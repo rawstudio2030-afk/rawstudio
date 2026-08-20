@@ -1,0 +1,25 @@
+/* Armazon de la app. Se carga despues de deck.css para ganarle al fondo
+   de lienzo que traia el deck (la rejilla) y dejar el fondo de app. */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+body {
+  background: #08080A;
+  background-image: none;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+#root {
+  /* El contenido de cada pantalla usa min-height:100%, asi que la altura
+     tiene que propagarse completa desde html. */
+  display: flex;
+  flex-direction: column;
+}
+#root > * { flex: 1 }
+
+/* Los textos del deck no son seleccionables por accidente al tocar. */
+[style*="cursor: pointer"], [style*="cursor:pointer"] {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}

@@ -1,0 +1,17 @@
+/* CSS global heredado del deck: keyframes de las animaciones y reset. */
+body{margin:0;background:#0B0B0E;background-image:linear-gradient(rgba(255,255,255,.028) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.028) 1px,transparent 1px);background-size:32px 32px}
+a{color:#FF2BD1;text-decoration:none}a:hover{color:#C8FF3D}
+::-webkit-scrollbar{width:0;height:0}
+@keyframes agPulse{0%,100%{opacity:1}50%{opacity:.45}}
+@keyframes agZoom{0%{transform:scale(.62);opacity:0;filter:blur(14px)}22%{opacity:1;filter:blur(0)}70%{transform:scale(1)}86%{transform:scale(1.04);opacity:1}100%{transform:scale(1.5);opacity:0;filter:blur(6px)}}
+@keyframes agRing{0%{transform:scale(.2);opacity:0}18%{opacity:.9}100%{transform:scale(2.6);opacity:0}}
+@keyframes agTag{0%,26%{opacity:0;transform:translateY(10px)}44%,78%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-6px)}}
+@keyframes agSweep{0%{transform:translateX(-120%) skewX(-18deg)}100%{transform:translateX(320%) skewX(-18deg)}}
+@keyframes agBar{0%{width:0}100%{width:100%}}
+@keyframes agTlA{0%{transform:scale(.16);opacity:0;filter:blur(8px)}14%{opacity:1;filter:blur(0)}62%,100%{transform:scale(1.02);opacity:1;filter:blur(0)}}
+@keyframes agTlB{0%{transform:scale(.16);opacity:0;filter:blur(8px)}14%{opacity:1;filter:blur(0)}62%,100%{transform:scale(1.02);opacity:1;filter:blur(0)}}
+@keyframes agFlameIn{0%,54%{opacity:0;transform:translate(-50%,0) scaleY(.2)}72%{opacity:1;transform:translate(-50%,0) scaleY(1)}100%{opacity:1;transform:translate(-50%,0) scaleY(1)}}
+@keyframes agFlick{0%{transform:scaleY(1) scaleX(1) translateY(0);opacity:.95}30%{transform:scaleY(1.5) scaleX(.82) translateY(-9px);opacity:1}55%{transform:scaleY(1.12) scaleX(1.08) translateY(-3px);opacity:.8}80%{transform:scaleY(1.62) scaleX(.9) translateY(-13px);opacity:1}100%{transform:scaleY(1) scaleX(1) translateY(0);opacity:.95}}
+@keyframes agWordIn{0%,58%{opacity:0;transform:translateY(14px)}80%,100%{opacity:1;transform:translateY(0)}}
+@keyframes agFlameIn2{0%,54%{opacity:0;transform:translate(-50%,0) scaleY(.2)}72%{opacity:1;transform:translate(-50%,0) scaleY(1)}100%{opacity:1;transform:translate(-50%,0) scaleY(1)}}
+@keyframes agWordIn2{0%,58%{opacity:0;transform:translateY(14px)}80%,100%{opacity:1;transform:translateY(0)}}
