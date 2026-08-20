@@ -8,7 +8,7 @@ export default function AgeGate() {
   const nav = useNavigate()
   return (
     <div style={{minHeight: "100%", boxSizing: "border-box", padding: "64px 26px 44px", background: "#08080A", color: "#F2F0F3", fontFamily: "'Space Grotesk',sans-serif", display: "flex", flexDirection: "column"}}>
-      <div style={{position: "relative", width: "150px", height: "68px", transform: "rotate(-2deg)", filter: "drop-shadow(0 0 16px rgba(255,43,209,.6))"}}>
+      <div style={{position: "relative", width: "150px", height: "56px", transform: "rotate(-2deg)", filter: "drop-shadow(0 0 16px rgba(255,43,209,.6))"}}>
         <img src={wordmark} alt="RAWstudio" style={{width: "100%", height: "auto", display: "block"}} />
       </div>
       <div style={{flex: "1", display: "flex", flexDirection: "column", justifyContent: "center", gap: "22px", padding: "34px 0"}}>
