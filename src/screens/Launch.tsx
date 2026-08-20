@@ -1,7 +1,7 @@
 // Pantalla 00 — Launch
 // Generada desde el deck de Claude Design. El markup se conserva tal cual;
 // solo se anadio el cableado de navegacion.
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import wordmark from '../assets/wordmark.png'
 import launchVideo from '../assets/launch.mp4'
@@ -9,10 +9,43 @@ import launchVideo from '../assets/launch.mp4'
 export default function Launch() {
   const nav = useNavigate()
   const vidRef = useRef<HTMLVideoElement>(null)
+  const barraRef = useRef<HTMLSpanElement>(null)
   const replay = () => {
     const v = vidRef.current
     if (v) { v.currentTime = 0; v.play() }
   }
+
+  // Al llenarse la barra de progreso (agBar, 6.5 s) la intro termino y se pasa
+  // solo al age gate. Se escucha el fin real de la animacion y no un
+  // temporizador a ciegas: si la pestaña se va a segundo plano el navegador
+  // pausa la animacion, y con temporizador el usuario volveria a una pantalla
+  // que nunca llego a ver.
+  useEffect(() => {
+    const barra = barraRef.current
+    if (!barra) return
+
+    let hecho = false
+    const avanzar = () => {
+      if (hecho) return
+      hecho = true
+      nav('/age')
+    }
+
+    barra.addEventListener('animationend', avanzar)
+
+    // Respaldo por si la animacion nunca corre —motion reducido, estilos que
+    // no cargaron—: sin esto la intro se queda congelada. Tocar la pantalla
+    // tambien avanza, pero no conviene depender de que lo adivinen.
+    const respaldo = window.setTimeout(() => {
+      if (document.visibilityState === 'visible') avanzar()
+    }, 9000)
+
+    return () => {
+      barra.removeEventListener('animationend', avanzar)
+      window.clearTimeout(respaldo)
+      hecho = true
+    }
+  }, [nav])
   return (
     <div onClick={() => nav('/age')} style={{height: "100%", boxSizing: "border-box", background: "#08080A", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", position: "relative", overflow: "hidden", fontFamily: "'Space Grotesk',sans-serif"}}>
       <video ref={vidRef} src={launchVideo} autoPlay muted loop playsInline style={{position: "absolute", inset: "0", width: "100%", height: "100%", objectFit: "cover", display: "block"}} />
@@ -26,7 +59,7 @@ export default function Launch() {
         </div>
       </div>
       <div style={{position: "absolute", bottom: "78px", width: "96px", height: "2px", background: "#1E1E24", overflow: "hidden"}}>
-        <span style={{display: "block", height: "2px", background: "#C8FF3D", boxShadow: "0 0 10px #C8FF3D", animation: "agBar 6.5s ease-out both"}} />
+        <span ref={barraRef} style={{display: "block", height: "2px", background: "#C8FF3D", boxShadow: "0 0 10px #C8FF3D", animation: "agBar 6.5s ease-out both"}} />
       </div>
       <div style={{position: "absolute", bottom: "46px", font: "400 9.5px/1 'Space Mono',monospace", letterSpacing: "1.6px", textTransform: "uppercase", color: "#7E7A83"}}>
         18+ only

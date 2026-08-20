@@ -27,7 +27,7 @@ export default function AgeGate() {
     // Sin sesion todavia: se guarda la intencion y se registra al volver del
     // enlace magico, cuando ya existe una fila de perfil que actualizar.
     localStorage.setItem('rawstudio.edad_confirmada', new Date().toISOString())
-    nav('/acceso')
+    nav('/entrar')
   }
   return (
     <div style={{minHeight: "100%", boxSizing: "border-box", padding: "64px 26px 44px", background: "#08080A", color: "#F2F0F3", fontFamily: "'Space Grotesk',sans-serif", display: "flex", flexDirection: "column"}}>

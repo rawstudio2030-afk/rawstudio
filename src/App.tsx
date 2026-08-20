@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
+import { useSesion } from './lib/sesion'
 import Launch from './screens/Launch'
 import AgeGate from './screens/AgeGate'
 import ClipDetail from './screens/ClipDetail'
@@ -11,6 +12,7 @@ import Library from './screens/Library'
 import Chat from './screens/Chat'
 import Creators from './screens/Creators'
 import Acceso from './screens/Acceso'
+import Entrar from './screens/Entrar'
 
 export const SCREENS = [
   { path: '/',          n: '00', title: 'Launch',         el: <Launch /> },
@@ -23,7 +25,9 @@ export const SCREENS = [
   { path: '/library',   n: '07', title: 'Library',        el: <Library /> },
   { path: '/chat',      n: '08', title: 'Chat',           el: <Chat /> },
   { path: '/creadoras', n: '09', title: 'Para creadoras', el: <Creators /> },
-  { path: '/acceso',    n: '10', title: 'Acceso',          el: <Acceso /> },
+  { path: '/entrar',    n: '10', title: 'La puerta',      el: <Entrar /> },
+  { path: '/registro',  n: '11', title: 'Crear cuenta',   el: <Acceso modo="registro" /> },
+  { path: '/acceso',    n: '12', title: 'Ya tengo cuenta', el: <Acceso modo="acceso" /> },
 ]
 
 /* Indice de pantallas: andamio de prototipo, no parte del producto.
@@ -65,7 +69,7 @@ function ScreenIndex() {
             letterSpacing: 2.4, textTransform: 'uppercase',
             color: '#6E6A72', marginBottom: 14,
           }}>
-            RAWstudio · 11 pantallas
+            RAWstudio · 13 pantallas
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {SCREENS.map(s => {
@@ -99,6 +103,33 @@ function ScreenIndex() {
   )
 }
 
+
+/* Al aterrizar con sesion recien hecha, si el perfil no tiene confirmada la
+   mayoria de edad se manda al age gate.
+
+   Por que no basta con localStorage: los enlaces de correo se abren muy seguido
+   en el navegador interno de la app de correo, que es otro contexto. La marca
+   local se pierde y la puerta quedaria sin cruzar. El perfil es estado del
+   servidor y viaja con la cuenta, no con el dispositivo. */
+function GuardiaEdad() {
+  const { sesion, perfil, cargando } = useSesion()
+  const nav = useNavigate()
+  const aqui = useLocation().pathname
+  const yaMandado = useRef(false)
+
+  useEffect(() => {
+    if (cargando || !sesion || !perfil) return
+    if (perfil.adult_confirmed_at) return
+    if (yaMandado.current) return
+    // El indice de pantallas del prototipo debe seguir sirviendo para saltar
+    // libremente, asi que esto corre una sola vez por sesion, no en cada ruta.
+    yaMandado.current = true
+    if (aqui !== '/age') nav('/age')
+  }, [cargando, sesion, perfil, aqui, nav])
+
+  return null
+}
+
 export default function App() {
   return (
     <>
@@ -106,6 +137,7 @@ export default function App() {
         {SCREENS.map(s => <Route key={s.path} path={s.path} element={s.el} />)}
         <Route path="*" element={<Launch />} />
       </Routes>
+      <GuardiaEdad />
       <ScreenIndex />
     </>
   )
