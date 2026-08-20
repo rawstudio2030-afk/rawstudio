@@ -1,10 +1,13 @@
-// Pantallas 10 y 11 — Crear cuenta / Ya tengo cuenta
+// Pantallas 11 y 12 — Crear cuenta / Entrar
 //
-// Con enlace magico ambas usan el mismo mecanismo, pero NO son la misma accion:
-// registro crea al usuario si no existe; acceso exige que ya exista. Sin esa
-// distincion, quien se equivoca de correo al iniciar sesion se crea una cuenta
-// nueva vacia sin darse cuenta y cree que perdio la suya.
-import { useState } from 'react'
+// Contraseña como via principal: el enlace magico obliga a salir al correo en
+// CADA entrada, y eso confunde y pierde gente. Con contraseña el correo se toca
+// una sola vez, al confirmar la cuenta.
+//
+// Interlineado 1 y no .9 como el deck: en español los titulares llevan
+// mayusculas acentuadas (CONTRASEÑA) y con el interlineado apretado el acento
+// queda tapado por la linea de arriba.
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import wordmark from '../assets/wordmark.png'
 import { supabase } from '../lib/supabase'
@@ -13,42 +16,41 @@ const UI = "'Space Grotesk', system-ui, sans-serif"
 const MONO = "'Space Mono', monospace"
 const SERIF = "'Instrument Serif', serif"
 
-// Interlineado 1 y no .88/.9 como el deck: en español los titulares llevan
-// mayusculas acentuadas (CÓMO, INCÓMODO, MÁS) y con el interlineado apretado
-// del deck el acento queda tapado por la linea de arriba y la palabra se lee
-// mal. El deck no lo sufre porque esta en ingles.
-type Estado = 'listo' | 'enviando' | 'enviado' | 'error'
 export type Modo = 'registro' | 'acceso'
+type Estado = 'listo' | 'enviando' | 'confirma' | 'liga' | 'reset' | 'error'
 
 const COPY = {
   registro: {
     titulo: ['Crea', 'tu', 'cuenta.'],
-    bajada: 'Sin contraseñas. Te mandamos una liga al correo y quedas dentro.',
-    boton: 'Crear mi cuenta',
+    bajada: 'Tu correo y una contraseña. Nada más.',
+    boton: 'Crear cuenta',
     alterno: 'Ya tengo cuenta',
     rutaAlterna: '/acceso',
   },
   acceso: {
-    titulo: ['Entra', 'sin', 'contraseña.'],
-    bajada: 'Escribe tu correo y te mandamos una liga. Nada que memorizar, nada que se pueda filtrar.',
-    boton: 'Mándame la liga',
+    titulo: ['Entra', 'a lo', 'tuyo.'],
+    bajada: 'Con el correo y la contraseña que registraste.',
+    boton: 'Entrar',
     alterno: 'No tengo cuenta',
     rutaAlterna: '/registro',
   },
 }
 
-// Los mensajes de Supabase vienen en ingles y en jerga. Se traducen a algo que
+// Los mensajes de Supabase vienen en ingles y en jerga; se traducen a algo que
 // le diga a la persona que hacer.
 function mensajeUtil(raw: string, modo: Modo): string {
   const m = raw.toLowerCase()
-  if (m.includes('signups not allowed') || m.includes('user not found')) {
-    return modo === 'acceso'
-      ? 'No encontramos una cuenta con ese correo. ¿Querías crear una?'
-      : raw
-  }
-  if (m.includes('rate limit') || m.includes('too many') || m.includes('for security purposes')) {
+  if (m.includes('invalid login credentials')) return 'Correo o contraseña incorrectos.'
+  if (m.includes('already registered') || m.includes('already been registered'))
+    return 'Ya existe una cuenta con ese correo. Entra en vez de crearla.'
+  if (m.includes('password should be') || m.includes('at least 6'))
+    return 'La contraseña debe tener al menos 6 caracteres.'
+  if (m.includes('email not confirmed'))
+    return 'Falta confirmar tu correo. Busca el mensaje que te mandamos al registrarte.'
+  if (m.includes('rate limit') || m.includes('too many') || m.includes('for security purposes'))
     return 'Demasiados intentos seguidos. Espera un minuto y vuelve a probar.'
-  }
+  if (m.includes('signups not allowed') || m.includes('user not found'))
+    return modo === 'acceso' ? 'No encontramos una cuenta con ese correo.' : raw
   if (m.includes('invalid') && m.includes('email')) return 'Ese correo no parece válido.'
   return raw
 }
@@ -57,30 +59,103 @@ export default function Acceso({ modo }: { modo: Modo }) {
   const nav = useNavigate()
   const t = COPY[modo]
   const [correo, setCorreo] = useState('')
+  const [clave, setClave] = useState('')
+  const [verClave, setVerClave] = useState(false)
   const [estado, setEstado] = useState<Estado>('listo')
   const [detalle, setDetalle] = useState('')
+  const [conGoogle, setConGoogle] = useState(false)
 
-  const valido = /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(correo.trim())
+  // El boton de Google solo aparece si el proveedor esta realmente configurado.
+  // Mostrarlo sin configurar lleva a una pantalla de error de Google, que es
+  // peor que no ofrecerlo.
+  useEffect(() => {
+    let vivo = true
+    supabase.auth.getSession() // asegura cliente listo
+    fetch(`${import.meta.env.VITE_SUPABASE_URL}/auth/v1/settings`, {
+      headers: { apikey: import.meta.env.VITE_SUPABASE_ANON_KEY },
+    })
+      .then(r => r.json())
+      .then(d => { if (vivo) setConGoogle(!!d?.external?.google) })
+      .catch(() => {})
+    return () => { vivo = false }
+  }, [])
+
+  const correoOk = /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(correo.trim())
+  const claveOk = clave.length >= 6
+  const listo = correoOk && claveOk
+
+  const fallar = (msg: string) => { setEstado('error'); setDetalle(mensajeUtil(msg, modo)) }
 
   const enviar = async () => {
-    if (!valido || estado === 'enviando') return
+    if (!listo || estado === 'enviando') return
+    setEstado('enviando')
+    const email = correo.trim().toLowerCase()
+
+    if (modo === 'registro') {
+      const { data, error } = await supabase.auth.signUp({
+        email, password: clave,
+        options: { emailRedirectTo: window.location.origin },
+      })
+      if (error) return fallar(error.message)
+      // Con confirmacion activa no llega sesion: hay que pasar por el correo.
+      if (!data.session) { setEstado('confirma'); return }
+      nav('/clip')
+      return
+    }
+
+    const { error } = await supabase.auth.signInWithPassword({ email, password: clave })
+    if (error) return fallar(error.message)
+    nav('/clip')
+  }
+
+  const olvide = async () => {
+    if (!correoOk) { fallar('Escribe tu correo primero para mandarte el enlace.'); return }
+    setEstado('enviando')
+    const { error } = await supabase.auth.resetPasswordForEmail(
+      correo.trim().toLowerCase(), { redirectTo: window.location.origin })
+    if (error) return fallar(error.message)
+    setEstado('reset')
+  }
+
+  const ligaAlCorreo = async () => {
+    if (!correoOk) { fallar('Escribe tu correo para mandarte la liga.'); return }
     setEstado('enviando')
     const { error } = await supabase.auth.signInWithOtp({
       email: correo.trim().toLowerCase(),
-      options: {
-        // La diferencia real entre las dos pantallas.
-        shouldCreateUser: modo === 'registro',
-        // Vuelve a la raiz; HashRouter reconstruye la ruta y el codigo PKCE
-        // llega en la query, sin chocar con el fragmento.
-        emailRedirectTo: window.location.origin,
-      },
+      options: { shouldCreateUser: modo === 'registro', emailRedirectTo: window.location.origin },
     })
-    if (error) {
-      setEstado('error')
-      setDetalle(mensajeUtil(error.message, modo))
-      return
-    }
-    setEstado('enviado')
+    if (error) return fallar(error.message)
+    setEstado('liga')
+  }
+
+  const entrarGoogle = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin },
+    })
+    if (error) fallar(error.message)
+  }
+
+  const avisos: Record<string, { titulo: string[]; texto: React.ReactNode }> = {
+    confirma: {
+      titulo: ['Confirma', 'tu', 'correo.'],
+      texto: <>Te mandamos un mensaje a <span style={{ color: '#F2F0F3' }}>{correo.trim().toLowerCase()}</span>. Ábrelo una vez y ya podrás entrar con tu contraseña siempre.</>,
+    },
+    liga: {
+      titulo: ['Revisa', 'tu', 'correo.'],
+      texto: <>Te mandamos una liga a <span style={{ color: '#F2F0F3' }}>{correo.trim().toLowerCase()}</span>. Ábrela en este mismo teléfono.</>,
+    },
+    reset: {
+      titulo: ['Revisa', 'tu', 'correo.'],
+      texto: <>Te mandamos un enlace para poner una contraseña nueva a <span style={{ color: '#F2F0F3' }}>{correo.trim().toLowerCase()}</span>.</>,
+    },
+  }
+  const aviso = avisos[estado]
+
+  const campo: React.CSSProperties = {
+    width: '100%', boxSizing: 'border-box', background: '#111116',
+    border: `1px solid ${estado === 'error' ? '#FF2BD1' : 'rgba(255,255,255,.14)'}`,
+    color: '#F2F0F3', font: `400 16px/1 ${UI}`, padding: '17px 15px', outline: 'none',
   }
 
   return (
@@ -96,16 +171,17 @@ export default function Acceso({ modo }: { modo: Modo }) {
         <img src={wordmark} alt="RAWstudio" style={{ width: '100%', height: 'auto', display: 'block' }} />
       </div>
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 22, padding: '34px 0' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 18, padding: '30px 0' }}>
         <div style={{ width: 64, height: 3, background: '#FF2BD1' }} />
 
-        {estado === 'enviado' ? (
+        {aviso ? (
           <>
-            <div style={{ fontFamily: 'Anton, sans-serif', fontSize: 52, lineHeight: 1, textTransform: 'uppercase' }}>
-              Revisa<br />tu<br /><span style={{ color: '#C8FF3D' }}>correo.</span>
+            <div style={{ fontFamily: 'Anton, sans-serif', fontSize: 48, lineHeight: 1, textTransform: 'uppercase' }}>
+              {aviso.titulo[0]}<br />{aviso.titulo[1]}<br />
+              <span style={{ color: '#C8FF3D' }}>{aviso.titulo[2]}</span>
             </div>
-            <div style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: 21, lineHeight: 1.35, color: '#9C979F' }}>
-              Te mandamos una liga a <span style={{ color: '#F2F0F3' }}>{correo.trim().toLowerCase()}</span>. Ábrela en este mismo teléfono y quedas dentro.
+            <div style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: 20, lineHeight: 1.35, color: '#9C979F' }}>
+              {aviso.texto}
             </div>
             <div style={{ font: `400 12px/1.6 ${MONO}`, color: '#6E6A72' }}>
               Si no llega en un minuto, revisa la carpeta de no deseados.
@@ -113,11 +189,11 @@ export default function Acceso({ modo }: { modo: Modo }) {
           </>
         ) : (
           <>
-            <div style={{ fontFamily: 'Anton, sans-serif', fontSize: 52, lineHeight: 1, textTransform: 'uppercase' }}>
+            <div style={{ fontFamily: 'Anton, sans-serif', fontSize: 48, lineHeight: 1, textTransform: 'uppercase' }}>
               {t.titulo[0]}<br />{t.titulo[1]}<br />
               <span style={{ color: '#C8FF3D' }}>{t.titulo[2]}</span>
             </div>
-            <div style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: 21, lineHeight: 1.35, color: '#9C979F' }}>
+            <div style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: 20, lineHeight: 1.35, color: '#9C979F' }}>
               {t.bajada}
             </div>
 
@@ -125,13 +201,34 @@ export default function Acceso({ modo }: { modo: Modo }) {
               type="email" inputMode="email" autoComplete="email"
               placeholder="tu@correo.com" value={correo}
               onChange={e => { setCorreo(e.target.value); if (estado === 'error') setEstado('listo') }}
-              onKeyDown={e => { if (e.key === 'Enter') enviar() }}
-              style={{
-                width: '100%', boxSizing: 'border-box', background: '#111116',
-                border: `1px solid ${estado === 'error' ? '#FF2BD1' : 'rgba(255,255,255,.14)'}`,
-                color: '#F2F0F3', font: `400 16px/1 ${UI}`, padding: '17px 15px', outline: 'none',
-              }}
+              style={campo}
             />
+
+            <div style={{ position: 'relative' }}>
+              <input
+                type={verClave ? 'text' : 'password'}
+                autoComplete={modo === 'registro' ? 'new-password' : 'current-password'}
+                placeholder="tu contraseña" value={clave}
+                onChange={e => { setClave(e.target.value); if (estado === 'error') setEstado('listo') }}
+                onKeyDown={e => { if (e.key === 'Enter') enviar() }}
+                style={{ ...campo, paddingRight: 62 }}
+              />
+              <span
+                onClick={() => setVerClave(v => !v)}
+                style={{
+                  position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)',
+                  font: `700 10px/1 ${UI}`, letterSpacing: 1.4, textTransform: 'uppercase',
+                  color: '#6E6A72', cursor: 'pointer', padding: 6,
+                }}>
+                {verClave ? 'Ocultar' : 'Ver'}
+              </span>
+            </div>
+
+            {modo === 'registro' && !claveOk && clave.length > 0 && (
+              <div style={{ font: `400 12px/1.5 ${MONO}`, color: '#6E6A72' }}>
+                Mínimo 6 caracteres.
+              </div>
+            )}
 
             {estado === 'error' && (
               <div style={{ font: `400 13px/1.5 ${UI}`, color: '#FF2BD1' }}>{detalle}</div>
@@ -141,41 +238,51 @@ export default function Acceso({ modo }: { modo: Modo }) {
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {estado !== 'enviado' && (
+        {aviso ? (
+          <div onClick={() => { setEstado('listo'); nav('/entrar') }} style={{
+            border: '1px solid rgba(255,255,255,.16)', color: '#9C979F', textAlign: 'center',
+            padding: 18, font: `700 12px/1 ${UI}`, letterSpacing: 2, textTransform: 'uppercase', cursor: 'pointer',
+          }}>Volver</div>
+        ) : (
           <>
-            <div
-              onClick={enviar}
-              style={{
-                background: valido ? '#FF2BD1' : '#191920',
-                color: valido ? '#08080A' : '#5E5A63',
-                textAlign: 'center', padding: 19,
-                font: `700 13px/1 ${UI}`, letterSpacing: 2.2, textTransform: 'uppercase',
-                boxShadow: valido ? '0 0 34px rgba(255,43,209,.42)' : 'none',
-                cursor: valido ? 'pointer' : 'default',
-              }}>
-              {estado === 'enviando' ? 'Enviando…' : t.boton}
+            <div onClick={enviar} style={{
+              background: listo ? '#FF2BD1' : '#191920',
+              color: listo ? '#08080A' : '#5E5A63',
+              textAlign: 'center', padding: 19,
+              font: `700 13px/1 ${UI}`, letterSpacing: 2.2, textTransform: 'uppercase',
+              boxShadow: listo ? '0 0 34px rgba(255,43,209,.42)' : 'none',
+              cursor: listo ? 'pointer' : 'default',
+            }}>
+              {estado === 'enviando' ? 'Un momento…' : t.boton}
             </div>
-            <div
-              onClick={() => nav(t.rutaAlterna)}
-              style={{
-                border: '1px solid rgba(255,255,255,.16)', color: '#9C979F',
-                textAlign: 'center', padding: 18,
-                font: `700 12px/1 ${UI}`, letterSpacing: 2, textTransform: 'uppercase', cursor: 'pointer',
+
+            {conGoogle && (
+              <div onClick={entrarGoogle} style={{
+                background: '#F2F0F3', color: '#08080A', textAlign: 'center', padding: 17,
+                font: `700 12px/1 ${UI}`, letterSpacing: 1.6, textTransform: 'uppercase', cursor: 'pointer',
               }}>
-              {t.alterno}
+                Continuar con Google
+              </div>
+            )}
+
+            <div onClick={() => nav(t.rutaAlterna)} style={{
+              border: '1px solid rgba(255,255,255,.16)', color: '#9C979F', textAlign: 'center',
+              padding: 18, font: `700 12px/1 ${UI}`, letterSpacing: 2, textTransform: 'uppercase', cursor: 'pointer',
+            }}>{t.alterno}</div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginTop: 4, paddingRight: 58 }}>
+              <span onClick={ligaAlCorreo} style={{
+                font: `400 12px/1.5 ${MONO}`, color: '#6E6A72',
+                textDecoration: 'underline', cursor: 'pointer',
+              }}>Entrar con liga</span>
+              {modo === 'acceso' && (
+                <span onClick={olvide} style={{
+                  font: `400 12px/1.5 ${MONO}`, color: '#6E6A72',
+                  textDecoration: 'underline', cursor: 'pointer', textAlign: 'right',
+                }}>Olvidé mi clave</span>
+              )}
             </div>
           </>
-        )}
-        {estado === 'enviado' && (
-          <div
-            onClick={() => nav('/entrar')}
-            style={{
-              border: '1px solid rgba(255,255,255,.16)', color: '#9C979F',
-              textAlign: 'center', padding: 18,
-              font: `700 12px/1 ${UI}`, letterSpacing: 2, textTransform: 'uppercase', cursor: 'pointer',
-            }}>
-            Volver
-          </div>
         )}
       </div>
     </div>

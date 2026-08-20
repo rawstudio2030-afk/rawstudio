@@ -34,7 +34,7 @@ export default function Entrar() {
           Elige<br />cómo<br /><span style={{ color: '#C8FF3D' }}>entras.</span>
         </div>
         <div style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 21, lineHeight: 1.35, color: '#9C979F' }}>
-          Sin contraseñas. Te mandamos una liga al correo y listo.
+          Con tu correo y una contraseña. El acceso por liga también sigue ahí.
         </div>
 
         {/* Gancho para creadoras. Va aqui y no despues del registro porque este
