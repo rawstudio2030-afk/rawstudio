@@ -26,7 +26,11 @@ export default function Entrar() {
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 22, padding: '30px 0' }}>
         <div style={{ width: 64, height: 3, background: '#FF2BD1' }} />
-        <div style={{ fontFamily: 'Anton, sans-serif', fontSize: 52, lineHeight: .9, textTransform: 'uppercase' }}>
+        {/* Interlineado 1 y no .9 como el deck: en español los titulares llevan
+            mayusculas acentuadas (CÓMO) y con el interlineado apretado el acento
+            queda tapado por la linea de arriba. El deck no lo sufre por estar
+            en ingles. */}
+        <div style={{ fontFamily: 'Anton, sans-serif', fontSize: 52, lineHeight: 1, textTransform: 'uppercase' }}>
           Elige<br />cómo<br /><span style={{ color: '#C8FF3D' }}>entras.</span>
         </div>
         <div style={{ fontFamily: "'Instrument Serif', serif", fontStyle: 'italic', fontSize: 21, lineHeight: 1.35, color: '#9C979F' }}>

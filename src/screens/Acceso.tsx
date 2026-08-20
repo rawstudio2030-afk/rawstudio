@@ -13,6 +13,10 @@ const UI = "'Space Grotesk', system-ui, sans-serif"
 const MONO = "'Space Mono', monospace"
 const SERIF = "'Instrument Serif', serif"
 
+// Interlineado 1 y no .88/.9 como el deck: en español los titulares llevan
+// mayusculas acentuadas (CÓMO, INCÓMODO, MÁS) y con el interlineado apretado
+// del deck el acento queda tapado por la linea de arriba y la palabra se lee
+// mal. El deck no lo sufre porque esta en ingles.
 type Estado = 'listo' | 'enviando' | 'enviado' | 'error'
 export type Modo = 'registro' | 'acceso'
 
@@ -97,7 +101,7 @@ export default function Acceso({ modo }: { modo: Modo }) {
 
         {estado === 'enviado' ? (
           <>
-            <div style={{ fontFamily: 'Anton, sans-serif', fontSize: 52, lineHeight: .9, textTransform: 'uppercase' }}>
+            <div style={{ fontFamily: 'Anton, sans-serif', fontSize: 52, lineHeight: 1, textTransform: 'uppercase' }}>
               Revisa<br />tu<br /><span style={{ color: '#C8FF3D' }}>correo.</span>
             </div>
             <div style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: 21, lineHeight: 1.35, color: '#9C979F' }}>
@@ -109,7 +113,7 @@ export default function Acceso({ modo }: { modo: Modo }) {
           </>
         ) : (
           <>
-            <div style={{ fontFamily: 'Anton, sans-serif', fontSize: 52, lineHeight: .9, textTransform: 'uppercase' }}>
+            <div style={{ fontFamily: 'Anton, sans-serif', fontSize: 52, lineHeight: 1, textTransform: 'uppercase' }}>
               {t.titulo[0]}<br />{t.titulo[1]}<br />
               <span style={{ color: '#C8FF3D' }}>{t.titulo[2]}</span>
             </div>

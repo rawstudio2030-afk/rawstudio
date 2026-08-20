@@ -18,8 +18,12 @@ const etiqueta = (color: string): React.CSSProperties => ({
   font: `700 10px/1 ${UI}`, letterSpacing: 2.4, textTransform: 'uppercase', color,
 })
 
+// Interlineado 1 y no .88/.9 como el deck: en español los titulares llevan
+// mayusculas acentuadas (CÓMO, INCÓMODO, MÁS) y con el interlineado apretado
+// del deck el acento queda tapado por la linea de arriba y la palabra se lee
+// mal. El deck no lo sufre porque esta en ingles.
 const titular: React.CSSProperties = {
-  fontFamily: 'Anton, sans-serif', fontSize: 46, lineHeight: .88,
+  fontFamily: 'Anton, sans-serif', fontSize: 46, lineHeight: 1,
   textTransform: 'uppercase', color: PAPER, margin: '0 0 22px',
 }
 
@@ -101,7 +105,7 @@ export default function Creators() {
           <div style={{ ...etiqueta(CYAN), marginBottom: 16 }}>
             Plataforma para creadoras · México y Estados Unidos
           </div>
-          <div style={{ fontFamily: 'Anton, sans-serif', fontSize: 62, lineHeight: .86, textTransform: 'uppercase', marginBottom: 20 }}>
+          <div style={{ fontFamily: 'Anton, sans-serif', fontSize: 62, lineHeight: .95, textTransform: 'uppercase', marginBottom: 20 }}>
             Tu contenido.<br />Tus reglas.<br />
             <span style={{ color: PINK, textShadow: '0 0 30px rgba(255,43,209,.5)' }}>Tu 80%.</span>
           </div>
