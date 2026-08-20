@@ -2,10 +2,33 @@
 // Generada desde el deck de Claude Design. El markup se conserva tal cual;
 // solo se anadio el cableado de navegacion.
 import { useNavigate } from 'react-router-dom'
+import { useSesion } from '../lib/sesion'
+import { supabase } from '../lib/supabase'
 import wordmark from '../assets/wordmark.png'
 
 export default function AgeGate() {
   const nav = useNavigate()
+  const { sesion, refrescarPerfil } = useSesion()
+
+  // Deja de ser decorativo: registra la autodeclaracion de mayoria de edad y,
+  // si aun no hay sesion, manda a acceder antes de dejar ver nada.
+  // Ojo: esto es autodeclaracion, no verificacion de identidad. Sirve como
+  // registro de que se mostro la puerta, no como prueba legal de edad.
+  const confirmarEdad = async () => {
+    if (sesion) {
+      await supabase
+        .from('profiles')
+        .update({ adult_confirmed_at: new Date().toISOString() })
+        .eq('id', sesion.user.id)
+      await refrescarPerfil()
+      nav('/clip')
+      return
+    }
+    // Sin sesion todavia: se guarda la intencion y se registra al volver del
+    // enlace magico, cuando ya existe una fila de perfil que actualizar.
+    localStorage.setItem('rawstudio.edad_confirmada', new Date().toISOString())
+    nav('/acceso')
+  }
   return (
     <div style={{minHeight: "100%", boxSizing: "border-box", padding: "64px 26px 44px", background: "#08080A", color: "#F2F0F3", fontFamily: "'Space Grotesk',sans-serif", display: "flex", flexDirection: "column"}}>
       <div style={{position: "relative", width: "150px", height: "56px", transform: "rotate(-2deg)", filter: "drop-shadow(0 0 16px rgba(255,43,209,.6))"}}>
@@ -35,7 +58,7 @@ export default function AgeGate() {
         </div>
       </div>
       <div style={{display: "flex", flexDirection: "column", gap: "10px"}}>
-        <div style={{background: "#FF2BD1", color: "#08080A", textAlign: "center", padding: "19px", font: "700 13px/1 'Space Grotesk'", letterSpacing: "2.2px", textTransform: "uppercase", boxShadow: "0 0 34px rgba(255,43,209,.42)", cursor: "pointer"}} onClick={() => nav('/clip')}>
+        <div style={{background: "#FF2BD1", color: "#08080A", textAlign: "center", padding: "19px", font: "700 13px/1 'Space Grotesk'", letterSpacing: "2.2px", textTransform: "uppercase", boxShadow: "0 0 34px rgba(255,43,209,.42)", cursor: "pointer"}} onClick={confirmarEdad}>
           I'm 18 or older
         </div>
         <div style={{border: "1px solid rgba(255,255,255,.16)", color: "#9C979F", textAlign: "center", padding: "18px", font: "700 12px/1 'Space Grotesk'", letterSpacing: "2px", textTransform: "uppercase", cursor: "pointer"}} onClick={() => nav('/')}>

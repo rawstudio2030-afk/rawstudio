@@ -25,3 +25,10 @@ dist-ssr
 
 dist
 node_modules
+
+# Variables de entorno. NUNCA versionar: aunque la anon key de Supabase es
+# publica por diseño, este archivo es el lugar donde por descuido termina
+# pegada una service_role, y este repo es publico.
+.env
+.env.*
+!.env.example
