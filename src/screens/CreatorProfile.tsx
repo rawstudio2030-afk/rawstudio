@@ -108,6 +108,14 @@ export default function CreatorProfile() {
             </span>
           </div>
         </div>
+        <div onClick={() => nav('/creadoras')} style={{display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", marginTop: "22px", padding: "17px 16px", border: "1px dashed rgba(200,255,61,.4)", background: "rgba(200,255,61,.05)", cursor: "pointer"}}>
+          <span style={{font: "700 11px/1.4 'Space Grotesk'", letterSpacing: "1.4px", textTransform: "uppercase", color: "#C8FF3D"}}>
+            ¿Quieres publicar lo tuyo?
+          </span>
+          <span style={{font: "700 15px/1 'Space Grotesk'", color: "#C8FF3D"}}>
+            &#8594;
+          </span>
+        </div>
       </div>
     </div>
   )

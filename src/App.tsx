@@ -9,6 +9,7 @@ import Upload from './screens/Upload'
 import Earnings from './screens/Earnings'
 import Library from './screens/Library'
 import Chat from './screens/Chat'
+import Creators from './screens/Creators'
 
 export const SCREENS = [
   { path: '/',          n: '00', title: 'Launch',         el: <Launch /> },
@@ -20,6 +21,7 @@ export const SCREENS = [
   { path: '/earnings',  n: '06', title: 'Earnings',       el: <Earnings /> },
   { path: '/library',   n: '07', title: 'Library',        el: <Library /> },
   { path: '/chat',      n: '08', title: 'Chat',           el: <Chat /> },
+  { path: '/creadoras', n: '09', title: 'Para creadoras', el: <Creators /> },
 ]
 
 /* Indice de pantallas: andamio de prototipo, no parte del producto.
@@ -61,7 +63,7 @@ function ScreenIndex() {
             letterSpacing: 2.4, textTransform: 'uppercase',
             color: '#6E6A72', marginBottom: 14,
           }}>
-            RAWstudio · 9 pantallas
+            RAWstudio · 10 pantallas
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {SCREENS.map(s => {

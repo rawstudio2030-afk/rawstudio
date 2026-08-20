@@ -23,3 +23,27 @@ body {
   -webkit-tap-highlight-color: transparent;
   user-select: none;
 }
+
+/* Acordeon de la pagina para creadoras. Va en CSS y no en estilos inline
+   porque details[open] es un selector de estado: no se puede expresar inline. */
+details > summary { list-style: none }
+details > summary::-webkit-details-marker { display: none }
+details > summary:focus-visible { outline: 2px solid #00E5FF; outline-offset: 3px }
+
+.faq-signo {
+  flex: 0 0 auto;
+  width: 21px;
+  height: 21px;
+  margin-top: 1px;
+  border: 1.5px solid #FF2BD1;
+  color: #FF2BD1;
+  display: grid;
+  place-items: center;
+  font: 400 14px/1 'Space Grotesk', system-ui, sans-serif;
+  transition: transform .2s ease, background .2s ease, color .2s ease;
+}
+details[open] > summary > .faq-signo {
+  background: #FF2BD1;
+  color: #08080A;
+  transform: rotate(45deg);
+}
