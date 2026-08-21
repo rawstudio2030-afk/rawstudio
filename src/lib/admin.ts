@@ -1,4 +1,4 @@
-import { supabase, type Perfil } from './supabase'
+import { supabase } from './supabase'
 
 /** Si es admin lo decide la base, no el cliente. Esta consulta solo sirve para
  *  DIBUJAR o no el panel; la proteccion de verdad son las politicas RLS: aunque
@@ -10,17 +10,32 @@ export async function soyAdmin(): Promise<boolean> {
   return data === true
 }
 
-export type PerfilAdmin = Perfil & {
+export type PerfilAdmin = {
+  id: string
+  email: string
+  handle: string
+  display_name: string
+  avatar_path: string | null
+  is_creator: boolean
+  verified: boolean
   suspended_at: string | null
   suspended_reason: string | null
+  adult_confirmed_at: string | null
+  metodos: string
+  ultimo_acceso: string | null
+  clips_total: number
+  clips_publicados: number
+  es_admin: boolean
+  created_at: string
 }
 
+/** El correo vive en auth.users, que el cliente no puede consultar. Se pide por
+ *  una funcion security definer que comprueba es_admin() del lado del servidor:
+ *  a un no-admin le devuelve cero filas, y un anonimo ni siquiera puede
+ *  ejecutarla. */
 export async function listarPerfiles(busqueda: string): Promise<PerfilAdmin[]> {
-  let q = supabase.from('profiles')
-    .select('*').order('created_at', { ascending: false }).limit(60)
-  const b = busqueda.trim()
-  if (b) q = q.or(`handle.ilike.%${b}%,display_name.ilike.%${b}%`)
-  const { data, error } = await q
+  const { data, error } = await supabase
+    .rpc('admin_listar_usuarios', { busqueda: busqueda.trim() })
   if (error) { console.warn('[admin] listar:', error.message); return [] }
   return (data ?? []) as PerfilAdmin[]
 }

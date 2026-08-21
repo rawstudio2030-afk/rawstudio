@@ -1,6 +1,7 @@
 // Pantalla 01 — Age gate
 // Generada desde el deck de Claude Design. El markup se conserva tal cual;
 // solo se anadio el cableado de navegacion.
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import { supabase } from '../lib/supabase'
@@ -8,7 +9,13 @@ import wordmark from '../assets/wordmark.png'
 
 export default function AgeGate() {
   const nav = useNavigate()
-  const { sesion, refrescarPerfil } = useSesion()
+  const { sesion, perfil, cargando, refrescarPerfil } = useSesion()
+
+  // Si ya cruzo esta puerta, no se le vuelve a poner enfrente.
+  useEffect(() => {
+    if (cargando) return
+    if (sesion && perfil?.adult_confirmed_at) nav('/clip', { replace: true })
+  }, [cargando, sesion, perfil, nav])
 
   // Deja de ser decorativo: registra la autodeclaracion de mayoria de edad y,
   // si aun no hay sesion, manda a acceder antes de dejar ver nada.

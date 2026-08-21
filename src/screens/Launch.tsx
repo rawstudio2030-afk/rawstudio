@@ -3,11 +3,13 @@
 // solo se anadio el cableado de navegacion.
 import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useSesion } from '../lib/sesion'
 import wordmark from '../assets/wordmark.png'
 import launchVideo from '../assets/launch.mp4'
 
 export default function Launch() {
   const nav = useNavigate()
+  const { sesion, perfil, cargando } = useSesion()
   const vidRef = useRef<HTMLVideoElement>(null)
   const barraRef = useRef<HTMLSpanElement>(null)
   const replay = () => {
@@ -28,6 +30,10 @@ export default function Launch() {
     const avanzar = () => {
       if (hecho) return
       hecho = true
+      // Preguntar la edad a quien ya entro y ya la confirmo es redundante y se
+      // siente a error. La puerta de edad solo aparece si hace falta cruzarla.
+      if (cargando) { nav('/age'); return }
+      if (sesion && perfil?.adult_confirmed_at) { nav('/clip'); return }
       nav('/age')
     }
 
@@ -45,7 +51,7 @@ export default function Launch() {
       window.clearTimeout(respaldo)
       hecho = true
     }
-  }, [nav])
+  }, [nav, sesion, perfil, cargando])
   return (
     <div onClick={() => nav('/age')} style={{height: "100%", boxSizing: "border-box", background: "#08080A", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", position: "relative", overflow: "hidden", fontFamily: "'Space Grotesk',sans-serif"}}>
       <video ref={vidRef} src={launchVideo} autoPlay muted loop playsInline style={{position: "absolute", inset: "0", width: "100%", height: "100%", objectFit: "cover", display: "block"}} />

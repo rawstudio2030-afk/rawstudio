@@ -99,7 +99,7 @@ export default function Admin() {
       {pestaña === 'gente' ? (
         <>
           <input value={busqueda} onChange={e => setBusqueda(e.target.value)}
-            placeholder="Buscar por usuario o nombre"
+            placeholder="Buscar por correo, usuario o nombre"
             style={{
               width: '100%', boxSizing: 'border-box', background: '#111116',
               border: '1px solid rgba(255,255,255,.14)', color: '#F2F0F3',
@@ -130,8 +130,14 @@ export default function Admin() {
                       {p.verified && <span style={{ color: '#00E5FF', fontSize: 13 }}>&#10038;</span>}
                       {p.is_creator && <span style={{ ...etiqueta, color: '#C8FF3D', letterSpacing: 1.2 }}>creadora</span>}
                     </div>
-                    <div style={{ font: `400 12px/1.4 ${MONO}`, color: '#6E6A72' }}>
-                      @{p.handle}{susp && <span style={{ color: '#FF2BD1' }}> · suspendida</span>}
+                    <div style={{ font: `400 12px/1.4 ${MONO}`, color: '#6E6A72',
+                                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {p.email}
+                    </div>
+                    <div style={{ font: `400 11px/1.5 ${MONO}`, color: '#5E5A63' }}>
+                      @{p.handle}
+                      {p.es_admin && <span style={{ color: '#00E5FF' }}> · admin</span>}
+                      {susp && <span style={{ color: '#FF2BD1' }}> · suspendida</span>}
                     </div>
                   </div>
                   <span style={{ color: '#5E5A63', font: `400 16px/1 ${UI}` }}>{open ? '−' : '+'}</span>
@@ -139,10 +145,20 @@ export default function Admin() {
 
                 {open && (
                   <div style={{ paddingTop: 14, display: 'flex', flexDirection: 'column', gap: 9 }}>
-                    <div style={{ font: `400 11px/1.6 ${MONO}`, color: '#5E5A63' }}>
-                      id {p.id.slice(0, 8)}… · alta {new Date(p.created_at).toLocaleDateString('es-MX')}
-                      {p.adult_confirmed_at ? ' · edad confirmada' : ' · edad sin confirmar'}
-                      {p.suspended_reason && ` · motivo: ${p.suspended_reason}`}
+                    <div style={{
+                      display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: '7px 12px',
+                      font: `400 11px/1.5 ${MONO}`, color: '#6E6A72',
+                      border: '1px solid rgba(255,255,255,.09)', padding: 12,
+                    }}>
+                      <Dato k="Alta" v={new Date(p.created_at).toLocaleDateString('es-MX')} />
+                      <Dato k="Último acceso" v={p.ultimo_acceso
+                        ? new Date(p.ultimo_acceso).toLocaleDateString('es-MX') : 'nunca'} />
+                      <Dato k="Entra con" v={p.metodos} />
+                      <Dato k="Edad" v={p.adult_confirmed_at ? 'confirmada' : 'sin confirmar'} />
+                      <Dato k="Clips" v={`${p.clips_publicados} publicados · ${p.clips_total} en total`} />
+                      <Dato k="Perfil" v={p.is_creator ? 'creadora' : 'compradora'} />
+                      {p.suspended_reason && <Dato k="Motivo" v={p.suspended_reason} />}
+                      <Dato k="id" v={`${p.id.slice(0, 8)}…`} />
                     </div>
 
                     {!susp && (
@@ -191,6 +207,15 @@ export default function Admin() {
           ))}
         </>
       )}
+    </div>
+  )
+}
+
+function Dato({ k, v }: { k: string; v: string }) {
+  return (
+    <div>
+      <div style={{ color: '#5E5A63', fontSize: 10, letterSpacing: 1, textTransform: 'uppercase' }}>{k}</div>
+      <div style={{ color: '#F2F0F3', marginTop: 2, wordBreak: 'break-word' }}>{v}</div>
     </div>
   )
 }
