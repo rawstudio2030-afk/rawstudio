@@ -39,15 +39,34 @@ export default function Launch() {
 
     barra.addEventListener('animationend', avanzar)
 
-    // Respaldo por si la animacion nunca corre —motion reducido, estilos que
-    // no cargaron—: sin esto la intro se queda congelada. Tocar la pantalla
-    // tambien avanza, pero no conviene depender de que lo adivinen.
+    // El video puede tardar mas que la animacion en descargarse: en una
+    // conexion movil mediana, un archivo pesado no alcanza a empezar antes de
+    // los 6.5 s y la intro se iba con la pantalla en negro. Si aun no arranca,
+    // se le concede espera extra en vez de avanzar sobre nada.
+    const video = vidRef.current
+    const yaCorre = () => !!video && !video.paused && video.readyState > 2
+
+    const avanzarSiHayQueVer = () => {
+      if (yaCorre() || !video) { avanzar(); return }
+      // Espera acotada: mejor una intro corta que una pantalla negra eterna
+      // si la red esta muy mal o el navegador bloquea la reproduccion.
+      const empezar = () => avanzar()
+      video.addEventListener('playing', empezar, { once: true })
+      window.setTimeout(avanzar, 6000)
+    }
+
+    barra.removeEventListener('animationend', avanzar)
+    barra.addEventListener('animationend', avanzarSiHayQueVer)
+
+    // Respaldo duro: si nada de lo anterior ocurre —animacion que no corre,
+    // video que nunca carga— la intro no puede quedarse congelada.
     const respaldo = window.setTimeout(() => {
       if (document.visibilityState === 'visible') avanzar()
-    }, 9000)
+    }, 14000)
 
     return () => {
       barra.removeEventListener('animationend', avanzar)
+      barra.removeEventListener('animationend', avanzarSiHayQueVer)
       window.clearTimeout(respaldo)
       hecho = true
     }
