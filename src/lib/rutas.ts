@@ -39,6 +39,7 @@ export const BARRA: Destino[] = [
 
 /** Accesos que viven dentro de "Yo", segun quien seas. */
 export const ATAJOS_PERFIL: Destino[] = [
+  { path: '/estudio',   titulo: 'Mi estudio',      icono: '◆', papeles: ['creadora', 'admin'] },
   { path: '/upload',    titulo: 'Subir un clip',   icono: '↑', papeles: ['creadora', 'admin'] },
   { path: '/earnings',  titulo: 'Mis ganancias',   icono: '$', papeles: ['creadora', 'admin'] },
   { path: '/wallet',    titulo: 'Mi monedero',     icono: '◎', papeles: ['usuaria', 'creadora', 'admin'] },

@@ -37,6 +37,9 @@ export default function Upload() {
   const [desc, setDesc] = useState('')
   const [modo, setModo] = useState<Visibilidad>('pago')
   const [precio, setPrecio] = useState(240)
+  const [renta, setRenta] = useState(false)
+  const [rentaHoras, setRentaHoras] = useState<48 | 72>(48)
+  const [rentaCoins, setRentaCoins] = useState(80)
   const [estado, setEstado] = useState<'listo' | 'subiendo' | 'error'>('listo')
   const [detalle, setDetalle] = useState('')
   const [paso, setPaso] = useState('')
@@ -79,6 +82,8 @@ export default function Upload() {
       cover_path: coverPath,
       visibility: modo,
       price_coins: modo === 'pago' ? precio : 0,
+      renta_horas: modo === 'pago' && renta ? rentaHoras : null,
+      renta_coins: modo === 'pago' && renta ? rentaCoins : null,
       published: true,
     })
     if (r.error) { setEstado('error'); setDetalle(r.error); return }
@@ -173,6 +178,59 @@ export default function Upload() {
           <div style={{ font: `400 12px/1.7 ${MONO}`, color: '#6E6A72', marginTop: 12, borderTop: '1px solid rgba(255,255,255,.09)', paddingTop: 12 }}>
             plataforma 20% · <span style={{ color: '#F2F0F3' }}>tú recibes {gana} coins</span>
           </div>
+        </div>
+      )}
+
+      {modo === 'pago' && (
+        <div style={{ border: '1px solid rgba(255,255,255,.12)', padding: 16 }}>
+          <div
+            onClick={() => setRenta(v => !v)}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14, cursor: 'pointer' }}>
+            <div>
+              <div style={{ ...etiqueta, color: renta ? '#00E5FF' : '#6E6A72' }}>También en renta</div>
+              <div style={{ font: `400 12px/1.5 ${MONO}`, color: '#5E5A63', marginTop: 6 }}>
+                Acceso por tiempo, más barato que comprarlo
+              </div>
+            </div>
+            <div style={{
+              width: 46, height: 26, borderRadius: 13, flex: '0 0 auto',
+              background: renta ? '#00E5FF' : '#191920', position: 'relative', transition: 'background .18s',
+            }}>
+              <div style={{
+                position: 'absolute', top: 3, left: renta ? 23 : 3, width: 20, height: 20,
+                borderRadius: '50%', background: renta ? '#08080A' : '#5E5A63', transition: 'left .18s',
+              }} />
+            </div>
+          </div>
+
+          {renta && (
+            <div style={{ marginTop: 16, borderTop: '1px solid rgba(255,255,255,.09)', paddingTop: 16 }}>
+              <div style={{ display: 'flex', gap: 7, marginBottom: 14 }}>
+                {([48, 72] as const).map(h => (
+                  <span key={h} onClick={() => setRentaHoras(h)} style={{
+                    flex: 1, textAlign: 'center', padding: '12px 6px', cursor: 'pointer',
+                    font: `700 11px/1 ${UI}`, letterSpacing: 1.4, textTransform: 'uppercase',
+                    background: rentaHoras === h ? '#00E5FF' : 'transparent',
+                    color: rentaHoras === h ? '#08080A' : '#9C979F',
+                    border: `1px solid ${rentaHoras === h ? '#00E5FF' : 'rgba(255,255,255,.14)'}`,
+                  }}>{h} horas</span>
+                ))}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14 }}>
+                <span style={etiqueta}>Precio de renta</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <Paso t="−" al={() => setRentaCoins(p => Math.max(0, p - 10))} />
+                  <span style={{ fontFamily: 'Anton, sans-serif', fontSize: 26, lineHeight: 1, color: '#00E5FF' }}>{rentaCoins}</span>
+                  <Paso t="+" al={() => setRentaCoins(p => p + 10)} />
+                </div>
+              </div>
+              {rentaCoins >= precio && (
+                <div style={{ font: `400 11px/1.6 ${MONO}`, color: '#FF2BD1', marginTop: 12 }}>
+                  Rentar cuesta igual o más que comprarlo. Nadie elegiría la renta.
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 

@@ -17,6 +17,7 @@ import Acceso from './screens/Acceso'
 import Entrar from './screens/Entrar'
 import PerfilPropio from './screens/Perfil'
 import Admin from './screens/Admin'
+import Estudio from './screens/Estudio'
 
 export const SCREENS = [
   { path: '/',          n: '00', title: 'Launch',         el: <Launch /> },
@@ -26,6 +27,7 @@ export const SCREENS = [
   { path: '/creator',   n: '04', title: 'Creator',        el: <CreatorProfile /> },
   { path: '/perfil',    n: '13', title: 'Mi perfil',      el: <PerfilPropio /> },
   { path: '/admin',     n: '14', title: 'Administración', el: <Admin /> },
+  { path: '/estudio',   n: '15', title: 'Estudio',        el: <Estudio /> },
   { path: '/upload',    n: '05', title: 'Upload',         el: <Upload /> },
   { path: '/earnings',  n: '06', title: 'Earnings',       el: <Earnings /> },
   { path: '/library',   n: '07', title: 'Library',        el: <Library /> },
