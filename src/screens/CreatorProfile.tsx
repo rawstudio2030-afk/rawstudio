@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import { perfilPorHandle, urlAvatar } from '../lib/perfiles'
+import { clipsDe, urlPortada, type Clip } from '../lib/clips'
 import type { Perfil } from '../lib/supabase'
 
 const UI = "'Space Grotesk', system-ui, sans-serif"
@@ -23,6 +24,7 @@ export default function CreatorProfile() {
 
   const [perfil, setPerfil] = useState<Perfil | null>(null)
   const [cargando, setCargando] = useState(true)
+  const [clips, setClips] = useState<Clip[]>([])
 
   // Sin handle en la ruta se muestra el propio, que es el caso de "ver como se
   // ve mi perfil" y evita una pantalla vacia al entrar sin parametro.
@@ -36,6 +38,15 @@ export default function CreatorProfile() {
     perfilPorHandle(handle).then(p => { if (vivo) { setPerfil(p); setCargando(false) } })
     return () => { vivo = false }
   }, [handle, mio, cargandoSesion])
+
+  // RLS decide que se ve: a una tercera persona solo le llegan los publicados,
+  // a la propia autora tambien sus borradores.
+  useEffect(() => {
+    if (!perfil) { setClips([]); return }
+    let vivo = true
+    clipsDe(perfil.id).then(c => { if (vivo) setClips(c) })
+    return () => { vivo = false }
+  }, [perfil])
 
   if (cargando) return <Centro texto="Cargando…" />
 
@@ -107,17 +118,55 @@ export default function CreatorProfile() {
           }}>Editar mi perfil</div>
         )}
 
-        {/* Hueco honesto: aqui van los clips cuando exista la tabla. */}
-        <div style={{
-          marginTop: 28, padding: '26px 18px', textAlign: 'center',
-          border: '1px dashed rgba(255,255,255,.12)',
-        }}>
-          <div style={{ font: `700 10px/1 ${UI}`, letterSpacing: 2.2, textTransform: 'uppercase', color: '#5E5A63' }}>
-            Sin clips todavía
-          </div>
-          <div style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: 16, color: '#6E6A72', marginTop: 10 }}>
-            {esMio ? 'Cuando publiques, tus clips aparecen aquí.' : 'Esta creadora aún no publica nada.'}
-          </div>
+        <div style={{ marginTop: 28 }}>
+          {clips.length === 0 ? (
+            <div style={{ padding: '26px 18px', textAlign: 'center', border: '1px dashed rgba(255,255,255,.12)' }}>
+              <div style={{ font: `700 10px/1 ${UI}`, letterSpacing: 2.2, textTransform: 'uppercase', color: '#5E5A63' }}>
+                Sin clips todavía
+              </div>
+              <div style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: 16, color: '#6E6A72', marginTop: 10 }}>
+                {esMio ? 'Cuando publiques, tus clips aparecen aquí.' : 'Esta creadora aún no publica nada.'}
+              </div>
+              {esMio && (
+                <div onClick={() => nav('/upload')} style={{
+                  marginTop: 16, display: 'inline-block', background: '#FF2BD1', color: '#08080A',
+                  padding: '14px 22px', font: `700 11px/1 ${UI}`, letterSpacing: 1.8,
+                  textTransform: 'uppercase', cursor: 'pointer',
+                }}>Publicar el primero</div>
+              )}
+            </div>
+          ) : (
+            <>
+              <div style={{ font: `700 10px/1 ${UI}`, letterSpacing: 2.2, textTransform: 'uppercase', color: '#6E6A72', marginBottom: 12 }}>
+                {clips.length} {clips.length === 1 ? 'clip' : 'clips'}
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 10 }}>
+                {clips.map(c => {
+                  const p = urlPortada(c.cover_path)
+                  return (
+                    <div key={c.id} onClick={() => nav(`/clip/${c.id}`)} style={{
+                      aspectRatio: '3/4', position: 'relative', cursor: 'pointer',
+                      background: p ? `center/cover url(${p})` : 'repeating-linear-gradient(130deg,#191920 0 8px,#111116 8px 16px)',
+                    }}>
+                      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,transparent 45%,rgba(8,8,10,.9) 100%)' }} />
+                      {!c.published && (
+                        <span style={{
+                          position: 'absolute', top: 8, left: 8, background: '#FF2BD1', color: '#08080A',
+                          padding: '4px 6px', font: `700 8.5px/1 ${UI}`, letterSpacing: 1.2, textTransform: 'uppercase',
+                        }}>Borrador</span>
+                      )}
+                      <div style={{ position: 'absolute', left: 9, right: 9, bottom: 9 }}>
+                        <div style={{ font: `600 12px/1.3 ${UI}`, color: '#F2F0F3' }}>{c.title}</div>
+                        <div style={{ font: `400 10px/1.4 ${MONO}`, color: '#C8FF3D', marginTop: 3 }}>
+                          {c.visibility === 'gratis' ? 'gratis' : c.visibility === 'suscriptores' ? 'suscriptores' : `${c.price_coins} coins`}
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

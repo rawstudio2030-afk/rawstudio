@@ -142,6 +142,7 @@ export default function App() {
         {/* Perfil publico por handle. No entra al indice de pantallas porque
             necesita un parametro y ahi no habria cual usar. */}
         <Route path="/creator/:handle" element={<CreatorProfile />} />
+        <Route path="/clip/:id" element={<ClipDetail />} />
         <Route path="*" element={<Launch />} />
       </Routes>
       <GuardiaEdad />

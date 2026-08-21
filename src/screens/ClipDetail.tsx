@@ -1,121 +1,187 @@
-// Pantalla 02 — Clip + paywall
-// Generada desde el deck de Claude Design. El markup se conserva tal cual;
-// solo se anadio el cableado de navegacion.
-import { useNavigate } from 'react-router-dom'
+// Pantalla 02 — Clip y paywall
+// Reescrita: antes era el mock del deck con "Mira Vanta" y "Neon Hours vol. 3"
+// escritos a mano. Ahora lee un clip real y su autora real.
+//
+// El candado NO es visual: el video vive en un bucket privado y solo se obtiene
+// una URL firmada si las politicas de storage dejan leerlo. Sin acceso, aqui no
+// hay archivo que reproducir aunque alguien edite el JavaScript.
+import { useEffect, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { useSesion } from '../lib/sesion'
+import { urlAvatar } from '../lib/perfiles'
+import { clipPorId, urlPortada, urlVideoFirmada, clipsPublicados, type ClipConAutora } from '../lib/clips'
+
+const UI = "'Space Grotesk', system-ui, sans-serif"
+const MONO = "'Space Mono', monospace"
+const SERIF = "'Instrument Serif', serif"
 
 export default function ClipDetail() {
   const nav = useNavigate()
+  const { id } = useParams()
+  const { sesion } = useSesion()
+  const [clip, setClip] = useState<ClipConAutora | null>(null)
+  const [cargando, setCargando] = useState(true)
+  const [video, setVideo] = useState<string | null>(null)
+
+  useEffect(() => {
+    let vivo = true
+    setCargando(true)
+    const traer = async () => {
+      // Sin id en la ruta se muestra el mas reciente, que es lo util al entrar
+      // desde el age gate mientras no exista una pantalla de descubrimiento.
+      const c = id ? await clipPorId(id) : (await clipsPublicados(1))[0] ?? null
+      if (!vivo) return
+      setClip(c); setCargando(false)
+      if (c?.storage_path) {
+        const u = await urlVideoFirmada(c.storage_path)
+        if (vivo) setVideo(u)
+      }
+    }
+    traer()
+    return () => { vivo = false }
+  }, [id, sesion])
+
+  if (cargando) return <Centro texto="Cargando…" />
+
+  if (!clip) return (
+    <Centro
+      texto={id ? 'Este clip ya no existe.' : 'Todavía no hay clips publicados.'}
+      accion={{ texto: 'Volver', al: () => nav('/entrar') }}
+    />
+  )
+
+  const autora = clip.profiles
+  const portada = urlPortada(clip.cover_path)
+  const foto = urlAvatar(autora?.avatar_path ?? null)
+  const mio = sesion?.user.id === clip.creator_id
+  // Hoy solo la autora y un admin pueden abrir el archivo. Cuando existan las
+  // compras, video llegara tambien a quien pago, sin cambiar nada aqui.
+  const desbloqueado = !!video
+
   return (
-    <div style={{minHeight: "100%", boxSizing: "border-box", background: "#08080A", color: "#F2F0F3", fontFamily: "'Space Grotesk',sans-serif", paddingBottom: "40px"}}>
-      <div style={{position: "relative", height: "300px", background: "repeating-linear-gradient(122deg,#17171C 0 9px,#0F0F13 9px 18px)", display: "flex", alignItems: "center", justifyContent: "center", filter: "blur(9px) saturate(.7)"}}>
-        <span style={{font: "400 10.5px/1 'Space Mono',monospace", letterSpacing: "1.6px", color: "#55515B", textTransform: "uppercase"}}>
-          [ preview frame — 9:16 still ]
-        </span>
+    <div style={{ minHeight: '100%', background: '#08080A', color: '#F2F0F3', fontFamily: UI }}>
+      {/* marco */}
+      <div style={{ position: 'relative', height: 300, background: '#111116' }}>
+        {desbloqueado ? (
+          <video src={video!} controls playsInline
+            poster={portada ?? undefined}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', background: '#000' }} />
+        ) : (
+          <>
+            <div style={{
+              position: 'absolute', inset: 0,
+              background: portada ? `center/cover url(${portada})`
+                                  : 'repeating-linear-gradient(122deg,#17171C 0 9px,#0F0F13 9px 18px)',
+              filter: 'blur(9px) saturate(.7)', transform: 'scale(1.06)',
+            }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(8,8,10,.35) 0%,rgba(8,8,10,.92) 100%)' }} />
+            <div style={{
+              position: 'absolute', top: 16, right: 16, border: '1px solid #C8FF3D',
+              color: '#C8FF3D', padding: '7px 10px',
+              font: `700 10px/1 ${UI}`, letterSpacing: 1.6, textTransform: 'uppercase',
+            }}>Bloqueado</div>
+          </>
+        )}
+        <span onClick={() => nav(-1)} style={{
+          position: 'absolute', top: 16, left: 16, width: 38, height: 38, borderRadius: '50%',
+          border: '1px solid rgba(255,255,255,.22)', background: 'rgba(8,8,10,.55)',
+          display: 'grid', placeItems: 'center', font: `400 20px/1 ${UI}`,
+          color: '#F2F0F3', cursor: 'pointer', zIndex: 2,
+        }}>‹</span>
       </div>
-      <div style={{height: "300px", marginTop: "-300px", position: "relative", background: "linear-gradient(180deg,rgba(8,8,10,.35) 0%,rgba(8,8,10,.1) 45%,#08080A 100%)", display: "flex", flexDirection: "column", justifyContent: "space-between", padding: "60px 20px 18px", boxSizing: "border-box"}}>
-        <div style={{display: "flex", justifyContent: "space-between", alignItems: "center"}}>
-          <span style={{width: "34px", height: "34px", border: "1px solid rgba(255,255,255,.2)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", font: "700 15px/1 'Space Grotesk'", color: "#fff", cursor: "pointer"}} onClick={() => nav('/library')}>
-            ‹
-          </span>
-          <span style={{background: "rgba(8,8,10,.72)", border: "1px solid rgba(200,255,61,.5)", color: "#C8FF3D", font: "700 9.5px/1 'Space Grotesk'", letterSpacing: "1.6px", textTransform: "uppercase", padding: "7px 10px"}}>
-            Locked · 12:04
-          </span>
-        </div>
-        <div style={{display: "flex", alignItems: "center", gap: "11px"}}>
-          <span style={{width: "46px", height: "46px", borderRadius: "50%", background: "repeating-linear-gradient(45deg,#2A2A31 0 6px,#1B1B21 6px 12px)", border: "1.5px solid #FF2BD1", flex: "none"}} />
-          <div>
-            <div style={{font: "700 14px/1.2 'Space Grotesk'", letterSpacing: ".2px"}}>
-              MIRA VANTA
-              <span style={{color: "#00E5FF"}}>
-                ✦
-              </span>
+
+      {/* autora */}
+      {autora && (
+        <div onClick={() => nav(`/creator/${autora.handle}`)} style={{
+          display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px',
+          borderBottom: '1px solid rgba(255,255,255,.09)', cursor: 'pointer',
+        }}>
+          <div style={{
+            width: 44, height: 44, borderRadius: '50%', flex: '0 0 auto',
+            border: '1px solid #FF2BD1',
+            background: foto ? `center/cover url(${foto})` : 'repeating-linear-gradient(130deg,#191920 0 6px,#111116 6px 12px)',
+          }} />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ font: `700 15px/1.3 ${UI}`, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 6 }}>
+              {autora.display_name}
+              {autora.verified && <span style={{ color: '#00E5FF', fontSize: 13 }}>&#10038;</span>}
             </div>
-            <div style={{font: "400 11px/1.3 'Space Mono',monospace", color: "#7E7A83", cursor: "pointer"}} onClick={() => nav('/creator')}>
-              @miravanta · 214 clips
+            <div style={{ font: `400 12px/1.4 ${MONO}`, color: '#6E6A72' }}>@{autora.handle}</div>
+          </div>
+          <span style={{ color: '#5E5A63' }}>›</span>
+        </div>
+      )}
+
+      <div style={{ padding: '20px 20px 40px' }}>
+        <div style={{ fontFamily: 'Anton, sans-serif', fontSize: 34, lineHeight: 1, textTransform: 'uppercase' }}>
+          {clip.title}
+        </div>
+
+        {clip.description && (
+          <div style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: 18, lineHeight: 1.4, color: '#9C979F', marginTop: 12 }}>
+            {clip.description}
+          </div>
+        )}
+
+        <div style={{ font: `400 11px/1.7 ${MONO}`, color: '#5E5A63', marginTop: 14 }}>
+          publicado {clip.published_at ? new Date(clip.published_at).toLocaleDateString('es-MX') : '—'}
+          {!clip.published && ' · borrador'}
+        </div>
+
+        {mio ? (
+          <div style={{
+            marginTop: 24, padding: '18px 16px', border: '1px dashed rgba(200,255,61,.4)',
+            background: 'rgba(200,255,61,.05)',
+          }}>
+            <div style={{ font: `700 10px/1 ${UI}`, letterSpacing: 2.2, textTransform: 'uppercase', color: '#C8FF3D' }}>
+              Es tuyo
+            </div>
+            <div style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: 16, color: '#9C979F', marginTop: 9 }}>
+              Lo ves completo porque lo publicaste tú.
             </div>
           </div>
-          <span style={{marginLeft: "auto", border: "1px solid #FF2BD1", color: "#FF2BD1", font: "700 10px/1 'Space Grotesk'", letterSpacing: "1.6px", textTransform: "uppercase", padding: "9px 12px", cursor: "pointer"}} onClick={() => nav('/creator')}>
-            Follow
-          </span>
-        </div>
-      </div>
-      <div style={{padding: "20px 20px 0"}}>
-        <div style={{fontFamily: "Anton,sans-serif", fontSize: "33px", lineHeight: ".94", letterSpacing: "-.2px", textTransform: "uppercase"}}>
-          Neon Hours
-          <span style={{fontFamily: "'Instrument Serif',serif", fontStyle: "italic", textTransform: "none", letterSpacing: "0", color: "#C8FF3D"}}>
-            vol. 3
-          </span>
-        </div>
-        <div style={{font: "400 13px/1.55 'Space Grotesk'", color: "#9C979F", marginTop: "10px"}}>
-          Shot on one roll of tungsten film in a rented hotel bar at 4am. Twelve minutes, no cuts, sound on.
-        </div>
-        <div style={{display: "flex", gap: "7px", flexWrap: "wrap", marginTop: "14px"}}>
-          <span style={{font: "400 10px/1 'Space Mono',monospace", letterSpacing: "1.2px", textTransform: "uppercase", color: "#9C979F", border: "1px solid rgba(255,255,255,.13)", padding: "7px 9px"}}>
-            #slow
-          </span>
-          <span style={{font: "400 10px/1 'Space Mono',monospace", letterSpacing: "1.2px", textTransform: "uppercase", color: "#9C979F", border: "1px solid rgba(255,255,255,.13)", padding: "7px 9px"}}>
-            #film
-          </span>
-          <span style={{font: "400 10px/1 'Space Mono',monospace", letterSpacing: "1.2px", textTransform: "uppercase", color: "#9C979F", border: "1px solid rgba(255,255,255,.13)", padding: "7px 9px"}}>
-            #one-take
-          </span>
-          <span style={{font: "400 10px/1 'Space Mono',monospace", letterSpacing: "1.2px", textTransform: "uppercase", color: "#08080A", background: "#00E5FF", padding: "7px 9px"}}>
-            4k · hdr
-          </span>
-        </div>
-        <div style={{marginTop: "20px", border: "1px solid rgba(255,255,255,.09)", background: "#101014"}}>
-          <div style={{padding: "16px 16px 14px", display: "flex", alignItems: "flex-end", justifyContent: "space-between", borderBottom: "1px dashed rgba(255,255,255,.12)"}}>
-            <div>
-              <div style={{font: "700 9.5px/1 'Space Grotesk'", letterSpacing: "2.2px", textTransform: "uppercase", color: "#6E6A72", marginBottom: "8px"}}>
-                Unlock forever
+        ) : clip.visibility === 'gratis' ? null : (
+          <div style={{ marginTop: 24, border: '1px solid rgba(255,255,255,.12)', padding: 18 }}>
+            <div style={{ font: `700 10px/1 ${UI}`, letterSpacing: 2.2, textTransform: 'uppercase', color: '#6E6A72' }}>
+              {clip.visibility === 'pago' ? 'Desbloquear para siempre' : 'Solo suscriptores'}
+            </div>
+            {clip.visibility === 'pago' && (
+              <div style={{ fontFamily: 'Anton, sans-serif', fontSize: 30, lineHeight: 1, color: '#C8FF3D', marginTop: 10 }}>
+                {clip.price_coins} coins
               </div>
-              <div style={{fontFamily: "Anton,sans-serif", fontSize: "30px", lineHeight: "1", color: "#C8FF3D"}}>
-                240 coins
-              </div>
+            )}
+            <div style={{
+              marginTop: 16, background: '#191920', color: '#5E5A63', textAlign: 'center',
+              padding: 17, font: `700 12px/1 ${UI}`, letterSpacing: 2, textTransform: 'uppercase',
+            }}>
+              Aún no se puede comprar
             </div>
-            <div style={{font: "400 10.5px/1.5 'Space Mono',monospace", color: "#6E6A72", textAlign: "right"}}>
-              yours to rewatch
-              <br />
-              on any device
-            </div>
-          </div>
-          <div style={{padding: "14px 16px"}}>
-            <div style={{background: "#C8FF3D", color: "#08080A", textAlign: "center", padding: "17px", font: "700 13px/1 'Space Grotesk'", letterSpacing: "2.2px", textTransform: "uppercase", boxShadow: "0 0 30px rgba(200,255,61,.3)", cursor: "pointer"}} onClick={() => nav('/wallet')}>
-              Unlock this clip
+            <div style={{ font: `400 11px/1.6 ${MONO}`, color: '#5E5A63', marginTop: 10, textAlign: 'center' }}>
+              Falta el monedero
             </div>
           </div>
-        </div>
-        <div style={{marginTop: "12px", display: "flex", gap: "10px"}}>
-          <div style={{flex: "1", border: "1px solid rgba(255,43,209,.34)", background: "rgba(255,43,209,.07)", padding: "14px"}}>
-            <div style={{font: "700 9.5px/1 'Space Grotesk'", letterSpacing: "1.8px", textTransform: "uppercase", color: "#FF2BD1", marginBottom: "7px", cursor: "pointer"}} onClick={() => nav('/wallet')}>
-              Subscribe
-            </div>
-            <div style={{font: "700 17px/1.1 'Space Grotesk'"}}>
-              $14.99
-              <span style={{font: "400 11px 'Space Mono',monospace", color: "#9C979F"}}>
-                /mo
-              </span>
-            </div>
-            <div style={{font: "400 10.5px/1.45 'Space Mono',monospace", color: "#8E8A93", marginTop: "6px"}}>
-              all 214 clips + DMs
-            </div>
-          </div>
-          <div style={{flex: "1", border: "1px solid rgba(255,255,255,.1)", padding: "14px", position: "relative"}}>
-            <span style={{position: "absolute", top: "-9px", right: "8px", transform: "rotate(4deg)", background: "#fff", color: "#08080A", font: "700 8.5px/1 'Space Grotesk'", letterSpacing: "1.2px", textTransform: "uppercase", padding: "5px 7px"}}>
-              save 40%
-            </span>
-            <div style={{font: "700 9.5px/1 'Space Grotesk'", letterSpacing: "1.8px", textTransform: "uppercase", color: "#6E6A72", marginBottom: "7px", cursor: "pointer"}} onClick={() => nav('/wallet')}>
-              Bundle
-            </div>
-            <div style={{font: "700 17px/1.1 'Space Grotesk'"}}>
-              Vol. 1–3
-            </div>
-            <div style={{font: "400 10.5px/1.45 'Space Mono',monospace", color: "#8E8A93", marginTop: "6px"}}>
-              480 coins · $17.99
-            </div>
-          </div>
-        </div>
+        )}
       </div>
+    </div>
+  )
+}
+
+function Centro({ texto, accion }: { texto: string; accion?: { texto: string; al: () => void } }) {
+  return (
+    <div style={{
+      minHeight: '100%', boxSizing: 'border-box', padding: '64px 26px',
+      background: '#08080A', color: '#9C979F', fontFamily: SERIF, fontStyle: 'italic',
+      fontSize: 20, display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center', gap: 20, textAlign: 'center',
+    }}>
+      {texto}
+      {accion && (
+        <span onClick={accion.al} style={{
+          background: '#FF2BD1', color: '#08080A', padding: '15px 26px',
+          font: `700 12px/1 ${UI}`, letterSpacing: 2, textTransform: 'uppercase',
+          fontStyle: 'normal', cursor: 'pointer',
+        }}>{accion.texto}</span>
+      )}
     </div>
   )
 }

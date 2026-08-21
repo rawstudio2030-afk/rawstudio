@@ -34,6 +34,9 @@ export type Perfil = {
   is_creator: boolean
   verified: boolean
   adult_confirmed_at: string | null
+  // Marcadas por un admin; el propio usuario no puede escribirlas.
+  suspended_at: string | null
+  suspended_reason: string | null
   created_at: string
   updated_at: string
 }
