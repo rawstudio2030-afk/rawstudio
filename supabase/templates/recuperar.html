@@ -1,42 +1,138 @@
-<!-- Plantilla de recuperación de contraseña.
-     La de Supabase es genérica en inglés y sin marca. Eso no solo se ve
-     improvisado: los filtros de correo penalizan mensajes sin identidad clara,
-     y fue parte de por qué el primero cayó en no deseados. -->
-<div style="margin:0;padding:0;background:#08080A;">
-  <div style="max-width:520px;margin:0 auto;padding:40px 28px;font-family:'Helvetica Neue',Arial,sans-serif;">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="supported-color-schemes" content="light dark">
+<title>RAWstudio · Recuperar contraseña</title>
+<!--[if mso]>
+<xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml>
+<![endif]-->
+<style>
+  @media only screen and (max-width:620px){
+    .px{padding-left:22px!important;padding-right:22px!important}
+    .h1{font-size:34px!important;line-height:34px!important}
+    .stack{display:block!important;width:100%!important}
+  }
+</style>
+</head>
+<body style="margin:0;padding:0;background-color:#0B0B0E;">
 
-    <div style="font:700 13px/1 Arial,sans-serif;letter-spacing:3px;text-transform:uppercase;color:#C8FF3D;">
-      RAWstudio
-    </div>
+<span style="display:none!important;visibility:hidden;opacity:0;color:transparent;height:0;width:0;overflow:hidden;mso-hide:all;">Tu secreto sigue siendo tuyo. Este enlace vive una hora y luego se autodestruye.</span>
 
-    <div style="height:3px;width:56px;background:#FF2BD1;margin:22px 0 26px;"></div>
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#0B0B0E;width:100%;">
+<tr><td align="center" style="padding:28px 12px 48px 12px;">
 
-    <div style="font:700 30px/1.1 Arial,sans-serif;color:#F2F0F3;text-transform:uppercase;margin-bottom:18px;">
-      Cambia tu contraseña
-    </div>
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="width:600px;max-width:600px;">
 
-    <div style="font:400 16px/1.55 Arial,sans-serif;color:#9C979F;margin-bottom:28px;">
-      Pediste recuperar el acceso a tu cuenta. Toca el botón y pon una
-      contraseña nueva. El enlace dura poco tiempo, a propósito.
-    </div>
+  <!-- LOGO · alojado en el propio sitio: los clientes de correo no cargan
+       archivos locales, y el PNG con transparencia lo pinta Outlook como caja
+       blanca, asi que va aplanado sobre el fondo del correo. -->
+  <tr><td align="left" style="padding:8px 0 20px 0;">
+    <img src="https://rawstudio.biz/correo/logo.jpg" alt="RAWSTUDIO" width="188" height="66" style="display:block;border:0;outline:none;text-decoration:none;width:188px;height:auto;font-family:Arial,Helvetica,sans-serif;font-size:26px;font-weight:bold;letter-spacing:1px;color:#C8FF3D;">
+  </td></tr>
 
-    <a href="{{ .ConfirmationURL }}"
-       style="display:inline-block;background:#FF2BD1;color:#08080A;text-decoration:none;
-              padding:17px 30px;font:700 13px/1 Arial,sans-serif;letter-spacing:2px;
-              text-transform:uppercase;">
-      Poner contraseña nueva
-    </a>
+  <!-- TARJETA -->
+  <tr><td style="background-color:#131317;border:1px solid #26262E;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;">
 
-    <div style="font:400 13px/1.6 Arial,sans-serif;color:#6E6A72;margin-top:30px;">
-      Si no fuiste tú, ignora este mensaje: tu contraseña sigue igual y nadie
-      entró a tu cuenta.
-    </div>
+      <tr><td height="5" style="height:5px;line-height:5px;font-size:0;background-color:#C8FF3D;">&nbsp;</td></tr>
 
-    <div style="height:1px;background:rgba(255,255,255,.1);margin:30px 0 18px;"></div>
+      <tr><td class="px" style="padding:38px 44px 0 44px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+          <td style="background-color:#FF2BD1;padding:7px 11px;font-family:'Courier New',Courier,monospace;font-size:11px;line-height:11px;mso-line-height-rule:exactly;font-weight:bold;letter-spacing:2px;color:#0B0B0E;text-transform:uppercase;">Recuperar acceso</td>
+        </tr></table>
+      </td></tr>
 
-    <div style="font:400 12px/1.6 Arial,sans-serif;color:#5E5A63;">
-      RAWstudio · rawstudio.biz<br>
-      Este correo se envió porque alguien lo solicitó desde tu cuenta.
-    </div>
-  </div>
-</div>
+      <tr><td class="px h1" style="padding:22px 44px 0 44px;font-family:Arial Black,Arial,Helvetica,sans-serif;font-size:42px;line-height:42px;mso-line-height-rule:exactly;font-weight:bold;letter-spacing:-0.5px;color:#F2F0F3;text-transform:uppercase;">
+        Se te olvidó<br>la contraseña.<br><span style="color:#C8FF3D;">No juzgamos.</span>
+      </td></tr>
+
+      <tr><td class="px" style="padding:20px 44px 0 44px;font-family:Georgia,'Times New Roman',serif;font-size:19px;line-height:29px;mso-line-height-rule:exactly;color:#A8A3AC;font-style:italic;">
+        Alguien pidió restablecer la contraseña de esta cuenta. Suponemos que fuiste tú. No le preguntamos a nadie más.
+      </td></tr>
+
+      <!-- BOTON · Supabase sustituye la variable del href por el enlace real
+           con su token. No repetirla en comentarios: tambien se sustituye ahi y
+           el token acabaria dos veces en el correo. -->
+      <tr><td class="px" style="padding:30px 44px 0 44px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;"><tr>
+          <td align="center" bgcolor="#FF2BD1" style="background-color:#FF2BD1;padding:19px 20px;">
+            <a href="{{ .ConfirmationURL }}" style="display:block;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:14px;mso-line-height-rule:exactly;font-weight:bold;letter-spacing:2.4px;color:#0B0B0E;text-decoration:none;text-transform:uppercase;">Crear una nueva</a>
+          </td>
+        </tr></table>
+      </td></tr>
+
+      <!-- El diseño decia 30 minutos; la duracion real del proyecto es
+           otp_expiry = 3600, o sea una hora. Prometer menos tiempo del real
+           hace que la gente descarte enlaces que todavia sirven. -->
+      <tr><td class="px" style="padding:14px 44px 0 44px;font-family:'Courier New',Courier,monospace;font-size:12px;line-height:19px;mso-line-height-rule:exactly;color:#00E5FF;">
+        El enlace vive una hora. Después se autodestruye, muy discretamente.
+      </td></tr>
+
+      <tr><td class="px" style="padding:34px 44px 0 44px;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;"><tr><td height="1" style="height:1px;line-height:1px;font-size:0;background-color:#26262E;">&nbsp;</td></tr></table></td></tr>
+
+      <tr><td class="px" style="padding:30px 44px 0 44px;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:13px;mso-line-height-rule:exactly;font-weight:bold;letter-spacing:2.6px;color:#8E8A93;text-transform:uppercase;">
+        Mientras tanto, lo que <span style="color:#C8FF3D;">no</span> hicimos
+      </td></tr>
+
+      <tr><td class="px" style="padding:18px 44px 0 44px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;">
+          <tr>
+            <td width="26" valign="top" style="width:26px;font-family:'Courier New',Courier,monospace;font-size:15px;line-height:24px;mso-line-height-rule:exactly;color:#C8FF3D;font-weight:bold;">01</td>
+            <td valign="top" style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;mso-line-height-rule:exactly;color:#E4E1E6;padding-bottom:14px;">Contarle a nadie. Este correo salió sin copia oculta a tu ex.</td>
+          </tr>
+          <tr>
+            <td width="26" valign="top" style="width:26px;font-family:'Courier New',Courier,monospace;font-size:15px;line-height:24px;mso-line-height-rule:exactly;color:#C8FF3D;font-weight:bold;">02</td>
+            <td valign="top" style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;mso-line-height-rule:exactly;color:#E4E1E6;padding-bottom:14px;">Guardar tu contraseña anterior. Ni la teníamos, ni la queremos.</td>
+          </tr>
+          <tr>
+            <td width="26" valign="top" style="width:26px;font-family:'Courier New',Courier,monospace;font-size:15px;line-height:24px;mso-line-height-rule:exactly;color:#C8FF3D;font-weight:bold;">03</td>
+            <td valign="top" style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;mso-line-height-rule:exactly;color:#E4E1E6;padding-bottom:14px;">Aparecer en tu estado de cuenta con nuestro nombre. Seguimos siendo esa línea aburrida que nadie lee.</td>
+          </tr>
+          <tr>
+            <td width="26" valign="top" style="width:26px;font-family:'Courier New',Courier,monospace;font-size:15px;line-height:24px;mso-line-height-rule:exactly;color:#C8FF3D;font-weight:bold;">04</td>
+            <td valign="top" style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;mso-line-height-rule:exactly;color:#E4E1E6;padding-bottom:4px;">Cerrar tu biblioteca. Todo sigue ahí, esperándote, sin comentarios.</td>
+          </tr>
+        </table>
+      </td></tr>
+
+      <!-- El diseño enlazaba a /seguridad para cerrar sesiones. Esa pantalla no
+           existe todavia, y un enlace roto en un correo de seguridad es peor que
+           no ofrecerlo: se lee como sitio abandonado. Se deja el aviso sin liga. -->
+      <tr><td class="px" style="padding:32px 44px 0 44px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;background-color:#1A1A20;">
+          <tr>
+            <td width="4" style="width:4px;background-color:#00E5FF;font-size:0;line-height:0;">&nbsp;</td>
+            <td style="padding:20px 22px;">
+              <p style="margin:0 0 8px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:12px;mso-line-height-rule:exactly;font-weight:bold;letter-spacing:2.2px;color:#00E5FF;text-transform:uppercase;">¿No fuiste tú?</p>
+              <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:23px;mso-line-height-rule:exactly;color:#A8A3AC;">Ignora este correo y tu contraseña se queda igual: nadie entró a tu cuenta y el enlace caduca solo.</p>
+            </td>
+          </tr>
+        </table>
+      </td></tr>
+
+      <tr><td style="padding:38px 0 0 0;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;"><tr><td height="5" style="height:5px;line-height:5px;font-size:0;background-color:#FF2BD1;">&nbsp;</td></tr></table></td></tr>
+
+    </table>
+  </td></tr>
+
+  <!-- PIE · sin enlaces a /ajustes ni /baja: son rutas que no existen, y este
+       es correo transaccional, donde la baja no aplica. -->
+  <tr><td class="px" style="padding:26px 8px 0 8px;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;">
+      <tr><td style="font-family:'Courier New',Courier,monospace;font-size:11px;line-height:19px;mso-line-height-rule:exactly;color:#6E6A72;">
+        RAWSTUDIO · sólo 18+ · reproducción protegida, sin descargas<br>
+        <a href="https://rawstudio.biz" style="color:#8E8A93;text-decoration:underline;">rawstudio.biz</a><br>
+        Recibiste este correo porque alguien pidió recuperar el acceso a esta cuenta.
+      </td></tr>
+    </table>
+  </td></tr>
+
+</table>
+
+</td></tr>
+</table>
+</body>
+</html>
