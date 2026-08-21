@@ -27,20 +27,27 @@ export type Destino = {
   papeles: Papel[]
 }
 
-/** Barra inferior: cuatro destinos, iguales para todas. Lo especifico de cada
- *  papel vive dentro de "Yo", que evita una barra de seis pestañas que en
- *  movil no cabe ni se entiende. */
+/** Barra inferior: cuatro destinos que cambian segun el papel.
+ *
+ *  "Yo" va al final y no al principio, siguiendo la convencion de Instagram,
+ *  TikTok, YouTube y OnlyFans: la primera posicion es donde aterrizas por
+ *  omision, y se aterriza en el contenido, no en una misma.
+ *
+ *  Lo que si cambia es el segundo lugar. Biblioteca es de compradora y a una
+ *  creadora le estorba; a cambio, el estudio le quedaba enterrado dentro de
+ *  "Yo" y la obligaba a usar esa pestaña como pasillo en vez de destino. */
 export const BARRA: Destino[] = [
   { path: '/clip',    titulo: 'Explorar',   icono: '▶', papeles: ['usuaria', 'creadora', 'admin'] },
-  { path: '/library', titulo: 'Biblioteca', icono: '▤', papeles: ['usuaria', 'creadora', 'admin'] },
+  { path: '/library', titulo: 'Biblioteca', icono: '▤', papeles: ['usuaria'] },
+  { path: '/estudio', titulo: 'Estudio',    icono: '◆', papeles: ['creadora', 'admin'] },
   { path: '/chat',    titulo: 'Mensajes',   icono: '✉', papeles: ['usuaria', 'creadora', 'admin'] },
   { path: '/perfil',  titulo: 'Yo',         icono: '●', papeles: ['usuaria', 'creadora', 'admin'] },
 ]
 
 /** Accesos que viven dentro de "Yo", segun quien seas. */
 export const ATAJOS_PERFIL: Destino[] = [
-  { path: '/estudio',   titulo: 'Mi estudio',      icono: '◆', papeles: ['creadora', 'admin'] },
   { path: '/upload',    titulo: 'Subir un clip',   icono: '↑', papeles: ['creadora', 'admin'] },
+  { path: '/library',   titulo: 'Lo que compré',   icono: '▤', papeles: ['creadora', 'admin'] },
   { path: '/earnings',  titulo: 'Mis ganancias',   icono: '$', papeles: ['creadora', 'admin'] },
   { path: '/wallet',    titulo: 'Mi monedero',     icono: '◎', papeles: ['usuaria', 'creadora', 'admin'] },
   { path: '/creadoras', titulo: 'Quiero publicar', icono: '✦', papeles: ['usuaria'] },
