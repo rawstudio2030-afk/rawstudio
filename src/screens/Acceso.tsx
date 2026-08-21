@@ -10,7 +10,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
-import wordmark from '../assets/wordmark.png'
+import Wordmark from '../components/Wordmark'
 import { supabase } from '../lib/supabase'
 
 const UI = "'Space Grotesk', system-ui, sans-serif"
@@ -171,12 +171,7 @@ export default function Acceso({ modo }: { modo: Modo }) {
       background: '#08080A', color: '#F2F0F3', fontFamily: UI,
       display: 'flex', flexDirection: 'column',
     }}>
-      <div style={{
-        position: 'relative', width: 150, height: 56, transform: 'rotate(-2deg)',
-        filter: 'drop-shadow(0 0 16px rgba(255,43,209,.6))',
-      }}>
-        <img src={wordmark} alt="RAWstudio" style={{ width: '100%', height: 'auto', display: 'block' }} />
-      </div>
+      <Wordmark ancho={150} glow={16} />
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 18, padding: '30px 0' }}>
         <div style={{ width: 64, height: 3, background: '#FF2BD1' }} />

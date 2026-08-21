@@ -5,7 +5,7 @@ import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import { supabase } from '../lib/supabase'
-import wordmark from '../assets/wordmark.png'
+import Wordmark from '../components/Wordmark'
 import cortina from '../assets/cortina.jpg'
 
 export default function AgeGate() {
@@ -47,9 +47,7 @@ export default function AgeGate() {
           la pantalla de inicio sobre el video. */}
       <div aria-hidden style={{position: "absolute", inset: 0, background: "linear-gradient(180deg,#08080A 0%,rgba(8,8,10,.94) 26%,rgba(8,8,10,.55) 52%,rgba(8,8,10,.82) 100%)", zIndex: 1}} />
       <div style={{position: "relative", zIndex: 2, display: "flex", flexDirection: "column", flex: 1}}>
-      <div style={{position: "relative", width: "150px", height: "56px", transform: "rotate(-2deg)", filter: "drop-shadow(0 0 16px rgba(255,43,209,.6))"}}>
-        <img src={wordmark} alt="RAWstudio" style={{width: "100%", height: "auto", display: "block"}} />
-      </div>
+      <Wordmark ancho={150} glow={16} />
       <div style={{flex: "1", display: "flex", flexDirection: "column", justifyContent: "center", gap: "22px", padding: "34px 0"}}>
         <div style={{width: "64px", height: "3px", background: "#FF2BD1"}} />
         <div style={{fontFamily: "Anton,sans-serif", fontSize: "58px", lineHeight: ".9", letterSpacing: "-.5px", textTransform: "uppercase"}}>

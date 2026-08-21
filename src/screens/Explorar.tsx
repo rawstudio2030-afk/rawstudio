@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import { clipsPublicados, urlPortada, type ClipConAutora } from '../lib/clips'
 import { urlAvatar } from '../lib/perfiles'
-import wordmark from '../assets/wordmark.png'
+import Wordmark from '../components/Wordmark'
 
 const UI = "'Space Grotesk', system-ui, sans-serif"
 const MONO = "'Space Mono', monospace"
@@ -36,12 +36,7 @@ export default function Explorar() {
   return (
     <div style={{ minHeight: '100%', background: '#08080A', color: '#F2F0F3', fontFamily: UI }}>
       <div style={{ padding: '46px 18px 0' }}>
-        <div style={{
-          width: 116, height: 43, transform: 'rotate(-2deg)',
-          filter: 'drop-shadow(0 0 14px rgba(255,43,209,.55))', marginBottom: 20,
-        }}>
-          <img src={wordmark} alt="RAWstudio" style={{ width: '100%', height: 'auto', display: 'block' }} />
-        </div>
+        <Wordmark ancho={116} glow={14} />
 
         <div style={{ display: 'flex', gap: 7, marginBottom: 18 }}>
           {([['todo', 'Todo'], ['pago', 'De pago'], ['gratis', 'Gratis']] as [Filtro, string][]).map(([v, t]) => (

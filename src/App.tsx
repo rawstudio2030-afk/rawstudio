@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import { useSesion } from './lib/sesion'
 import { GuardiaRutas, BarraInferior, HuecoBarra } from './components/Navegacion'
+import CierrePorInactividad from './components/CierrePorInactividad'
 import Launch from './screens/Launch'
 import AgeGate from './screens/AgeGate'
 import ClipDetail from './screens/ClipDetail'
@@ -144,6 +145,7 @@ export default function App() {
         <Route path="*" element={<Launch />} />
       </Routes>
       <GuardiaRutas />
+      <CierrePorInactividad />
       <GuardiaEdad />
       <HuecoBarra />
       <BarraInferior />
