@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import { supabase } from '../lib/supabase'
 import wordmark from '../assets/wordmark.png'
+import cortina from '../assets/cortina.jpg'
 
 export default function AgeGate() {
   const nav = useNavigate()
@@ -37,7 +38,15 @@ export default function AgeGate() {
     nav('/entrar')
   }
   return (
-    <div style={{minHeight: "100%", boxSizing: "border-box", padding: "64px 26px 44px", background: "#08080A", color: "#F2F0F3", fontFamily: "'Space Grotesk',sans-serif", display: "flex", flexDirection: "column"}}>
+    <div style={{minHeight: "100%", boxSizing: "border-box", padding: "64px 26px 44px", background: "#08080A", color: "#F2F0F3", fontFamily: "'Space Grotesk',sans-serif", display: "flex", flexDirection: "column", position: "relative", overflow: "hidden"}}>
+      {/* La ilustracion va al fondo, anclada abajo: la rendija verde queda a la
+          altura de los botones y apunta hacia el titular. */}
+      <div aria-hidden style={{position: "absolute", inset: 0, background: `bottom center / cover no-repeat url(${cortina})`, zIndex: 0}} />
+      {/* Degradado sobre la imagen. Sin esto el titular en Anton compite con los
+          pliegues de la cortina y se vuelve ilegible; es el mismo recurso que usa
+          la pantalla de inicio sobre el video. */}
+      <div aria-hidden style={{position: "absolute", inset: 0, background: "linear-gradient(180deg,#08080A 0%,rgba(8,8,10,.94) 26%,rgba(8,8,10,.55) 52%,rgba(8,8,10,.82) 100%)", zIndex: 1}} />
+      <div style={{position: "relative", zIndex: 2, display: "flex", flexDirection: "column", flex: 1}}>
       <div style={{position: "relative", width: "150px", height: "56px", transform: "rotate(-2deg)", filter: "drop-shadow(0 0 16px rgba(255,43,209,.6))"}}>
         <img src={wordmark} alt="RAWstudio" style={{width: "100%", height: "auto", display: "block"}} />
       </div>
@@ -74,6 +83,7 @@ export default function AgeGate() {
         <div style={{font: "400 10.5px/1.5 'Space Mono',monospace", color: "#5E5A63", textAlign: "center", padding: "8px 6px 0"}}>
           ID check may be requested before your first payout. We store a hash, not your face.
         </div>
+      </div>
       </div>
     </div>
   )
