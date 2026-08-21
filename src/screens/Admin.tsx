@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import { urlAvatar } from '../lib/perfiles'
+import { ajustarSaldo } from '../lib/monedero'
 import {
   soyAdmin, listarPerfiles, suspender, reactivar, cambiarVerificacion,
   bitacora, otorgarAdmin, revocarAdmin, marcarCreadora,
@@ -31,6 +32,7 @@ export default function Admin() {
   const [log, setLog] = useState<Entrada[]>([])
   const [abierto, setAbierto] = useState<string | null>(null)
   const [motivo, setMotivo] = useState('')
+  const [monto, setMonto] = useState('')
   const [error, setError] = useState('')
   const [ocupado, setOcupado] = useState(false)
 
@@ -162,7 +164,37 @@ export default function Admin() {
                       <Dato k="id" v={`${p.id.slice(0, 8)}…`} />
                     </div>
 
-                    {!susp && (
+                    {/* Ajuste de saldo. El motivo es obligatorio del lado del
+                        servidor: un movimiento de dinero sin explicacion es
+                        justo lo que el libro contable existe para evitar. */}
+                    <div style={{ display: 'flex', gap: 7 }}>
+                      <input value={monto} onChange={e => setMonto(e.target.value.replace(/[^0-9-]/g, ''))}
+                        placeholder="± coins" inputMode="numeric"
+                        style={{
+                          width: 96, boxSizing: 'border-box', background: '#111116',
+                          border: '1px solid rgba(255,255,255,.14)', color: '#F2F0F3',
+                          font: `400 14px/1 ${MONO}`, padding: '12px', outline: 'none',
+                        }} />
+                      <Boton texto="Ajustar saldo" color="#C8FF3D" ocupado={ocupado}
+                        al={() => actuar(async () => {
+                          const n = parseInt(monto, 10)
+                          if (!n) return 'Escribe una cantidad distinta de cero'
+                          if (!motivo.trim()) return 'Escribe el motivo del ajuste'
+                          const err = await ajustarSaldo(p.id, n, motivo.trim())
+                          if (!err) setMonto('')
+                          return err
+                        })} />
+                    </div>
+
+                    <input value={motivo} onChange={e => setMotivo(e.target.value)}
+                      placeholder="Motivo (obligatorio para ajustes y suspensiones)"
+                      style={{
+                        width: '100%', boxSizing: 'border-box', background: '#111116',
+                        border: '1px solid rgba(255,255,255,.14)', color: '#F2F0F3',
+                        font: `400 14px/1 ${UI}`, padding: '12px', outline: 'none',
+                      }} />
+
+                    {false && (
                       <input value={motivo} onChange={e => setMotivo(e.target.value)}
                         placeholder="Motivo de la suspensión"
                         style={{

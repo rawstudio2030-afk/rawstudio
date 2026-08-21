@@ -10,6 +10,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import { urlAvatar } from '../lib/perfiles'
 import { clipPorId, urlPortada, urlVideoFirmada, clipsPublicados, type ClipConAutora } from '../lib/clips'
+import { comprarClip, saldo } from '../lib/monedero'
 
 const UI = "'Space Grotesk', system-ui, sans-serif"
 const MONO = "'Space Mono', monospace"
@@ -22,6 +23,9 @@ export default function ClipDetail() {
   const [clip, setClip] = useState<ClipConAutora | null>(null)
   const [cargando, setCargando] = useState(true)
   const [video, setVideo] = useState<string | null>(null)
+  const [coins, setCoins] = useState<number | null>(null)
+  const [comprando, setComprando] = useState(false)
+  const [errorCompra, setErrorCompra] = useState('')
 
   useEffect(() => {
     let vivo = true
@@ -38,8 +42,21 @@ export default function ClipDetail() {
       }
     }
     traer()
+    if (sesion) saldo().then(v => { if (vivo) setCoins(v) })
     return () => { vivo = false }
   }, [id, sesion])
+
+  // Tras comprar se vuelve a pedir la URL firmada: la politica de storage ya
+  // reconoce la compra, asi que ahora si entrega el archivo.
+  const desbloquear = async () => {
+    if (!clip || comprando) return
+    setComprando(true); setErrorCompra('')
+    const r = await comprarClip(clip.id)
+    if (!r.ok) { setErrorCompra(r.error ?? 'No se pudo completar'); setComprando(false); return }
+    setCoins(r.saldo ?? null)
+    if (clip.storage_path) setVideo(await urlVideoFirmada(clip.storage_path))
+    setComprando(false)
+  }
 
   if (cargando) return <Centro texto="Cargando…" />
 
@@ -150,15 +167,48 @@ export default function ClipDetail() {
                 {clip.price_coins} coins
               </div>
             )}
-            <div style={{
-              marginTop: 16, background: '#191920', color: '#5E5A63', textAlign: 'center',
-              padding: 17, font: `700 12px/1 ${UI}`, letterSpacing: 2, textTransform: 'uppercase',
-            }}>
-              Aún no se puede comprar
-            </div>
-            <div style={{ font: `400 11px/1.6 ${MONO}`, color: '#5E5A63', marginTop: 10, textAlign: 'center' }}>
-              Falta el monedero
-            </div>
+            {clip.visibility === 'pago' ? (() => {
+              const alcanza = coins !== null && coins >= clip.price_coins
+              const falta = coins === null ? 0 : clip.price_coins - coins
+              return (
+                <>
+                  <div onClick={sesion && alcanza ? desbloquear : undefined} style={{
+                    marginTop: 16,
+                    background: !sesion ? '#191920' : alcanza ? '#C8FF3D' : '#191920',
+                    color: !sesion ? '#5E5A63' : alcanza ? '#08080A' : '#5E5A63',
+                    textAlign: 'center', padding: 17,
+                    font: `700 12px/1 ${UI}`, letterSpacing: 2, textTransform: 'uppercase',
+                    cursor: sesion && alcanza ? 'pointer' : 'default',
+                    boxShadow: alcanza ? '0 0 30px rgba(200,255,61,.3)' : 'none',
+                  }}>
+                    {comprando ? 'Desbloqueando…'
+                      : !sesion ? 'Entra para desbloquear'
+                      : alcanza ? 'Desbloquear este clip'
+                      : `Te faltan ${falta} coins`}
+                  </div>
+                  {sesion && (
+                    <div onClick={() => nav('/wallet')} style={{
+                      font: `400 11px/1.6 ${MONO}`, color: '#6E6A72', marginTop: 10,
+                      textAlign: 'center', cursor: 'pointer', textDecoration: 'underline',
+                    }}>
+                      Tu saldo: {coins ?? '…'} coins
+                    </div>
+                  )}
+                  {errorCompra && (
+                    <div style={{ font: `400 12px/1.5 ${UI}`, color: '#FF2BD1', marginTop: 10, textAlign: 'center' }}>
+                      {errorCompra}
+                    </div>
+                  )}
+                </>
+              )
+            })() : (
+              <div style={{
+                marginTop: 16, background: '#191920', color: '#5E5A63', textAlign: 'center',
+                padding: 17, font: `700 12px/1 ${UI}`, letterSpacing: 2, textTransform: 'uppercase',
+              }}>
+                Faltan las suscripciones
+              </div>
+            )}
           </div>
         )}
       </div>

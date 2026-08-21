@@ -5,6 +5,7 @@ import { GuardiaRutas, BarraInferior, HuecoBarra } from './components/Navegacion
 import Launch from './screens/Launch'
 import AgeGate from './screens/AgeGate'
 import ClipDetail from './screens/ClipDetail'
+import Explorar from './screens/Explorar'
 import Wallet from './screens/Wallet'
 import CreatorProfile from './screens/CreatorProfile'
 import Upload from './screens/Upload'
@@ -20,7 +21,7 @@ import Admin from './screens/Admin'
 export const SCREENS = [
   { path: '/',          n: '00', title: 'Launch',         el: <Launch /> },
   { path: '/age',       n: '01', title: 'Age gate',       el: <AgeGate /> },
-  { path: '/clip',      n: '02', title: 'Clip + paywall', el: <ClipDetail /> },
+  { path: '/clip',      n: '02', title: 'Explorar',       el: <Explorar /> },
   { path: '/wallet',    n: '03', title: 'Wallet',         el: <Wallet /> },
   { path: '/creator',   n: '04', title: 'Creator',        el: <CreatorProfile /> },
   { path: '/perfil',    n: '13', title: 'Mi perfil',      el: <PerfilPropio /> },
