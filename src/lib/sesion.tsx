@@ -53,7 +53,15 @@ export function ProveedorSesion({ children }: { children: ReactNode }) {
 
     // Cubre el regreso del enlace magico, el refresco de token y el cierre de
     // sesion desde otra pestaña.
-    const { data: sub } = supabase.auth.onAuthStateChange(async (_evt, s) => {
+    const { data: sub } = supabase.auth.onAuthStateChange(async (evt, s) => {
+      // Supabase avisa la recuperacion con su propio evento. Se marca aqui
+      // porque la sesion que crea es indistinguible de una normal, y sin la
+      // marca la app la trataria como "ya entro" y lo mandaria al contenido
+      // sin darle nunca la oportunidad de cambiar la contraseña.
+      if (evt === 'PASSWORD_RECOVERY') {
+        sessionStorage.setItem('rawstudio.recuperando', '1')
+        window.location.hash = '#/nueva-clave'
+      }
       if (!vivo) return
       setSesion(s)
       await traerPerfil(s?.user.id)

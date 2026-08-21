@@ -1,0 +1,42 @@
+<!-- Plantilla de recuperación de contraseña.
+     La de Supabase es genérica en inglés y sin marca. Eso no solo se ve
+     improvisado: los filtros de correo penalizan mensajes sin identidad clara,
+     y fue parte de por qué el primero cayó en no deseados. -->
+<div style="margin:0;padding:0;background:#08080A;">
+  <div style="max-width:520px;margin:0 auto;padding:40px 28px;font-family:'Helvetica Neue',Arial,sans-serif;">
+
+    <div style="font:700 13px/1 Arial,sans-serif;letter-spacing:3px;text-transform:uppercase;color:#C8FF3D;">
+      RAWstudio
+    </div>
+
+    <div style="height:3px;width:56px;background:#FF2BD1;margin:22px 0 26px;"></div>
+
+    <div style="font:700 30px/1.1 Arial,sans-serif;color:#F2F0F3;text-transform:uppercase;margin-bottom:18px;">
+      Cambia tu contraseña
+    </div>
+
+    <div style="font:400 16px/1.55 Arial,sans-serif;color:#9C979F;margin-bottom:28px;">
+      Pediste recuperar el acceso a tu cuenta. Toca el botón y pon una
+      contraseña nueva. El enlace dura poco tiempo, a propósito.
+    </div>
+
+    <a href="{{ .ConfirmationURL }}"
+       style="display:inline-block;background:#FF2BD1;color:#08080A;text-decoration:none;
+              padding:17px 30px;font:700 13px/1 Arial,sans-serif;letter-spacing:2px;
+              text-transform:uppercase;">
+      Poner contraseña nueva
+    </a>
+
+    <div style="font:400 13px/1.6 Arial,sans-serif;color:#6E6A72;margin-top:30px;">
+      Si no fuiste tú, ignora este mensaje: tu contraseña sigue igual y nadie
+      entró a tu cuenta.
+    </div>
+
+    <div style="height:1px;background:rgba(255,255,255,.1);margin:30px 0 18px;"></div>
+
+    <div style="font:400 12px/1.6 Arial,sans-serif;color:#5E5A63;">
+      RAWstudio · rawstudio.biz<br>
+      Este correo se envió porque alguien lo solicitó desde tu cuenta.
+    </div>
+  </div>
+</div>

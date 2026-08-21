@@ -43,6 +43,13 @@ export function GuardiaRutas() {
 
   useEffect(() => {
     if (cargando) return
+    // Durante una recuperacion hay sesion pero la persona AUN no termina de
+    // entrar: falta poner la contraseña. Expulsarla al contenido aqui es lo que
+    // hacia parecer que el enlace del correo no servia.
+    if (sessionStorage.getItem('rawstudio.recuperando') === '1') {
+      if (aqui !== '/nueva-clave') nav('/nueva-clave', { replace: true })
+      return
+    }
     if (sesion && REDIRIGE_SI_HAY_SESION.includes(aqui)) {
       nav('/clip', { replace: true }); return
     }
