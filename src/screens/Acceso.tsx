@@ -9,6 +9,7 @@
 // queda tapado por la linea de arriba.
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useSesion } from '../lib/sesion'
 import wordmark from '../assets/wordmark.png'
 import { supabase } from '../lib/supabase'
 
@@ -57,7 +58,13 @@ function mensajeUtil(raw: string, modo: Modo): string {
 
 export default function Acceso({ modo }: { modo: Modo }) {
   const nav = useNavigate()
+  const { sesion, cargando } = useSesion()
   const t = COPY[modo]
+
+  // Igual que en la puerta: con sesion abierta, pedir credenciales confunde.
+  useEffect(() => {
+    if (!cargando && sesion) nav('/clip', { replace: true })
+  }, [cargando, sesion, nav])
   const [correo, setCorreo] = useState('')
   const [clave, setClave] = useState('')
   const [verClave, setVerClave] = useState(false)

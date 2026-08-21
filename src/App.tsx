@@ -40,8 +40,18 @@ function ScreenIndex() {
   const [open, setOpen] = useState(false)
   const nav = useNavigate()
   const here = useLocation().pathname
+  const { sesion, perfil, salir } = useSesion()
 
   const go = (p: string) => { nav(p); setOpen(false) }
+
+  // El estado de la sesion vive aqui porque el menu es lo unico presente en
+  // todas las pantallas. Antes solo se podia cerrar sesion desde el perfil,
+  // en un texto chico, y no se encontraba.
+  const cerrar = async () => {
+    await salir()
+    setOpen(false)
+    nav('/entrar', { replace: true })
+  }
 
   return (
     <>
@@ -68,6 +78,39 @@ function ScreenIndex() {
             display: 'flex', flexDirection: 'column', justifyContent: 'center',
             padding: '24px 18px 78px', boxSizing: 'border-box',
           }}>
+          {/* quien eres, siempre a la vista */}
+          <div
+            onClick={e => { e.stopPropagation(); go(sesion ? '/perfil' : '/entrar') }}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 11, cursor: 'pointer',
+              padding: '13px 12px', marginBottom: 14,
+              border: `1px solid ${sesion ? 'rgba(200,255,61,.35)' : 'rgba(255,255,255,.14)'}`,
+              background: sesion ? 'rgba(200,255,61,.06)' : 'transparent',
+            }}>
+            <div style={{
+              width: 34, height: 34, borderRadius: '50%', flex: '0 0 auto',
+              border: `1px solid ${sesion ? '#C8FF3D' : 'rgba(255,255,255,.2)'}`,
+              background: 'repeating-linear-gradient(130deg,#191920 0 6px,#111116 6px 12px)',
+            }} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{
+                font: "700 9px/1 'Space Grotesk', system-ui, sans-serif",
+                letterSpacing: 2, textTransform: 'uppercase',
+                color: sesion ? '#C8FF3D' : '#6E6A72',
+              }}>
+                {sesion ? 'Sesión abierta' : 'Sin sesión'}
+              </div>
+              <div style={{
+                font: "500 14px/1.3 'Space Grotesk', system-ui, sans-serif",
+                color: '#F2F0F3', marginTop: 4,
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              }}>
+                {sesion ? (perfil ? `@${perfil.handle}` : sesion.user.email) : 'Entrar o crear cuenta'}
+              </div>
+            </div>
+            <span style={{ color: '#5E5A63' }}>›</span>
+          </div>
+
           <div style={{
             font: "700 10px/1 'Space Grotesk', system-ui, sans-serif",
             letterSpacing: 2.4, textTransform: 'uppercase',
@@ -101,6 +144,19 @@ function ScreenIndex() {
               )
             })}
           </div>
+
+          {sesion && (
+            <div
+              onClick={e => { e.stopPropagation(); cerrar() }}
+              style={{
+                marginTop: 18, textAlign: 'center', padding: '15px 12px', cursor: 'pointer',
+                border: '1px solid rgba(255,43,209,.5)', color: '#FF2BD1',
+                font: "700 11px/1 'Space Grotesk', system-ui, sans-serif",
+                letterSpacing: 2, textTransform: 'uppercase',
+              }}>
+              Cerrar sesión
+            </div>
+          )}
         </div>
       )}
     </>

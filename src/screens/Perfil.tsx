@@ -105,10 +105,7 @@ export default function Perfil() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span onClick={() => nav(-1)} style={{ font: `400 26px/1 ${UI}`, color: '#9C979F', cursor: 'pointer' }}>‹</span>
         <span style={{ ...etiqueta, color: '#C8FF3D' }}>Mi perfil</span>
-        <span onClick={async () => { await salir(); nav('/entrar') }}
-          style={{ font: `700 10px/1 ${UI}`, letterSpacing: 1.6, textTransform: 'uppercase', color: '#6E6A72', cursor: 'pointer' }}>
-          Salir
-        </span>
+        <span style={{ width: 14 }} />
       </div>
 
       {/* foto */}
@@ -224,6 +221,13 @@ export default function Perfil() {
           cursor: puedeGuardar ? 'pointer' : 'default',
         }}>
           {estado === 'guardando' ? 'Guardando…' : estado === 'guardado' ? '✓ Guardado' : 'Guardar cambios'}
+        </div>
+        <div onClick={async () => { await salir(); nav('/entrar', { replace: true }) }} style={{
+          border: '1px solid rgba(255,43,209,.5)', color: '#FF2BD1', textAlign: 'center',
+          padding: 17, font: `700 12px/1 ${UI}`, letterSpacing: 2,
+          textTransform: 'uppercase', cursor: 'pointer',
+        }}>
+          Cerrar sesión
         </div>
         {perfil && (
           <div onClick={() => nav(`/creator/${perfil.handle}`)} style={{

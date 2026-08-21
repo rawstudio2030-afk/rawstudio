@@ -2,7 +2,9 @@
 // Aparece despues del age gate y antes de pedir cualquier dato: separa
 // "vengo a ver" de "vengo a publicar", que son los dos negocios distintos que
 // conviven en RAWstudio.
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useSesion } from '../lib/sesion'
 import wordmark from '../assets/wordmark.png'
 
 const UI = "'Space Grotesk', system-ui, sans-serif"
@@ -10,6 +12,13 @@ const MONO = "'Space Mono', monospace"
 
 export default function Entrar() {
   const nav = useNavigate()
+  const { sesion, cargando } = useSesion()
+
+  // Ofrecerle "crear cuenta" a quien ya entro no se entiende: parece que la
+  // sesion se perdio. Si hay sesion, esta pantalla no tiene nada que hacer.
+  useEffect(() => {
+    if (!cargando && sesion) nav('/clip', { replace: true })
+  }, [cargando, sesion, nav])
 
   return (
     <div style={{
