@@ -14,6 +14,7 @@ import Creators from './screens/Creators'
 import Acceso from './screens/Acceso'
 import Entrar from './screens/Entrar'
 import PerfilPropio from './screens/Perfil'
+import Admin from './screens/Admin'
 
 export const SCREENS = [
   { path: '/',          n: '00', title: 'Launch',         el: <Launch /> },
@@ -22,6 +23,7 @@ export const SCREENS = [
   { path: '/wallet',    n: '03', title: 'Wallet',         el: <Wallet /> },
   { path: '/creator',   n: '04', title: 'Creator',        el: <CreatorProfile /> },
   { path: '/perfil',    n: '13', title: 'Mi perfil',      el: <PerfilPropio /> },
+  { path: '/admin',     n: '14', title: 'Administración', el: <Admin /> },
   { path: '/upload',    n: '05', title: 'Upload',         el: <Upload /> },
   { path: '/earnings',  n: '06', title: 'Earnings',       el: <Earnings /> },
   { path: '/library',   n: '07', title: 'Library',        el: <Library /> },
@@ -71,7 +73,7 @@ function ScreenIndex() {
             letterSpacing: 2.4, textTransform: 'uppercase',
             color: '#6E6A72', marginBottom: 14,
           }}>
-            RAWstudio · 14 pantallas
+            RAWstudio · 15 pantallas
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {SCREENS.map(s => {
