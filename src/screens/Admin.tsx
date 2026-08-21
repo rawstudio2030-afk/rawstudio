@@ -9,7 +9,8 @@ import { useSesion } from '../lib/sesion'
 import { urlAvatar } from '../lib/perfiles'
 import {
   soyAdmin, listarPerfiles, suspender, reactivar, cambiarVerificacion,
-  bitacora, type PerfilAdmin, type Entrada,
+  bitacora, otorgarAdmin, revocarAdmin, marcarCreadora,
+  type PerfilAdmin, type Entrada,
 } from '../lib/admin'
 
 const UI = "'Space Grotesk', system-ui, sans-serif"
@@ -178,6 +179,14 @@ export default function Admin() {
                       <Boton texto={p.verified ? 'Quitar verificación' : 'Verificar'} color="#00E5FF"
                         ocupado={ocupado}
                         al={() => actuar(() => cambiarVerificacion(p.id, !p.verified))} />
+                      <Boton texto={p.is_creator ? 'Quitar creadora' : 'Hacer creadora'} color="#C8FF3D"
+                        ocupado={ocupado}
+                        al={() => actuar(() => marcarCreadora(p.id, !p.is_creator))} />
+                      <Boton texto={p.es_admin ? 'Quitar admin' : 'Hacer admin'} color="#00E5FF"
+                        ocupado={ocupado}
+                        al={() => actuar(() => p.es_admin
+                          ? revocarAdmin(p.id)
+                          : otorgarAdmin(p.id, motivo || 'otorgado desde el panel'))} />
                       <Boton texto="Ver perfil" color="rgba(255,255,255,.3)" ocupado={false}
                         al={async () => { nav(`/creator/${p.handle}`); return null }} />
                     </div>

@@ -6,6 +6,8 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useSesion } from '../lib/sesion'
 import { urlAvatar } from '../lib/perfiles'
+import { usePapel } from '../components/Navegacion'
+import { ATAJOS_PERFIL, visiblesPara } from '../lib/rutas'
 
 const UI = "'Space Grotesk', system-ui, sans-serif"
 const MONO = "'Space Mono', monospace"
@@ -24,6 +26,7 @@ export default function Perfil() {
   const nav = useNavigate()
   const { sesion, perfil, cargando, refrescarPerfil, salir } = useSesion()
   const archivo = useRef<HTMLInputElement>(null)
+  const { papel } = usePapel()
 
   const [handle, setHandle] = useState('')
   const [nombre, setNombre] = useState('')
@@ -210,6 +213,26 @@ export default function Perfil() {
       {estado === 'error' && (
         <div style={{ font: `400 13px/1.5 ${UI}`, color: '#FF2BD1' }}>{detalle}</div>
       )}
+
+      {/* Accesos segun quien eres. Viven aqui y no en la barra inferior para
+          que la barra se quede en cuatro pestañas: seis no caben en movil ni se
+          leen de un vistazo. */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 1, marginTop: 4 }}>
+        {visiblesPara(ATAJOS_PERFIL, papel).map(a => (
+          <div key={a.path} onClick={() => nav(a.path)} style={{
+            display: 'flex', alignItems: 'center', gap: 13, padding: '15px 13px',
+            cursor: 'pointer', border: '1px solid rgba(255,255,255,.09)',
+            background: a.path === '/admin' ? 'rgba(0,229,255,.05)' : 'transparent',
+          }}>
+            <span style={{
+              width: 26, textAlign: 'center', fontSize: 15,
+              color: a.path === '/admin' ? '#00E5FF' : '#C8FF3D',
+            }}>{a.icono}</span>
+            <span style={{ flex: 1, font: `500 15px/1.3 ${UI}`, color: '#F2F0F3' }}>{a.titulo}</span>
+            <span style={{ color: '#5E5A63' }}>›</span>
+          </div>
+        ))}
+      </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 'auto', paddingTop: 12 }}>
         <div onClick={guardar} style={{

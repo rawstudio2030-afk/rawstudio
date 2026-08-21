@@ -88,3 +88,23 @@ export async function bitacora(limite = 40): Promise<Entrada[]> {
   if (error) { console.warn('[admin] bitacora:', error.message); return [] }
   return (data ?? []) as Entrada[]
 }
+
+/** Mover privilegios pasa por funciones del servidor y no por una politica:
+ *  hacen falta salvaguardas que una politica no puede expresar —nadie se quita
+ *  el rol a si misma, y siempre queda al menos una administradora—. */
+export async function otorgarAdmin(id: string, motivo: string) {
+  const { error } = await supabase.rpc('admin_otorgar_admin',
+    { objetivo: id, motivo: motivo || null })
+  return error ? error.message : null
+}
+
+export async function revocarAdmin(id: string) {
+  const { error } = await supabase.rpc('admin_revocar_admin', { objetivo: id })
+  return error ? error.message : null
+}
+
+export async function marcarCreadora(id: string, valor: boolean) {
+  const { error } = await supabase.rpc('admin_marcar_creadora',
+    { objetivo: id, valor })
+  return error ? error.message : null
+}

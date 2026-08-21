@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import { useSesion } from './lib/sesion'
+import { GuardiaRutas, BarraInferior, HuecoBarra } from './components/Navegacion'
 import Launch from './screens/Launch'
 import AgeGate from './screens/AgeGate'
 import ClipDetail from './screens/ClipDetail'
@@ -34,135 +35,71 @@ export const SCREENS = [
   { path: '/acceso',    n: '12', title: 'Ya tengo cuenta', el: <Acceso modo="acceso" /> },
 ]
 
-/* Indice de pantallas: andamio de prototipo, no parte del producto.
-   Permite saltar a cualquier pantalla al enseñarlo, sin recorrer el flujo. */
-function ScreenIndex() {
+/* Indice de pantallas: SOLO herramienta de desarrollo. Se abre agregando
+   ?dev=1 a la URL. Antes salia siempre y a todo el mundo, con las 15 pantallas
+   revueltas —incluidas Launch, el age gate y Administracion—, que es justo lo
+   contrario de ayudar a encontrar las cosas. */
+function IndiceDesarrollo() {
   const [open, setOpen] = useState(false)
   const nav = useNavigate()
   const here = useLocation().pathname
-  const { sesion, perfil, salir } = useSesion()
+  const activo = new URLSearchParams(window.location.search).get('dev') === '1'
+  if (!activo) return null
 
   const go = (p: string) => { nav(p); setOpen(false) }
 
-  // El estado de la sesion vive aqui porque el menu es lo unico presente en
-  // todas las pantallas. Antes solo se podia cerrar sesion desde el perfil,
-  // en un texto chico, y no se encontraba.
-  const cerrar = async () => {
-    await salir()
-    setOpen(false)
-    nav('/entrar', { replace: true })
-  }
-
   return (
     <>
-      <button
-        onClick={() => setOpen(!open)}
-        aria-label="Indice de pantallas"
+      <button onClick={() => setOpen(!open)} aria-label="Indice de pantallas"
         style={{
-          position: 'fixed', right: 14, bottom: 14, zIndex: 9999,
-          width: 44, height: 44, borderRadius: '50%', border: 'none',
-          background: open ? '#C8FF3D' : 'rgba(255,43,209,.92)',
+          position: 'fixed', right: 14, bottom: 84, zIndex: 9999,
+          width: 40, height: 40, borderRadius: '50%', border: 'none',
+          background: open ? '#C8FF3D' : 'rgba(110,106,114,.9)',
           color: open ? '#08080A' : '#fff', cursor: 'pointer',
-          font: "700 15px/1 'Space Grotesk', system-ui, sans-serif",
-          boxShadow: '0 4px 22px rgba(0,0,0,.5)',
-        }}>
-        {open ? '×' : '☰'}
-      </button>
+          font: "700 13px/1 'Space Grotesk', system-ui, sans-serif",
+        }}>{open ? '×' : 'dev'}</button>
 
       {open && (
-        <div
-          onClick={() => setOpen(false)}
-          style={{
-            position: 'fixed', inset: 0, zIndex: 9998,
-            background: 'rgba(8,8,10,.93)', backdropFilter: 'blur(6px)',
-            display: 'flex', flexDirection: 'column', justifyContent: 'center',
-            padding: '24px 18px 78px', boxSizing: 'border-box',
-          }}>
-          {/* quien eres, siempre a la vista */}
-          <div
-            onClick={e => { e.stopPropagation(); go(sesion ? '/perfil' : '/entrar') }}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 11, cursor: 'pointer',
-              padding: '13px 12px', marginBottom: 14,
-              border: `1px solid ${sesion ? 'rgba(200,255,61,.35)' : 'rgba(255,255,255,.14)'}`,
-              background: sesion ? 'rgba(200,255,61,.06)' : 'transparent',
-            }}>
-            <div style={{
-              width: 34, height: 34, borderRadius: '50%', flex: '0 0 auto',
-              border: `1px solid ${sesion ? '#C8FF3D' : 'rgba(255,255,255,.2)'}`,
-              background: 'repeating-linear-gradient(130deg,#191920 0 6px,#111116 6px 12px)',
-            }} />
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{
-                font: "700 9px/1 'Space Grotesk', system-ui, sans-serif",
-                letterSpacing: 2, textTransform: 'uppercase',
-                color: sesion ? '#C8FF3D' : '#6E6A72',
-              }}>
-                {sesion ? 'Sesión abierta' : 'Sin sesión'}
-              </div>
-              <div style={{
-                font: "500 14px/1.3 'Space Grotesk', system-ui, sans-serif",
-                color: '#F2F0F3', marginTop: 4,
-                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-              }}>
-                {sesion ? (perfil ? `@${perfil.handle}` : sesion.user.email) : 'Entrar o crear cuenta'}
-              </div>
-            </div>
-            <span style={{ color: '#5E5A63' }}>›</span>
-          </div>
-
+        <div onClick={() => setOpen(false)} style={{
+          position: 'fixed', inset: 0, zIndex: 9998,
+          background: 'rgba(8,8,10,.95)', backdropFilter: 'blur(6px)',
+          display: 'flex', flexDirection: 'column', justifyContent: 'center',
+          padding: '24px 18px 78px', boxSizing: 'border-box', overflowY: 'auto',
+        }}>
           <div style={{
             font: "700 10px/1 'Space Grotesk', system-ui, sans-serif",
             letterSpacing: 2.4, textTransform: 'uppercase',
             color: '#6E6A72', marginBottom: 14,
-          }}>
-            RAWstudio · 15 pantallas
-          </div>
+          }}>Índice de desarrollo · {SCREENS.length} pantallas</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {SCREENS.map(s => {
-              const active = s.path === here
+              const act = s.path === here
               return (
-                <div
-                  key={s.path}
-                  onClick={e => { e.stopPropagation(); go(s.path) }}
+                <div key={s.path} onClick={e => { e.stopPropagation(); go(s.path) }}
                   style={{
                     display: 'flex', alignItems: 'center', gap: 12,
-                    padding: '13px 12px', cursor: 'pointer',
-                    background: active ? 'rgba(255,43,209,.14)' : 'transparent',
-                    borderLeft: `2px solid ${active ? '#FF2BD1' : 'transparent'}`,
+                    padding: '11px 12px', cursor: 'pointer',
+                    background: act ? 'rgba(255,43,209,.14)' : 'transparent',
+                    borderLeft: `2px solid ${act ? '#FF2BD1' : 'transparent'}`,
                   }}>
                   <span style={{
                     font: "700 10px/1 'Space Mono', monospace",
-                    color: '#08080A', background: active ? '#FF2BD1' : '#C8FF3D',
+                    color: '#08080A', background: act ? '#FF2BD1' : '#C8FF3D',
                     padding: '5px 6px',
                   }}>{s.n}</span>
                   <span style={{
-                    font: "500 15px/1 'Space Grotesk', system-ui, sans-serif",
-                    color: active ? '#fff' : '#9C979F',
+                    font: "500 14px/1 'Space Grotesk', system-ui, sans-serif",
+                    color: act ? '#fff' : '#9C979F',
                   }}>{s.title}</span>
                 </div>
               )
             })}
           </div>
-
-          {sesion && (
-            <div
-              onClick={e => { e.stopPropagation(); cerrar() }}
-              style={{
-                marginTop: 18, textAlign: 'center', padding: '15px 12px', cursor: 'pointer',
-                border: '1px solid rgba(255,43,209,.5)', color: '#FF2BD1',
-                font: "700 11px/1 'Space Grotesk', system-ui, sans-serif",
-                letterSpacing: 2, textTransform: 'uppercase',
-              }}>
-              Cerrar sesión
-            </div>
-          )}
         </div>
       )}
     </>
   )
 }
-
 
 /* Al aterrizar con sesion recien hecha, si el perfil no tiene confirmada la
    mayoria de edad se manda al age gate.
@@ -201,8 +138,11 @@ export default function App() {
         <Route path="/clip/:id" element={<ClipDetail />} />
         <Route path="*" element={<Launch />} />
       </Routes>
+      <GuardiaRutas />
       <GuardiaEdad />
-      <ScreenIndex />
+      <HuecoBarra />
+      <BarraInferior />
+      <IndiceDesarrollo />
     </>
   )
 }
