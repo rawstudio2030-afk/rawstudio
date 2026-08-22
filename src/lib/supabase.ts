@@ -37,6 +37,9 @@ export type Perfil = {
   // Marcadas por un admin; el propio usuario no puede escribirlas.
   suspended_at: string | null
   suspended_reason: string | null
+  // Escritas por el servicio de verificacion o por un admin al resolver.
+  identidad_verificada: boolean
+  identidad_verificada_at: string | null
   created_at: string
   updated_at: string
 }

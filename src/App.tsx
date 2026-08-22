@@ -20,6 +20,7 @@ import PerfilPropio from './screens/Perfil'
 import Admin from './screens/Admin'
 import Estudio from './screens/Estudio'
 import NuevaClave from './screens/NuevaClave'
+import Verificar from './screens/Verificar'
 
 export const SCREENS = [
   { path: '/',          n: '00', title: 'Launch',         el: <Launch /> },
@@ -31,6 +32,7 @@ export const SCREENS = [
   { path: '/admin',     n: '14', title: 'Administración', el: <Admin /> },
   { path: '/estudio',   n: '15', title: 'Estudio',        el: <Estudio /> },
   { path: '/nueva-clave', n: '16', title: 'Contraseña nueva', el: <NuevaClave /> },
+  { path: '/verificar', n: '17', title: 'Verificar identidad', el: <Verificar /> },
   { path: '/upload',    n: '05', title: 'Upload',         el: <Upload /> },
   { path: '/earnings',  n: '06', title: 'Earnings',       el: <Earnings /> },
   { path: '/library',   n: '07', title: 'Library',        el: <Library /> },

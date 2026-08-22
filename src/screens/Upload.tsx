@@ -53,6 +53,15 @@ export default function Upload() {
     />
   )
   if (perfil.suspended_at) return <Centro texto="Tu cuenta está suspendida. Escríbenos si crees que es un error." />
+  // Se bloquea ANTES del formulario. La politica de la base ya lo impide, pero
+  // dejar llenar todo para rechazar al final seria cruel: se sube el video, se
+  // espera, y hasta entonces el error.
+  if (!perfil.identidad_verificada) return (
+    <Centro
+      texto="Antes de publicar necesitamos comprobar que eres mayor de edad. Es una sola vez."
+      accion={{ texto: 'Verificar identidad', al: () => nav('/verificar') }}
+    />
+  )
 
   const listo = !!video && titulo.trim().length > 0 && estado !== 'subiendo'
   const gana = modo === 'pago' ? Math.round(precio * 0.8) : 0

@@ -67,6 +67,29 @@ export default function Estudio() {
         No tienes que usarlas todas. Empieza por una y ve sumando.
       </div>
 
+      {/* Aviso de verificacion. Va ANTES que todo lo demas: sin esto, la
+          creadora llena el formulario de subida y hasta el final se topa con un
+          rechazo que no explica nada. Mejor decirselo al entrar. */}
+      {!perfil.identidad_verificada && (
+        <div onClick={() => nav('/verificar')} style={{
+          border: '1.5px solid #FF2BD1', background: 'rgba(255,43,209,.08)',
+          padding: '18px 16px', marginBottom: 22, cursor: 'pointer',
+        }}>
+          <div style={{ font: `700 10px/1 ${UI}`, letterSpacing: 2.2, textTransform: 'uppercase', color: '#FF2BD1' }}>
+            Falta verificar tu identidad
+          </div>
+          <div style={{ font: `400 14px/1.5 ${UI}`, color: '#F2F0F3', marginTop: 9 }}>
+            Para publicar y para cobrar necesitamos comprobar que eres mayor de edad. Es una sola vez.
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginTop: 12 }}>
+            <span style={{ font: `400 11px/1.5 ${MONO}`, color: '#6E6A72' }}>
+              Toma dos minutos
+            </span>
+            <span style={{ font: `700 14px/1 ${UI}`, color: '#FF2BD1' }}>&#8594;</span>
+          </div>
+        </div>
+      )}
+
       {/* ganancias acumuladas */}
       <div onClick={() => nav('/wallet')} style={{
         border: '1px solid rgba(255,255,255,.12)', padding: '18px 16px',
