@@ -45,14 +45,41 @@ export default function Verificar() {
   const curpOk = CURP_RE.test(curp.trim().toUpperCase())
   const puede = curpOk && !!ine && !!selfie && estado !== 'enviando'
 
+  /** Sube las imagenes al bucket privado y abre una revision manual.
+   *
+   *  Es el camino por omision mientras no exista el microservicio: con pocas
+   *  creadoras, la revision humana es MAS confiable que un cotejo open source
+   *  —lo que no es, es escalable, y eso todavia no importa—. */
+  const enviarParaRevision = async () => {
+    if (!sesion) return
+    const base = sesion.user.id
+    const sello = Date.now()
+    const subir = async (f: File, nombre: string) => {
+      const ext = (f.name.split('.').pop() || 'jpg').toLowerCase()
+      const ruta = `${base}/${sello}-${nombre}.${ext}`
+      const { error } = await supabase.storage.from('verificacion')
+        .upload(ruta, f, { contentType: f.type, upsert: false })
+      if (error) throw new Error(error.message)
+      return ruta
+    }
+    const rutaIne = await subir(ine!, 'ine')
+    const rutaSelfie = await subir(selfie!, 'selfie')
+    const { error } = await supabase.rpc('solicitar_verificacion', {
+      curp: curp.trim().toUpperCase(), ine: rutaIne, selfie: rutaSelfie,
+    })
+    if (error) throw new Error(error.message)
+  }
+
   const enviar = async () => {
     if (!puede || !sesion) return
+    setEstado('enviando'); setDetalle('')
+
+    // Sin microservicio configurado, va directo a revision manual.
     if (!SERVICIO) {
-      setEstado('error')
-      setDetalle('El servicio de verificación aún no está desplegado.')
+      try { await enviarParaRevision(); setEstado('revision') }
+      catch (e) { setEstado('error'); setDetalle((e as Error).message) }
       return
     }
-    setEstado('enviando'); setDetalle('')
 
     const cuerpo = new FormData()
     cuerpo.append('curp', curp.trim().toUpperCase())
@@ -120,12 +147,14 @@ export default function Verificar() {
       }}>
         <div style={{ ...etiqueta, color: '#C8FF3D' }}>Qué hacemos con esto</div>
         <div style={{ font: `400 13.5px/1.6 ${UI}`, color: '#F2F0F3', marginTop: 9 }}>
-          Las fotos se revisan <b>en memoria</b> y no se guardan. De todo esto solo
-          conservamos que eres mayor de edad y la fecha.
+          {SERVICIO
+            ? <>Las fotos se revisan <b>en memoria</b> y no se guardan. De todo esto solo conservamos que eres mayor de edad y la fecha.</>
+            : <>Una persona del equipo revisa tus fotos y las <b>borra al terminar</b>. De todo esto solo conservamos que eres mayor de edad y la fecha.</>}
         </div>
         <div style={{ font: `400 11.5px/1.6 ${MONO}`, color: '#6E6A72', marginTop: 9 }}>
-          Única excepción: si el cotejo no es concluyente, las guardamos hasta que
-          una persona lo revise, y se borran al resolverlo.
+          {SERVICIO
+            ? 'Única excepción: si el cotejo no es concluyente, las guardamos hasta que una persona lo revise, y se borran al resolverlo.'
+            : 'Tu CURP nunca se guarda completa, solo una huella que no permite reconstruirla.'}
         </div>
       </div>
 
