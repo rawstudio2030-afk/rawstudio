@@ -40,6 +40,7 @@ export type Perfil = {
   // Escritas por el servicio de verificacion o por un admin al resolver.
   identidad_verificada: boolean
   identidad_verificada_at: string | null
+  paises_bloqueados: string[]
   created_at: string
   updated_at: string
 }

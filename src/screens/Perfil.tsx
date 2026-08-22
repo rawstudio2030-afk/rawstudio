@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useSesion } from '../lib/sesion'
 import { urlAvatar } from '../lib/perfiles'
+import PaisesBloqueados from '../components/PaisesBloqueados'
 import { usePapel } from '../components/Navegacion'
 import { ATAJOS_PERFIL, visiblesPara } from '../lib/rutas'
 
@@ -32,6 +33,7 @@ export default function Perfil() {
   const [nombre, setNombre] = useState('')
   const [bio, setBio] = useState('')
   const [creadora, setCreadora] = useState(false)
+  const [paises, setPaises] = useState<string[]>([])
   const [estado, setEstado] = useState<'listo' | 'guardando' | 'guardado' | 'error'>('listo')
   const [detalle, setDetalle] = useState('')
   const [subiendo, setSubiendo] = useState(false)
@@ -42,6 +44,7 @@ export default function Perfil() {
     setNombre(perfil.display_name)
     setBio(perfil.bio ?? '')
     setCreadora(perfil.is_creator)
+    setPaises(perfil.paises_bloqueados ?? [])
   }, [perfil])
 
   if (cargando) return <Aviso texto="Cargando…" />
@@ -65,6 +68,7 @@ export default function Perfil() {
       display_name: nombre.trim(),
       bio: bio.trim() || null,
       is_creator: creadora,
+      paises_bloqueados: paises,
     }).eq('id', sesion.user.id)
 
     if (error) {
@@ -212,6 +216,14 @@ export default function Perfil() {
 
       {estado === 'error' && (
         <div style={{ font: `400 13px/1.5 ${UI}`, color: '#FF2BD1' }}>{detalle}</div>
+      )}
+
+      {/* El bloqueo por pais solo tiene sentido para quien publica. */}
+      {creadora && (
+        <div style={{ borderTop: '1px solid rgba(255,255,255,.09)', paddingTop: 18 }}>
+          <PaisesBloqueados valor={paises} onCambio={setPaises}
+            nota="Se aplica a todo lo que publiques, salvo que un clip diga otra cosa." />
+        </div>
       )}
 
       {/* Accesos segun quien eres. Viven aqui y no en la barra inferior para

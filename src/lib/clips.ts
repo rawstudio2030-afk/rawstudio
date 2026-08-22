@@ -30,14 +30,36 @@ export function urlPortada(path: string | null): string | null {
   return supabase.storage.from('clip-covers').getPublicUrl(path).data.publicUrl
 }
 
-/** El video vive en bucket privado. Esta URL solo se obtiene si las politicas
- *  de storage dejan leer el archivo: hoy, unicamente su autora o un admin.
- *  Cuando existan las compras, la politica se amplia y este mismo codigo
- *  empieza a servir a quien pago, sin cambiar aqui nada. */
-export async function urlVideoFirmada(path: string, segundos = 3600): Promise<string | null> {
-  const { data, error } = await supabase.storage.from('clips').createSignedUrl(path, segundos)
-  if (error) return null
-  return data.signedUrl
+export type Acceso =
+  | { url: string; pais: string | null }
+  | { error: string; motivo?: 'sin_acceso' | 'geobloqueo'; pais?: string }
+
+/** Pide la URL del video a la funcion de borde, no directo a Storage.
+ *
+ *  El paywall ya lo sostienen las politicas, pero el GEOBLOQUEO no puede
+ *  decidirse aqui: la base no sabe desde que pais llega la peticion, y el
+ *  navegador no es fuente confiable de eso. La funcion ve la IP real —la pone
+ *  la red, no quien llama— y decide antes de que exista una URL que entregar.
+ *
+ *  La URL que devuelve dura 15 minutos: si se filtrara, expira pronto. */
+export async function urlVideoFirmada(clipId: string): Promise<Acceso> {
+  const base = import.meta.env.VITE_SUPABASE_URL
+  const { data } = await supabase.auth.getSession()
+  const token = data.session?.access_token
+  if (!token) return { error: 'Necesitas entrar para ver este clip' }
+
+  try {
+    const r = await fetch(`${base}/functions/v1/ver-clip`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ clip: clipId }),
+    })
+    const j = await r.json()
+    if (!r.ok) return { error: j.error ?? 'No se pudo abrir el clip', motivo: j.motivo, pais: j.pais }
+    return { url: j.url, pais: j.pais ?? null }
+  } catch {
+    return { error: 'No pudimos contactar el servidor. Revisa tu conexión.' }
+  }
 }
 
 export async function clipsPublicados(limite = 30): Promise<ClipConAutora[]> {

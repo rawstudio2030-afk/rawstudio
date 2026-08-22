@@ -24,6 +24,7 @@ export default function ClipDetail() {
   const [clip, setClip] = useState<ClipConAutora | null>(null)
   const [cargando, setCargando] = useState(true)
   const [video, setVideo] = useState<string | null>(null)
+  const [bloqueo, setBloqueo] = useState<{ motivo?: string; pais?: string } | null>(null)
   const [coins, setCoins] = useState<number | null>(null)
   const [comprando, setComprando] = useState(false)
   const [errorCompra, setErrorCompra] = useState('')
@@ -37,9 +38,11 @@ export default function ClipDetail() {
       const c = id ? await clipPorId(id) : (await clipsPublicados(1))[0] ?? null
       if (!vivo) return
       setClip(c); setCargando(false)
-      if (c?.storage_path) {
-        const u = await urlVideoFirmada(c.storage_path)
-        if (vivo) setVideo(u)
+      if (c?.storage_path && sesion) {
+        const a = await urlVideoFirmada(c.id)
+        if (!vivo) return
+        if ('url' in a) { setVideo(a.url); setBloqueo(null) }
+        else setBloqueo({ motivo: a.motivo, pais: a.pais })
       }
     }
     traer()
@@ -55,7 +58,8 @@ export default function ClipDetail() {
     const r = await comprarClip(clip.id)
     if (!r.ok) { setErrorCompra(r.error ?? 'No se pudo completar'); setComprando(false); return }
     setCoins(r.saldo ?? null)
-    if (clip.storage_path) setVideo(await urlVideoFirmada(clip.storage_path))
+    const a = await urlVideoFirmada(clip.id)
+    if ('url' in a) setVideo(a.url)
     setComprando(false)
   }
 
@@ -102,10 +106,14 @@ export default function ClipDetail() {
             }} />
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(8,8,10,.35) 0%,rgba(8,8,10,.92) 100%)' }} />
             <div style={{
-              position: 'absolute', top: 16, right: 16, border: '1px solid #C8FF3D',
-              color: '#C8FF3D', padding: '7px 10px',
+              position: 'absolute', top: 16, right: 16,
+              border: `1px solid ${bloqueo?.motivo === 'geobloqueo' ? '#00E5FF' : '#C8FF3D'}`,
+              color: bloqueo?.motivo === 'geobloqueo' ? '#00E5FF' : '#C8FF3D',
+              padding: '7px 10px',
               font: `700 10px/1 ${UI}`, letterSpacing: 1.6, textTransform: 'uppercase',
-            }}>Bloqueado</div>
+            }}>
+              {bloqueo?.motivo === 'geobloqueo' ? 'No disponible aquí' : 'Bloqueado'}
+            </div>
           </>
         )}
         <span onClick={() => nav(-1)} style={{
@@ -154,7 +162,20 @@ export default function ClipDetail() {
           {!clip.published && ' · borrador'}
         </div>
 
-        {mio ? (
+        {bloqueo?.motivo === 'geobloqueo' ? (
+          <div style={{
+            marginTop: 24, padding: '18px 16px',
+            border: '1px solid rgba(0,229,255,.4)', background: 'rgba(0,229,255,.06)',
+          }}>
+            <div style={{ font: `700 10px/1 ${UI}`, letterSpacing: 2.2, textTransform: 'uppercase', color: '#00E5FF' }}>
+              No disponible en tu país
+            </div>
+            <div style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: 16, lineHeight: 1.4, color: '#9C979F', marginTop: 9 }}>
+              Quien publicó este clip decidió no mostrarlo aquí. No es un error
+              ni falta de pago: es su elección, y la respetamos.
+            </div>
+          </div>
+        ) : mio ? (
           <div style={{
             marginTop: 24, padding: '18px 16px', border: '1px dashed rgba(200,255,61,.4)',
             background: 'rgba(200,255,61,.05)',
