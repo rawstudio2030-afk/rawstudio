@@ -41,6 +41,26 @@ app.add_middleware(
 )
 
 
+@app.on_event("startup")
+async def precalentar():
+    """Carga los modelos al arrancar, no en la primera peticion.
+
+    Sin esto, quien verifique primero espera ~60 s mientras se cargan 1.5 GB de
+    modelos, y desde su lado parece que el servicio esta roto."""
+    if os.getenv("PRECALENTAR", "true").lower() != "true":
+        return
+    try:
+        from .rostro import _cargar as cargar_rostro
+        cargar_rostro()
+    except Exception as e:  # el servicio arranca igual; fallara al usarse
+        print("[verificacion] no se pudo precargar el modelo facial:", e)
+    try:
+        from .ine import _cargar as cargar_ocr
+        cargar_ocr()
+    except Exception as e:
+        print("[verificacion] no se pudo precargar el OCR:", e)
+
+
 @app.get("/salud")
 async def salud():
     return {"ok": True, "persiste_imagenes": False}

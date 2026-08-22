@@ -13,6 +13,8 @@ COPY app ./app
 
 # Sin volumenes ni directorio de subidas: el servicio no escribe imagenes a
 # disco por diseño.
-ENV PORT=8000
-EXPOSE 8000
+# Hugging Face Spaces espera el 7860; en Railway o Render se sobreescribe
+# con la variable PORT que ellos inyectan.
+ENV PORT=7860
+EXPOSE 7860
 CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT}"]

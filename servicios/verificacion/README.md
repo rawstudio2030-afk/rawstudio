@@ -1,3 +1,14 @@
+---
+title: RAWstudio Verificacion
+emoji: 🔒
+colorFrom: pink
+colorTo: gray
+sdk: docker
+app_port: 7860
+pinned: false
+short_description: Verificacion de edad e identidad. No persiste imagenes.
+---
+
 # Servicio de verificación · RAWstudio
 
 Verifica edad e identidad combinando CURP, credencial del INE y selfie.
