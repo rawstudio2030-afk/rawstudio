@@ -11,6 +11,7 @@ import { useSesion } from '../lib/sesion'
 import { urlAvatar } from '../lib/perfiles'
 import { clipPorId, urlPortada, urlVideoFirmada, clipsPublicados, type ClipConAutora } from '../lib/clips'
 import { comprarClip, saldo } from '../lib/monedero'
+import MarcaDeAgua from '../components/MarcaDeAgua'
 
 const UI = "'Space Grotesk', system-ui, sans-serif"
 const MONO = "'Space Mono', monospace"
@@ -19,7 +20,7 @@ const SERIF = "'Instrument Serif', serif"
 export default function ClipDetail() {
   const nav = useNavigate()
   const { id } = useParams()
-  const { sesion } = useSesion()
+  const { sesion, perfil: perfilPropio } = useSesion()
   const [clip, setClip] = useState<ClipConAutora | null>(null)
   const [cargando, setCargando] = useState(true)
   const [video, setVideo] = useState<string | null>(null)
@@ -71,6 +72,8 @@ export default function ClipDetail() {
   const portada = urlPortada(clip.cover_path)
   const foto = urlAvatar(autora?.avatar_path ?? null)
   const mio = sesion?.user.id === clip.creator_id
+  // Su propia creadora no necesita marca: no tiene a quien delatar.
+  const marca = !mio && perfilPropio ? `@${perfilPropio.handle}` : null
   // Hoy solo la autora y un admin pueden abrir el archivo. Cuando existan las
   // compras, video llegara tambien a quien pago, sin cambiar nada aqui.
   const desbloqueado = !!video
@@ -80,9 +83,15 @@ export default function ClipDetail() {
       {/* marco */}
       <div style={{ position: 'relative', height: 300, background: '#111116' }}>
         {desbloqueado ? (
-          <video src={video!} controls playsInline
-            poster={portada ?? undefined}
-            style={{ width: '100%', height: '100%', objectFit: 'cover', background: '#000' }} />
+          <>
+            <video src={video!} controls playsInline
+              poster={portada ?? undefined}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', background: '#000' }} />
+            {/* El identificador de quien mira, encima del video. Se usa el
+                handle y no el correo: señala la cuenta sin exponer un dato de
+                contacto en una grabacion que podria acabar circulando. */}
+            {marca && <MarcaDeAgua texto={marca} />}
+          </>
         ) : (
           <>
             <div style={{

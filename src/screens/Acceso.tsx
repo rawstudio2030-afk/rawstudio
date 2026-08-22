@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import Wordmark from '../components/Wordmark'
 import { supabase } from '../lib/supabase'
+import { VERSION_LEGAL } from '../content/legal'
 
 const UI = "'Space Grotesk', system-ui, sans-serif"
 const MONO = "'Space Mono', monospace"
@@ -56,6 +57,28 @@ function mensajeUtil(raw: string, modo: Modo): string {
   return raw
 }
 
+function Casilla({ marcada, onCambio, obligatoria, children }: {
+  marcada: boolean; onCambio: (v: boolean) => void
+  obligatoria?: boolean; children: React.ReactNode
+}) {
+  return (
+    <div onClick={() => onCambio(!marcada)}
+      style={{ display: 'flex', gap: 11, alignItems: 'flex-start', cursor: 'pointer' }}>
+      <span style={{
+        width: 20, height: 20, flex: '0 0 auto', marginTop: 1,
+        border: `1.5px solid ${marcada ? '#C8FF3D' : 'rgba(255,255,255,.28)'}`,
+        background: marcada ? '#C8FF3D' : 'transparent',
+        display: 'grid', placeItems: 'center',
+        font: `700 12px/1 ${UI}`, color: '#08080A',
+      }}>{marcada ? '✓' : ''}</span>
+      <span style={{ font: `400 12.5px/1.5 ${UI}`, color: '#9C979F' }}>
+        {children}
+        {obligatoria && <span style={{ color: '#FF2BD1' }}> *</span>}
+      </span>
+    </div>
+  )
+}
+
 export default function Acceso({ modo }: { modo: Modo }) {
   const nav = useNavigate()
   const { sesion, cargando } = useSesion()
@@ -71,6 +94,13 @@ export default function Acceso({ modo }: { modo: Modo }) {
   const [estado, setEstado] = useState<Estado>('listo')
   const [detalle, setDetalle] = useState('')
   const [conGoogle, setConGoogle] = useState(false)
+  // Casillas SEPARADAS y ninguna preseleccionada. Una sola de "acepto todo" es
+  // justo lo que invalida el consentimiento para datos sensibles: la ley pide
+  // que el de biometricos sea expreso y diferenciado.
+  const [aceptaLegal, setAceptaLegal] = useState(false)
+  const [aceptaBio, setAceptaBio] = useState(false)
+  const [quiereRecs, setQuiereRecs] = useState(false)
+  const [quierePromos, setQuierePromos] = useState(false)
 
   // El boton de Google solo aparece si el proveedor esta realmente configurado.
   // Mostrarlo sin configurar lleva a una pantalla de error de Google, que es
@@ -89,7 +119,9 @@ export default function Acceso({ modo }: { modo: Modo }) {
 
   const correoOk = /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(correo.trim())
   const claveOk = clave.length >= 6
-  const listo = correoOk && claveOk
+  // Las opcionales pueden quedarse en blanco y aun asi permitir el registro.
+  const consiente = modo === 'acceso' || (aceptaLegal && aceptaBio)
+  const listo = correoOk && claveOk && consiente
 
   const fallar = (msg: string) => { setEstado('error'); setDetalle(mensajeUtil(msg, modo)) }
 
@@ -104,7 +136,25 @@ export default function Acceso({ modo }: { modo: Modo }) {
         options: { emailRedirectTo: window.location.origin },
       })
       if (error) return fallar(error.message)
-      // Con confirmacion activa no llega sesion: hay que pasar por el correo.
+
+      // Se registra el consentimiento en cuanto hay usuario. Un "acepto" que no
+      // queda guardado no sirve como prueba: se anota QUE se acepto, en QUE
+      // version y cuando.
+      const uid = data.user?.id
+      if (uid) {
+        const filas = [
+          { tipo: 'terminos',        otorgado: true },
+          { tipo: 'privacidad',      otorgado: true },
+          { tipo: 'biometricos',     otorgado: true },
+          { tipo: 'recomendaciones', otorgado: quiereRecs },
+          { tipo: 'promociones',     otorgado: quierePromos },
+        ].map(f => ({ ...f, user_id: uid, version: VERSION_LEGAL, agente: navigator.userAgent }))
+        // La IP no la sabe el navegador; queda nula y la llena el servidor si
+        // algun dia se hace por funcion. Fingirla aqui seria peor que omitirla.
+        const { error: e2 } = await supabase.from('consentimientos').insert(filas)
+        if (e2) console.warn('[registro] no se pudo guardar el consentimiento:', e2.message)
+      }
+
       if (!data.session) { setEstado('confirma'); return }
       nav('/clip')
       return
@@ -229,6 +279,29 @@ export default function Acceso({ modo }: { modo: Modo }) {
             {modo === 'registro' && !claveOk && clave.length > 0 && (
               <div style={{ font: `400 12px/1.5 ${MONO}`, color: '#6E6A72' }}>
                 Mínimo 6 caracteres.
+              </div>
+            )}
+
+            {modo === 'registro' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 4 }}>
+                <Casilla marcada={aceptaLegal} onCambio={setAceptaLegal} obligatoria>
+                  He leído y acepto los{' '}
+                  <a onClick={e => { e.stopPropagation(); nav('/terminos') }}
+                     style={{ color: '#C8FF3D', textDecoration: 'underline', cursor: 'pointer' }}>términos</a>
+                  {' '}y el{' '}
+                  <a onClick={e => { e.stopPropagation(); nav('/privacidad') }}
+                     style={{ color: '#C8FF3D', textDecoration: 'underline', cursor: 'pointer' }}>aviso de privacidad</a>.
+                </Casilla>
+                <Casilla marcada={aceptaBio} onCambio={setAceptaBio} obligatoria>
+                  Autorizo el tratamiento de mis <b>datos biométricos faciales</b> y de mi
+                  identificación, con la única finalidad de verificar mi edad e identidad.
+                </Casilla>
+                <Casilla marcada={quiereRecs} onCambio={setQuiereRecs}>
+                  Quiero recomendaciones de contenido.
+                </Casilla>
+                <Casilla marcada={quierePromos} onCambio={setQuierePromos}>
+                  Quiero recibir novedades por correo.
+                </Casilla>
               </div>
             )}
 

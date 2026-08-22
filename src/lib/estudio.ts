@@ -22,18 +22,16 @@ export type ResumenEstudio = {
   clipsPublicados: number
   niveles: number
   encargosAbiertos: number
-  shows: number
   posts: number
   ganancias: number
 }
 
 export async function resumen(uid: string): Promise<ResumenEstudio> {
-  const [clips, niveles, encargos, shows, posts, mov] = await Promise.all([
+  const [clips, niveles, encargos, posts, mov] = await Promise.all([
     supabase.from('clips').select('id,published').eq('creator_id', uid),
     supabase.from('subscription_tiers').select('id').eq('creator_id', uid).eq('activo', true),
     supabase.from('custom_requests').select('id')
       .eq('creator_id', uid).in('estado', ['propuesta', 'negociando', 'aceptado', 'pagado', 'en_proceso']),
-    supabase.from('live_shows').select('id').eq('creator_id', uid).in('estado', ['programado', 'en_vivo']),
     supabase.from('posts').select('id').eq('creator_id', uid),
     supabase.from('coin_ledger').select('delta').in('motivo', ['venta_clip', 'propina']),
   ])
@@ -44,7 +42,6 @@ export async function resumen(uid: string): Promise<ResumenEstudio> {
     clipsPublicados: lista.filter((c: { published: boolean }) => c.published).length,
     niveles: niveles.data?.length ?? 0,
     encargosAbiertos: encargos.data?.length ?? 0,
-    shows: shows.data?.length ?? 0,
     posts: posts.data?.length ?? 0,
     ganancias: (mov.data ?? []).reduce(
       (s: number, m: { delta: number }) => s + (m.delta > 0 ? m.delta : 0), 0),
@@ -79,12 +76,6 @@ export function canales(r: ResumenEstudio): Canal[] {
         ? `${r.encargosAbiertos} ${r.encargosAbiertos === 1 ? 'solicitud abierta' : 'solicitudes abiertas'}`
         : 'Las fans piden algo y negocian el precio contigo',
       estado: 'listo',
-    },
-    {
-      clave: 'shows', titulo: 'Shows en vivo', icono: '◉', ruta: '/estudio/shows',
-      descripcion: r.shows > 0 ? `${r.shows} programado(s)` : 'Con entrada o propinas en vivo',
-      estado: 'en_obra',
-      nota: 'Falta conectar el proveedor de transmisión',
     },
     {
       clave: 'blog', titulo: 'Blog', icono: '✍', ruta: '/estudio/blog',

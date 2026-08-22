@@ -61,7 +61,7 @@ export default function Estudio() {
       </div>
 
       <div style={{ fontFamily: 'Anton, sans-serif', fontSize: 40, lineHeight: 1, textTransform: 'uppercase', marginBottom: 8 }}>
-        Siete formas<br /><span style={{ color: '#C8FF3D' }}>de ganar</span>
+        Seis formas<br /><span style={{ color: '#C8FF3D' }}>de ganar</span>
       </div>
       <div style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: 18, lineHeight: 1.35, color: '#9C979F', marginBottom: 24 }}>
         No tienes que usarlas todas. Empieza por una y ve sumando.
