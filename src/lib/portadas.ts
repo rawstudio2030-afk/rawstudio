@@ -46,7 +46,13 @@ export function portadaGenerada(id: string): string {
     `<stop offset="1" stop-color="#08080A" stop-opacity=".85"/>` +
     `</linearGradient></defs></svg>`
 
-  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`
+  // Los parentesis van codificados a mano: encodeURIComponent NO los toca, y
+  // dentro de un url() de CSS el ')' del rotate() cierra la regla antes de
+  // tiempo. El sintoma es una portada en blanco, sin error en consola.
+  const codificado = encodeURIComponent(svg)
+    .replace(/\(/g, '%28')
+    .replace(/\)/g, '%29')
+  return `data:image/svg+xml;utf8,${codificado}`
 }
 
 /** Devuelve la portada real si existe, y si no, una generada. */

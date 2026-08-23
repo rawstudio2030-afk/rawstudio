@@ -74,8 +74,7 @@ export default function Explorar() {
                 <div key={c.id} onClick={() => nav(`/clip/${c.id}`)} style={{ cursor: 'pointer' }}>
                   <div style={{
                     aspectRatio: '3/4', position: 'relative', overflow: 'hidden',
-                    background: p ? `center/cover url(${p})`
-                                  : 'repeating-linear-gradient(130deg,#191920 0 8px,#111116 8px 16px)',
+                    background: `center/cover url("${p}")`,
                   }}>
                     <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,transparent 40%,rgba(8,8,10,.92) 100%)' }} />
                     {c.es_demo && (
