@@ -16,6 +16,7 @@ export type Clip = {
   published_at: string | null
   renta_horas: number | null
   renta_coins: number | null
+  es_demo: boolean
   created_at: string
 }
 

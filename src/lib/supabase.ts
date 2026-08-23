@@ -41,6 +41,7 @@ export type Perfil = {
   identidad_verificada: boolean
   identidad_verificada_at: string | null
   paises_bloqueados: string[]
+  es_demo: boolean
   created_at: string
   updated_at: string
 }

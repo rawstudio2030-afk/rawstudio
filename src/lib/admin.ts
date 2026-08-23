@@ -26,6 +26,7 @@ export type PerfilAdmin = {
   clips_total: number
   clips_publicados: number
   es_admin: boolean
+  es_demo: boolean
   created_at: string
 }
 
@@ -107,4 +108,20 @@ export async function marcarCreadora(id: string, valor: boolean) {
   const { error } = await supabase.rpc('admin_marcar_creadora',
     { objetivo: id, valor })
   return error ? error.message : null
+}
+
+/** Siembra y borrado del contenido de demostracion.
+ *
+ *  Existe para que la plataforma no se vea vacia al enseñarla, sin usar a
+ *  personas reales. Todo queda marcado y se puede vaciar de un comando. */
+export async function sembrarDemo() {
+  const { data, error } = await supabase.rpc('admin_sembrar_demo')
+  if (error) return { error: error.message }
+  return data as { ok: boolean; perfiles: number; clips: number }
+}
+
+export async function borrarDemo() {
+  const { data, error } = await supabase.rpc('admin_borrar_demo')
+  if (error) return { error: error.message }
+  return data as { ok: boolean; borrados: number }
 }

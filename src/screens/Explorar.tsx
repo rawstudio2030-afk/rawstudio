@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import { clipsPublicados, urlPortada, type ClipConAutora } from '../lib/clips'
 import { urlAvatar } from '../lib/perfiles'
+import { portadaDe } from '../lib/portadas'
 import Wordmark from '../components/Wordmark'
 
 const UI = "'Space Grotesk', system-ui, sans-serif"
@@ -66,7 +67,7 @@ export default function Explorar() {
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 11 }}>
             {visibles.map(c => {
-              const p = urlPortada(c.cover_path)
+              const p = portadaDe(c.id, urlPortada(c.cover_path))
               const f = urlAvatar(c.profiles?.avatar_path ?? null)
               const gratis = c.visibility === 'gratis'
               return (
@@ -77,6 +78,13 @@ export default function Explorar() {
                                   : 'repeating-linear-gradient(130deg,#191920 0 8px,#111116 8px 16px)',
                   }}>
                     <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,transparent 40%,rgba(8,8,10,.92) 100%)' }} />
+                    {c.es_demo && (
+                      <span style={{
+                        position: 'absolute', top: 8, left: 8,
+                        background: '#6E6A72', color: '#08080A', padding: '4px 6px',
+                        font: `700 8.5px/1 ${UI}`, letterSpacing: 1.1, textTransform: 'uppercase',
+                      }}>Demo</span>
+                    )}
                     <span style={{
                       position: 'absolute', top: 8, right: 8,
                       background: gratis ? '#00E5FF' : '#C8FF3D', color: '#08080A',

@@ -10,7 +10,7 @@ import { urlAvatar } from '../lib/perfiles'
 import { ajustarSaldo } from '../lib/monedero'
 import {
   soyAdmin, listarPerfiles, suspender, reactivar, cambiarVerificacion,
-  bitacora, otorgarAdmin, revocarAdmin, marcarCreadora,
+  bitacora, otorgarAdmin, revocarAdmin, marcarCreadora, sembrarDemo, borrarDemo,
   type PerfilAdmin, type Entrada,
 } from '../lib/admin'
 
@@ -99,6 +99,33 @@ export default function Admin() {
 
       {error && <div style={{ font: `400 13px/1.5 ${UI}`, color: '#FF2BD1', marginBottom: 14 }}>{error}</div>}
 
+      {/* Contenido de demostración. Se separa del resto y se explica para qué
+          sirve: dentro de unas semanas nadie recordaría por qué hay perfiles
+          que no corresponden a nadie. */}
+      {pestaña === 'gente' && (
+        <div style={{
+          border: '1px dashed rgba(255,255,255,.18)', padding: '15px 14px', marginBottom: 16,
+        }}>
+          <div style={{ ...etiqueta, color: '#9C979F' }}>Contenido de demostración</div>
+          <div style={{ font: `400 12.5px/1.6 ${UI}`, color: '#6E6A72', marginTop: 8 }}>
+            Perfiles ficticios para que la plataforma no se vea vacía al enseñarla.
+            No corresponden a ninguna persona real. Bórralos antes de abrir al público.
+          </div>
+          <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
+            <Boton texto="Sembrar demo" color="#C8FF3D" ocupado={ocupado}
+              al={() => actuar(async () => {
+                const r = await sembrarDemo()
+                return 'error' in r ? r.error : null
+              })} />
+            <Boton texto="Borrar toda la demo" color="#FF2BD1" ocupado={ocupado}
+              al={() => actuar(async () => {
+                const r = await borrarDemo()
+                return 'error' in r ? r.error : null
+              })} />
+          </div>
+        </div>
+      )}
+
       {pestaña === 'gente' ? (
         <>
           <input value={busqueda} onChange={e => setBusqueda(e.target.value)}
@@ -140,6 +167,7 @@ export default function Admin() {
                     <div style={{ font: `400 11px/1.5 ${MONO}`, color: '#5E5A63' }}>
                       @{p.handle}
                       {p.es_admin && <span style={{ color: '#00E5FF' }}> · admin</span>}
+                      {p.es_demo && <span style={{ color: '#9C979F' }}> · demo</span>}
                       {susp && <span style={{ color: '#FF2BD1' }}> · suspendida</span>}
                     </div>
                   </div>

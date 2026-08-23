@@ -11,6 +11,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import { perfilPorHandle, urlAvatar } from '../lib/perfiles'
 import { clipsDe, urlPortada, type Clip } from '../lib/clips'
+import { portadaDe } from '../lib/portadas'
 import type { Perfil } from '../lib/supabase'
 
 const UI = "'Space Grotesk', system-ui, sans-serif"
@@ -102,6 +103,12 @@ export default function CreatorProfile() {
               font: `700 9px/1 ${UI}`, letterSpacing: 1.3, textTransform: 'uppercase',
             }}>Creadora</span>
           )}
+          {perfil.es_demo && (
+            <span style={{
+              marginLeft: 7, background: '#6E6A72', color: '#08080A', padding: '4px 7px',
+              font: `700 9px/1 ${UI}`, letterSpacing: 1.3, textTransform: 'uppercase',
+            }}>Demostración</span>
+          )}
         </div>
 
         {perfil.bio && (
@@ -142,11 +149,11 @@ export default function CreatorProfile() {
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 10 }}>
                 {clips.map(c => {
-                  const p = urlPortada(c.cover_path)
+                  const p = portadaDe(c.id, urlPortada(c.cover_path))
                   return (
                     <div key={c.id} onClick={() => nav(`/clip/${c.id}`)} style={{
                       aspectRatio: '3/4', position: 'relative', cursor: 'pointer',
-                      background: p ? `center/cover url(${p})` : 'repeating-linear-gradient(130deg,#191920 0 8px,#111116 8px 16px)',
+                      background: `center/cover url(${p})`,
                     }}>
                       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,transparent 45%,rgba(8,8,10,.9) 100%)' }} />
                       {!c.published && (
