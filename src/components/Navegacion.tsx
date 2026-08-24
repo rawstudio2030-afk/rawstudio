@@ -7,7 +7,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import { soyAdmin } from '../lib/admin'
 import {
-  BARRA, RUTAS_ENTRADA, REDIRIGE_SI_HAY_SESION, EXIGE_SESION,
+  BARRA, RUTAS_ENTRADA, RUTAS_PANEL, REDIRIGE_SI_HAY_SESION, EXIGE_SESION,
   papelDe, visiblesPara, type Papel,
 } from '../lib/rutas'
 import { COLOR, FUENTE } from '../lib/diseño'
@@ -70,6 +70,8 @@ export function BarraInferior() {
   // intencion y ofrece destinos que todavia no aplican.
   if (papel === 'visitante') return null
   if (RUTAS_ENTRADA.includes(aqui)) return null
+  // El panel trae barra lateral propia; la de abajo tapa filas de tabla.
+  if (RUTAS_PANEL.some(r => aqui.startsWith(r))) return null
 
   const destinos = visiblesPara(BARRA, papel)
 
@@ -107,5 +109,6 @@ export function HuecoBarra() {
   const aqui = useLocation().pathname
   const { papel } = usePapel()
   if (papel === 'visitante' || RUTAS_ENTRADA.includes(aqui)) return null
+  if (RUTAS_PANEL.some(r => aqui.startsWith(r))) return null
   return <div style={{ height: 'calc(64px + env(safe-area-inset-bottom))' }} />
 }

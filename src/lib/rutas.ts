@@ -16,6 +16,10 @@ export const RUTAS_ENTRADA = ['/', '/age', '/entrar', '/registro', '/acceso']
 export const REDIRIGE_SI_HAY_SESION = ['/entrar', '/registro', '/acceso']
 
 /** Sin sesion, estas exigen entrar primero. */
+/** El panel de administracion es de escritorio y trae su propia barra
+ *  lateral. La barra inferior de celular ahi sobra y ademas tapa filas. */
+export const RUTAS_PANEL = ['/admin', '/alta-creadora']
+
 export const EXIGE_SESION = [
   '/library', '/chat', '/perfil', '/upload', '/earnings', '/admin', '/wallet',
 ]

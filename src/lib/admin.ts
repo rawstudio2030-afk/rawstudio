@@ -255,3 +255,107 @@ export async function publicarPara(
     return { error: (e as Error).message }
   }
 }
+
+/* ==================== Modulo 1: usuarios ==================== */
+
+export type RolUsuario    = 'admin' | 'creadora' | 'usuaria'
+export type EstadoCuenta  = 'activa' | 'suspendida' | 'baneada'
+
+/** El rol es DERIVADO, no una columna: alguien puede ser administradora y
+ *  creadora a la vez. Se calcula en public.rol_de() y llega de solo lectura;
+ *  para cambiarlo hay que llamar a otorgarAdmin o marcarCreadora. */
+export type FilaUsuario = {
+  id: string; email: string; handle: string; display_name: string
+  avatar_path: string | null
+  rol: RolUsuario; estado: EstadoCuenta
+  verified: boolean; identidad_verificada: boolean
+  suspended_at: string | null; suspended_reason: string | null
+  suspendido_hasta: string | null
+  baneado_at: string | null; baneado_motivo: string | null
+  created_at: string; ultimo_acceso: string | null
+  saldo: number; total_ganado: number
+  clips_total: number; clips_publicados: number
+  es_demo: boolean
+  /** Total de filas que cumplen el filtro, no las de esta pagina. Viene
+   *  repetido en cada fila porque sale de un count() sobre la ventana. */
+  total_filas: number
+}
+
+export type OrdenUsuarios =
+  | 'created_at' | 'ultimo_acceso' | 'handle' | 'email'
+  | 'estado' | 'rol' | 'saldo' | 'total_ganado' | 'clips_total'
+
+export type ConsultaUsuarios = {
+  busqueda?: string; rol?: RolUsuario | ''; estado?: EstadoCuenta | ''
+  orden?: OrdenUsuarios; descendente?: boolean
+  pagina?: number; porPagina?: number
+}
+
+export async function listarUsuarios(q: ConsultaUsuarios = {}) {
+  const { data, error } = await supabase.rpc('admin_usuarios', {
+    busqueda: (q.busqueda ?? '').trim(),
+    filtro_rol: q.rol ?? '', filtro_estado: q.estado ?? '',
+    orden: q.orden ?? 'created_at', descendente: q.descendente ?? true,
+    pagina: q.pagina ?? 0, por_pagina: q.porPagina ?? 25,
+  })
+  if (error) return { filas: [] as FilaUsuario[], total: 0, error: error.message }
+  const filas = (data ?? []) as FilaUsuario[]
+  return { filas, total: filas[0]?.total_filas ?? 0, error: '' }
+}
+
+export type Movimiento = {
+  id: number; delta: number; motivo: string
+  nota: string | null; creado_por: string | null; created_at: string
+}
+export type ClipDeUsuario = {
+  id: string; titulo: string; publicado: boolean; visibilidad: string
+  precio: number; portada: string | null; created_at: string
+}
+export type AccionRegistrada = {
+  id: number; accion: string; detalle: Record<string, unknown>
+  admin: string; created_at: string
+}
+export type FichaUsuario = {
+  clips: ClipDeUsuario[]; movimientos: Movimiento[]
+  acciones: AccionRegistrada[]; reportes: unknown[]
+}
+
+export async function fichaUsuario(id: string) {
+  const { data, error } = await supabase.rpc('admin_usuario_detalle', { objetivo: id })
+  if (error) return { error: error.message }
+  if (data && typeof data === 'object' && 'error' in data)
+    return { error: (data as { error: string }).error }
+  return { ficha: data as FichaUsuario }
+}
+
+/* Las tres acciones de estado pasan por funciones del servidor y no por un
+ * update directo. La version anterior escribia en profiles desde el cliente y
+ * anotaba la bitacora en una segunda llamada: si la primera pasaba y la
+ * segunda no, quedaba un castigo sin registro. Ahora ambas cosas ocurren en
+ * la misma transaccion, y ahi viven tambien las salvaguardas (no castigarse a
+ * una misma, no castigar a otra administradora, motivo obligatorio). */
+
+export async function suspenderCuenta(id: string, motivo: string, hasta?: string | null) {
+  const { error } = await supabase.rpc('admin_suspender', {
+    objetivo: id, motivo, hasta: hasta || null,
+  })
+  return error?.message ?? ''
+}
+
+export async function banearCuenta(id: string, motivo: string) {
+  const { error } = await supabase.rpc('admin_banear', { objetivo: id, motivo })
+  return error?.message ?? ''
+}
+
+export async function reactivarCuenta(id: string) {
+  const { error } = await supabase.rpc('admin_reactivar', { objetivo: id })
+  return error?.message ?? ''
+}
+
+export async function ajustarSaldo(id: string, cantidad: number, motivo: string) {
+  const { data, error } = await supabase.rpc('admin_ajustar_saldo', {
+    objetivo: id, cantidad, motivo_texto: motivo,
+  })
+  if (error) return { error: error.message }
+  return data as { ok: boolean; saldo: number }
+}

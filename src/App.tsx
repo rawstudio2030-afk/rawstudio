@@ -150,6 +150,8 @@ export default function App() {
             necesita un parametro y ahi no habria cual usar. */}
         <Route path="/creator/:handle" element={<CreatorProfile />} />
         <Route path="/clip/:id" element={<ClipDetail />} />
+        {/* El panel enruta sus modulos por parametro; /admin a secas cae en Usuarios. */}
+        <Route path="/admin/:modulo" element={<Admin />} />
         <Route path="*" element={<Launch />} />
       </Routes>
       <GuardiaRutas />
