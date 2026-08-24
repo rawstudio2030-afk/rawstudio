@@ -13,18 +13,16 @@ import { useSesion } from '../lib/sesion'
 import { usePapel } from '../components/Navegacion'
 import { altaCreadora, subirExpediente, publicarPara } from '../lib/admin'
 import Wordmark from '../components/Wordmark'
+import { COLOR, TINTE, FUENTE } from '../lib/diseño'
 
-const UI = "'Space Grotesk', system-ui, sans-serif"
-const MONO = "'Space Mono', monospace"
-const SERIF = "'Instrument Serif', serif"
 
 const etiqueta: React.CSSProperties = {
-  font: `700 10px/1 ${UI}`, letterSpacing: 2.2, textTransform: 'uppercase', color: '#6E6A72',
+  font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', color: COLOR.textoTenue,
 }
 const campo: React.CSSProperties = {
-  width: '100%', boxSizing: 'border-box', background: '#111116',
-  border: '1px solid rgba(255,255,255,.14)', color: '#F2F0F3',
-  font: `400 16px/1.35 ${UI}`, padding: '15px', outline: 'none',
+  width: '100%', boxSizing: 'border-box', background: COLOR.superficie,
+  border: '1px solid rgba(255,255,255,.14)', color: COLOR.texto,
+  font: `400 16px/1.35 ${FUENTE.ui}`, padding: '15px', outline: 'none',
 }
 
 type Paso = 'datos' | 'documentos' | 'clips' | 'listo'
@@ -105,25 +103,25 @@ export default function AltaCreadora() {
   return (
     <div style={{
       minHeight: '100%', boxSizing: 'border-box', padding: '48px 22px 40px',
-      background: '#08080A', color: '#F2F0F3', fontFamily: UI,
+      background: COLOR.fondo, color: COLOR.texto, fontFamily: FUENTE.ui,
       display: 'flex', flexDirection: 'column', gap: 20,
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Wordmark ancho={110} glow={12} />
-        <span onClick={() => nav('/admin')} style={{ font: `400 26px/1 ${UI}`, color: '#9C979F', cursor: 'pointer' }}>×</span>
+        <span onClick={() => nav('/admin')} style={{ font: `400 26px/1 ${FUENTE.ui}`, color: COLOR.textoSuave, cursor: 'pointer' }}>×</span>
       </div>
 
       <div>
-        <div style={{ fontFamily: 'Anton, sans-serif', fontSize: 36, lineHeight: 1, textTransform: 'uppercase' }}>
-          Alta de<br /><span style={{ color: '#C8FF3D' }}>creadora</span>
+        <div style={{ fontFamily: FUENTE.display, fontSize: 36, lineHeight: 1, textTransform: 'uppercase' }}>
+          Alta de<br /><span style={{ color: COLOR.dinero }}>creadora</span>
         </div>
-        <div style={{ font: `400 11px/1.6 ${MONO}`, color: '#5E5A63', marginTop: 8 }}>
+        <div style={{ font: `400 11px/1.6 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 8 }}>
           {['datos', 'documentos', 'clips'].map((p, i) =>
             `${i + 1}. ${p}${paso === p ? '  ←' : ''}`).join('   ')}
         </div>
       </div>
 
-      {error && <div style={{ font: `400 13px/1.5 ${UI}`, color: '#FF2BD1' }}>{error}</div>}
+      {error && <div style={{ font: `400 13px/1.5 ${FUENTE.ui}`, color: COLOR.acento }}>{error}</div>}
 
       {paso === 'datos' && (
         <>
@@ -138,7 +136,7 @@ export default function AltaCreadora() {
           </Etiquetado>
           <Etiquetado t="Sobre ella">
             <textarea value={bio} onChange={e => setBio(e.target.value)} rows={2} maxLength={300}
-              style={{ ...campo, resize: 'vertical', fontFamily: UI }} />
+              style={{ ...campo, resize: 'vertical', fontFamily: FUENTE.ui }} />
           </Etiquetado>
           <Etiquetado t="Nota interna" pista="Solo tú la ves. Útil para recordar de dónde salió el acuerdo.">
             <input value={nota} onChange={e => setNota(e.target.value)} maxLength={200}
@@ -151,11 +149,11 @@ export default function AltaCreadora() {
       {paso === 'documentos' && creadora && (
         <>
           <div style={{
-            border: '1.5px dashed rgba(255,43,209,.45)', background: 'rgba(255,43,209,.06)',
+            border: '1.5px dashed rgba(255,43,209,.45)', background: TINTE.acento,
             padding: '15px 14px',
           }}>
-            <div style={{ ...etiqueta, color: '#FF2BD1' }}>@{creadora.handle} no puede publicar todavía</div>
-            <div style={{ font: `400 13px/1.6 ${UI}`, color: '#F2F0F3', marginTop: 8 }}>
+            <div style={{ ...etiqueta, color: COLOR.acento }}>@{creadora.handle} no puede publicar todavía</div>
+            <div style={{ font: `400 13px/1.6 ${FUENTE.ui}`, color: COLOR.texto, marginTop: 8 }}>
               Falta cargar su identificación y su consentimiento firmado. La base
               rechaza cualquier publicación hasta que ambos estén.
             </div>
@@ -180,10 +178,10 @@ export default function AltaCreadora() {
       {paso === 'clips' && creadora && (
         <>
           <div style={{
-            border: '1px solid rgba(200,255,61,.4)', background: 'rgba(200,255,61,.05)',
+            border: '1px solid rgba(200,255,61,.4)', background: TINTE.dinero,
             padding: '14px 13px',
           }}>
-            <div style={{ ...etiqueta, color: '#C8FF3D' }}>
+            <div style={{ ...etiqueta, color: COLOR.dinero }}>
               @{creadora.handle} verificada · {publicados} {publicados === 1 ? 'clip publicado' : 'clips publicados'}
             </div>
           </div>
@@ -199,15 +197,15 @@ export default function AltaCreadora() {
           <Etiquetado t="Precio en coins">
             <input type="number" value={precio} min={0} step={20}
               onChange={e => setPrecio(Math.max(0, parseInt(e.target.value || '0', 10)))}
-              style={{ ...campo, fontFamily: MONO }} />
+              style={{ ...campo, fontFamily: FUENTE.mono }} />
           </Etiquetado>
 
           <Boton texto={subiendo || (ocupado ? 'Publicando…' : 'Publicar clip')}
             activo={!!video && !!titulo.trim() && !ocupado} al={publicar} />
 
           <div onClick={() => nav(`/creator/${creadora.handle}`)} style={{
-            border: '1px solid rgba(255,255,255,.16)', color: '#9C979F', textAlign: 'center',
-            padding: 16, font: `700 11px/1 ${UI}`, letterSpacing: 2,
+            border: '1px solid rgba(255,255,255,.16)', color: COLOR.textoSuave, textAlign: 'center',
+            padding: 16, font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 2,
             textTransform: 'uppercase', cursor: 'pointer',
           }}>Ver su perfil</div>
         </>
@@ -221,7 +219,7 @@ function Etiquetado({ t, pista, children }: { t: string; pista?: string; childre
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <span style={etiqueta}>{t}</span>
       {children}
-      {pista && <span style={{ font: `400 11px/1.5 ${MONO}`, color: '#5E5A63' }}>{pista}</span>}
+      {pista && <span style={{ font: `400 11px/1.5 ${FUENTE.mono}`, color: COLOR.textoApagado }}>{pista}</span>}
     </div>
   )
 }
@@ -235,15 +233,15 @@ function Archivo({ t, f, onElegir, acepta, nota }: {
       <label htmlFor={id} style={{
         display: 'flex', alignItems: 'center', gap: 13, cursor: 'pointer',
         border: `1px ${f ? 'solid' : 'dashed'} rgba(255,255,255,${f ? '.2' : '.16'})`,
-        background: f ? 'rgba(200,255,61,.05)' : 'transparent', padding: 14,
+        background: f ? TINTE.dinero : 'transparent', padding: 14,
       }}>
         <div style={{
           width: 46, height: 46, flex: '0 0 auto',
-          background: 'repeating-linear-gradient(130deg,#191920 0 8px,#111116 8px 16px)',
+          background: `repeating-linear-gradient(130deg,${COLOR.superficieAlta} 0 8px,${COLOR.superficie} 8px 16px)`,
         }} />
         <div style={{ minWidth: 0 }}>
-          <div style={{ ...etiqueta, color: f ? '#C8FF3D' : '#6E6A72' }}>{f ? `${t} · listo` : t}</div>
-          <div style={{ font: `400 11.5px/1.5 ${MONO}`, color: '#5E5A63', marginTop: 6, wordBreak: 'break-all' }}>
+          <div style={{ ...etiqueta, color: f ? COLOR.dinero : COLOR.textoTenue }}>{f ? `${t} · listo` : t}</div>
+          <div style={{ font: `400 11.5px/1.5 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 6, wordBreak: 'break-all' }}>
             {f ? `${f.name} · ${(f.size / 1048576).toFixed(1)} MB` : nota}
           </div>
         </div>
@@ -264,9 +262,9 @@ function Archivo({ t, f, onElegir, acepta, nota }: {
 function Boton({ texto, activo, al }: { texto: string; activo: boolean; al: () => void }) {
   return (
     <div onClick={() => { if (activo) al() }} style={{
-      background: activo ? '#FF2BD1' : '#191920', color: activo ? '#08080A' : '#5E5A63',
+      background: activo ? COLOR.acento : COLOR.superficieAlta, color: activo ? COLOR.fondo : COLOR.textoApagado,
       textAlign: 'center', padding: 18, marginTop: 4,
-      font: `700 13px/1 ${UI}`, letterSpacing: 2.2, textTransform: 'uppercase',
+      font: `700 13px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
       boxShadow: activo ? '0 0 34px rgba(255,43,209,.42)' : 'none',
       cursor: activo ? 'pointer' : 'default',
     }}>{texto}</div>
@@ -277,15 +275,15 @@ function Centro({ texto, accion }: { texto: string; accion?: { texto: string; al
   return (
     <div style={{
       minHeight: '100%', boxSizing: 'border-box', padding: '64px 26px',
-      background: '#08080A', color: '#9C979F', fontFamily: SERIF, fontStyle: 'italic',
+      background: COLOR.fondo, color: COLOR.textoSuave, fontFamily: FUENTE.serif, fontStyle: 'italic',
       fontSize: 20, display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center', gap: 20, textAlign: 'center',
     }}>
       {texto}
       {accion && (
         <span onClick={accion.al} style={{
-          background: '#FF2BD1', color: '#08080A', padding: '15px 26px',
-          font: `700 12px/1 ${UI}`, letterSpacing: 2, textTransform: 'uppercase',
+          background: COLOR.acento, color: COLOR.fondo, padding: '15px 26px',
+          font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase',
           fontStyle: 'normal', cursor: 'pointer',
         }}>{accion.texto}</span>
       )}

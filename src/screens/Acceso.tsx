@@ -13,10 +13,8 @@ import { useSesion } from '../lib/sesion'
 import Wordmark from '../components/Wordmark'
 import { supabase } from '../lib/supabase'
 import { VERSION_LEGAL } from '../content/legal'
+import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 
-const UI = "'Space Grotesk', system-ui, sans-serif"
-const MONO = "'Space Mono', monospace"
-const SERIF = "'Instrument Serif', serif"
 
 export type Modo = 'registro' | 'acceso'
 type Estado = 'listo' | 'enviando' | 'confirma' | 'liga' | 'reset' | 'error'
@@ -66,14 +64,14 @@ function Casilla({ marcada, onCambio, obligatoria, children }: {
       style={{ display: 'flex', gap: 11, alignItems: 'flex-start', cursor: 'pointer' }}>
       <span style={{
         width: 20, height: 20, flex: '0 0 auto', marginTop: 1,
-        border: `1.5px solid ${marcada ? '#C8FF3D' : 'rgba(255,255,255,.28)'}`,
-        background: marcada ? '#C8FF3D' : 'transparent',
+        border: `1.5px solid ${marcada ? COLOR.dinero : 'rgba(255,255,255,.28)'}`,
+        background: marcada ? COLOR.dinero : 'transparent',
         display: 'grid', placeItems: 'center',
-        font: `700 12px/1 ${UI}`, color: '#08080A',
+        font: `700 12px/1 ${FUENTE.ui}`, color: COLOR.fondo,
       }}>{marcada ? '✓' : ''}</span>
-      <span style={{ font: `400 12.5px/1.5 ${UI}`, color: '#9C979F' }}>
+      <span style={{ font: `400 12.5px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
         {children}
-        {obligatoria && <span style={{ color: '#FF2BD1' }}> *</span>}
+        {obligatoria && <span style={{ color: COLOR.acento }}> *</span>}
       </span>
     </div>
   )
@@ -196,56 +194,56 @@ export default function Acceso({ modo }: { modo: Modo }) {
   const avisos: Record<string, { titulo: string[]; texto: React.ReactNode }> = {
     confirma: {
       titulo: ['Confirma', 'tu', 'correo.'],
-      texto: <>Te mandamos un mensaje a <span style={{ color: '#F2F0F3' }}>{correo.trim().toLowerCase()}</span>. Ábrelo una vez y ya podrás entrar con tu contraseña siempre.</>,
+      texto: <>Te mandamos un mensaje a <span style={{ color: COLOR.texto }}>{correo.trim().toLowerCase()}</span>. Ábrelo una vez y ya podrás entrar con tu contraseña siempre.</>,
     },
     liga: {
       titulo: ['Revisa', 'tu', 'correo.'],
-      texto: <>Te mandamos una liga a <span style={{ color: '#F2F0F3' }}>{correo.trim().toLowerCase()}</span>. Ábrela en este mismo teléfono.</>,
+      texto: <>Te mandamos una liga a <span style={{ color: COLOR.texto }}>{correo.trim().toLowerCase()}</span>. Ábrela en este mismo teléfono.</>,
     },
     reset: {
       titulo: ['Revisa', 'tu', 'correo.'],
-      texto: <>Te mandamos un enlace para poner una contraseña nueva a <span style={{ color: '#F2F0F3' }}>{correo.trim().toLowerCase()}</span>.</>,
+      texto: <>Te mandamos un enlace para poner una contraseña nueva a <span style={{ color: COLOR.texto }}>{correo.trim().toLowerCase()}</span>.</>,
     },
   }
   const aviso = avisos[estado]
 
   const campo: React.CSSProperties = {
-    width: '100%', boxSizing: 'border-box', background: '#111116',
-    border: `1px solid ${estado === 'error' ? '#FF2BD1' : 'rgba(255,255,255,.14)'}`,
-    color: '#F2F0F3', font: `400 16px/1 ${UI}`, padding: '17px 15px', outline: 'none',
+    width: '100%', boxSizing: 'border-box', background: COLOR.superficie,
+    border: `1px solid ${estado === 'error' ? COLOR.acento : LINEA.media}`,
+    color: COLOR.texto, font: `400 16px/1 ${FUENTE.ui}`, padding: '17px 15px', outline: 'none',
   }
 
   return (
     <div style={{
       minHeight: '100%', boxSizing: 'border-box', padding: '64px 26px 44px',
-      background: '#08080A', color: '#F2F0F3', fontFamily: UI,
+      background: COLOR.fondo, color: COLOR.texto, fontFamily: FUENTE.ui,
       display: 'flex', flexDirection: 'column',
     }}>
       <Wordmark ancho={150} glow={16} />
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 18, padding: '30px 0' }}>
-        <div style={{ width: 64, height: 3, background: '#FF2BD1' }} />
+        <div style={{ width: 64, height: 3, background: COLOR.acento }} />
 
         {aviso ? (
           <>
-            <div style={{ fontFamily: 'Anton, sans-serif', fontSize: 48, lineHeight: 1, textTransform: 'uppercase' }}>
+            <div style={{ fontFamily: FUENTE.display, fontSize: 48, lineHeight: 1, textTransform: 'uppercase' }}>
               {aviso.titulo[0]}<br />{aviso.titulo[1]}<br />
-              <span style={{ color: '#C8FF3D' }}>{aviso.titulo[2]}</span>
+              <span style={{ color: COLOR.dinero }}>{aviso.titulo[2]}</span>
             </div>
-            <div style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: 20, lineHeight: 1.35, color: '#9C979F' }}>
+            <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 20, lineHeight: 1.35, color: COLOR.textoSuave }}>
               {aviso.texto}
             </div>
-            <div style={{ font: `400 12px/1.6 ${MONO}`, color: '#6E6A72' }}>
+            <div style={{ font: `400 12px/1.6 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
               Si no llega en un minuto, revisa la carpeta de no deseados.
             </div>
           </>
         ) : (
           <>
-            <div style={{ fontFamily: 'Anton, sans-serif', fontSize: 48, lineHeight: 1, textTransform: 'uppercase' }}>
+            <div style={{ fontFamily: FUENTE.display, fontSize: 48, lineHeight: 1, textTransform: 'uppercase' }}>
               {t.titulo[0]}<br />{t.titulo[1]}<br />
-              <span style={{ color: '#C8FF3D' }}>{t.titulo[2]}</span>
+              <span style={{ color: COLOR.dinero }}>{t.titulo[2]}</span>
             </div>
-            <div style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: 20, lineHeight: 1.35, color: '#9C979F' }}>
+            <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 20, lineHeight: 1.35, color: COLOR.textoSuave }}>
               {t.bajada}
             </div>
 
@@ -269,15 +267,15 @@ export default function Acceso({ modo }: { modo: Modo }) {
                 onClick={() => setVerClave(v => !v)}
                 style={{
                   position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)',
-                  font: `700 10px/1 ${UI}`, letterSpacing: 1.4, textTransform: 'uppercase',
-                  color: '#6E6A72', cursor: 'pointer', padding: 6,
+                  font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.4, textTransform: 'uppercase',
+                  color: COLOR.textoTenue, cursor: 'pointer', padding: 6,
                 }}>
                 {verClave ? 'Ocultar' : 'Ver'}
               </span>
             </div>
 
             {modo === 'registro' && !claveOk && clave.length > 0 && (
-              <div style={{ font: `400 12px/1.5 ${MONO}`, color: '#6E6A72' }}>
+              <div style={{ font: `400 12px/1.5 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
                 Mínimo 6 caracteres.
               </div>
             )}
@@ -287,10 +285,10 @@ export default function Acceso({ modo }: { modo: Modo }) {
                 <Casilla marcada={aceptaLegal} onCambio={setAceptaLegal} obligatoria>
                   He leído y acepto los{' '}
                   <a onClick={e => { e.stopPropagation(); nav('/terminos') }}
-                     style={{ color: '#C8FF3D', textDecoration: 'underline', cursor: 'pointer' }}>términos</a>
+                     style={{ color: COLOR.dinero, textDecoration: 'underline', cursor: 'pointer' }}>términos</a>
                   {' '}y el{' '}
                   <a onClick={e => { e.stopPropagation(); nav('/privacidad') }}
-                     style={{ color: '#C8FF3D', textDecoration: 'underline', cursor: 'pointer' }}>aviso de privacidad</a>.
+                     style={{ color: COLOR.dinero, textDecoration: 'underline', cursor: 'pointer' }}>aviso de privacidad</a>.
                 </Casilla>
                 <Casilla marcada={aceptaBio} onCambio={setAceptaBio} obligatoria>
                   Autorizo el tratamiento de mis <b>datos biométricos faciales</b> y de mi
@@ -306,7 +304,7 @@ export default function Acceso({ modo }: { modo: Modo }) {
             )}
 
             {estado === 'error' && (
-              <div style={{ font: `400 13px/1.5 ${UI}`, color: '#FF2BD1' }}>{detalle}</div>
+              <div style={{ font: `400 13px/1.5 ${FUENTE.ui}`, color: COLOR.acento }}>{detalle}</div>
             )}
           </>
         )}
@@ -315,16 +313,16 @@ export default function Acceso({ modo }: { modo: Modo }) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {aviso ? (
           <div onClick={() => { setEstado('listo'); nav('/entrar') }} style={{
-            border: '1px solid rgba(255,255,255,.16)', color: '#9C979F', textAlign: 'center',
-            padding: 18, font: `700 12px/1 ${UI}`, letterSpacing: 2, textTransform: 'uppercase', cursor: 'pointer',
+            border: '1px solid rgba(255,255,255,.16)', color: COLOR.textoSuave, textAlign: 'center',
+            padding: 18, font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase', cursor: 'pointer',
           }}>Volver</div>
         ) : (
           <>
             <div onClick={enviar} style={{
-              background: listo ? '#FF2BD1' : '#191920',
-              color: listo ? '#08080A' : '#5E5A63',
+              background: listo ? COLOR.acento : COLOR.superficieAlta,
+              color: listo ? COLOR.fondo : COLOR.textoApagado,
               textAlign: 'center', padding: 19,
-              font: `700 13px/1 ${UI}`, letterSpacing: 2.2, textTransform: 'uppercase',
+              font: `700 13px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
               boxShadow: listo ? '0 0 34px rgba(255,43,209,.42)' : 'none',
               cursor: listo ? 'pointer' : 'default',
             }}>
@@ -333,26 +331,26 @@ export default function Acceso({ modo }: { modo: Modo }) {
 
             {conGoogle && (
               <div onClick={entrarGoogle} style={{
-                background: '#F2F0F3', color: '#08080A', textAlign: 'center', padding: 17,
-                font: `700 12px/1 ${UI}`, letterSpacing: 1.6, textTransform: 'uppercase', cursor: 'pointer',
+                background: COLOR.texto, color: COLOR.fondo, textAlign: 'center', padding: 17,
+                font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase', cursor: 'pointer',
               }}>
                 Continuar con Google
               </div>
             )}
 
             <div onClick={() => nav(t.rutaAlterna)} style={{
-              border: '1px solid rgba(255,255,255,.16)', color: '#9C979F', textAlign: 'center',
-              padding: 18, font: `700 12px/1 ${UI}`, letterSpacing: 2, textTransform: 'uppercase', cursor: 'pointer',
+              border: '1px solid rgba(255,255,255,.16)', color: COLOR.textoSuave, textAlign: 'center',
+              padding: 18, font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase', cursor: 'pointer',
             }}>{t.alterno}</div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginTop: 4, paddingRight: 58 }}>
               <span onClick={ligaAlCorreo} style={{
-                font: `400 12px/1.5 ${MONO}`, color: '#6E6A72',
+                font: `400 12px/1.5 ${FUENTE.mono}`, color: COLOR.textoTenue,
                 textDecoration: 'underline', cursor: 'pointer',
               }}>Entrar con liga</span>
               {modo === 'acceso' && (
                 <span onClick={olvide} style={{
-                  font: `400 12px/1.5 ${MONO}`, color: '#6E6A72',
+                  font: `400 12px/1.5 ${FUENTE.mono}`, color: COLOR.textoTenue,
                   textDecoration: 'underline', cursor: 'pointer', textAlign: 'right',
                 }}>Olvidé mi clave</span>
               )}

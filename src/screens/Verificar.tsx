@@ -9,15 +9,13 @@ import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import { supabase } from '../lib/supabase'
 import Wordmark from '../components/Wordmark'
+import { COLOR, LINEA, TINTE, FUENTE } from '../lib/diseño'
 
-const UI = "'Space Grotesk', system-ui, sans-serif"
-const MONO = "'Space Mono', monospace"
-const SERIF = "'Instrument Serif', serif"
 
 const SERVICIO = import.meta.env.VITE_VERIFICACION_URL as string | undefined
 
 const etiqueta: React.CSSProperties = {
-  font: `700 10px/1 ${UI}`, letterSpacing: 2.2, textTransform: 'uppercase', color: '#6E6A72',
+  font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', color: COLOR.textoTenue,
 }
 
 /** Edad a partir de la fecha. Se calcula tambien aqui para avisar de inmediato,
@@ -136,35 +134,35 @@ export default function Verificar() {
   return (
     <div style={{
       minHeight: '100%', boxSizing: 'border-box', padding: '54px 22px 40px',
-      background: '#08080A', color: '#F2F0F3', fontFamily: UI,
+      background: COLOR.fondo, color: COLOR.texto, fontFamily: FUENTE.ui,
       display: 'flex', flexDirection: 'column', gap: 20,
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Wordmark ancho={116} glow={14} />
-        <span onClick={() => nav('/estudio')} style={{ font: `400 26px/1 ${UI}`, color: '#9C979F', cursor: 'pointer' }}>×</span>
+        <span onClick={() => nav('/estudio')} style={{ font: `400 26px/1 ${FUENTE.ui}`, color: COLOR.textoSuave, cursor: 'pointer' }}>×</span>
       </div>
 
       <div>
-        <div style={{ fontFamily: 'Anton, sans-serif', fontSize: 40, lineHeight: 1, textTransform: 'uppercase' }}>
-          Comprueba<br />que eres<br /><span style={{ color: '#C8FF3D' }}>tú.</span>
+        <div style={{ fontFamily: FUENTE.display, fontSize: 40, lineHeight: 1, textTransform: 'uppercase' }}>
+          Comprueba<br />que eres<br /><span style={{ color: COLOR.dinero }}>tú.</span>
         </div>
-        <div style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: 18, lineHeight: 1.4, color: '#9C979F', marginTop: 14 }}>
+        <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 18, lineHeight: 1.4, color: COLOR.textoSuave, marginTop: 14 }}>
           Solo hace falta una vez, y solo para publicar o cobrar. Quien únicamente mira no pasa por aquí.
         </div>
       </div>
 
       {/* Lo que se promete en la pagina de creadoras, dicho aqui donde importa. */}
       <div style={{
-        border: '1.5px dashed rgba(200,255,61,.4)', background: 'rgba(200,255,61,.05)',
+        border: '1.5px dashed rgba(200,255,61,.4)', background: TINTE.dinero,
         padding: '16px 15px',
       }}>
-        <div style={{ ...etiqueta, color: '#C8FF3D' }}>Qué hacemos con esto</div>
-        <div style={{ font: `400 13.5px/1.6 ${UI}`, color: '#F2F0F3', marginTop: 9 }}>
+        <div style={{ ...etiqueta, color: COLOR.dinero }}>Qué hacemos con esto</div>
+        <div style={{ font: `400 13.5px/1.6 ${FUENTE.ui}`, color: COLOR.texto, marginTop: 9 }}>
           {SERVICIO
             ? <>Las fotos se revisan <b>en memoria</b> y no se guardan. De todo esto solo conservamos que eres mayor de edad y la fecha.</>
             : <>Una persona del equipo revisa tus fotos y las <b>borra al terminar</b>. De todo esto solo conservamos que eres mayor de edad y la fecha.</>}
         </div>
-        <div style={{ font: `400 11.5px/1.6 ${MONO}`, color: '#6E6A72', marginTop: 9 }}>
+        <div style={{ font: `400 11.5px/1.6 ${FUENTE.mono}`, color: COLOR.textoTenue, marginTop: 9 }}>
           {SERVICIO
             ? 'Única excepción: si el cotejo no es concluyente, las guardamos hasta que una persona lo revise, y se borran al resolverlo.'
             : 'Tu documento nunca se guarda completo, solo una huella que no permite reconstruirlo.'}
@@ -176,12 +174,12 @@ export default function Verificar() {
         <input type="date" value={nacimiento} max={new Date().toISOString().slice(0, 10)}
           onChange={e => { setNacimiento(e.target.value); if (estado === 'error') setEstado('listo') }}
           style={{
-            width: '100%', boxSizing: 'border-box', background: '#111116',
-            border: `1px solid ${nacimiento && !edadOk ? '#FF2BD1' : 'rgba(255,255,255,.14)'}`,
-            color: '#F2F0F3', font: `400 16px/1 ${UI}`,
+            width: '100%', boxSizing: 'border-box', background: COLOR.superficie,
+            border: `1px solid ${nacimiento && !edadOk ? COLOR.acento : LINEA.media}`,
+            color: COLOR.texto, font: `400 16px/1 ${FUENTE.ui}`,
             padding: '16px 15px', outline: 'none', colorScheme: 'dark',
           }} />
-        <span style={{ font: `400 11px/1.5 ${MONO}`, color: nacimiento && !edadOk ? '#FF2BD1' : '#5E5A63' }}>
+        <span style={{ font: `400 11px/1.5 ${FUENTE.mono}`, color: nacimiento && !edadOk ? COLOR.acento : COLOR.textoApagado }}>
           {!nacimiento ? 'Debe coincidir con tu identificación.'
             : !edadOk ? 'Necesitas 18 años o más para publicar.'
             : `${edad} años.`}
@@ -197,11 +195,11 @@ export default function Verificar() {
           onChange={e => setDocumento(e.target.value.toUpperCase())}
           placeholder="CURP, pasaporte o el que uses"
           style={{
-            width: '100%', boxSizing: 'border-box', background: '#111116',
-            border: '1px solid rgba(255,255,255,.14)', color: '#F2F0F3',
-            font: `400 15px/1 ${MONO}`, letterSpacing: 1, padding: '16px 15px', outline: 'none',
+            width: '100%', boxSizing: 'border-box', background: COLOR.superficie,
+            border: '1px solid rgba(255,255,255,.14)', color: COLOR.texto,
+            font: `400 15px/1 ${FUENTE.mono}`, letterSpacing: 1, padding: '16px 15px', outline: 'none',
           }} />
-        <span style={{ font: `400 11px/1.5 ${MONO}`, color: '#5E5A63' }}>
+        <span style={{ font: `400 11px/1.5 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
           Solo guardamos una huella, nunca el número.
         </span>
       </div>
@@ -215,13 +213,13 @@ export default function Verificar() {
         onElegir={f => { setSelfie(f); if (estado === 'error') setEstado('listo') }} />
 
       {estado === 'error' && (
-        <div style={{ font: `400 13px/1.5 ${UI}`, color: '#FF2BD1' }}>{detalle}</div>
+        <div style={{ font: `400 13px/1.5 ${FUENTE.ui}`, color: COLOR.acento }}>{detalle}</div>
       )}
 
       <div onClick={enviar} style={{
-        marginTop: 'auto', background: puede ? '#FF2BD1' : '#191920',
-        color: puede ? '#08080A' : '#5E5A63', textAlign: 'center', padding: 19,
-        font: `700 13px/1 ${UI}`, letterSpacing: 2.2, textTransform: 'uppercase',
+        marginTop: 'auto', background: puede ? COLOR.acento : COLOR.superficieAlta,
+        color: puede ? COLOR.fondo : COLOR.textoApagado, textAlign: 'center', padding: 19,
+        font: `700 13px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
         boxShadow: puede ? '0 0 34px rgba(255,43,209,.42)' : 'none',
         cursor: puede ? 'pointer' : 'default',
       }}>
@@ -241,18 +239,18 @@ function Foto({ etiqueta: et, nota, archivo, refInput, camara, onElegir }: {
       <div onClick={() => refInput.current?.click()} style={{
         display: 'flex', alignItems: 'center', gap: 13, cursor: 'pointer',
         border: `1px ${archivo ? 'solid' : 'dashed'} rgba(255,255,255,${archivo ? '.2' : '.16'})`,
-        background: archivo ? 'rgba(200,255,61,.05)' : 'transparent', padding: 14,
+        background: archivo ? TINTE.dinero : 'transparent', padding: 14,
       }}>
         <div style={{
           width: 52, height: 52, flex: '0 0 auto',
           background: archivo ? `center/cover url(${URL.createObjectURL(archivo)})`
-                              : 'repeating-linear-gradient(130deg,#191920 0 8px,#111116 8px 16px)',
+                              : `repeating-linear-gradient(130deg,${COLOR.superficieAlta} 0 8px,${COLOR.superficie} 8px 16px)`,
         }} />
         <div style={{ minWidth: 0 }}>
-          <div style={{ ...etiquetaBase, color: archivo ? '#C8FF3D' : '#6E6A72' }}>
+          <div style={{ ...etiquetaBase, color: archivo ? COLOR.dinero : COLOR.textoTenue }}>
             {archivo ? `${et} · listo` : et}
           </div>
-          <div style={{ font: `400 11.5px/1.5 ${MONO}`, color: '#5E5A63', marginTop: 6 }}>{nota}</div>
+          <div style={{ font: `400 11.5px/1.5 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 6 }}>{nota}</div>
         </div>
       </div>
       {/* capture abre la camara directo en movil, que es donde se hace esto */}
@@ -264,7 +262,7 @@ function Foto({ etiqueta: et, nota, archivo, refInput, camara, onElegir }: {
 }
 
 const etiquetaBase: React.CSSProperties = {
-  font: `700 10px/1 ${UI}`, letterSpacing: 2.2, textTransform: 'uppercase',
+  font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
 }
 
 function Centro({ titulo, texto, accion }: {
@@ -273,25 +271,25 @@ function Centro({ titulo, texto, accion }: {
   return (
     <div style={{
       minHeight: '100%', boxSizing: 'border-box', padding: '64px 26px',
-      background: '#08080A', display: 'flex', flexDirection: 'column',
+      background: COLOR.fondo, display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center', gap: 20, textAlign: 'center',
     }}>
       {titulo && (
         <div style={{
-          fontFamily: 'Anton, sans-serif', fontSize: 42, lineHeight: 1,
-          textTransform: 'uppercase', color: '#F2F0F3',
+          fontFamily: FUENTE.display, fontSize: 42, lineHeight: 1,
+          textTransform: 'uppercase', color: COLOR.texto,
         }}>
-          {titulo[0]}<br />{titulo[1]}<br /><span style={{ color: '#C8FF3D' }}>{titulo[2]}</span>
+          {titulo[0]}<br />{titulo[1]}<br /><span style={{ color: COLOR.dinero }}>{titulo[2]}</span>
         </div>
       )}
       <div style={{
-        fontFamily: SERIF, fontStyle: 'italic', fontSize: 19, lineHeight: 1.4,
-        color: '#9C979F', maxWidth: 330,
+        fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19, lineHeight: 1.4,
+        color: COLOR.textoSuave, maxWidth: 330,
       }}>{texto}</div>
       {accion && (
         <span onClick={accion.al} style={{
-          background: '#FF2BD1', color: '#08080A', padding: '15px 26px',
-          font: `700 12px/1 ${UI}`, letterSpacing: 2, textTransform: 'uppercase',
+          background: COLOR.acento, color: COLOR.fondo, padding: '15px 26px',
+          font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase',
           cursor: 'pointer',
         }}>{accion.texto}</span>
       )}

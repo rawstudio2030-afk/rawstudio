@@ -9,18 +9,16 @@ import { urlAvatar } from '../lib/perfiles'
 import PaisesBloqueados from '../components/PaisesBloqueados'
 import { usePapel } from '../components/Navegacion'
 import { ATAJOS_PERFIL, visiblesPara } from '../lib/rutas'
+import { COLOR, FUENTE } from '../lib/diseño'
 
-const UI = "'Space Grotesk', system-ui, sans-serif"
-const MONO = "'Space Mono', monospace"
-const SERIF = "'Instrument Serif', serif"
 
 const etiqueta: React.CSSProperties = {
-  font: `700 10px/1 ${UI}`, letterSpacing: 2.2, textTransform: 'uppercase', color: '#6E6A72',
+  font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', color: COLOR.textoTenue,
 }
 const campo: React.CSSProperties = {
-  width: '100%', boxSizing: 'border-box', background: '#111116',
-  border: '1px solid rgba(255,255,255,.14)', color: '#F2F0F3',
-  font: `400 16px/1.35 ${UI}`, padding: '15px', outline: 'none',
+  width: '100%', boxSizing: 'border-box', background: COLOR.superficie,
+  border: '1px solid rgba(255,255,255,.14)', color: COLOR.texto,
+  font: `400 16px/1.35 ${FUENTE.ui}`, padding: '15px', outline: 'none',
 }
 
 export default function Perfil() {
@@ -106,12 +104,12 @@ export default function Perfil() {
   return (
     <div style={{
       minHeight: '100%', boxSizing: 'border-box', padding: '54px 24px 44px',
-      background: '#08080A', color: '#F2F0F3', fontFamily: UI,
+      background: COLOR.fondo, color: COLOR.texto, fontFamily: FUENTE.ui,
       display: 'flex', flexDirection: 'column', gap: 22,
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span onClick={() => nav(-1)} style={{ font: `400 26px/1 ${UI}`, color: '#9C979F', cursor: 'pointer' }}>‹</span>
-        <span style={{ ...etiqueta, color: '#C8FF3D' }}>Mi perfil</span>
+        <span onClick={() => nav(-1)} style={{ font: `400 26px/1 ${FUENTE.ui}`, color: COLOR.textoSuave, cursor: 'pointer' }}>‹</span>
+        <span style={{ ...etiqueta, color: COLOR.dinero }}>Mi perfil</span>
         <span style={{ width: 14 }} />
       </div>
 
@@ -121,21 +119,21 @@ export default function Perfil() {
           onClick={() => archivo.current?.click()}
           style={{
             width: 82, height: 82, borderRadius: '50%', flex: '0 0 auto', cursor: 'pointer',
-            border: '2px solid #FF2BD1', overflow: 'hidden',
-            background: foto ? `center/cover url(${foto})` : 'repeating-linear-gradient(130deg,#191920 0 8px,#111116 8px 16px)',
+            border: `2px solid ${COLOR.acento}`, overflow: 'hidden',
+            background: foto ? `center/cover url(${foto})` : `repeating-linear-gradient(130deg,${COLOR.superficieAlta} 0 8px,${COLOR.superficie} 8px 16px)`,
             display: 'grid', placeItems: 'center',
           }}>
-          {!foto && <span style={{ ...etiqueta, color: '#5E5A63' }}>Foto</span>}
+          {!foto && <span style={{ ...etiqueta, color: COLOR.textoApagado }}>Foto</span>}
         </div>
         <div style={{ minWidth: 0 }}>
           <div onClick={() => archivo.current?.click()} style={{
-            display: 'inline-block', border: '1px solid rgba(255,255,255,.16)', color: '#9C979F',
-            padding: '10px 13px', font: `700 10px/1 ${UI}`, letterSpacing: 1.8,
+            display: 'inline-block', border: '1px solid rgba(255,255,255,.16)', color: COLOR.textoSuave,
+            padding: '10px 13px', font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.8,
             textTransform: 'uppercase', cursor: 'pointer',
           }}>
             {subiendo ? 'Subiendo…' : foto ? 'Cambiar foto' : 'Subir foto'}
           </div>
-          <div style={{ font: `400 11px/1.5 ${MONO}`, color: '#5E5A63', marginTop: 8 }}>
+          <div style={{ font: `400 11px/1.5 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 8 }}>
             JPG, PNG o WebP · máximo 2 MB
           </div>
         </div>
@@ -151,7 +149,7 @@ export default function Perfil() {
         <span style={etiqueta}>Nombre artístico</span>
         <input value={nombre} onChange={e => setNombre(e.target.value)}
           placeholder="Como quieres que te vean" maxLength={40} style={campo} />
-        <span style={{ font: `400 11px/1.5 ${MONO}`, color: '#5E5A63' }}>
+        <span style={{ font: `400 11px/1.5 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
           Es lo único visible. Tu nombre legal no aparece en ninguna pantalla.
         </span>
       </div>
@@ -162,13 +160,13 @@ export default function Perfil() {
         <div style={{ position: 'relative' }}>
           <span style={{
             position: 'absolute', left: 15, top: '50%', transform: 'translateY(-50%)',
-            font: `400 16px/1 ${UI}`, color: '#6E6A72',
+            font: `400 16px/1 ${FUENTE.ui}`, color: COLOR.textoTenue,
           }}>@</span>
           <input value={handle} maxLength={24}
             onChange={e => setHandle(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
             placeholder="tu_usuario" style={{ ...campo, paddingLeft: 32 }} />
         </div>
-        <span style={{ font: `400 11px/1.5 ${MONO}`, color: handleOk || !handle ? '#5E5A63' : '#FF2BD1' }}>
+        <span style={{ font: `400 11px/1.5 ${FUENTE.mono}`, color: handleOk || !handle ? COLOR.textoApagado : COLOR.acento }}>
           {handleOk || !handle
             ? 'Entre 3 y 24 caracteres: letras, números y guion bajo.'
             : 'Necesita entre 3 y 24 caracteres.'}
@@ -180,8 +178,8 @@ export default function Perfil() {
         <span style={etiqueta}>Sobre ti</span>
         <textarea value={bio} onChange={e => setBio(e.target.value)} rows={3} maxLength={300}
           placeholder="Una o dos líneas sobre lo que haces."
-          style={{ ...campo, resize: 'vertical', fontFamily: UI }} />
-        <span style={{ font: `400 11px/1.5 ${MONO}`, color: '#5E5A63' }}>{bio.length}/300</span>
+          style={{ ...campo, resize: 'vertical', fontFamily: FUENTE.ui }} />
+        <span style={{ font: `400 11px/1.5 ${FUENTE.mono}`, color: COLOR.textoApagado }}>{bio.length}/300</span>
       </div>
 
       {/* creadora */}
@@ -194,28 +192,28 @@ export default function Perfil() {
           background: creadora ? 'rgba(200,255,61,.07)' : 'transparent',
         }}>
         <div>
-          <div style={{ font: `700 12px/1.3 ${UI}`, letterSpacing: 1.2, textTransform: 'uppercase', color: creadora ? '#C8FF3D' : '#9C979F' }}>
+          <div style={{ font: `700 12px/1.3 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase', color: creadora ? COLOR.dinero : COLOR.textoSuave }}>
             Quiero publicar
           </div>
-          <div style={{ font: `400 12px/1.5 ${MONO}`, color: '#5E5A63', marginTop: 5 }}>
+          <div style={{ font: `400 12px/1.5 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 5 }}>
             Habilita tu perfil de creadora
           </div>
         </div>
         <div style={{
           width: 46, height: 26, borderRadius: 13, flex: '0 0 auto',
-          background: creadora ? '#C8FF3D' : '#191920', position: 'relative',
+          background: creadora ? COLOR.dinero : COLOR.superficieAlta, position: 'relative',
           transition: 'background .18s',
         }}>
           <div style={{
             position: 'absolute', top: 3, left: creadora ? 23 : 3,
             width: 20, height: 20, borderRadius: '50%',
-            background: creadora ? '#08080A' : '#5E5A63', transition: 'left .18s',
+            background: creadora ? COLOR.fondo : COLOR.textoApagado, transition: 'left .18s',
           }} />
         </div>
       </div>
 
       {estado === 'error' && (
-        <div style={{ font: `400 13px/1.5 ${UI}`, color: '#FF2BD1' }}>{detalle}</div>
+        <div style={{ font: `400 13px/1.5 ${FUENTE.ui}`, color: COLOR.acento }}>{detalle}</div>
       )}
 
       {/* El bloqueo por pais solo tiene sentido para quien publica. */}
@@ -238,36 +236,36 @@ export default function Perfil() {
           }}>
             <span style={{
               width: 26, textAlign: 'center', fontSize: 15,
-              color: a.path === '/admin' ? '#00E5FF' : '#C8FF3D',
+              color: a.path === '/admin' ? COLOR.admin : COLOR.dinero,
             }}>{a.icono}</span>
-            <span style={{ flex: 1, font: `500 15px/1.3 ${UI}`, color: '#F2F0F3' }}>{a.titulo}</span>
-            <span style={{ color: '#5E5A63' }}>›</span>
+            <span style={{ flex: 1, font: `500 15px/1.3 ${FUENTE.ui}`, color: COLOR.texto }}>{a.titulo}</span>
+            <span style={{ color: COLOR.textoApagado }}>›</span>
           </div>
         ))}
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 'auto', paddingTop: 12 }}>
         <div onClick={guardar} style={{
-          background: puedeGuardar ? '#FF2BD1' : '#191920',
-          color: puedeGuardar ? '#08080A' : '#5E5A63',
+          background: puedeGuardar ? COLOR.acento : COLOR.superficieAlta,
+          color: puedeGuardar ? COLOR.fondo : COLOR.textoApagado,
           textAlign: 'center', padding: 19,
-          font: `700 13px/1 ${UI}`, letterSpacing: 2.2, textTransform: 'uppercase',
+          font: `700 13px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
           boxShadow: puedeGuardar ? '0 0 34px rgba(255,43,209,.42)' : 'none',
           cursor: puedeGuardar ? 'pointer' : 'default',
         }}>
           {estado === 'guardando' ? 'Guardando…' : estado === 'guardado' ? '✓ Guardado' : 'Guardar cambios'}
         </div>
         <div onClick={async () => { await salir(); nav('/entrar', { replace: true }) }} style={{
-          border: '1px solid rgba(255,43,209,.5)', color: '#FF2BD1', textAlign: 'center',
-          padding: 17, font: `700 12px/1 ${UI}`, letterSpacing: 2,
+          border: '1px solid rgba(255,43,209,.5)', color: COLOR.acento, textAlign: 'center',
+          padding: 17, font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2,
           textTransform: 'uppercase', cursor: 'pointer',
         }}>
           Cerrar sesión
         </div>
         {perfil && (
           <div onClick={() => nav(`/creator/${perfil.handle}`)} style={{
-            border: '1px solid rgba(255,255,255,.16)', color: '#9C979F', textAlign: 'center',
-            padding: 18, font: `700 12px/1 ${UI}`, letterSpacing: 2, textTransform: 'uppercase', cursor: 'pointer',
+            border: '1px solid rgba(255,255,255,.16)', color: COLOR.textoSuave, textAlign: 'center',
+            padding: 18, font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase', cursor: 'pointer',
           }}>
             Ver cómo se ve
           </div>
@@ -281,15 +279,15 @@ function Aviso({ texto, accion }: { texto: string; accion?: { texto: string; al:
   return (
     <div style={{
       minHeight: '100%', boxSizing: 'border-box', padding: '64px 26px',
-      background: '#08080A', color: '#9C979F', fontFamily: SERIF, fontStyle: 'italic',
+      background: COLOR.fondo, color: COLOR.textoSuave, fontFamily: FUENTE.serif, fontStyle: 'italic',
       fontSize: 20, display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center', gap: 20, textAlign: 'center',
     }}>
       {texto}
       {accion && (
         <span onClick={accion.al} style={{
-          background: '#FF2BD1', color: '#08080A', padding: '15px 26px',
-          font: `700 12px/1 ${UI}`, letterSpacing: 2, textTransform: 'uppercase',
+          background: COLOR.acento, color: COLOR.fondo, padding: '15px 26px',
+          font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase',
           fontStyle: 'normal', cursor: 'pointer',
         }}>{accion.texto}</span>
       )}

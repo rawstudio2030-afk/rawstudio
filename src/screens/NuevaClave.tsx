@@ -8,10 +8,8 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import Wordmark from '../components/Wordmark'
+import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 
-const UI = "'Space Grotesk', system-ui, sans-serif"
-const MONO = "'Space Mono', monospace"
-const SERIF = "'Instrument Serif', serif"
 
 export default function NuevaClave() {
   const nav = useNavigate()
@@ -58,36 +56,36 @@ export default function NuevaClave() {
   return (
     <div style={{
       minHeight: '100%', boxSizing: 'border-box', padding: '64px 26px 44px',
-      background: '#08080A', color: '#F2F0F3', fontFamily: UI,
+      background: COLOR.fondo, color: COLOR.texto, fontFamily: FUENTE.ui,
       display: 'flex', flexDirection: 'column',
     }}>
       <Wordmark ancho={150} glow={16} />
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 18, padding: '32px 0' }}>
-        <div style={{ width: 64, height: 3, background: '#FF2BD1' }} />
+        <div style={{ width: 64, height: 3, background: COLOR.acento }} />
 
         {estado === 'hecho' ? (
           <>
-            <div style={{ fontFamily: 'Anton, sans-serif', fontSize: 48, lineHeight: 1, textTransform: 'uppercase' }}>
-              Listo,<br />ya<br /><span style={{ color: '#C8FF3D' }}>quedó.</span>
+            <div style={{ fontFamily: FUENTE.display, fontSize: 48, lineHeight: 1, textTransform: 'uppercase' }}>
+              Listo,<br />ya<br /><span style={{ color: COLOR.dinero }}>quedó.</span>
             </div>
-            <div style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: 20, lineHeight: 1.35, color: '#9C979F' }}>
+            <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 20, lineHeight: 1.35, color: COLOR.textoSuave }}>
               Tu contraseña nueva ya está guardada. La próxima vez entras directo con ella.
             </div>
           </>
         ) : haySesion === false ? (
           <>
-            <div style={{ fontFamily: 'Anton, sans-serif', fontSize: 44, lineHeight: 1, textTransform: 'uppercase' }}>
-              Este enlace<br /><span style={{ color: '#C8FF3D' }}>ya expiró.</span>
+            <div style={{ fontFamily: FUENTE.display, fontSize: 44, lineHeight: 1, textTransform: 'uppercase' }}>
+              Este enlace<br /><span style={{ color: COLOR.dinero }}>ya expiró.</span>
             </div>
-            <div style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: 19, lineHeight: 1.35, color: '#9C979F' }}>
+            <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19, lineHeight: 1.35, color: COLOR.textoSuave }}>
               Los enlaces de recuperación duran poco, a propósito. Pide uno nuevo y ábrelo en cuanto llegue.
             </div>
           </>
         ) : (
           <>
-            <div style={{ fontFamily: 'Anton, sans-serif', fontSize: 48, lineHeight: 1, textTransform: 'uppercase' }}>
-              Pon tu<br />contraseña<br /><span style={{ color: '#C8FF3D' }}>nueva.</span>
+            <div style={{ fontFamily: FUENTE.display, fontSize: 48, lineHeight: 1, textTransform: 'uppercase' }}>
+              Pon tu<br />contraseña<br /><span style={{ color: COLOR.dinero }}>nueva.</span>
             </div>
 
             <div style={{ position: 'relative' }}>
@@ -98,8 +96,8 @@ export default function NuevaClave() {
                 style={campo(estado === 'error')} />
               <span onClick={() => setVer(v => !v)} style={{
                 position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)',
-                font: `700 10px/1 ${UI}`, letterSpacing: 1.4, textTransform: 'uppercase',
-                color: '#6E6A72', cursor: 'pointer', padding: 6,
+                font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.4, textTransform: 'uppercase',
+                color: COLOR.textoTenue, cursor: 'pointer', padding: 6,
               }}>{ver ? 'Ocultar' : 'Ver'}</span>
             </div>
 
@@ -110,14 +108,14 @@ export default function NuevaClave() {
               onKeyDown={e => { if (e.key === 'Enter') guardar() }}
               style={campo(repetir.length > 0 && !iguales)} />
 
-            <div style={{ font: `400 12px/1.6 ${MONO}`, color: repetir.length > 0 && !iguales ? '#FF2BD1' : '#5E5A63' }}>
+            <div style={{ font: `400 12px/1.6 ${FUENTE.mono}`, color: repetir.length > 0 && !iguales ? COLOR.acento : COLOR.textoApagado }}>
               {repetir.length > 0 && !iguales
                 ? 'Las dos contraseñas no son iguales.'
                 : 'Mínimo 6 caracteres.'}
             </div>
 
             {estado === 'error' && (
-              <div style={{ font: `400 13px/1.5 ${UI}`, color: '#FF2BD1' }}>{detalle}</div>
+              <div style={{ font: `400 13px/1.5 ${FUENTE.ui}`, color: COLOR.acento }}>{detalle}</div>
             )}
           </>
         )}
@@ -140,17 +138,17 @@ export default function NuevaClave() {
 }
 
 const campo = (mal: boolean): React.CSSProperties => ({
-  width: '100%', boxSizing: 'border-box', background: '#111116',
-  border: `1px solid ${mal ? '#FF2BD1' : 'rgba(255,255,255,.14)'}`,
-  color: '#F2F0F3', font: `400 16px/1 ${UI}`, padding: '17px 15px',
+  width: '100%', boxSizing: 'border-box', background: COLOR.superficie,
+  border: `1px solid ${mal ? COLOR.acento : LINEA.media}`,
+  color: COLOR.texto, font: `400 16px/1 ${FUENTE.ui}`, padding: '17px 15px',
   paddingRight: 62, outline: 'none',
 })
 
 const boton = (activo: boolean): React.CSSProperties => ({
-  background: activo ? '#FF2BD1' : '#191920',
-  color: activo ? '#08080A' : '#5E5A63',
+  background: activo ? COLOR.acento : COLOR.superficieAlta,
+  color: activo ? COLOR.fondo : COLOR.textoApagado,
   textAlign: 'center', padding: 19,
-  font: `700 13px/1 ${UI}`, letterSpacing: 2.2, textTransform: 'uppercase',
+  font: `700 13px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
   boxShadow: activo ? '0 0 34px rgba(255,43,209,.42)' : 'none',
   cursor: activo ? 'pointer' : 'default',
 })

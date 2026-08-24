@@ -2,15 +2,16 @@
    se pueda editar sin tocar el markup. Los iconos vienen de la pagina original,
    convertidos a JSX. */
 import type { ReactNode } from 'react'
+import { COLOR, LINEA } from '../lib/diseño'
 
-export const PINK = '#FF2BD1'
-export const LIME = '#C8FF3D'
-export const CYAN = '#00E5FF'
-export const INK = '#08080A'
-export const PAPER = '#F2F0F3'
-export const MUTED = '#9C979F'
-export const DIM = '#6E6A72'
-export const LINE = 'rgba(255,255,255,.09)'
+export const PINK = COLOR.acento
+export const LIME = COLOR.dinero
+export const CYAN = COLOR.admin
+export const INK = COLOR.fondo
+export const PAPER = COLOR.texto
+export const MUTED = COLOR.textoSuave
+export const DIM = COLOR.textoTenue
+export const LINE = LINEA.tenue
 
 const S = { stroke: 'currentColor', fill: 'none', strokeWidth: 1.8,
             strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }

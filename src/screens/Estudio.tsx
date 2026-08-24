@@ -8,15 +8,13 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import { resumen, canales, type Canal, type ResumenEstudio } from '../lib/estudio'
+import { COLOR, FUENTE } from '../lib/diseño'
 
-const UI = "'Space Grotesk', system-ui, sans-serif"
-const MONO = "'Space Mono', monospace"
-const SERIF = "'Instrument Serif', serif"
 
-const COLOR: Record<Canal['estado'], string> = {
-  listo: '#C8FF3D',
-  sin_configurar: '#00E5FF',
-  en_obra: '#6E6A72',
+const COLOR_ESTADO: Record<Canal['estado'], string> = {
+  listo: COLOR.dinero,
+  sin_configurar: COLOR.admin,
+  en_obra: COLOR.textoTenue,
 }
 const LEYENDA: Record<Canal['estado'], string> = {
   listo: 'Activo',
@@ -50,20 +48,20 @@ export default function Estudio() {
   return (
     <div style={{
       minHeight: '100%', boxSizing: 'border-box', padding: '54px 20px 40px',
-      background: '#08080A', color: '#F2F0F3', fontFamily: UI,
+      background: COLOR.fondo, color: COLOR.texto, fontFamily: FUENTE.ui,
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 22 }}>
-        <span onClick={() => nav('/perfil')} style={{ font: `400 26px/1 ${UI}`, color: '#9C979F', cursor: 'pointer' }}>‹</span>
-        <span style={{ font: `700 10px/1 ${UI}`, letterSpacing: 2.2, textTransform: 'uppercase', color: '#C8FF3D' }}>
+        <span onClick={() => nav('/perfil')} style={{ font: `400 26px/1 ${FUENTE.ui}`, color: COLOR.textoSuave, cursor: 'pointer' }}>‹</span>
+        <span style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', color: COLOR.dinero }}>
           Estudio
         </span>
         <span style={{ width: 14 }} />
       </div>
 
-      <div style={{ fontFamily: 'Anton, sans-serif', fontSize: 40, lineHeight: 1, textTransform: 'uppercase', marginBottom: 8 }}>
-        Seis formas<br /><span style={{ color: '#C8FF3D' }}>de ganar</span>
+      <div style={{ fontFamily: FUENTE.display, fontSize: 40, lineHeight: 1, textTransform: 'uppercase', marginBottom: 8 }}>
+        Seis formas<br /><span style={{ color: COLOR.dinero }}>de ganar</span>
       </div>
-      <div style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: 18, lineHeight: 1.35, color: '#9C979F', marginBottom: 24 }}>
+      <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 18, lineHeight: 1.35, color: COLOR.textoSuave, marginBottom: 24 }}>
         No tienes que usarlas todas. Empieza por una y ve sumando.
       </div>
 
@@ -72,20 +70,20 @@ export default function Estudio() {
           rechazo que no explica nada. Mejor decirselo al entrar. */}
       {!perfil.identidad_verificada && (
         <div onClick={() => nav('/verificar')} style={{
-          border: '1.5px solid #FF2BD1', background: 'rgba(255,43,209,.08)',
+          border: `1.5px solid ${COLOR.acento}`, background: 'rgba(255,43,209,.08)',
           padding: '18px 16px', marginBottom: 22, cursor: 'pointer',
         }}>
-          <div style={{ font: `700 10px/1 ${UI}`, letterSpacing: 2.2, textTransform: 'uppercase', color: '#FF2BD1' }}>
+          <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', color: COLOR.acento }}>
             Falta verificar tu identidad
           </div>
-          <div style={{ font: `400 14px/1.5 ${UI}`, color: '#F2F0F3', marginTop: 9 }}>
+          <div style={{ font: `400 14px/1.5 ${FUENTE.ui}`, color: COLOR.texto, marginTop: 9 }}>
             Para publicar y para cobrar necesitamos comprobar que eres mayor de edad. Es una sola vez.
           </div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginTop: 12 }}>
-            <span style={{ font: `400 11px/1.5 ${MONO}`, color: '#6E6A72' }}>
+            <span style={{ font: `400 11px/1.5 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
               Toma dos minutos
             </span>
-            <span style={{ font: `700 14px/1 ${UI}`, color: '#FF2BD1' }}>&#8594;</span>
+            <span style={{ font: `700 14px/1 ${FUENTE.ui}`, color: COLOR.acento }}>&#8594;</span>
           </div>
         </div>
       )}
@@ -97,15 +95,15 @@ export default function Estudio() {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         <div>
-          <div style={{ font: `700 10px/1 ${UI}`, letterSpacing: 2.2, textTransform: 'uppercase', color: '#6E6A72' }}>
+          <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', color: COLOR.textoTenue }}>
             Has ganado
           </div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 9 }}>
-            <span style={{ fontFamily: 'Anton, sans-serif', fontSize: 34, lineHeight: 1, color: '#C8FF3D' }}>{r.ganancias}</span>
-            <span style={{ font: `400 12px/1 ${MONO}`, color: '#6E6A72', textTransform: 'uppercase', letterSpacing: 1.4 }}>coins</span>
+            <span style={{ fontFamily: FUENTE.display, fontSize: 34, lineHeight: 1, color: COLOR.dinero }}>{r.ganancias}</span>
+            <span style={{ font: `400 12px/1 ${FUENTE.mono}`, color: COLOR.textoTenue, textTransform: 'uppercase', letterSpacing: 1.4 }}>coins</span>
           </div>
         </div>
-        <span style={{ color: '#5E5A63' }}>›</span>
+        <span style={{ color: COLOR.textoApagado }}>›</span>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -120,30 +118,30 @@ export default function Estudio() {
                 cursor: activo ? 'pointer' : 'default',
                 opacity: activo ? 1 : .58,
               }}>
-              <span style={{ width: 24, textAlign: 'center', fontSize: 16, color: COLOR[c.estado], marginTop: 1 }}>
+              <span style={{ width: 24, textAlign: 'center', fontSize: 16, color: COLOR_ESTADO[c.estado], marginTop: 1 }}>
                 {c.icono}
               </span>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                  <span style={{ font: `600 15px/1.3 ${UI}` }}>{c.titulo}</span>
+                  <span style={{ font: `600 15px/1.3 ${FUENTE.ui}` }}>{c.titulo}</span>
                   <span style={{
-                    font: `700 8.5px/1 ${UI}`, letterSpacing: 1.2, textTransform: 'uppercase',
-                    color: c.estado === 'listo' ? '#08080A' : COLOR[c.estado],
-                    background: c.estado === 'listo' ? '#C8FF3D' : 'transparent',
-                    border: c.estado === 'listo' ? 'none' : `1px solid ${COLOR[c.estado]}`,
+                    font: `700 8.5px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
+                    color: c.estado === 'listo' ? COLOR.fondo : COLOR_ESTADO[c.estado],
+                    background: c.estado === 'listo' ? COLOR.dinero : 'transparent',
+                    border: c.estado === 'listo' ? 'none' : `1px solid ${COLOR_ESTADO[c.estado]}`,
                     padding: '4px 6px',
                   }}>{LEYENDA[c.estado]}</span>
                 </div>
-                <div style={{ font: `400 12.5px/1.5 ${UI}`, color: '#9C979F', marginTop: 5 }}>
+                <div style={{ font: `400 12.5px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave, marginTop: 5 }}>
                   {c.descripcion}
                 </div>
                 {c.nota && (
-                  <div style={{ font: `400 11px/1.5 ${MONO}`, color: '#5E5A63', marginTop: 5 }}>
+                  <div style={{ font: `400 11px/1.5 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 5 }}>
                     {c.nota}
                   </div>
                 )}
               </div>
-              {activo && <span style={{ color: '#5E5A63', marginTop: 2 }}>›</span>}
+              {activo && <span style={{ color: COLOR.textoApagado, marginTop: 2 }}>›</span>}
             </div>
           )
         })}
@@ -156,15 +154,15 @@ function Centro({ texto, accion }: { texto: string; accion?: { texto: string; al
   return (
     <div style={{
       minHeight: '100%', boxSizing: 'border-box', padding: '64px 26px',
-      background: '#08080A', color: '#9C979F', fontFamily: SERIF, fontStyle: 'italic',
+      background: COLOR.fondo, color: COLOR.textoSuave, fontFamily: FUENTE.serif, fontStyle: 'italic',
       fontSize: 20, display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center', gap: 20, textAlign: 'center',
     }}>
       {texto}
       {accion && (
         <span onClick={accion.al} style={{
-          background: '#FF2BD1', color: '#08080A', padding: '15px 26px',
-          font: `700 12px/1 ${UI}`, letterSpacing: 2, textTransform: 'uppercase',
+          background: COLOR.acento, color: COLOR.fondo, padding: '15px 26px',
+          font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase',
           fontStyle: 'normal', cursor: 'pointer',
         }}>{accion.texto}</span>
       )}

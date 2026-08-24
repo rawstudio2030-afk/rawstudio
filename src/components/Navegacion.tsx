@@ -10,8 +10,8 @@ import {
   BARRA, RUTAS_ENTRADA, REDIRIGE_SI_HAY_SESION, EXIGE_SESION,
   papelDe, visiblesPara, type Papel,
 } from '../lib/rutas'
+import { COLOR, FUENTE } from '../lib/diseño'
 
-const UI = "'Space Grotesk', system-ui, sans-serif"
 
 /** El papel se resuelve una vez y se comparte; consultar es_admin() en cada
  *  pantalla seria una ida a la base por render. */
@@ -87,13 +87,13 @@ export function BarraInferior() {
           <div key={d.path} onClick={() => nav(d.path)} style={{
             flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
             gap: 5, padding: '11px 4px 13px', cursor: 'pointer',
-            color: activo ? '#FF2BD1' : '#6E6A72',
-            borderTop: `2px solid ${activo ? '#FF2BD1' : 'transparent'}`,
+            color: activo ? COLOR.acento : COLOR.textoTenue,
+            borderTop: `2px solid ${activo ? COLOR.acento : 'transparent'}`,
             marginTop: -1,
           }}>
             <span style={{ fontSize: 17, lineHeight: 1 }}>{d.icono}</span>
             <span style={{
-              font: `700 9px/1 ${UI}`, letterSpacing: 1.2, textTransform: 'uppercase',
+              font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
             }}>{d.titulo}</span>
           </div>
         )

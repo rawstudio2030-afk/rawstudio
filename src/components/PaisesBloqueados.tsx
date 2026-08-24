@@ -5,9 +5,8 @@
 // por estado o ciudad no se ofrece porque la geolocalizacion por IP a ese nivel
 // falla seguido, y una creadora confiaria en algo que no la protege.
 import { useState } from 'react'
+import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 
-const UI = "'Space Grotesk', system-ui, sans-serif"
-const MONO = "'Space Mono', monospace"
 
 // Los mas relevantes para el publico de la plataforma, mas un campo libre.
 const FRECUENTES: [string, string][] = [
@@ -31,7 +30,7 @@ export default function PaisesBloqueados({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <span style={{ font: `700 10px/1 ${UI}`, letterSpacing: 2.2, textTransform: 'uppercase', color: '#6E6A72' }}>
+      <span style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', color: COLOR.textoTenue }}>
         Ocultar en estos países
       </span>
 
@@ -41,10 +40,10 @@ export default function PaisesBloqueados({
           return (
             <span key={c} onClick={() => alternar(c)} style={{
               padding: '9px 11px', cursor: 'pointer',
-              font: `700 10px/1 ${UI}`, letterSpacing: 1.2, textTransform: 'uppercase',
-              background: on ? '#00E5FF' : 'transparent',
-              color: on ? '#08080A' : '#9C979F',
-              border: `1px solid ${on ? '#00E5FF' : 'rgba(255,255,255,.14)'}`,
+              font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
+              background: on ? COLOR.admin : 'transparent',
+              color: on ? COLOR.fondo : COLOR.textoSuave,
+              border: `1px solid ${on ? COLOR.admin : LINEA.media}`,
             }}>{n}</span>
           )
         })}
@@ -57,13 +56,13 @@ export default function PaisesBloqueados({
           onKeyDown={e => { if (e.key === 'Enter') agregarOtro() }}
           placeholder="Otro (ej. FR)"
           style={{
-            width: 130, boxSizing: 'border-box', background: '#111116',
-            border: '1px solid rgba(255,255,255,.14)', color: '#F2F0F3',
-            font: `400 14px/1 ${MONO}`, padding: '11px', outline: 'none',
+            width: 130, boxSizing: 'border-box', background: COLOR.superficie,
+            border: '1px solid rgba(255,255,255,.14)', color: COLOR.texto,
+            font: `400 14px/1 ${FUENTE.mono}`, padding: '11px', outline: 'none',
           }} />
         <span onClick={agregarOtro} style={{
           padding: '11px 14px', border: '1px solid rgba(255,255,255,.16)',
-          color: '#9C979F', font: `700 10px/1 ${UI}`, letterSpacing: 1.4,
+          color: COLOR.textoSuave, font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.4,
           textTransform: 'uppercase', cursor: 'pointer',
         }}>Agregar</span>
       </div>
@@ -73,20 +72,20 @@ export default function PaisesBloqueados({
           {valor.filter(c => !FRECUENTES.some(([f]) => f === c)).map(c => (
             <span key={c} onClick={() => alternar(c)} style={{
               padding: '8px 10px', cursor: 'pointer',
-              font: `700 10px/1 ${MONO}`, letterSpacing: 1.2,
-              background: '#00E5FF', color: '#08080A',
+              font: `700 10px/1 ${FUENTE.mono}`, letterSpacing: 1.2,
+              background: COLOR.admin, color: COLOR.fondo,
             }}>{c} ×</span>
           ))}
         </div>
       )}
 
-      <div style={{ font: `400 11.5px/1.6 ${MONO}`, color: '#5E5A63' }}>
+      <div style={{ font: `400 11.5px/1.6 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
         {nota ?? 'Quien se conecte desde ahí no podrá abrirlo.'}
       </div>
 
       {/* Se dice el limite real. Prometer un bloqueo infalible seria lo peor
           que se le puede decir a alguien que se esconde de su entorno. */}
-      <div style={{ font: `400 11px/1.6 ${MONO}`, color: '#6E6A72' }}>
+      <div style={{ font: `400 11px/1.6 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
         Ojo: una VPN salta esto. Reduce mucho el riesgo, no lo elimina.
       </div>
     </div>

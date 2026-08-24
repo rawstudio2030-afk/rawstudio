@@ -1,3 +1,4 @@
+import { COLOR } from './diseño'
 /** Portada generada cuando un clip no tiene imagen propia.
  *
  *  En vez de un rectángulo gris, se dibuja un patrón op-art derivado del
@@ -8,7 +9,7 @@
  *  subió portada: un catálogo con huecos grises se ve roto; con patrones se ve
  *  intencional. */
 
-const ACENTOS = ['#FF2BD1', '#C8FF3D', '#00E5FF']
+const ACENTOS = [COLOR.acento, COLOR.dinero, COLOR.admin]
 
 /** Hash pequeño y estable. No necesita ser criptográfico: solo repartir. */
 function semilla(id: string): number {
@@ -42,8 +43,8 @@ export function portadaGenerada(id: string): string {
     `<g transform="rotate(${giro} 50 66)">${capas}</g>` +
     `<rect width="100" height="133" fill="url(#g)"/>` +
     `<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">` +
-    `<stop offset="0" stop-color="#08080A" stop-opacity="0"/>` +
-    `<stop offset="1" stop-color="#08080A" stop-opacity=".85"/>` +
+    `<stop offset="0" stop-color="${COLOR.fondo}" stop-opacity="0"/>` +
+    `<stop offset="1" stop-color="${COLOR.fondo}" stop-opacity=".85"/>` +
     `</linearGradient></defs></svg>`
 
   // Los parentesis van codificados a mano: encodeURIComponent NO los toca, y

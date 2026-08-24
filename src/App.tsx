@@ -23,6 +23,7 @@ import NuevaClave from './screens/NuevaClave'
 import Verificar from './screens/Verificar'
 import { Privacidad, Terminos } from './screens/Legal'
 import AltaCreadora from './screens/AltaCreadora'
+import { COLOR } from './lib/diseño'
 
 export const SCREENS = [
   { path: '/',          n: '00', title: 'Launch',         el: <Launch /> },
@@ -67,8 +68,8 @@ function IndiceDesarrollo() {
         style={{
           position: 'fixed', right: 14, bottom: 84, zIndex: 9999,
           width: 40, height: 40, borderRadius: '50%', border: 'none',
-          background: open ? '#C8FF3D' : 'rgba(110,106,114,.9)',
-          color: open ? '#08080A' : '#fff', cursor: 'pointer',
+          background: open ? COLOR.dinero : 'rgba(110,106,114,.9)',
+          color: open ? COLOR.fondo : '#fff', cursor: 'pointer',
           font: "700 13px/1 'Space Grotesk', system-ui, sans-serif",
         }}>{open ? '×' : 'dev'}</button>
 
@@ -82,7 +83,7 @@ function IndiceDesarrollo() {
           <div style={{
             font: "700 10px/1 'Space Grotesk', system-ui, sans-serif",
             letterSpacing: 2.4, textTransform: 'uppercase',
-            color: '#6E6A72', marginBottom: 14,
+            color: COLOR.textoTenue, marginBottom: 14,
           }}>Índice de desarrollo · {SCREENS.length} pantallas</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {SCREENS.map(s => {
@@ -93,16 +94,16 @@ function IndiceDesarrollo() {
                     display: 'flex', alignItems: 'center', gap: 12,
                     padding: '11px 12px', cursor: 'pointer',
                     background: act ? 'rgba(255,43,209,.14)' : 'transparent',
-                    borderLeft: `2px solid ${act ? '#FF2BD1' : 'transparent'}`,
+                    borderLeft: `2px solid ${act ? COLOR.acento : 'transparent'}`,
                   }}>
                   <span style={{
                     font: "700 10px/1 'Space Mono', monospace",
-                    color: '#08080A', background: act ? '#FF2BD1' : '#C8FF3D',
+                    color: COLOR.fondo, background: act ? COLOR.acento : COLOR.dinero,
                     padding: '5px 6px',
                   }}>{s.n}</span>
                   <span style={{
                     font: "500 14px/1 'Space Grotesk', system-ui, sans-serif",
-                    color: act ? '#fff' : '#9C979F',
+                    color: act ? '#fff' : COLOR.textoSuave,
                   }}>{s.title}</span>
                 </div>
               )

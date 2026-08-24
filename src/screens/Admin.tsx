@@ -13,13 +13,11 @@ import {
   bitacora, otorgarAdmin, revocarAdmin, marcarCreadora, sembrarDemo, borrarDemo,
   type PerfilAdmin, type Entrada,
 } from '../lib/admin'
+import { COLOR, LINEA, TINTE, FUENTE } from '../lib/diseño'
 
-const UI = "'Space Grotesk', system-ui, sans-serif"
-const MONO = "'Space Mono', monospace"
-const SERIF = "'Instrument Serif', serif"
 
 const etiqueta: React.CSSProperties = {
-  font: `700 10px/1 ${UI}`, letterSpacing: 2.2, textTransform: 'uppercase', color: '#6E6A72',
+  font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', color: COLOR.textoTenue,
 }
 
 export default function Admin() {
@@ -77,11 +75,11 @@ export default function Admin() {
   return (
     <div style={{
       minHeight: '100%', boxSizing: 'border-box', padding: '54px 20px 40px',
-      background: '#08080A', color: '#F2F0F3', fontFamily: UI,
+      background: COLOR.fondo, color: COLOR.texto, fontFamily: FUENTE.ui,
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-        <span onClick={() => nav('/entrar')} style={{ font: `400 26px/1 ${UI}`, color: '#9C979F', cursor: 'pointer' }}>‹</span>
-        <span style={{ ...etiqueta, color: '#00E5FF' }}>Administración</span>
+        <span onClick={() => nav('/entrar')} style={{ font: `400 26px/1 ${FUENTE.ui}`, color: COLOR.textoSuave, cursor: 'pointer' }}>‹</span>
+        <span style={{ ...etiqueta, color: COLOR.admin }}>Administración</span>
         <span style={{ width: 14 }} />
       </div>
 
@@ -89,29 +87,29 @@ export default function Admin() {
         {(['gente', 'bitacora'] as const).map(p => (
           <span key={p} onClick={() => setPestaña(p)} style={{
             flex: 1, textAlign: 'center', padding: '11px 8px', cursor: 'pointer',
-            font: `700 10px/1 ${UI}`, letterSpacing: 1.8, textTransform: 'uppercase',
-            background: pestaña === p ? '#FF2BD1' : 'transparent',
-            color: pestaña === p ? '#08080A' : '#9C979F',
-            border: `1px solid ${pestaña === p ? '#FF2BD1' : 'rgba(255,255,255,.14)'}`,
+            font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.8, textTransform: 'uppercase',
+            background: pestaña === p ? COLOR.acento : 'transparent',
+            color: pestaña === p ? COLOR.fondo : COLOR.textoSuave,
+            border: `1px solid ${pestaña === p ? COLOR.acento : LINEA.media}`,
           }}>{p === 'gente' ? 'Personas' : 'Bitácora'}</span>
         ))}
       </div>
 
-      {error && <div style={{ font: `400 13px/1.5 ${UI}`, color: '#FF2BD1', marginBottom: 14 }}>{error}</div>}
+      {error && <div style={{ font: `400 13px/1.5 ${FUENTE.ui}`, color: COLOR.acento, marginBottom: 14 }}>{error}</div>}
 
       {pestaña === 'gente' && (
         <div onClick={() => nav('/alta-creadora')} style={{
-          border: '1px solid rgba(200,255,61,.4)', background: 'rgba(200,255,61,.05)',
+          border: '1px solid rgba(200,255,61,.4)', background: TINTE.dinero,
           padding: '15px 14px', marginBottom: 16, cursor: 'pointer',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
         }}>
           <div>
-            <div style={{ ...etiqueta, color: '#C8FF3D' }}>Dar de alta una creadora</div>
-            <div style={{ font: `400 12.5px/1.6 ${UI}`, color: '#6E6A72', marginTop: 7 }}>
+            <div style={{ ...etiqueta, color: COLOR.dinero }}>Dar de alta una creadora</div>
+            <div style={{ font: `400 12.5px/1.6 ${FUENTE.ui}`, color: COLOR.textoTenue, marginTop: 7 }}>
               Para quien firmó papeles fuera de la app. Subes su expediente y publicas por ella.
             </div>
           </div>
-          <span style={{ color: '#C8FF3D', font: `700 15px/1 ${UI}` }}>&#8594;</span>
+          <span style={{ color: COLOR.dinero, font: `700 15px/1 ${FUENTE.ui}` }}>&#8594;</span>
         </div>
       )}
 
@@ -122,18 +120,18 @@ export default function Admin() {
         <div style={{
           border: '1px dashed rgba(255,255,255,.18)', padding: '15px 14px', marginBottom: 16,
         }}>
-          <div style={{ ...etiqueta, color: '#9C979F' }}>Contenido de demostración</div>
-          <div style={{ font: `400 12.5px/1.6 ${UI}`, color: '#6E6A72', marginTop: 8 }}>
+          <div style={{ ...etiqueta, color: COLOR.textoSuave }}>Contenido de demostración</div>
+          <div style={{ font: `400 12.5px/1.6 ${FUENTE.ui}`, color: COLOR.textoTenue, marginTop: 8 }}>
             Perfiles ficticios para que la plataforma no se vea vacía al enseñarla.
             No corresponden a ninguna persona real. Bórralos antes de abrir al público.
           </div>
           <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
-            <Boton texto="Sembrar demo" color="#C8FF3D" ocupado={ocupado}
+            <Boton texto="Sembrar demo" color={COLOR.dinero} ocupado={ocupado}
               al={() => actuar(async () => {
                 const r = await sembrarDemo()
                 return 'error' in r ? r.error : null
               })} />
-            <Boton texto="Borrar toda la demo" color="#FF2BD1" ocupado={ocupado}
+            <Boton texto="Borrar toda la demo" color={COLOR.acento} ocupado={ocupado}
               al={() => actuar(async () => {
                 const r = await borrarDemo()
                 return 'error' in r ? r.error : null
@@ -147,9 +145,9 @@ export default function Admin() {
           <input value={busqueda} onChange={e => setBusqueda(e.target.value)}
             placeholder="Buscar por correo, usuario o nombre"
             style={{
-              width: '100%', boxSizing: 'border-box', background: '#111116',
-              border: '1px solid rgba(255,255,255,.14)', color: '#F2F0F3',
-              font: `400 15px/1 ${UI}`, padding: '14px', outline: 'none', marginBottom: 14,
+              width: '100%', boxSizing: 'border-box', background: COLOR.superficie,
+              border: '1px solid rgba(255,255,255,.14)', color: COLOR.texto,
+              font: `400 15px/1 ${FUENTE.ui}`, padding: '14px', outline: 'none', marginBottom: 14,
             }} />
 
           <div style={{ ...etiqueta, marginBottom: 10 }}>{gente.length} perfiles</div>
@@ -161,40 +159,40 @@ export default function Admin() {
             return (
               <div key={p.id} style={{
                 borderBottom: '1px solid rgba(255,255,255,.09)', padding: '14px 2px',
-                background: susp ? 'rgba(255,43,209,.06)' : 'transparent',
+                background: susp ? TINTE.acento : 'transparent',
               }}>
                 <div onClick={() => { setAbierto(open ? null : p.id); setMotivo('') }}
                   style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}>
                   <div style={{
                     width: 40, height: 40, borderRadius: '50%', flex: '0 0 auto',
-                    border: `1px solid ${susp ? '#FF2BD1' : 'rgba(255,255,255,.18)'}`,
-                    background: foto ? `center/cover url(${foto})` : 'repeating-linear-gradient(130deg,#191920 0 6px,#111116 6px 12px)',
+                    border: `1px solid ${susp ? COLOR.acento : LINEA.marcada}`,
+                    background: foto ? `center/cover url(${foto})` : `repeating-linear-gradient(130deg,${COLOR.superficieAlta} 0 6px,${COLOR.superficie} 6px 12px)`,
                   }} />
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ font: `600 15px/1.3 ${UI}`, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <div style={{ font: `600 15px/1.3 ${FUENTE.ui}`, display: 'flex', alignItems: 'center', gap: 6 }}>
                       <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.display_name}</span>
-                      {p.verified && <span style={{ color: '#00E5FF', fontSize: 13 }}>&#10038;</span>}
-                      {p.is_creator && <span style={{ ...etiqueta, color: '#C8FF3D', letterSpacing: 1.2 }}>creadora</span>}
+                      {p.verified && <span style={{ color: COLOR.admin, fontSize: 13 }}>&#10038;</span>}
+                      {p.is_creator && <span style={{ ...etiqueta, color: COLOR.dinero, letterSpacing: 1.2 }}>creadora</span>}
                     </div>
-                    <div style={{ font: `400 12px/1.4 ${MONO}`, color: '#6E6A72',
+                    <div style={{ font: `400 12px/1.4 ${FUENTE.mono}`, color: COLOR.textoTenue,
                                   overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {p.email}
                     </div>
-                    <div style={{ font: `400 11px/1.5 ${MONO}`, color: '#5E5A63' }}>
+                    <div style={{ font: `400 11px/1.5 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
                       @{p.handle}
-                      {p.es_admin && <span style={{ color: '#00E5FF' }}> · admin</span>}
-                      {p.es_demo && <span style={{ color: '#9C979F' }}> · demo</span>}
-                      {susp && <span style={{ color: '#FF2BD1' }}> · suspendida</span>}
+                      {p.es_admin && <span style={{ color: COLOR.admin }}> · admin</span>}
+                      {p.es_demo && <span style={{ color: COLOR.textoSuave }}> · demo</span>}
+                      {susp && <span style={{ color: COLOR.acento }}> · suspendida</span>}
                     </div>
                   </div>
-                  <span style={{ color: '#5E5A63', font: `400 16px/1 ${UI}` }}>{open ? '−' : '+'}</span>
+                  <span style={{ color: COLOR.textoApagado, font: `400 16px/1 ${FUENTE.ui}` }}>{open ? '−' : '+'}</span>
                 </div>
 
                 {open && (
                   <div style={{ paddingTop: 14, display: 'flex', flexDirection: 'column', gap: 9 }}>
                     <div style={{
                       display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: '7px 12px',
-                      font: `400 11px/1.5 ${MONO}`, color: '#6E6A72',
+                      font: `400 11px/1.5 ${FUENTE.mono}`, color: COLOR.textoTenue,
                       border: '1px solid rgba(255,255,255,.09)', padding: 12,
                     }}>
                       <Dato k="Alta" v={new Date(p.created_at).toLocaleDateString('es-MX')} />
@@ -215,11 +213,11 @@ export default function Admin() {
                       <input value={monto} onChange={e => setMonto(e.target.value.replace(/[^0-9-]/g, ''))}
                         placeholder="± coins" inputMode="numeric"
                         style={{
-                          width: 96, boxSizing: 'border-box', background: '#111116',
-                          border: '1px solid rgba(255,255,255,.14)', color: '#F2F0F3',
-                          font: `400 14px/1 ${MONO}`, padding: '12px', outline: 'none',
+                          width: 96, boxSizing: 'border-box', background: COLOR.superficie,
+                          border: '1px solid rgba(255,255,255,.14)', color: COLOR.texto,
+                          font: `400 14px/1 ${FUENTE.mono}`, padding: '12px', outline: 'none',
                         }} />
-                      <Boton texto="Ajustar saldo" color="#C8FF3D" ocupado={ocupado}
+                      <Boton texto="Ajustar saldo" color={COLOR.dinero} ocupado={ocupado}
                         al={() => actuar(async () => {
                           const n = parseInt(monto, 10)
                           if (!n) return 'Escribe una cantidad distinta de cero'
@@ -233,32 +231,32 @@ export default function Admin() {
                     <input value={motivo} onChange={e => setMotivo(e.target.value)}
                       placeholder="Motivo (obligatorio para ajustes y suspensiones)"
                       style={{
-                        width: '100%', boxSizing: 'border-box', background: '#111116',
-                        border: '1px solid rgba(255,255,255,.14)', color: '#F2F0F3',
-                        font: `400 14px/1 ${UI}`, padding: '12px', outline: 'none',
+                        width: '100%', boxSizing: 'border-box', background: COLOR.superficie,
+                        border: '1px solid rgba(255,255,255,.14)', color: COLOR.texto,
+                        font: `400 14px/1 ${FUENTE.ui}`, padding: '12px', outline: 'none',
                       }} />
 
                     {false && (
                       <input value={motivo} onChange={e => setMotivo(e.target.value)}
                         placeholder="Motivo de la suspensión"
                         style={{
-                          width: '100%', boxSizing: 'border-box', background: '#111116',
-                          border: '1px solid rgba(255,255,255,.14)', color: '#F2F0F3',
-                          font: `400 14px/1 ${UI}`, padding: '12px', outline: 'none',
+                          width: '100%', boxSizing: 'border-box', background: COLOR.superficie,
+                          border: '1px solid rgba(255,255,255,.14)', color: COLOR.texto,
+                          font: `400 14px/1 ${FUENTE.ui}`, padding: '12px', outline: 'none',
                         }} />
                     )}
 
                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                      <Boton texto={susp ? 'Reactivar' : 'Suspender'} color={susp ? '#C8FF3D' : '#FF2BD1'}
+                      <Boton texto={susp ? 'Reactivar' : 'Suspender'} color={susp ? COLOR.dinero : COLOR.acento}
                         ocupado={ocupado}
                         al={() => actuar(() => susp ? reactivar(p.id) : suspender(p.id, motivo))} />
-                      <Boton texto={p.verified ? 'Quitar verificación' : 'Verificar'} color="#00E5FF"
+                      <Boton texto={p.verified ? 'Quitar verificación' : 'Verificar'} color={COLOR.admin}
                         ocupado={ocupado}
                         al={() => actuar(() => cambiarVerificacion(p.id, !p.verified))} />
-                      <Boton texto={p.is_creator ? 'Quitar creadora' : 'Hacer creadora'} color="#C8FF3D"
+                      <Boton texto={p.is_creator ? 'Quitar creadora' : 'Hacer creadora'} color={COLOR.dinero}
                         ocupado={ocupado}
                         al={() => actuar(() => marcarCreadora(p.id, !p.is_creator))} />
-                      <Boton texto={p.es_admin ? 'Quitar admin' : 'Hacer admin'} color="#00E5FF"
+                      <Boton texto={p.es_admin ? 'Quitar admin' : 'Hacer admin'} color={COLOR.admin}
                         ocupado={ocupado}
                         al={() => actuar(() => p.es_admin
                           ? revocarAdmin(p.id)
@@ -276,14 +274,14 @@ export default function Admin() {
         <>
           <div style={{ ...etiqueta, marginBottom: 12 }}>Últimas {log.length} acciones</div>
           {log.length === 0 && (
-            <div style={{ fontFamily: SERIF, fontStyle: 'italic', fontSize: 17, color: '#6E6A72' }}>
+            <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 17, color: COLOR.textoTenue }}>
               Todavía no hay acciones registradas.
             </div>
           )}
           {log.map(e => (
             <div key={e.id} style={{ borderBottom: '1px solid rgba(255,255,255,.09)', padding: '13px 2px' }}>
-              <div style={{ font: `600 14px/1.3 ${UI}`, color: '#F2F0F3' }}>{e.accion}</div>
-              <div style={{ font: `400 11px/1.6 ${MONO}`, color: '#6E6A72', marginTop: 4 }}>
+              <div style={{ font: `600 14px/1.3 ${FUENTE.ui}`, color: COLOR.texto }}>{e.accion}</div>
+              <div style={{ font: `400 11px/1.6 ${FUENTE.mono}`, color: COLOR.textoTenue, marginTop: 4 }}>
                 {new Date(e.created_at).toLocaleString('es-MX')}
                 {e.objetivo && ` · sobre ${e.objetivo.slice(0, 8)}…`}
                 {e.detalle && Object.keys(e.detalle).length > 0 && ` · ${JSON.stringify(e.detalle)}`}
@@ -299,8 +297,8 @@ export default function Admin() {
 function Dato({ k, v }: { k: string; v: string }) {
   return (
     <div>
-      <div style={{ color: '#5E5A63', fontSize: 10, letterSpacing: 1, textTransform: 'uppercase' }}>{k}</div>
-      <div style={{ color: '#F2F0F3', marginTop: 2, wordBreak: 'break-word' }}>{v}</div>
+      <div style={{ color: COLOR.textoApagado, fontSize: 10, letterSpacing: 1, textTransform: 'uppercase' }}>{k}</div>
+      <div style={{ color: COLOR.texto, marginTop: 2, wordBreak: 'break-word' }}>{v}</div>
     </div>
   )
 }
@@ -311,7 +309,7 @@ function Boton({ texto, color, al, ocupado }: {
   return (
     <span onClick={() => { if (!ocupado) al() }} style={{
       border: `1px solid ${color}`, color, padding: '10px 13px',
-      font: `700 10px/1 ${UI}`, letterSpacing: 1.4, textTransform: 'uppercase',
+      font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.4, textTransform: 'uppercase',
       cursor: ocupado ? 'default' : 'pointer', opacity: ocupado ? .5 : 1,
     }}>{texto}</span>
   )
@@ -321,15 +319,15 @@ function Centro({ texto, accion }: { texto: string; accion?: { texto: string; al
   return (
     <div style={{
       minHeight: '100%', boxSizing: 'border-box', padding: '64px 26px',
-      background: '#08080A', color: '#9C979F', fontFamily: SERIF, fontStyle: 'italic',
+      background: COLOR.fondo, color: COLOR.textoSuave, fontFamily: FUENTE.serif, fontStyle: 'italic',
       fontSize: 20, display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center', gap: 20, textAlign: 'center',
     }}>
       {texto}
       {accion && (
         <span onClick={accion.al} style={{
-          background: '#FF2BD1', color: '#08080A', padding: '15px 26px',
-          font: `700 12px/1 ${UI}`, letterSpacing: 2, textTransform: 'uppercase',
+          background: COLOR.acento, color: COLOR.fondo, padding: '15px 26px',
+          font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase',
           fontStyle: 'normal', cursor: 'pointer',
         }}>{accion.texto}</span>
       )}
