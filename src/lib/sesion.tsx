@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { supabase, type Perfil } from './supabase'
+import { registrarAcceso } from './admin'
 
 type Estado = {
   sesion: Session | null
@@ -65,6 +66,12 @@ export function ProveedorSesion({ children }: { children: ReactNode }) {
       if (!vivo) return
       setSesion(s)
       await traerPerfil(s?.user.id)
+      // El acceso queda en la bitacora con la IP que ve el servidor. Solo en
+      // SIGNED_IN: TOKEN_REFRESHED se dispara solo cada hora y anotarlo seria
+      // ruido que ademas escondería los accesos de verdad.
+      if (evt === 'SIGNED_IN' && s?.user) {
+        registrarAcceso(s.user.app_metadata?.provider ?? 'correo')
+      }
       if (vivo) setCargando(false)
     })
 

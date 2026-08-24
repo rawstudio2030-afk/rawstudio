@@ -359,3 +359,44 @@ export async function ajustarSaldo(id: string, cantidad: number, motivo: string)
   if (error) return { error: error.message }
   return data as { ok: boolean; saldo: number }
 }
+
+/* ==================== Modulo 6: bitacora ==================== */
+
+export type EventoBitacora = {
+  id: number; accion: string; created_at: string; ip: string | null
+  actor: string; actor_handle: string | null; actor_nombre: string | null
+  objetivo: string | null; objetivo_handle: string | null; objetivo_nombre: string | null
+  detalle: Record<string, unknown>
+  total_filas: number
+}
+
+export type ConsultaBitacora = {
+  busqueda?: string; accion?: string
+  desde?: string | null; hasta?: string | null
+  pagina?: number; porPagina?: number
+}
+
+export async function leerBitacora(q: ConsultaBitacora = {}) {
+  const { data, error } = await supabase.rpc('bitacora', {
+    busqueda: (q.busqueda ?? '').trim(), filtro_accion: q.accion ?? '',
+    desde_: q.desde || null, hasta_: q.hasta || null,
+    pagina: q.pagina ?? 0, por_pagina: q.porPagina ?? 50,
+  })
+  if (error) return { filas: [] as EventoBitacora[], total: 0, error: error.message }
+  const filas = (data ?? []) as EventoBitacora[]
+  return { filas, total: filas[0]?.total_filas ?? 0, error: '' }
+}
+
+export async function accionesBitacora() {
+  const { data, error } = await supabase.rpc('bitacora_acciones')
+  if (error) return []
+  return (data ?? []) as { accion: string; cuantas: number }[]
+}
+
+/** Se llama al entrar. La IP NO la manda el navegador —no conoce la suya—
+ *  sino que la lee el servidor de las cabeceras que pone Cloudflare. Aqui
+ *  solo se avisa de que hubo un acceso y con que metodo. */
+export async function registrarAcceso(metodo: string) {
+  const { error } = await supabase.rpc('registrar_acceso', { metodo })
+  if (error) console.warn('[admin] registrar acceso:', error.message)
+}
