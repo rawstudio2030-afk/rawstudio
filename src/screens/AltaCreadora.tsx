@@ -86,11 +86,16 @@ export default function AltaCreadora() {
 
   const publicar = async () => {
     if (!creadora || !video || !titulo.trim() || ocupado) return
-    setOcupado(true); setError(''); setSubiendo('Subiendo el video…')
-    const r = await publicarPara({
-      creadora: creadora.id, titulo, video, portada,
-      precio, visibilidad: 'pago',
-    })
+    setOcupado(true); setError(''); setSubiendo('Preparando…')
+    const r = await publicarPara(
+      { creadora: creadora.id, titulo, video, portada, precio, visibilidad: 'pago' },
+      // Un video de 17 MB puede tardar varios minutos. Sin porcentaje no hay
+      // forma de distinguir una subida lenta de una atorada.
+      (etapa, fraccion) => setSubiendo(
+        etapa === 'guardando' ? 'Guardando…'
+          : `Subiendo ${etapa === 'video' ? 'el video' : 'la portada'} · ${Math.round(fraccion * 100)}%`,
+      ),
+    )
     setOcupado(false); setSubiendo('')
     if ('error' in r) { setError(r.error); return }
     setPublicados(n => n + 1)
@@ -244,7 +249,14 @@ function Archivo({ t, f, onElegir, acepta, nota }: {
         </div>
       </label>
       <input id={id} type="file" accept={acepta} style={{ display: 'none' }}
-        onChange={e => { const x = e.target.files?.[0]; if (x) onElegir(x) }} />
+        onChange={e => {
+          const x = e.target.files?.[0]
+          // Se limpia el valor para que volver a elegir EL MISMO archivo
+          // dispare el evento otra vez. Sin esto, despues de un intento
+          // fallido el selector se queda mudo y parece descompuesto.
+          e.target.value = ''
+          if (x) onElegir(x)
+        }} />
     </>
   )
 }

@@ -180,31 +180,78 @@ export async function subirExpediente(
 
 /** Publica un clip a nombre de una creadora dada de alta. Rechaza si el
  *  expediente está incompleto: esa regla vive en la base. */
-export async function publicarPara(datos: {
-  creadora: string; titulo: string; video: File; portada?: File | null
-  precio: number; visibilidad: 'pago' | 'suscriptores' | 'gratis'
-  descripcion?: string
-}) {
-  const subir = async (bucket: string, f: File) => {
+export async function publicarPara(
+  datos: {
+    creadora: string; titulo: string; video: File; portada?: File | null
+    precio: number; visibilidad: 'pago' | 'suscriptores' | 'gratis'
+    descripcion?: string
+  },
+  alAvanzar?: (etapa: string, fraccion: number) => void,
+) {
+  // Se pide primero una URL firmada y despues se sube por XHR.
+  //
+  // Dos razones, ambas por lo que se vio en el alta de la primera creadora:
+  //
+  // 1. El permiso se revisa AL PEDIR la URL, no al terminar de transferir. Si
+  //    falta el expediente o no hay privilegios, el error llega en un segundo
+  //    y no despues de mandar 17 MB en balde.
+  // 2. XHR si emite progreso; el cliente de Supabase no. Sin eso una subida
+  //    normal de varios minutos era indistinguible de una atorada.
+  const subidos: { bucket: string; ruta: string }[] = []
+
+  const subir = async (bucket: string, f: File, etapa: string) => {
     const ext = (f.name.split('.').pop() || 'bin').toLowerCase()
     const ruta = `${datos.creadora}/${crypto.randomUUID()}.${ext}`
-    const { error } = await supabase.storage.from(bucket)
-      .upload(ruta, f, { contentType: f.type })
+    const { data, error } = await supabase.storage.from(bucket).createSignedUploadUrl(ruta)
     if (error) throw new Error(error.message)
+
+    await new Promise<void>((listo, falla) => {
+      const x = new XMLHttpRequest()
+      x.open('PUT', data.signedUrl)
+      x.setRequestHeader('content-type', f.type || 'application/octet-stream')
+      x.upload.onprogress = e => {
+        if (e.lengthComputable) alAvanzar?.(etapa, e.loaded / e.total)
+      }
+      x.onload = () => (x.status >= 200 && x.status < 300)
+        ? listo()
+        : falla(new Error(`El servidor rechazo el archivo (${x.status})`))
+      x.onerror = () => falla(new Error('Se interrumpio la conexion durante la subida'))
+      x.onabort = () => falla(new Error('La subida se cancelo'))
+      x.send(f)
+    })
+
+    subidos.push({ bucket, ruta })
+    alAvanzar?.(etapa, 1)
     return ruta
   }
+
+  // Si el guardado falla, los archivos ya transferidos quedarian ocupando
+  // espacio sin ningun clip que los use. Se borran para que un reintento
+  // arranque limpio.
+  const limpiar = async () => {
+    for (const { bucket, ruta } of subidos) {
+      await supabase.storage.from(bucket).remove([ruta]).catch(() => {})
+    }
+  }
+
   try {
-    const rutaVideo = await subir('clips', datos.video)
-    const rutaPortada = datos.portada ? await subir('clip-covers', datos.portada) : null
+    const rutaVideo = await subir('clips', datos.video, 'video')
+    const rutaPortada = datos.portada
+      ? await subir('clip-covers', datos.portada, 'portada')
+      : null
+
+    alAvanzar?.('guardando', 0)
     const { data, error } = await supabase.rpc('admin_publicar_para', {
       creadora: datos.creadora, p_titulo: datos.titulo.trim(),
       p_archivo: rutaVideo, p_portada: rutaPortada,
       p_precio: datos.precio, p_visibilidad: datos.visibilidad,
       p_descripcion: datos.descripcion?.trim() || null,
     })
-    if (error) return { error: error.message }
+    if (error) { await limpiar(); return { error: error.message } }
+    alAvanzar?.('guardando', 1)
     return data as { ok: boolean; clip: string }
   } catch (e) {
+    await limpiar()
     return { error: (e as Error).message }
   }
 }
