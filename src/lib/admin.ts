@@ -125,3 +125,86 @@ export async function borrarDemo() {
   if (error) return { error: error.message }
   return data as { ok: boolean; borrados: number }
 }
+
+// ── Alta de creadoras con expediente ────────────────────────────────────────
+
+export type Expediente = {
+  user_id: string
+  identificacion_path: string | null
+  consentimiento_path: string | null
+  consentimiento_fecha: string | null
+  nota: string | null
+  alta_at: string
+}
+
+export async function altaCreadora(datos: {
+  handle: string; nombre: string; bio?: string
+  consentimientoFecha?: string; nota?: string
+}) {
+  const { data, error } = await supabase.rpc('admin_alta_creadora', {
+    p_handle: datos.handle.trim().toLowerCase(),
+    p_nombre: datos.nombre.trim(),
+    p_bio: datos.bio?.trim() || null,
+    p_consentimiento_fecha: datos.consentimientoFecha || null,
+    p_nota: datos.nota?.trim() || null,
+  })
+  if (error) return { error: error.message }
+  return data as { ok: boolean; id: string; handle: string; verificada: boolean }
+}
+
+/** Sube los documentos del expediente. La verificación se enciende sola cuando
+ *  ambos están cargados: lo decide un trigger en la base, no este código. */
+export async function subirExpediente(
+  creadora: string, identificacion: File, consentimiento: File, fecha?: string,
+) {
+  const subir = async (f: File, nombre: string) => {
+    const ext = (f.name.split('.').pop() || 'jpg').toLowerCase()
+    const ruta = `${creadora}/${nombre}.${ext}`
+    const { error } = await supabase.storage.from('expedientes')
+      .upload(ruta, f, { contentType: f.type, upsert: true })
+    if (error) throw new Error(error.message)
+    return ruta
+  }
+  try {
+    const a = await subir(identificacion, 'identificacion')
+    const b = await subir(consentimiento, 'consentimiento')
+    const { data, error } = await supabase.rpc('admin_expediente_documentos', {
+      creadora, identificacion: a, consentimiento: b, fecha: fecha || null,
+    })
+    if (error) return { error: error.message }
+    return data as { ok: boolean; verificada: boolean }
+  } catch (e) {
+    return { error: (e as Error).message }
+  }
+}
+
+/** Publica un clip a nombre de una creadora dada de alta. Rechaza si el
+ *  expediente está incompleto: esa regla vive en la base. */
+export async function publicarPara(datos: {
+  creadora: string; titulo: string; video: File; portada?: File | null
+  precio: number; visibilidad: 'pago' | 'suscriptores' | 'gratis'
+  descripcion?: string
+}) {
+  const subir = async (bucket: string, f: File) => {
+    const ext = (f.name.split('.').pop() || 'bin').toLowerCase()
+    const ruta = `${datos.creadora}/${crypto.randomUUID()}.${ext}`
+    const { error } = await supabase.storage.from(bucket)
+      .upload(ruta, f, { contentType: f.type })
+    if (error) throw new Error(error.message)
+    return ruta
+  }
+  try {
+    const rutaVideo = await subir('clips', datos.video)
+    const rutaPortada = datos.portada ? await subir('clip-covers', datos.portada) : null
+    const { data, error } = await supabase.rpc('admin_publicar_para', {
+      creadora: datos.creadora, p_titulo: datos.titulo.trim(),
+      p_archivo: rutaVideo, p_portada: rutaPortada,
+      p_precio: datos.precio, p_visibilidad: datos.visibilidad,
+      p_descripcion: datos.descripcion?.trim() || null,
+    })
+    if (error) return { error: error.message }
+    return data as { ok: boolean; clip: string }
+  } catch (e) {
+    return { error: (e as Error).message }
+  }
+}

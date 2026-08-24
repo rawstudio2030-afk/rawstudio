@@ -20,9 +20,19 @@ const etiqueta: React.CSSProperties = {
   font: `700 10px/1 ${UI}`, letterSpacing: 2.2, textTransform: 'uppercase', color: '#6E6A72',
 }
 
-// Misma validacion que el servicio, repetida aqui solo para avisar de inmediato.
-// La que MANDA es la del servidor: esta se puede saltar editando el JavaScript.
-const CURP_RE = /^[A-Z][AEIOUX][A-Z]{2}\d{6}[HMX][A-Z]{2}[B-DF-HJ-NP-TV-Z]{3}[0-9A-Z]\d$/
+/** Edad a partir de la fecha. Se calcula tambien aqui para avisar de inmediato,
+ *  pero la que MANDA es la del servidor: esta se puede saltar editando el
+ *  JavaScript. */
+function edadDe(iso: string): number | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return null
+  const n = new Date(iso + 'T00:00:00')
+  if (isNaN(n.getTime())) return null
+  const hoy = new Date()
+  let e = hoy.getFullYear() - n.getFullYear()
+  const m = hoy.getMonth() - n.getMonth()
+  if (m < 0 || (m === 0 && hoy.getDate() < n.getDate())) e--
+  return e
+}
 
 export default function Verificar() {
   const nav = useNavigate()
@@ -30,7 +40,8 @@ export default function Verificar() {
   const refINE = useRef<HTMLInputElement>(null)
   const refSelfie = useRef<HTMLInputElement>(null)
 
-  const [curp, setCurp] = useState('')
+  const [nacimiento, setNacimiento] = useState('')
+  const [documento, setDocumento] = useState('')
   const [ine, setIne] = useState<File | null>(null)
   const [selfie, setSelfie] = useState<File | null>(null)
   const [estado, setEstado] = useState<'listo' | 'enviando' | 'ok' | 'revision' | 'error'>('listo')
@@ -42,8 +53,9 @@ export default function Verificar() {
     <Centro texto="Tu identidad ya está verificada." accion={{ texto: 'Ir al estudio', al: () => nav('/estudio') }} />
   )
 
-  const curpOk = CURP_RE.test(curp.trim().toUpperCase())
-  const puede = curpOk && !!ine && !!selfie && estado !== 'enviando'
+  const edad = edadDe(nacimiento)
+  const edadOk = edad !== null && edad >= 18 && edad <= 120
+  const puede = edadOk && !!ine && !!selfie && estado !== 'enviando'
 
   /** Sube las imagenes al bucket privado y abre una revision manual.
    *
@@ -64,8 +76,9 @@ export default function Verificar() {
     }
     const rutaIne = await subir(ine!, 'ine')
     const rutaSelfie = await subir(selfie!, 'selfie')
-    const { error } = await supabase.rpc('solicitar_verificacion', {
-      curp: curp.trim().toUpperCase(), ine: rutaIne, selfie: rutaSelfie,
+    const { error } = await supabase.rpc('solicitar_verificacion_v2', {
+      nacimiento, ine: rutaIne, selfie: rutaSelfie,
+      documento: documento.trim() || null,
     })
     if (error) throw new Error(error.message)
   }
@@ -82,7 +95,7 @@ export default function Verificar() {
     }
 
     const cuerpo = new FormData()
-    cuerpo.append('curp', curp.trim().toUpperCase())
+    cuerpo.append('nacimiento', nacimiento)
     cuerpo.append('ine', ine!)
     cuerpo.append('selfie', selfie!)
     // El servicio necesita saber de quien es, y comprobarlo: se manda el token
@@ -154,29 +167,46 @@ export default function Verificar() {
         <div style={{ font: `400 11.5px/1.6 ${MONO}`, color: '#6E6A72', marginTop: 9 }}>
           {SERVICIO
             ? 'Única excepción: si el cotejo no es concluyente, las guardamos hasta que una persona lo revise, y se borran al resolverlo.'
-            : 'Tu CURP nunca se guarda completa, solo una huella que no permite reconstruirla.'}
+            : 'Tu documento nunca se guarda completo, solo una huella que no permite reconstruirlo.'}
         </div>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <span style={etiqueta}>CURP</span>
-        <input value={curp} maxLength={18}
-          onChange={e => { setCurp(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '')); if (estado === 'error') setEstado('listo') }}
-          placeholder="18 caracteres"
+        <span style={etiqueta}>Fecha de nacimiento</span>
+        <input type="date" value={nacimiento} max={new Date().toISOString().slice(0, 10)}
+          onChange={e => { setNacimiento(e.target.value); if (estado === 'error') setEstado('listo') }}
           style={{
             width: '100%', boxSizing: 'border-box', background: '#111116',
-            border: `1px solid ${curp.length === 18 && !curpOk ? '#FF2BD1' : 'rgba(255,255,255,.14)'}`,
-            color: '#F2F0F3', font: `400 16px/1 ${MONO}`, letterSpacing: 1.5,
-            padding: '17px 15px', outline: 'none',
+            border: `1px solid ${nacimiento && !edadOk ? '#FF2BD1' : 'rgba(255,255,255,.14)'}`,
+            color: '#F2F0F3', font: `400 16px/1 ${UI}`,
+            padding: '16px 15px', outline: 'none', colorScheme: 'dark',
           }} />
-        <span style={{ font: `400 11px/1.5 ${MONO}`, color: curp.length === 18 && !curpOk ? '#FF2BD1' : '#5E5A63' }}>
-          {curp.length === 18 && !curpOk
-            ? 'Esa CURP no es válida. Revisa que esté completa.'
-            : 'De aquí sale tu fecha de nacimiento.'}
+        <span style={{ font: `400 11px/1.5 ${MONO}`, color: nacimiento && !edadOk ? '#FF2BD1' : '#5E5A63' }}>
+          {!nacimiento ? 'Debe coincidir con tu identificación.'
+            : !edadOk ? 'Necesitas 18 años o más para publicar.'
+            : `${edad} años.`}
         </span>
       </div>
 
-      <Foto etiqueta="Tu INE" nota="La cara frontal, completa y sin reflejos"
+      {/* Opcional a proposito: sirve para detectar que una misma persona abrio
+          dos cuentas, pero exigirlo dejaria fuera a quien no trae su documento
+          a la mano o viene de otro pais. */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <span style={etiqueta}>Número de documento · opcional</span>
+        <input value={documento} maxLength={30}
+          onChange={e => setDocumento(e.target.value.toUpperCase())}
+          placeholder="CURP, pasaporte o el que uses"
+          style={{
+            width: '100%', boxSizing: 'border-box', background: '#111116',
+            border: '1px solid rgba(255,255,255,.14)', color: '#F2F0F3',
+            font: `400 15px/1 ${MONO}`, letterSpacing: 1, padding: '16px 15px', outline: 'none',
+          }} />
+        <span style={{ font: `400 11px/1.5 ${MONO}`, color: '#5E5A63' }}>
+          Solo guardamos una huella, nunca el número.
+        </span>
+      </div>
+
+      <Foto etiqueta="Tu identificación" nota="INE, pasaporte o cédula. Completa y sin reflejos"
         archivo={ine} refInput={refINE} camara="environment"
         onElegir={f => { setIne(f); if (estado === 'error') setEstado('listo') }} />
 

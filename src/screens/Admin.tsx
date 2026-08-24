@@ -99,6 +99,22 @@ export default function Admin() {
 
       {error && <div style={{ font: `400 13px/1.5 ${UI}`, color: '#FF2BD1', marginBottom: 14 }}>{error}</div>}
 
+      {pestaña === 'gente' && (
+        <div onClick={() => nav('/alta-creadora')} style={{
+          border: '1px solid rgba(200,255,61,.4)', background: 'rgba(200,255,61,.05)',
+          padding: '15px 14px', marginBottom: 16, cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+        }}>
+          <div>
+            <div style={{ ...etiqueta, color: '#C8FF3D' }}>Dar de alta una creadora</div>
+            <div style={{ font: `400 12.5px/1.6 ${UI}`, color: '#6E6A72', marginTop: 7 }}>
+              Para quien firmó papeles fuera de la app. Subes su expediente y publicas por ella.
+            </div>
+          </div>
+          <span style={{ color: '#C8FF3D', font: `700 15px/1 ${UI}` }}>&#8594;</span>
+        </div>
+      )}
+
       {/* Contenido de demostración. Se separa del resto y se explica para qué
           sirve: dentro de unas semanas nadie recordaría por qué hay perfiles
           que no corresponden a nadie. */}
