@@ -11,6 +11,7 @@ import { soyAdmin } from '../lib/admin'
 import { COLOR, FUENTE } from '../lib/diseño'
 import { Marco, useModulo } from '../admin/Marco'
 import Usuarios from '../admin/Usuarios'
+import Moderacion from '../admin/Moderacion'
 import Bitacora from '../admin/Bitacora'
 import Herramientas from '../admin/Herramientas'
 
@@ -35,9 +36,10 @@ export default function Admin() {
   return (
     <Marco titulo={modulo.titulo} resumen={modulo.clave === 'usuarios' ? undefined : undefined}>
       {modulo.clave === 'usuarios'     && <Usuarios />}
+      {modulo.clave === 'moderacion'   && <Moderacion />}
       {modulo.clave === 'bitacora'     && <Bitacora />}
       {modulo.clave === 'herramientas' && <Herramientas />}
-      {!['usuarios', 'bitacora', 'herramientas'].includes(modulo.clave) && (
+      {!['usuarios', 'moderacion', 'bitacora', 'herramientas'].includes(modulo.clave) && (
         <div style={{ padding: '70px 0', textAlign: 'center' }}>
           <div style={{ font: `400 15px/1.5 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
             Este módulo todavía no está construido.

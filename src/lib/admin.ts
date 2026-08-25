@@ -400,3 +400,75 @@ export async function registrarAcceso(metodo: string) {
   const { error } = await supabase.rpc('registrar_acceso', { metodo })
   if (error) console.warn('[admin] registrar acceso:', error.message)
 }
+
+/* ==================== Modulo 2: moderacion ==================== */
+
+export type EstadoClip = 'pendiente' | 'aprobado' | 'rechazado' | 'retirado'
+
+export type ClipEnCola = {
+  id: string; titulo: string; descripcion: string | null
+  cover_path: string | null; storage_path: string | null
+  duracion: number | null; precio: number; visibilidad: string
+  estado: EstadoClip; motivo_rechazo: string | null
+  created_at: string; revisado_at: string | null
+  creadora: string; creadora_handle: string; creadora_nombre: string
+  creadora_verificada: boolean; creadora_estado: string
+  reportes: number; gravedad: number; total_filas: number
+}
+
+export async function colaModeracion(
+  estado: EstadoClip | '' = 'pendiente', pagina = 0, porPagina = 24,
+) {
+  const { data, error } = await supabase.rpc('admin_cola_moderacion', {
+    filtro_estado: estado, pagina, por_pagina: porPagina,
+  })
+  if (error) return { filas: [] as ClipEnCola[], total: 0, error: error.message }
+  const filas = (data ?? []) as ClipEnCola[]
+  return { filas, total: filas[0]?.total_filas ?? 0, error: '' }
+}
+
+export async function conteoModeracion() {
+  const { data, error } = await supabase.rpc('admin_conteo_moderacion')
+  if (error) return {} as Record<string, number>
+  return Object.fromEntries(
+    ((data ?? []) as { estado: string; cuantos: number }[])
+      .map(r => [r.estado, Number(r.cuantos)]),
+  ) as Record<string, number>
+}
+
+export async function moderar(clip: string, decision: EstadoClip, motivo?: string) {
+  const { error } = await supabase.rpc('admin_moderar', {
+    clip, decision, motivo: motivo ?? null,
+  })
+  return error?.message ?? ''
+}
+
+export async function banderaModeracion(valor: boolean) {
+  const { error } = await supabase.rpc('admin_ajustar_bandera', {
+    p_clave: 'moderacion_previa_forzada', p_valor: valor,
+  })
+  return error?.message ?? ''
+}
+
+export async function leerBandera(): Promise<boolean> {
+  const { data, error } = await supabase
+    .from('ajustes').select('valor').eq('clave', 'moderacion_previa_forzada').maybeSingle()
+  if (error || !data) return false
+  return data.valor === true
+}
+
+export type MotivoReporte =
+  | 'menor_de_edad' | 'no_consentido' | 'violencia'
+  | 'contenido_ilegal' | 'derechos_autor' | 'spam' | 'otro'
+
+export async function reportar(
+  objetivo: { clip?: string; perfil?: string },
+  motivo: MotivoReporte, comentario?: string,
+) {
+  const { data, error } = await supabase.rpc('reportar', {
+    p_clip: objetivo.clip ?? null, p_perfil: objetivo.perfil ?? null,
+    p_motivo: motivo, p_comentario: comentario ?? null,
+  })
+  if (error) return { error: error.message }
+  return data as { ok: boolean; repetido: boolean }
+}

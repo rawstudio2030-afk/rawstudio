@@ -67,8 +67,17 @@ Deno.serve(async (req) => {
   if (!puede) return responder({ error: 'No tienes acceso a este clip', motivo: 'sin_acceso' }, 403)
 
   // 2 · ¿Está bloqueado en su país?
+  //
+  // BYPASS EXPLÍCITO DE ADMINISTRACIÓN. tiene_acceso() ya deja pasar a un
+  // admin sin pagar ni suscribirse, pero el geobloqueo es una segunda puerta
+  // y sin esto un administrador que estuviera en un país bloqueado no podría
+  // revisar el clip para moderarlo — justo cuando más falta le hace verlo.
+  // El bloqueo por país protege a la creadora de su público, no de quien
+  // administra la plataforma.
+  const { data: esAdmin } = await comoUsuario.rpc('es_admin')
+
   const pais = paisDe(req)
-  if (pais) {
+  if (pais && !esAdmin) {
     const { data: bloqueado } = await comoUsuario.rpc('bloqueado_en', { clip, pais })
     if (bloqueado) {
       return responder({

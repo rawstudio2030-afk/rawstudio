@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import { subirArchivo, crearClip, type Visibilidad } from '../lib/clips'
 import { COLOR, LINEA, TINTE, FUENTE } from '../lib/diseño'
+import MisClips from '../components/MisClips'
 
 
 const etiqueta: React.CSSProperties = {
@@ -284,6 +285,7 @@ function Centro({ texto, accion }: { texto: string; accion?: { texto: string; al
           fontStyle: 'normal', cursor: 'pointer',
         }}>{accion.texto}</span>
       )}
+      <MisClips />
     </div>
   )
 }
