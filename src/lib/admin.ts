@@ -657,3 +657,90 @@ export async function urlDocumento(bucket: 'verificacion' | 'expedientes', path:
   if (error) return null
   return data.signedUrl
 }
+
+/* ==================== Modulo 3: contenido ==================== */
+
+export async function borrarClipAdmin(clip: string, motivo: string) {
+  const { error } = await supabase.rpc('admin_borrar_clip', { clip, motivo })
+  return error?.message ?? ''
+}
+export async function restaurarClip(clip: string) {
+  const { error } = await supabase.rpc('admin_restaurar_clip', { clip })
+  return error?.message ?? ''
+}
+export async function destacar(clip: string, posicion: number | null) {
+  const { error } = await supabase.rpc('admin_destacar', { clip, posicion })
+  return error?.message ?? ''
+}
+
+export type PorPurgar = {
+  id: string; titulo: string; storage_path: string | null
+  cover_path: string | null; creadora_handle: string
+  borrado_at: string; purgar_despues_de: string
+}
+
+export async function porPurgar() {
+  const { data, error } = await supabase.rpc('admin_por_purgar')
+  if (error) return [] as PorPurgar[]
+  return (data ?? []) as PorPurgar[]
+}
+
+/** Borra los archivos DE VERDAD y solo entonces limpia las rutas.
+ *
+ *  El orden importa: si se limpiaran las rutas primero y el borrado fallara,
+ *  quedarian archivos ocupando espacio sin ninguna fila que los mencione, o
+ *  sea invisibles para siempre. */
+export async function purgar(c: PorPurgar) {
+  const errores: string[] = []
+  if (c.storage_path) {
+    const { error } = await supabase.storage.from('clips').remove([c.storage_path])
+    if (error) errores.push(`video: ${error.message}`)
+  }
+  if (c.cover_path) {
+    const { error } = await supabase.storage.from('clip-covers').remove([c.cover_path])
+    if (error) errores.push(`portada: ${error.message}`)
+  }
+  if (errores.length) return errores.join(' · ')
+  const { error } = await supabase.rpc('admin_marcar_purgado', { clip: c.id })
+  return error?.message ?? ''
+}
+
+export type ClipAdmin = {
+  id: string; title: string; estado: EstadoClip; published: boolean
+  tipo: string; price_coins: number; visibility: string
+  cover_path: string | null; storage_path: string | null
+  destacado_orden: number | null
+  borrado_at: string | null; borrado_motivo: string | null
+  purgar_despues_de: string | null
+  created_at: string
+  profiles: { handle: string; display_name: string } | null
+}
+
+/** Se consulta la tabla directamente y no por RPC: la politica de lectura ya
+ *  deja ver todo a la administracion, asi que una funcion nueva solo repetiria
+ *  la regla en un segundo sitio desde donde podria desincronizarse. */
+export async function clipsAdmin(
+  filtro: 'todos' | 'destacados' | 'borrados' | 'plataforma' = 'todos',
+  busqueda = '',
+) {
+  let q = supabase.from('clips')
+    .select('id,title,estado,published,tipo,price_coins,visibility,cover_path,' +
+            'storage_path,destacado_orden,borrado_at,borrado_motivo,' +
+            'purgar_despues_de,created_at,' +
+            'profiles!clips_creator_id_fkey(handle,display_name)')
+    .limit(100)
+
+  if (filtro === 'destacados') q = q.not('destacado_orden', 'is', null)
+    .order('destacado_orden', { ascending: true })
+  else if (filtro === 'borrados') q = q.not('borrado_at', 'is', null)
+    .order('borrado_at', { ascending: false })
+  else if (filtro === 'plataforma') q = q.neq('tipo', 'creadora')
+    .order('created_at', { ascending: false })
+  else q = q.is('borrado_at', null).order('created_at', { ascending: false })
+
+  if (busqueda.trim()) q = q.ilike('title', `%${busqueda.trim()}%`)
+
+  const { data, error } = await q
+  if (error) return { filas: [] as ClipAdmin[], error: error.message }
+  return { filas: (data ?? []) as unknown as ClipAdmin[], error: '' }
+}

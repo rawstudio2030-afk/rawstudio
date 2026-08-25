@@ -64,8 +64,12 @@ export async function urlVideoFirmada(clipId: string): Promise<Acceso> {
 }
 
 export async function clipsPublicados(limite = 30): Promise<ClipConAutora[]> {
+  // Lo destacado va primero, en el orden que le puso la administracion, y
+  // despues lo demas por fecha. nullsFirst:false manda al final lo que no
+  // esta destacado, que es todo salvo un puñado.
   const { data, error } = await supabase.from('clips')
     .select(CON_AUTORA).eq('published', true)
+    .order('destacado_orden', { ascending: true, nullsFirst: false })
     .order('published_at', { ascending: false }).limit(limite)
   if (error) { console.warn('[clips] publicados:', error.message); return [] }
   return (data ?? []) as ClipConAutora[]
