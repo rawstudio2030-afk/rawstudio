@@ -472,3 +472,69 @@ export async function reportar(
   if (error) return { error: error.message }
   return data as { ok: boolean; repetido: boolean }
 }
+
+/* ==================== Modulo 5: finanzas ==================== */
+
+/** OJO CON LAS UNIDADES: los coins NO son pesos. La plataforma mueve dos
+ *  monedas —coins adentro, pesos afuera— y el puente entre ambas es la
+ *  recarga, que todavia no existe porque no hay procesador de pagos. Sumarlas
+ *  o convertirlas exigiria un tipo de cambio que nadie ha definido. */
+export type FilaFinanzas = {
+  fuente: string; operaciones: number; bruto_coins: number
+  comision_coins: number; para_creadoras: number
+}
+
+export type DineroReal = {
+  ordenes_pagadas: number; entrado_mxn: number
+  ordenes_pendientes: number; pendiente_mxn: number
+  dispersado_mxn: number; isr_mxn: number; iva_ret_mxn: number
+}
+
+export type PuntoSerie = { dia: string; operaciones: number; coins: number }
+
+export type FilaRanking = {
+  id: string; handle: string; nombre: string; ganado: number
+  ventas: number; propinas: number; clips_publicados: number
+}
+
+const num = <T,>(f: T, ks: (keyof T)[]) => {
+  const o = { ...f }
+  for (const k of ks) o[k] = Number(o[k]) as T[keyof T]
+  return o
+}
+
+export async function finanzas(desde?: string | null, hasta?: string | null) {
+  const { data, error } = await supabase.rpc('admin_finanzas', {
+    desde_: desde || null, hasta_: hasta || null,
+  })
+  if (error) return { filas: [] as FilaFinanzas[], error: error.message }
+  const filas = ((data ?? []) as FilaFinanzas[]).map(f =>
+    num(f, ['operaciones', 'bruto_coins', 'comision_coins', 'para_creadoras']))
+  return { filas, error: '' }
+}
+
+export async function dineroReal(desde?: string | null, hasta?: string | null) {
+  const { data, error } = await supabase.rpc('admin_dinero_real', {
+    desde_: desde || null, hasta_: hasta || null,
+  })
+  if (error || !data?.[0]) return null
+  return num(data[0] as DineroReal, [
+    'ordenes_pagadas', 'entrado_mxn', 'ordenes_pendientes',
+    'pendiente_mxn', 'dispersado_mxn', 'isr_mxn', 'iva_ret_mxn',
+  ])
+}
+
+export async function serieFinanzas(dias = 30) {
+  const { data, error } = await supabase.rpc('admin_finanzas_serie', { dias })
+  if (error) return [] as PuntoSerie[]
+  return ((data ?? []) as PuntoSerie[]).map(p => num(p, ['operaciones', 'coins']))
+}
+
+export async function rankingCreadoras(desde?: string | null, hasta?: string | null, limite = 20) {
+  const { data, error } = await supabase.rpc('admin_ranking_creadoras', {
+    desde_: desde || null, hasta_: hasta || null, limite,
+  })
+  if (error) return [] as FilaRanking[]
+  return ((data ?? []) as FilaRanking[]).map(f =>
+    num(f, ['ganado', 'ventas', 'propinas', 'clips_publicados']))
+}
