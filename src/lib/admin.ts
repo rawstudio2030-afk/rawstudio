@@ -880,3 +880,82 @@ export async function enviarCampana(
     return { error: (e as Error).message }
   }
 }
+
+/* ==================== Modulo 8: retiros y reembolsos ==================== */
+
+export type EstadoRetiro = 'pendiente' | 'aprobada' | 'pagada' | 'rechazada'
+
+export type Retiro = {
+  id: string; creator_id: string; handle: string; nombre: string
+  coins: number; estado: EstadoRetiro
+  clabe: string | null; banco: string | null; titular: string | null
+  rfc: string | null; regimen: string | null
+  motivo_rechazo: string | null
+  created_at: string; resuelta_at: string | null
+  saldo_actual: number; verificada: boolean
+  bruto_mxn: number | null; neto_mxn: number | null; spei_ref: string | null
+  total_filas: number
+}
+
+export async function listarRetiros(
+  estado: EstadoRetiro | '' = 'pendiente', pagina = 0, porPagina = 30,
+) {
+  const { data, error } = await supabase.rpc('admin_retiros', {
+    filtro_estado: estado, pagina, por_pagina: porPagina,
+  })
+  if (error) return { filas: [] as Retiro[], total: 0, error: error.message }
+  const filas = (data ?? []) as Retiro[]
+  return { filas, total: Number(filas[0]?.total_filas ?? 0), error: '' }
+}
+
+export async function resolverRetiro(id: string, aprobar: boolean, motivo?: string) {
+  const { data, error } = await supabase.rpc('admin_resolver_retiro', {
+    solicitud: id, aprobar, motivo: motivo ?? null,
+  })
+  if (error) return { error: error.message }
+  return data as { ok: boolean; estado: string; bruto_mxn?: number; neto_mxn?: number }
+}
+
+export async function marcarPagado(id: string, referencia: string) {
+  const { error } = await supabase.rpc('admin_marcar_pagado', {
+    solicitud: id, referencia,
+  })
+  return error?.message ?? ''
+}
+
+export async function reembolsar(
+  destino: string, deQuien: string, cantidad: number, motivo: string, ref?: string,
+) {
+  const { data, error } = await supabase.rpc('admin_reembolsar', {
+    destino, de_quien: deQuien, cantidad, motivo, referencia: ref ?? null,
+  })
+  if (error) return { error: error.message }
+  return data as { ok: boolean; saldo_origen: number }
+}
+
+export type EncargoDisputa = {
+  id: string; fan: string; fan_handle: string
+  creadora: string; creadora_handle: string
+  descripcion: string; coins: number; estado: string
+  entrega_max: string; created_at: string; dias_de_retraso: number
+}
+
+export async function encargosEnDisputa() {
+  const { data, error } = await supabase.rpc('admin_encargos_en_disputa')
+  if (error) return [] as EncargoDisputa[]
+  return (data ?? []) as EncargoDisputa[]
+}
+
+export async function valorCoin(): Promise<number | null> {
+  const { data } = await supabase.from('ajustes')
+    .select('valor').eq('clave', 'valor_coin_mxn').maybeSingle()
+  const v = data?.valor
+  return typeof v === 'number' ? v : null
+}
+
+export async function fijarValorCoin(centavos: number) {
+  const { error } = await supabase.rpc('admin_ajustar_bandera_num', {
+    p_clave: 'valor_coin_mxn', p_valor: centavos,
+  })
+  return error?.message ?? ''
+}
