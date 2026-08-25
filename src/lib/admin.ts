@@ -744,3 +744,139 @@ export async function clipsAdmin(
   if (error) return { filas: [] as ClipAdmin[], error: error.message }
   return { filas: (data ?? []) as unknown as ClipAdmin[], error: '' }
 }
+
+/* ==================== Modulo 4: comunicacion ==================== */
+
+export type Canal = 'correo' | 'mensaje'
+
+export type Segmento = {
+  clave: string; titulo: string; nota: string
+}
+
+/** Las claves tienen que coincidir EXACTAMENTE con las de admin_segmento():
+ *  una que no exista devuelve cero personas y la campaña se rechaza sola, que
+ *  es preferible a mandarle correo a quien no tocaba. */
+export const SEGMENTOS: Segmento[] = [
+  { clave: 'todas', titulo: 'Todas las cuentas', nota: 'Menos las baneadas y las de demostración.' },
+  { clave: 'creadoras', titulo: 'Creadoras', nota: 'Todas las que pueden publicar.' },
+  { clave: 'creadoras_sin_chat', titulo: 'Creadoras que no cobran por chat',
+    nota: 'Nunca han mandado un mensaje de paga. Probablemente no saben que se puede.' },
+  { clave: 'creadoras_sin_ventas_30d', titulo: 'Creadoras sin ventas en 30 días', nota: '' },
+  { clave: 'creadoras_sin_clips', titulo: 'Creadoras sin ningún clip aprobado',
+    nota: 'Se registraron y no llegaron a publicar.' },
+  { clave: 'creadoras_sin_verificar', titulo: 'Creadoras sin verificar',
+    nota: 'No pueden publicar ni cobrar hasta que se verifiquen.' },
+  { clave: 'usuarias', titulo: 'Usuarias (no creadoras)', nota: '' },
+  { clave: 'inactivas_30d', titulo: 'Sin entrar en 30 días', nota: '' },
+]
+
+export type PersonaSegmento = { id: string; handle: string; nombre: string; correo: string }
+
+export async function verSegmento(clave: string) {
+  const { data, error } = await supabase.rpc('admin_segmento', { clave })
+  if (error) return { gente: [] as PersonaSegmento[], error: error.message }
+  return { gente: (data ?? []) as PersonaSegmento[], error: '' }
+}
+
+/** Sustituye las variables. Es el MISMO texto que usa la Edge Function para
+ *  el correo, para que la vista previa no mienta. */
+export function personalizar(texto: string, p: PersonaSegmento) {
+  return texto
+    .replaceAll('{nombre_usuario}', p.nombre || p.handle)
+    .replaceAll('{handle}', '@' + p.handle)
+    .replaceAll('{correo}', p.correo)
+}
+
+export type Plantilla = {
+  id: string; nombre: string; canal: Canal
+  asunto: string | null; cuerpo: string; updated_at: string
+}
+
+export async function plantillas() {
+  const { data, error } = await supabase.from('plantillas')
+    .select('id,nombre,canal,asunto,cuerpo,updated_at')
+    .order('updated_at', { ascending: false })
+  if (error) return [] as Plantilla[]
+  return (data ?? []) as Plantilla[]
+}
+
+export async function guardarPlantilla(
+  nombre: string, canal: Canal, asunto: string | null, cuerpo: string, id?: string,
+) {
+  const { data, error } = await supabase.rpc('admin_guardar_plantilla', {
+    p_nombre: nombre, p_canal: canal, p_asunto: asunto,
+    p_cuerpo: cuerpo, p_id: id ?? null,
+  })
+  if (error) return { error: error.message }
+  return { id: data as string }
+}
+
+export async function borrarPlantilla(id: string) {
+  const { error } = await supabase.rpc('admin_borrar_plantilla', { p_id: id })
+  return error?.message ?? ''
+}
+
+export type Campana = {
+  id: string; canal: Canal; segmento: string
+  asunto: string | null; cuerpo: string; estado: string
+  destinatarios: number; enviados: number; fallidos: number
+  created_at: string; terminada_at: string | null
+}
+
+export async function campanas() {
+  const { data, error } = await supabase.from('campanas')
+    .select('id,canal,segmento,asunto,cuerpo,estado,destinatarios,enviados,fallidos,created_at,terminada_at')
+    .order('created_at', { ascending: false }).limit(50)
+  if (error) return [] as Campana[]
+  return (data ?? []) as Campana[]
+}
+
+/** Manda la campaña.
+ *
+ *  El mensaje interno se envia desde aqui, uno por persona. El correo NO: va
+ *  a una Edge Function porque la llave de Resend tiene que quedarse del lado
+ *  del servidor. Puesta en el navegador la leeria cualquiera con las
+ *  herramientas de desarrollo y podria mandar correo en nombre del dominio. */
+export async function enviarCampana(
+  canal: Canal, segmento: string, asunto: string, cuerpo: string,
+  avance?: (hechos: number, total: number) => void,
+) {
+  const { data: id, error } = await supabase.rpc('admin_abrir_campana', {
+    p_canal: canal, p_segmento: segmento,
+    p_asunto: canal === 'correo' ? asunto : null, p_cuerpo: cuerpo,
+  })
+  if (error) return { error: error.message }
+  const campana = id as string
+
+  if (canal === 'mensaje') {
+    const { gente, error: e2 } = await verSegmento(segmento)
+    if (e2) return { error: e2 }
+    let hechos = 0
+    for (const p of gente) {
+      await supabase.rpc('admin_mensaje_interno', {
+        destino: p.id, texto: personalizar(cuerpo, p), campana,
+      })
+      avance?.(++hechos, gente.length)
+    }
+    const { data } = await supabase.rpc('admin_cerrar_campana', { campana })
+    return { resultado: data as { enviados: number; fallidos: number } }
+  }
+
+  const { data: s } = await supabase.auth.getSession()
+  const base = import.meta.env.VITE_SUPABASE_URL
+  try {
+    const r = await fetch(`${base}/functions/v1/enviar-campana`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${s.session?.access_token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ campana, segmento, asunto, cuerpo }),
+    })
+    const j = await r.json()
+    if (!r.ok) return { error: j.ayuda ? `${j.error}. ${j.ayuda}` : (j.error ?? 'Falló el envío') }
+    return { resultado: j as { enviados: number; fallidos: number } }
+  } catch (e) {
+    return { error: (e as Error).message }
+  }
+}

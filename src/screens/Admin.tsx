@@ -12,6 +12,7 @@ import { COLOR, FUENTE } from '../lib/diseño'
 import { Marco, useModulo } from '../admin/Marco'
 import Usuarios from '../admin/Usuarios'
 import Moderacion from '../admin/Moderacion'
+import Comunicacion from '../admin/Comunicacion'
 import Contenido from '../admin/Contenido'
 import Verificacion from '../admin/Verificacion'
 import Reportes from '../admin/Reportes'
@@ -42,12 +43,13 @@ export default function Admin() {
       {modulo.clave === 'usuarios'     && <Usuarios />}
       {modulo.clave === 'moderacion'   && <Moderacion />}
       {modulo.clave === 'contenido'    && <Contenido />}
+      {modulo.clave === 'comunicacion' && <Comunicacion />}
       {modulo.clave === 'reportes'     && <Reportes />}
       {modulo.clave === 'verificacion' && <Verificacion />}
       {modulo.clave === 'finanzas'     && <Finanzas />}
       {modulo.clave === 'bitacora'     && <Bitacora />}
       {modulo.clave === 'herramientas' && <Herramientas />}
-      {!['usuarios', 'moderacion', 'contenido', 'reportes', 'verificacion', 'finanzas', 'bitacora', 'herramientas'].includes(modulo.clave) && (
+      {!['usuarios', 'moderacion', 'contenido', 'comunicacion', 'reportes', 'verificacion', 'finanzas', 'bitacora', 'herramientas'].includes(modulo.clave) && (
         <div style={{ padding: '70px 0', textAlign: 'center' }}>
           <div style={{ font: `400 15px/1.5 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
             Este módulo todavía no está construido.

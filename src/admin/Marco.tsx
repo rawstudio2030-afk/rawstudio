@@ -23,7 +23,7 @@ export const MODULOS: Modulo[] = [
   { clave: 'usuarios',     titulo: 'Usuarios',      n: '01', listo: true  },
   { clave: 'moderacion',   titulo: 'Moderación',    n: '02', listo: true  },
   { clave: 'contenido',    titulo: 'Contenido',     n: '03', listo: true  },
-  { clave: 'comunicacion', titulo: 'Comunicación',  n: '04', listo: false },
+  { clave: 'comunicacion', titulo: 'Comunicación',  n: '04', listo: true  },
   { clave: 'finanzas',     titulo: 'Finanzas',      n: '05', listo: true  },
   { clave: 'bitacora',     titulo: 'Bitácora',      n: '06', listo: true  },
   { clave: 'reportes',     titulo: 'Reportes',      n: '07', listo: true  },
