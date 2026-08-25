@@ -605,3 +605,55 @@ export const MOTIVOS: { v: MotivoReporte; t: string; ayuda: string }[] = [
   { v: 'spam',             t: 'Spam o engaño', ayuda: '' },
   { v: 'otro',             t: 'Otra cosa', ayuda: 'Cuéntanos qué pasa.' },
 ]
+
+/* ==================== Modulo 9: verificacion ==================== */
+
+export type EstadoVerificacion =
+  'procesando' | 'aprobada' | 'rechazada' | 'pendiente_revision'
+
+export type Verificacion = {
+  id: string; user_id: string; handle: string; nombre: string; email: string
+  estado: EstadoVerificacion; similitud: number | null
+  paso_fallido: string | null; motivo: string | null
+  edad: number | null; fecha_nacimiento: string | null
+  ine_path: string | null; selfie_path: string | null
+  borrar_despues_de: string | null
+  revisada_por: string | null; revisada_at: string | null; nota_revision: string | null
+  created_at: string
+  identidad_verificada: boolean; intentos: number
+  tiene_expediente: boolean; clips_pendientes: number; total_filas: number
+}
+
+export async function listarVerificaciones(
+  estado: EstadoVerificacion | '' = 'pendiente_revision', pagina = 0, porPagina = 25,
+) {
+  const { data, error } = await supabase.rpc('admin_verificaciones', {
+    filtro_estado: estado, pagina, por_pagina: porPagina,
+  })
+  if (error) return { filas: [] as Verificacion[], total: 0, error: error.message }
+  const filas = (data ?? []) as Verificacion[]
+  return { filas, total: Number(filas[0]?.total_filas ?? 0), error: '' }
+}
+
+export async function conteoVerificaciones() {
+  const { data, error } = await supabase.rpc('admin_conteo_verificaciones')
+  if (error) return {} as Record<string, number>
+  return Object.fromEntries(((data ?? []) as { estado: string; cuantos: number }[])
+    .map(r => [r.estado, Number(r.cuantos)])) as Record<string, number>
+}
+
+export async function resolverVerificacion(id: string, aprobar: boolean, nota?: string) {
+  const { error } = await supabase.rpc('admin_resolver_verificacion', {
+    verificacion: id, aprobar, nota: nota ?? null,
+  })
+  return error?.message ?? ''
+}
+
+/** Los documentos viven en un bucket privado que solo lee la administracion.
+ *  La liga dura cinco minutos: es tiempo de sobra para mirarla y poco para
+ *  que quede pegada en ningun lado. */
+export async function urlDocumento(bucket: 'verificacion' | 'expedientes', path: string) {
+  const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, 300)
+  if (error) return null
+  return data.signedUrl
+}
