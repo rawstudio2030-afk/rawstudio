@@ -14,6 +14,7 @@ import { clipsDe, urlPortada, type Clip } from '../lib/clips'
 import { portadaDe } from '../lib/portadas'
 import type { Perfil } from '../lib/supabase'
 import { COLOR, FUENTE } from '../lib/diseño'
+import Reportar from '../components/Reportar'
 
 
 export default function CreatorProfile() {
@@ -172,6 +173,10 @@ export default function CreatorProfile() {
               </div>
             </>
           )}
+        </div>
+
+        <div style={{ marginTop: 24, textAlign: 'center' }}>
+          <Reportar perfil={perfil.id} etiqueta="Reportar este perfil" />
         </div>
       </div>
     </div>

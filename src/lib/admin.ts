@@ -538,3 +538,70 @@ export async function rankingCreadoras(desde?: string | null, hasta?: string | n
   return ((data ?? []) as FilaRanking[]).map(f =>
     num(f, ['ganado', 'ventas', 'propinas', 'clips_publicados']))
 }
+
+/* ==================== Modulo 7: reportes ==================== */
+
+export type EstadoReporte = 'nuevo' | 'en_revision' | 'resuelto' | 'desestimado'
+
+export type Reporte = {
+  id: string; motivo: MotivoReporte; gravedad: number
+  comentario: string | null; estado: EstadoReporte
+  created_at: string; resuelto_at: string | null
+  nota_resolucion: string | null; ip: string | null
+  reporta: string; reporta_handle: string | null
+  clip_id: string | null; clip_titulo: string | null
+  clip_estado: string | null; clip_portada: string | null
+  perfil_id: string | null; perfil_handle: string | null; perfil_estado: string | null
+  creadora: string | null; creadora_handle: string | null
+  otros_del_mismo: number; total_filas: number
+}
+
+export async function listarReportes(
+  estado: EstadoReporte | '' = 'nuevo', motivo: MotivoReporte | '' = '',
+  pagina = 0, porPagina = 30,
+) {
+  const { data, error } = await supabase.rpc('admin_reportes', {
+    filtro_estado: estado, filtro_motivo: motivo, pagina, por_pagina: porPagina,
+  })
+  if (error) return { filas: [] as Reporte[], total: 0, error: error.message }
+  const filas = (data ?? []) as Reporte[]
+  return { filas, total: Number(filas[0]?.total_filas ?? 0), error: '' }
+}
+
+export async function conteoReportes() {
+  const { data, error } = await supabase.rpc('admin_conteo_reportes')
+  if (error) return {} as Record<string, number>
+  return Object.fromEntries(((data ?? []) as { estado: string; cuantos: number }[])
+    .map(r => [r.estado, Number(r.cuantos)])) as Record<string, number>
+}
+
+export async function resolverReporte(id: string, estado: EstadoReporte, nota?: string) {
+  const { error } = await supabase.rpc('admin_resolver_reporte', {
+    reporte: id, nuevo_estado: estado, nota: nota ?? null,
+  })
+  return error?.message ?? ''
+}
+
+/** Cierra de golpe todos los pendientes del mismo objetivo. La decision de
+ *  moderacion fue una sola; cerrarlos de a uno invita a dejarse alguno
+ *  abierto, y los abiertos son los que cuentan para la despublicacion. */
+export async function cerrarReportesDe(objetivo: { clip?: string; perfil?: string }, nota?: string) {
+  const { data, error } = await supabase.rpc('admin_cerrar_reportes_de', {
+    p_clip: objetivo.clip ?? null, p_perfil: objetivo.perfil ?? null, nota: nota ?? null,
+  })
+  if (error) return { error: error.message }
+  return data as { ok: boolean; cerrados: number }
+}
+
+export const MOTIVOS: { v: MotivoReporte; t: string; ayuda: string }[] = [
+  { v: 'menor_de_edad',    t: 'Parece una persona menor de edad',
+    ayuda: 'Lo revisamos de inmediato y con prioridad sobre todo lo demás.' },
+  { v: 'no_consentido',    t: 'Se publicó sin consentimiento',
+    ayuda: 'Alguien aparece aquí sin haber aceptado que se publicara.' },
+  { v: 'violencia',        t: 'Violencia o daño real', ayuda: '' },
+  { v: 'contenido_ilegal', t: 'Otro contenido ilegal', ayuda: '' },
+  { v: 'derechos_autor',   t: 'Es mío y lo subieron sin permiso',
+    ayuda: 'Si eres la persona titular, dínoslo en el comentario.' },
+  { v: 'spam',             t: 'Spam o engaño', ayuda: '' },
+  { v: 'otro',             t: 'Otra cosa', ayuda: 'Cuéntanos qué pasa.' },
+]

@@ -11,6 +11,7 @@ import { useSesion } from '../lib/sesion'
 import { urlAvatar } from '../lib/perfiles'
 import { clipPorId, urlPortada, urlVideoFirmada, clipsPublicados, type ClipConAutora } from '../lib/clips'
 import { comprarClip, saldo } from '../lib/monedero'
+import Reportar from '../components/Reportar'
 import MarcaDeAgua from '../components/MarcaDeAgua'
 import { COLOR, VELO, TINTE, FUENTE } from '../lib/diseño'
 
@@ -239,6 +240,12 @@ export default function ClipDetail() {
             )}
           </div>
         )}
+
+        {/* Discreto y al pie: reportar no es una accion que haya que invitar
+            a hacer, pero tiene que estar cuando hace falta. */}
+        <div style={{ marginTop: 26, textAlign: 'center' }}>
+          <Reportar clip={id} etiqueta="Reportar este clip" />
+        </div>
       </div>
     </div>
   )
