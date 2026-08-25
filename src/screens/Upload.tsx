@@ -5,6 +5,7 @@ import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import { subirArchivo, crearClip, type Visibilidad } from '../lib/clips'
+import { miniaturaDeVideo } from '../lib/miniatura'
 import { COLOR, LINEA, TINTE, FUENTE } from '../lib/diseño'
 import MisClips from '../components/MisClips'
 
@@ -69,16 +70,27 @@ export default function Upload() {
     if (!listo || !video || !sesion) return
     setEstado('subiendo'); setDetalle('')
 
+    // Se saca el cuadro ANTES de subir el video: el archivo ya esta aqui, y
+    // si se hiciera despues habria que esperar toda la subida para descubrir
+    // que el formato no se puede decodificar.
+    let imagen = portada
+    if (!imagen) {
+      setPaso('Sacando la portada del video…')
+      imagen = await miniaturaDeVideo(video)
+    }
+
     setPaso('Subiendo el video…')
     const v = await subirArchivo('clips', sesion.user.id, video)
     if (v.error) { setEstado('error'); setDetalle(v.error); return }
 
     let coverPath: string | null = null
-    if (portada) {
+    if (imagen) {
       setPaso('Subiendo la portada…')
-      const c = await subirArchivo('clip-covers', sesion.user.id, portada)
-      if (c.error) { setEstado('error'); setDetalle(c.error); return }
-      coverPath = c.path ?? null
+      const c = await subirArchivo('clip-covers', sesion.user.id, imagen)
+      // Que falle la portada NO tumba la publicacion: sin ella el clip se
+      // muestra con el patron generado, y perder el video subido por una
+      // imagen seria mucho peor.
+      coverPath = c.error ? null : (c.path ?? null)
     }
 
     setPaso('Publicando…')

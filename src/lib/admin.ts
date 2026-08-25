@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { miniaturaDeVideo } from './miniatura'
 
 /** Si es admin lo decide la base, no el cliente. Esta consulta solo sirve para
  *  DIBUJAR o no el panel; la proteccion de verdad son las politicas RLS: aunque
@@ -235,9 +236,17 @@ export async function publicarPara(
   }
 
   try {
+    // Si no viene portada, se saca un cuadro del propio video. Antes se caia
+    // siempre al patron generado, que no dice nada de lo que hay dentro.
+    let portada = datos.portada ?? null
+    if (!portada) {
+      alAvanzar?.('portada', 0)
+      portada = await miniaturaDeVideo(datos.video)
+    }
+
     const rutaVideo = await subir('clips', datos.video, 'video')
-    const rutaPortada = datos.portada
-      ? await subir('clip-covers', datos.portada, 'portada')
+    const rutaPortada = portada
+      ? await subir('clip-covers', portada, 'portada')
       : null
 
     alAvanzar?.('guardando', 0)
@@ -706,7 +715,7 @@ export async function purgar(c: PorPurgar) {
 }
 
 export type ClipAdmin = {
-  id: string; title: string; estado: EstadoClip; published: boolean
+  id: string; creator_id: string; title: string; estado: EstadoClip; published: boolean
   tipo: string; price_coins: number; visibility: string
   cover_path: string | null; storage_path: string | null
   destacado_orden: number | null
@@ -724,7 +733,7 @@ export async function clipsAdmin(
   busqueda = '',
 ) {
   let q = supabase.from('clips')
-    .select('id,title,estado,published,tipo,price_coins,visibility,cover_path,' +
+    .select('id,creator_id,title,estado,published,tipo,price_coins,visibility,cover_path,' +
             'storage_path,destacado_orden,borrado_at,borrado_motivo,' +
             'purgar_despues_de,created_at,' +
             'profiles!clips_creator_id_fkey(handle,display_name)')
@@ -958,4 +967,29 @@ export async function fijarValorCoin(centavos: number) {
     p_clave: 'valor_coin_mxn', p_valor: centavos,
   })
   return error?.message ?? ''
+}
+
+/** Genera la portada de un clip que se subio sin ella, sacando un cuadro del
+ *  video ya publicado. Para los que quedaron antes de que la subida lo hiciera
+ *  sola. */
+export async function generarPortada(clip: string, creadora: string) {
+  const { urlVideoFirmada } = await import('./clips')
+  const { miniaturaDeUrl } = await import('./miniatura')
+
+  const acceso = await urlVideoFirmada(clip)
+  if (!('url' in acceso) || !acceso.url) {
+    return { error: ('error' in acceso && acceso.error) || 'No se pudo abrir el video' }
+  }
+  const imagen = await miniaturaDeUrl(acceso.url)
+  if (!imagen) {
+    return { error: 'El navegador no pudo decodificar ese video para sacar un cuadro' }
+  }
+  const ruta = `${creadora}/${crypto.randomUUID()}.jpg`
+  const { error } = await supabase.storage.from('clip-covers')
+    .upload(ruta, imagen, { contentType: 'image/jpeg' })
+  if (error) return { error: error.message }
+
+  const { error: e2 } = await supabase.rpc('admin_fijar_portada', { clip, ruta })
+  if (e2) return { error: e2.message }
+  return { ok: true }
 }

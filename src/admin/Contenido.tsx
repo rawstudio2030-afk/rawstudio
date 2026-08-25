@@ -13,7 +13,7 @@ import { useNavigate } from 'react-router-dom'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 import {
   clipsAdmin, borrarClipAdmin, restaurarClip, destacar,
-  porPurgar, purgar, type ClipAdmin, type PorPurgar,
+  porPurgar, purgar, generarPortada, type ClipAdmin, type PorPurgar,
 } from '../lib/admin'
 import { urlPortada } from '../lib/clips'
 import {
@@ -104,6 +104,14 @@ export default function Contenido() {
           <Boton chico tono="primario" al={() => restaurarClip(c.id).then(tras)}>Restaurar</Boton>
         ) : (
           <>
+            {!c.cover_path && c.storage_path && (
+              <Boton chico al={async () => {
+                setAviso('Sacando el cuadro del video…')
+                const r = await generarPortada(c.id, c.creator_id)
+                setAviso('')
+                if ('error' in r) setError(r.error!); else { setError(''); await cargar() }
+              }}>Generar portada</Boton>
+            )}
             {c.estado === 'aprobado' && (
               c.destacado_orden != null
                 ? <Boton chico al={() => destacar(c.id, null).then(tras)}>Quitar de portada</Boton>

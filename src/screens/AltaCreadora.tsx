@@ -90,7 +90,8 @@ export default function AltaCreadora() {
       // Un video de 17 MB puede tardar varios minutos. Sin porcentaje no hay
       // forma de distinguir una subida lenta de una atorada.
       (etapa, fraccion) => setSubiendo(
-        etapa === 'guardando' ? 'Guardando…'
+        etapa === 'portada' && fraccion === 0 ? 'Sacando la portada del video…'
+          : etapa === 'guardando' ? 'Guardando…'
           : `Subiendo ${etapa === 'video' ? 'el video' : 'la portada'} · ${Math.round(fraccion * 100)}%`,
       ),
     )
