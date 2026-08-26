@@ -756,7 +756,7 @@ export async function clipsAdmin(
 
 /* ==================== Modulo 4: comunicacion ==================== */
 
-export type Canal = 'correo' | 'mensaje'
+export type Canal = 'correo' | 'mensaje' | 'redes_sociales'
 
 export type Segmento = {
   clave: string; titulo: string; nota: string
@@ -992,4 +992,42 @@ export async function generarPortada(clip: string, creadora: string) {
   const { error: e2 } = await supabase.rpc('admin_fijar_portada', { clip, ruta })
   if (e2) return { error: e2.message }
   return { ok: true }
+}
+
+/* ==================== Módulo: Redes Sociales ==================== */
+
+export type PostRedSocial = {
+  id: string; plataforma: string; contenido: string; video_url: string | null
+  estado: string; url_plataforma: string | null; likes: number; compartidas: number
+  respuestas: number; views: number; created_at: string; updated_at: string
+}
+
+export async function publicarEnX(contenido: string, videoUrl?: string | null) {
+  const { data, error } = await supabase.rpc('admin_publicar_en_x', {
+    p_contenido: contenido, p_video_url: videoUrl ?? null,
+  })
+  if (error) return { error: error.message }
+  return { id: data as string }
+}
+
+export async function publicarEnTikTok(contenido: string, videoUrl: string) {
+  const { data, error } = await supabase.rpc('admin_publicar_en_tiktok', {
+    p_contenido: contenido, p_video_url: videoUrl,
+  })
+  if (error) return { error: error.message }
+  return { id: data as string }
+}
+
+export async function historialRedSocial(plataforma?: string) {
+  const query = supabase.from('redes_sociales_posts')
+    .select('id,plataforma,contenido,video_url,estado,url_plataforma,likes,compartidas,respuestas,views,created_at,updated_at')
+    .order('created_at', { ascending: false }).limit(50)
+
+  if (plataforma) {
+    query.eq('plataforma', plataforma)
+  }
+
+  const { data, error } = await query
+  if (error) return [] as PostRedSocial[]
+  return (data ?? []) as PostRedSocial[]
 }

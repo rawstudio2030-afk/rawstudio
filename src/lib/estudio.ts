@@ -1,6 +1,6 @@
 import { supabase } from './supabase'
 
-/** Los siete canales de ingreso de la plataforma, con su estado real.
+/** Los seis canales de ingreso de la plataforma, con su estado real.
  *
  *  Existe esta lista porque el estudio solo ofrecia "publicar un clip", aunque
  *  la plataforma promete siete formas de ganar. Cada canal declara si ya se

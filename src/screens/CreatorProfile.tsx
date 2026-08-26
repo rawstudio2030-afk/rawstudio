@@ -15,6 +15,7 @@ import { portadaDe } from '../lib/portadas'
 import type { Perfil } from '../lib/supabase'
 import { COLOR, FUENTE } from '../lib/diseño'
 import Reportar from '../components/Reportar'
+import OfertaCreadora from '../components/OfertaCreadora'
 
 
 export default function CreatorProfile() {
@@ -174,6 +175,8 @@ export default function CreatorProfile() {
             </>
           )}
         </div>
+
+        <OfertaCreadora creadora={perfil.id} handle={perfil.handle} />
 
         <div style={{ marginTop: 24, textAlign: 'center' }}>
           <Reportar perfil={perfil.id} etiqueta="Reportar este perfil" />

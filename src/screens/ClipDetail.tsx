@@ -11,9 +11,10 @@ import { useSesion } from '../lib/sesion'
 import { urlAvatar } from '../lib/perfiles'
 import { clipPorId, urlPortada, urlVideoFirmada, clipsPublicados, type ClipConAutora } from '../lib/clips'
 import { comprarClip, saldo } from '../lib/monedero'
+import { rentarClip } from '../lib/canales'
 import Reportar from '../components/Reportar'
 import MarcaDeAgua from '../components/MarcaDeAgua'
-import { COLOR, VELO, TINTE, FUENTE } from '../lib/diseño'
+import { COLOR, LINEA, VELO, TINTE, FUENTE } from '../lib/diseño'
 
 
 export default function ClipDetail() {
@@ -26,6 +27,7 @@ export default function ClipDetail() {
   const [bloqueo, setBloqueo] = useState<{ motivo?: string; pais?: string } | null>(null)
   const [coins, setCoins] = useState<number | null>(null)
   const [comprando, setComprando] = useState(false)
+  const [rentando, setRentando] = useState(false)
   const [errorCompra, setErrorCompra] = useState('')
 
   useEffect(() => {
@@ -48,6 +50,19 @@ export default function ClipDetail() {
     if (sesion) saldo().then(v => { if (vivo) setCoins(v) })
     return () => { vivo = false }
   }, [id, sesion])
+
+  const rentar = async () => {
+    if (!clip || rentando) return
+    setRentando(true); setErrorCompra('')
+    const r = await rentarClip(clip.id)
+    setRentando(false)
+    if ('error' in r) { setErrorCompra(r.error!); return }
+    // Igual que al comprar: hay que volver a pedir la URL firmada, porque
+    // hasta ahora la funcion de borde la estaba negando.
+    setCoins(r.saldo ?? null)
+    const a = await urlVideoFirmada(clip.id)
+    if ('url' in a) setVideo(a.url)
+  }
 
   // Tras comprar se vuelve a pedir la URL firmada: la politica de storage ya
   // reconoce la compra, asi que ahora si entrega el archivo.
@@ -221,6 +236,20 @@ export default function ClipDetail() {
                       textAlign: 'center', cursor: 'pointer', textDecoration: 'underline',
                     }}>
                       Tu saldo: {coins ?? '…'} coins
+                    </div>
+                  )}
+                  {/* Renta: mas barata y por tiempo. Se ofrece DEBAJO de la
+                      compra porque la compra es lo que le deja mas a la
+                      creadora; quien no quiera pagarla ya encuentra esto. */}
+                  {clip.renta_coins != null && clip.renta_horas != null && sesion && (
+                    <div onClick={rentando ? undefined : rentar} style={{
+                      marginTop: 10, textAlign: 'center', padding: 14,
+                      border: `1px solid ${LINEA.fuerte}`, cursor: 'pointer',
+                      font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.6,
+                      textTransform: 'uppercase', color: COLOR.textoSuave,
+                    }}>
+                      {rentando ? 'Rentando…'
+                        : `O réntalo ${clip.renta_horas} h por ${clip.renta_coins} coins`}
                     </div>
                   )}
                   {errorCompra && (

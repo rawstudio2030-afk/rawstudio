@@ -22,6 +22,7 @@ export const RUTAS_PANEL = ['/admin', '/alta-creadora']
 
 export const EXIGE_SESION = [
   '/library', '/chat', '/perfil', '/upload', '/earnings', '/admin', '/wallet',
+  '/estudio', '/estudio/niveles', '/estudio/encargos', '/estudio/blog',
 ]
 
 export type Destino = {

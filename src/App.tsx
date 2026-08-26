@@ -18,6 +18,9 @@ import Acceso from './screens/Acceso'
 import Entrar from './screens/Entrar'
 import PerfilPropio from './screens/Perfil'
 import Admin from './screens/Admin'
+import Niveles from './estudio/Niveles'
+import Encargos from './estudio/Encargos'
+import Blog from './estudio/Blog'
 import Estudio from './screens/Estudio'
 import NuevaClave from './screens/NuevaClave'
 import Verificar from './screens/Verificar'
@@ -39,6 +42,9 @@ export const SCREENS = [
   { path: '/privacidad', n: '18', title: 'Aviso de privacidad', el: <Privacidad /> },
   { path: '/terminos',  n: '19', title: 'Términos',        el: <Terminos /> },
   { path: '/alta-creadora', n: '20', title: 'Alta de creadora', el: <AltaCreadora /> },
+  { path: '/estudio/niveles',  n: '21', title: 'Suscripción mensual', el: <Niveles /> },
+  { path: '/estudio/encargos', n: '22', title: 'Contenido a la medida', el: <Encargos /> },
+  { path: '/estudio/blog',     n: '23', title: 'Blog', el: <Blog /> },
   { path: '/upload',    n: '05', title: 'Upload',         el: <Upload /> },
   { path: '/earnings',  n: '06', title: 'Earnings',       el: <Earnings /> },
   { path: '/library',   n: '07', title: 'Library',        el: <Library /> },

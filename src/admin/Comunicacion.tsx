@@ -31,7 +31,7 @@ export default function Comunicacion() {
   const [nombrePlantilla, setNombrePlantilla] = useState('')
   const [lista, setLista] = useState<Plantilla[]>([])
   const [historial, setHistorial] = useState<Campana[]>([])
-  const [pestana, setPestana] = useState<'redactar' | 'historial'>('redactar')
+  const [pestana, setPestana] = useState<'redactar' | 'historial' | 'redes_sociales'>('redactar')
 
   const recargar = useCallback(async () => {
     setLista(await plantillas())
@@ -83,19 +83,43 @@ export default function Comunicacion() {
   return (
     <>
       <div style={{ display: 'flex', borderBottom: `1px solid ${LINEA.tenue}`, marginBottom: 18 }}>
-        {(['redactar', 'historial'] as const).map(p => (
+        {(['redactar', 'historial', 'redes_sociales'] as const).map(p => (
           <div key={p} onClick={() => setPestana(p)} style={{
             padding: '9px 15px', cursor: 'pointer',
             font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
             color: pestana === p ? COLOR.admin : COLOR.textoTenue,
             borderBottom: `2px solid ${pestana === p ? COLOR.admin : 'transparent'}`,
-          }}>{p === 'redactar' ? 'Redactar' : `Historial (${historial.length})`}</div>
+          }}>
+            {p === 'redactar' ? 'Redactar' : p === 'historial' ? `Historial (${historial.length})` : 'Redes Sociales'}
+          </div>
         ))}
       </div>
 
       {pestana === 'historial' ? (
         <Tabla columnas={columnas} filas={historial} clave={c => c.id}
           vacia="Todavía no se ha mandado ninguna campaña" />
+      ) : pestana === 'redes_sociales' ? (
+        <div style={{ padding: '20px', border: `1px solid ${LINEA.tenue}`, borderRadius: 4 }}>
+          <div style={{ font: `400 14px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave, marginBottom: 20 }}>
+            ℹ️ Módulo de Redes Sociales en desarrollo. Próximamente podrás publicar directamente en X y TikTok.
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 15 }}>
+            <div style={{ padding: 15, border: `1px solid ${LINEA.tenue}`, borderRadius: 4 }}>
+              <div style={{ font: `700 12px/1 ${FUENTE.ui}`, marginBottom: 10 }}>X (Twitter)</div>
+              <div style={{ font: `400 11px/1.5 ${FUENTE.ui}`, color: COLOR.textoTenue, marginBottom: 15 }}>
+                Publica tuits y expande tu audiencia en X.
+              </div>
+              <Boton tono="primario" activo={false} al={() => {}}>Configurar X</Boton>
+            </div>
+            <div style={{ padding: 15, border: `1px solid ${LINEA.tenue}`, borderRadius: 4 }}>
+              <div style={{ font: `700 12px/1 ${FUENTE.ui}`, marginBottom: 10 }}>TikTok</div>
+              <div style={{ font: `400 11px/1.5 ${FUENTE.ui}`, color: COLOR.textoTenue, marginBottom: 15 }}>
+                Publica videos cortos en TikTok y llega a más personas.
+              </div>
+              <Boton tono="primario" activo={false} al={() => {}}>Configurar TikTok</Boton>
+            </div>
+          </div>
+        </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 22 }}>
           {/* ---- Redacción ---- */}
