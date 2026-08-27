@@ -44,3 +44,28 @@ export async function creadoras(busqueda = '', limite = 60, desde = 0) {
   if (error) { console.warn('[perfiles] creadoras:', error.message); return [] }
   return (data ?? []) as FichaCreadora[]
 }
+
+/** Sube una foto de perfil y devuelve su ruta.
+ *
+ *  CADA SUBIDA USA UNA RUTA NUEVA. Antes se escribia siempre en
+ *  {id}/avatar.jpg con upsert, asi que la URL publica no cambiaba nunca y el
+ *  navegador —y la CDN de Supabase, que cachea una hora— seguian sirviendo la
+ *  imagen vieja. Se veia como "tarda mucho en cambiar" cuando en realidad no
+ *  cambiaba: era la misma direccion.
+ *
+ *  La anterior se borra despues de guardar la nueva. En ese orden: si se
+ *  borrara primero y la subida fallara, la persona se quedaria sin foto. */
+export async function subirAvatar(uid: string, f: File, anterior?: string | null) {
+  const ext = (f.name.split('.').pop() || 'jpg').toLowerCase()
+  const ruta = `${uid}/${crypto.randomUUID()}.${ext}`
+  const { error } = await supabase.storage.from('avatars')
+    .upload(ruta, f, { contentType: f.type })
+  if (error) return { error: error.message }
+
+  if (anterior && anterior !== ruta) {
+    // Si falla, solo queda un archivo suelto; no se le dice nada a nadie
+    // porque la foto nueva ya esta puesta y eso es lo que importaba.
+    await supabase.storage.from('avatars').remove([anterior])
+  }
+  return { ruta }
+}

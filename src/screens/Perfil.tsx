@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useSesion } from '../lib/sesion'
-import { urlAvatar } from '../lib/perfiles'
+import { subirAvatar, urlAvatar } from '../lib/perfiles'
 import PaisesBloqueados from '../components/PaisesBloqueados'
 import { usePapel } from '../components/Navegacion'
 import { ATAJOS_PERFIL, visiblesPara } from '../lib/rutas'
@@ -85,16 +85,14 @@ export default function Perfil() {
   const subirFoto = async (f: File) => {
     if (!sesion) return
     setSubiendo(true)
-    // La ruta DEBE empezar con el id: las politicas de storage se apoyan en eso
-    // para que nadie escriba en la carpeta de otro.
-    const ext = (f.name.split('.').pop() || 'jpg').toLowerCase()
-    const ruta = `${sesion.user.id}/avatar.${ext}`
-    const { error } = await supabase.storage.from('avatars')
-      .upload(ruta, f, { upsert: true, contentType: f.type })
-    if (error) {
-      setEstado('error'); setDetalle(error.message); setSubiendo(false); return
+    // La ruta empieza con el id porque las politicas de storage se apoyan en
+    // eso, y lleva un identificador nuevo en cada subida para que la URL
+    // publica cambie: con la ruta fija, la foto vieja se quedaba cacheada.
+    const r = await subirAvatar(sesion.user.id, f, perfil?.avatar_path)
+    if ('error' in r) {
+      setEstado('error'); setDetalle(r.error!); setSubiendo(false); return
     }
-    await supabase.from('profiles').update({ avatar_path: ruta }).eq('id', sesion.user.id)
+    await supabase.from('profiles').update({ avatar_path: r.ruta }).eq('id', sesion.user.id)
     await refrescarPerfil()
     setSubiendo(false)
   }

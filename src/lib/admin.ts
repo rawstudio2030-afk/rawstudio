@@ -1031,3 +1031,18 @@ export async function historialRedSocial(plataforma?: string) {
   if (error) return [] as PostRedSocial[]
   return (data ?? []) as PostRedSocial[]
 }
+
+/** Pone la foto de perfil de una creadora dada de alta por administracion.
+ *
+ *  Hace falta porque esas creadoras no pueden entrar a su cuenta: si el admin
+ *  no puede ponerles foto, no la tienen nunca. */
+export async function fijarAvatar(creadora: string, f: File, anterior?: string | null) {
+  const { subirAvatar } = await import('./perfiles')
+  const r = await subirAvatar(creadora, f, anterior)
+  if ('error' in r) return { error: r.error }
+  const { error } = await supabase.rpc('admin_fijar_avatar', {
+    creadora, ruta: r.ruta,
+  })
+  if (error) return { error: error.message }
+  return { ok: true, ruta: r.ruta }
+}

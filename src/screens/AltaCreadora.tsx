@@ -11,7 +11,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import { usePapel } from '../components/Navegacion'
-import { altaCreadora, subirExpediente, publicarPara } from '../lib/admin'
+import { altaCreadora, subirExpediente, publicarPara, fijarAvatar } from '../lib/admin'
 import Wordmark from '../components/Wordmark'
 import { COLOR, TINTE, FUENTE } from '../lib/diseño'
 
@@ -35,6 +35,7 @@ export default function AltaCreadora() {
   const [paso, setPaso] = useState<Paso>('datos')
   const [creadora, setCreadora] = useState<{ id: string; handle: string } | null>(null)
   const [ocupado, setOcupado] = useState(false)
+  const [avatar, setAvatar] = useState<File | null>(null)
   const [error, setError] = useState('')
 
   // paso 1
@@ -80,6 +81,14 @@ export default function AltaCreadora() {
     if ('error' in r) { setError(r.error); return }
     if (!r.verificada) { setError('Los documentos se cargaron pero el perfil no quedó verificado.'); return }
     setPaso('clips')
+  }
+
+  const ponerAvatar = async (f: File) => {
+    if (!creadora) return
+    setAvatar(f); setOcupado(true); setError('')
+    const r = await fijarAvatar(creadora.id, f)
+    setOcupado(false)
+    if ('error' in r) { setError(r.error!); setAvatar(null) }
   }
 
   const publicar = async () => {
@@ -170,6 +179,13 @@ export default function AltaCreadora() {
               onChange={e => setFechaConsent(e.target.value)}
               style={{ ...campo, colorScheme: 'dark' }} />
           </Etiquetado>
+
+          {/* La foto va aqui y no en el primer paso porque una creadora dada
+              de alta por administracion NO puede entrar a su cuenta: si no se
+              la pone quien la da de alta, no la tiene nunca. */}
+          <Archivo t="Foto de perfil" f={avatar} onElegir={ponerAvatar}
+            acepta="image/jpeg,image/png,image/webp"
+            nota="Opcional, pero ella no podrá ponérsela sola" />
 
           <Boton texto={ocupado ? 'Subiendo…' : 'Cargar expediente'}
             activo={!!ident && !!consent && !ocupado} al={cargarDocs} />

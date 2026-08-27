@@ -1,5 +1,6 @@
 /* Modulo 1: usuarios. */
 import { useCallback, useEffect, useState } from 'react'
+import { urlAvatar } from '../lib/perfiles'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 import {
   listarUsuarios, fichaUsuario, suspenderCuenta, banearCuenta, reactivarCuenta,
@@ -85,9 +86,13 @@ export default function Usuarios() {
       clave: 'handle', titulo: 'Usuaria', ordenable: true,
       pinta: f => (
         <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+          {/* El listado ya traia avatar_path y se estaba ignorando: siempre
+              se pintaba el marcador de posicion. */}
           <div style={{
             width: 26, height: 26, borderRadius: '50%', flex: '0 0 auto',
-            background: `repeating-linear-gradient(130deg,${COLOR.superficieAlta} 0 4px,${COLOR.superficie} 4px 8px)`,
+            background: urlAvatar(f.avatar_path)
+              ? `center/cover url(${urlAvatar(f.avatar_path)})`
+              : `repeating-linear-gradient(130deg,${COLOR.superficieAlta} 0 4px,${COLOR.superficie} 4px 8px)`,
             border: `1px solid ${LINEA.suave}`,
           }} />
           <div>
