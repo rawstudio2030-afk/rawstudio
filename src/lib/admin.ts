@@ -1046,3 +1046,20 @@ export async function fijarAvatar(creadora: string, f: File, anterior?: string |
   if (error) return { error: error.message }
   return { ok: true, ruta: r.ruta }
 }
+
+/** Creadoras a las que la administracion puede publicarles: las que tienen
+ *  expediente. Son las mismas a las que las politicas de storage permiten
+ *  escribirles, asi que la lista no promete nada que luego falle. */
+export type CreadoraGestionable = {
+  id: string; handle: string; nombre: string; avatar_path: string | null
+  verificada: boolean; tiene_documentos: boolean
+  clips_total: number; clips_publicados: number; alta_at: string
+}
+
+export async function creadorasGestionables(busqueda = '') {
+  const { data, error } = await supabase.rpc('admin_creadoras_gestionables', {
+    busqueda: busqueda.trim(),
+  })
+  if (error) return { filas: [] as CreadoraGestionable[], error: error.message }
+  return { filas: (data ?? []) as CreadoraGestionable[], error: '' }
+}

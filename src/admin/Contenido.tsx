@@ -16,18 +16,20 @@ import {
   porPurgar, purgar, generarPortada, type ClipAdmin, type PorPurgar,
 } from '../lib/admin'
 import { urlPortada } from '../lib/clips'
+import PublicarPor from './PublicarPor'
 import {
   Tabla, Boton, Campo, Confirmar, Etiquetado, Insignia,
   desde, type Columna,
 } from './piezas'
 
-type Filtro = 'todos' | 'destacados' | 'borrados' | 'plataforma'
+type Filtro = 'todos' | 'destacados' | 'borrados' | 'plataforma' | 'subir'
 
 const PESTANAS: { v: Filtro; t: string }[] = [
   { v: 'todos',      t: 'Todo el contenido' },
   { v: 'destacados', t: 'Destacados'        },
   { v: 'plataforma', t: 'De la plataforma'  },
   { v: 'borrados',   t: 'Borrados'          },
+  { v: 'subir',      t: 'Subir por una creadora' },
 ]
 
 export default function Contenido() {
@@ -49,6 +51,9 @@ export default function Contenido() {
 
   const cargar = useCallback(async () => {
     setCargando(true)
+    // 'subir' no lista clips, muestra otra pantalla: pedirle a la base un
+    // filtro que no existe seria un viaje para nada.
+    if (filtro === 'subir') { setCargando(false); return }
     const r = await clipsAdmin(filtro, busqueda)
     setFilas(r.filas); setError(r.error); setCargando(false)
     setPendientes(await porPurgar())
@@ -168,12 +173,14 @@ export default function Contenido() {
         ))}
       </div>
 
+      {filtro === 'subir' ? <PublicarPor /> : <>
+
       <div style={{ display: 'flex', gap: 12, alignItems: 'flex-end', marginBottom: 16 }}>
         <Etiquetado texto="Buscar por título" ancho={280} hijo={
           <Campo valor={texto} cambia={setTexto} marcador="Título del clip" />
         } />
         <div style={{ flex: 1 }} />
-        <Boton tono="primario" al={() => nav('/alta-creadora')}>Subir por una creadora</Boton>
+        <Boton tono="primario" al={() => nav('/alta-creadora')}>Dar de alta una creadora</Boton>
       </div>
 
       {error && (
@@ -196,6 +203,8 @@ export default function Contenido() {
           después, por fecha.
         </div>
       )}
+
+      </>}
 
       {dialogo?.que === 'borrar' && (
         <Confirmar titulo="Borrar el clip" etiqueta="Borrar" exigeMotivo
