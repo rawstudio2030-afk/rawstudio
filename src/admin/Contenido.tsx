@@ -163,14 +163,28 @@ export default function Contenido() {
       )}
 
       <div style={{ display: 'flex', borderBottom: `1px solid ${LINEA.tenue}`, marginBottom: 16 }}>
-        {PESTANAS.map(p => (
-          <div key={p.v} onClick={() => setFiltro(p.v)} style={{
-            padding: '9px 15px', cursor: 'pointer',
-            font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
-            color: filtro === p.v ? COLOR.admin : COLOR.textoTenue,
-            borderBottom: `2px solid ${filtro === p.v ? COLOR.admin : 'transparent'}`,
-          }}>{p.t}</div>
-        ))}
+        {PESTANAS.map(p => {
+          // 'subir' es una ACCION, no un filtro de la lista. Pintada igual que
+          // las demas se leia como un titulo mas y nadie la encontraba: se
+          // separa a la derecha y lleva el color de accion.
+          const accion = p.v === 'subir'
+          return (
+            <div key={p.v} onClick={() => setFiltro(p.v)} style={{
+              padding: '9px 15px', cursor: 'pointer',
+              font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
+              marginLeft: accion ? 'auto' : undefined,
+              color: filtro === p.v
+                ? (accion ? COLOR.fondo : COLOR.admin)
+                : (accion ? COLOR.acento : COLOR.textoTenue),
+              background: accion && filtro === p.v ? COLOR.acento : 'transparent',
+              border: accion ? `1px solid ${COLOR.acento}` : undefined,
+              borderBottom: accion
+                ? `1px solid ${COLOR.acento}`
+                : `2px solid ${filtro === p.v ? COLOR.admin : 'transparent'}`,
+              marginBottom: accion ? 6 : undefined,
+            }}>{accion ? `+ ${p.t}` : p.t}</div>
+          )
+        })}
       </div>
 
       {filtro === 'subir' ? <PublicarPor /> : <>

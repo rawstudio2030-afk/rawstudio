@@ -109,34 +109,71 @@ export default function PublicarPor() {
   )
 }
 
+/** Un video en la fila de subida. El titulo se propone a partir del nombre
+ *  del archivo —quitando extension y separadores— porque escribirlos uno por
+ *  uno era justo lo que hacia insoportable subir diez. */
+type EnFila = {
+  archivo: File; titulo: string
+  estado: 'espera' | 'subiendo' | 'listo' | 'error'
+  detalle: string
+}
+
+function tituloDesde(nombre: string) {
+  return nombre
+    .replace(/\.[^.]+$/, '')
+    .replace(/[_-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 90) || 'Sin título'
+}
+
 function Formulario({ c, vuelve }: { c: CreadoraGestionable; vuelve: () => void }) {
-  const [titulo, setTitulo] = useState('')
+  const [fila, setFila] = useState<EnFila[]>([])
   const [desc, setDesc] = useState('')
   const [precio, setPrecio] = useState('240')
   const [visibilidad, setVisibilidad] = useState<'pago' | 'suscriptores' | 'gratis'>('pago')
-  const [video, setVideo] = useState<File | null>(null)
-  const [portada, setPortada] = useState<File | null>(null)
   const [avatar, setAvatar] = useState<File | null>(null)
   const [ocupado, setOcupado] = useState(false)
   const [avance, setAvance] = useState('')
   const [error, setError] = useState('')
   const [hechos, setHechos] = useState(0)
 
+  const cambiar = (i: number, cambio: Partial<EnFila>) =>
+    setFila(f => f.map((x, j) => j === i ? { ...x, ...cambio } : x))
+
   const publicar = async () => {
-    if (!video || !titulo.trim() || ocupado) return
-    setOcupado(true); setError(''); setAvance('Preparando…')
-    const r = await publicarPara(
-      { creadora: c.id, titulo, video, portada, descripcion: desc,
-        precio: parseInt(precio || '0', 10), visibilidad },
-      (etapa, f) => setAvance(
-        etapa === 'guardando' ? 'Guardando…'
-          : etapa === 'portada' && f === 0 ? 'Sacando la portada del video…'
-          : `Subiendo ${etapa === 'video' ? 'el video' : 'la portada'} · ${Math.round(f * 100)}%`),
-    )
+    const pendientes = fila
+      .map((f, i) => ({ f, i }))
+      .filter(({ f }) => f.estado !== 'listo' && f.titulo.trim())
+    if (!pendientes.length || ocupado) return
+
+    setOcupado(true); setError('')
+    let ok = 0
+    // De uno en uno y no en paralelo: son archivos grandes, y varias subidas
+    // simultaneas se roban el ancho de banda entre ellas y acaban tardando
+    // mas que en fila.
+    for (const { f, i } of pendientes) {
+      cambiar(i, { estado: 'subiendo', detalle: '' })
+      const r = await publicarPara(
+        { creadora: c.id, titulo: f.titulo, video: f.archivo, portada: null,
+          descripcion: desc, precio: parseInt(precio || '0', 10), visibilidad },
+        (etapa, frac) => setAvance(
+          `${f.titulo} · ` + (etapa === 'guardando' ? 'guardando'
+            : etapa === 'portada' && frac === 0 ? 'sacando la portada'
+            : `${etapa === 'video' ? 'video' : 'portada'} ${Math.round(frac * 100)}%`)),
+      )
+      if ('error' in r) {
+        // Un fallo no detiene la fila: los demas videos no tienen la culpa.
+        cambiar(i, { estado: 'error', detalle: r.error! })
+      } else {
+        cambiar(i, { estado: 'listo', detalle: '' })
+        ok++
+      }
+    }
     setOcupado(false); setAvance('')
-    if ('error' in r) { setError(r.error!); return }
-    setHechos(n => n + 1)
-    setTitulo(''); setDesc(''); setVideo(null); setPortada(null)
+    setHechos(n => n + ok)
+    const fallaron = fila.filter(f => f.estado === 'error').length
+    if (fallaron) setError(`${fallaron} no se pudieron subir. Están marcados abajo.`)
   }
 
   return (
@@ -188,12 +225,75 @@ function Formulario({ c, vuelve }: { c: CreadoraGestionable; vuelve: () => void 
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 22 }}>
         <div>
-          <Etiquetado texto="Título" hijo={
-            <Campo valor={titulo} cambia={setTitulo} marcador="Cómo se llama el clip" />
-          } />
-          <div style={{ height: 14 }} />
-          <Etiquetado texto="Descripción (opcional)" hijo={
-            <Campo valor={desc} cambia={setDesc} marcador="De qué va" />
+          {/* Elegir varios de una vez: subir diez videos escribiendo el titulo
+              de cada uno por separado era lo que hacia el trabajo insoportable.
+              El titulo se propone del nombre del archivo y se puede corregir. */}
+          <div style={{ border: `1px dashed ${LINEA.marcada}`, padding: '18px 16px',
+            textAlign: 'center' }}>
+            <input type="file" multiple
+              accept="video/mp4,video/quicktime,video/webm"
+              onChange={e => {
+                const nuevos = [...(e.target.files ?? [])].map(a => ({
+                  archivo: a, titulo: tituloDesde(a.name),
+                  estado: 'espera' as const, detalle: '',
+                }))
+                e.target.value = ''
+                setFila(f => [...f, ...nuevos])
+              }}
+              style={{ font: `400 12px/1 ${FUENTE.ui}`, color: COLOR.textoSuave }} />
+            <div style={{ marginTop: 9, font: `400 11px/1.5 ${FUENTE.ui}`,
+              color: COLOR.textoApagado }}>
+              Puedes elegir varios a la vez. MP4, MOV o WebM · hasta 2 GB cada uno.
+              La portada se saca del propio video.
+            </div>
+          </div>
+
+          {fila.length > 0 && (
+            <div style={{ marginTop: 14, display: 'grid', gap: 8 }}>
+              {fila.map((f, i) => (
+                <div key={i} style={{
+                  display: 'flex', alignItems: 'center', gap: 10, padding: '9px 11px',
+                  border: `1px solid ${
+                    f.estado === 'listo' ? COLOR.dinero
+                    : f.estado === 'error' ? '#FF4444'
+                    : f.estado === 'subiendo' ? COLOR.admin : LINEA.tenue}`,
+                }}>
+                  <input value={f.titulo}
+                    onChange={e => cambiar(i, { titulo: e.target.value.slice(0, 90) })}
+                    disabled={f.estado === 'listo' || ocupado}
+                    style={{
+                      flex: 1, background: 'transparent', color: COLOR.texto,
+                      border: 'none', outline: 'none',
+                      font: `400 13px/1.3 ${FUENTE.ui}`,
+                      opacity: f.estado === 'listo' ? .5 : 1,
+                    }} />
+                  <span style={{ font: `400 10px/1.4 ${FUENTE.mono}`,
+                    color: COLOR.textoApagado, whiteSpace: 'nowrap' }}>
+                    {(f.archivo.size / 1048576).toFixed(1)} MB
+                  </span>
+                  {f.estado === 'listo'    && <Insignia texto="publicado" color={COLOR.dinero} />}
+                  {f.estado === 'subiendo' && <Insignia texto="subiendo" color={COLOR.admin} />}
+                  {f.estado === 'error'    && <Insignia texto="falló" color="#FF4444" />}
+                  {f.estado === 'espera' && !ocupado && (
+                    <span onClick={() => setFila(x => x.filter((_, j) => j !== i))}
+                      style={{ cursor: 'pointer', color: COLOR.textoApagado,
+                        font: `400 17px/1 ${FUENTE.ui}`, padding: '0 3px' }}>×</span>
+                  )}
+                </div>
+              ))}
+              {fila.some(f => f.detalle) && (
+                <div style={{ font: `400 11px/1.5 ${FUENTE.mono}`, color: '#FF4444' }}>
+                  {fila.filter(f => f.detalle).map((f, i) => (
+                    <div key={i}>{f.titulo}: {f.detalle}</div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          <div style={{ height: 18 }} />
+          <Etiquetado texto="Descripción, igual para todos (opcional)" hijo={
+            <Campo valor={desc} cambia={setDesc} marcador="De qué van" />
           } />
           <div style={{ height: 14 }} />
           <div style={{ display: 'flex', gap: 12 }}>
@@ -208,14 +308,10 @@ function Formulario({ c, vuelve }: { c: CreadoraGestionable; vuelve: () => void 
               ]} />
             } />
           </div>
-
-          <div style={{ marginTop: 18, display: 'grid', gap: 12 }}>
-            <ArchivoCampo t="Video" f={video} pon={setVideo}
-              acepta="video/mp4,video/quicktime,video/webm"
-              nota="MP4, MOV o WebM · hasta 2 GB" />
-            <ArchivoCampo t="Portada (opcional)" f={portada} pon={setPortada}
-              acepta="image/jpeg,image/png,image/webp"
-              nota="Si no pones una, se saca un cuadro del video" />
+          <div style={{ marginTop: 7, font: `400 11px/1.5 ${FUENTE.ui}`,
+            color: COLOR.textoApagado }}>
+            El precio y la visibilidad se aplican a todos los de la fila. Se cambian
+            después uno por uno si hace falta.
           </div>
 
           {error && (
@@ -223,9 +319,20 @@ function Formulario({ c, vuelve }: { c: CreadoraGestionable; vuelve: () => void 
               color: '#FF4444', font: `400 12px/1.45 ${FUENTE.ui}` }}>{error}</div>
           )}
 
-          <div style={{ marginTop: 18 }}>
-            <Boton tono="primario" activo={!!video && !!titulo.trim() && !ocupado}
-              al={publicar}>{avance || 'Publicar por ella'}</Boton>
+          <div style={{ marginTop: 18, display: 'flex', gap: 10, alignItems: 'center' }}>
+            <Boton tono="primario"
+              activo={fila.some(f => f.estado !== 'listo' && f.titulo.trim()) && !ocupado}
+              al={publicar}>
+              {avance || (() => {
+                const n = fila.filter(f => f.estado !== 'listo' && f.titulo.trim()).length
+                return n > 1 ? `Publicar los ${n}` : 'Publicar por ella'
+              })()}
+            </Boton>
+            {fila.some(f => f.estado === 'listo') && !ocupado && (
+              <Boton al={() => setFila(f => f.filter(x => x.estado !== 'listo'))}>
+                Quitar los ya publicados
+              </Boton>
+            )}
           </div>
         </div>
 
@@ -242,31 +349,5 @@ function Formulario({ c, vuelve }: { c: CreadoraGestionable; vuelve: () => void 
         </div>
       </div>
     </>
-  )
-}
-
-function ArchivoCampo({ t, f, pon, acepta, nota }: {
-  t: string; f: File | null; pon: (f: File | null) => void
-  acepta: string; nota: string
-}) {
-  return (
-    <div style={{ border: `1px solid ${f ? COLOR.dinero : LINEA.tenue}`, padding: '12px 14px' }}>
-      <div style={{ font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.3,
-        textTransform: 'uppercase', color: f ? COLOR.dinero : COLOR.textoTenue }}>{t}</div>
-      <div style={{ marginTop: 8 }}>
-        <input type="file" accept={acepta}
-          onChange={e => {
-            const x = e.target.files?.[0]
-            // Se limpia para que reelegir el MISMO archivo vuelva a disparar
-            // el evento; si no, tras un fallo el selector parece muerto.
-            e.target.value = ''
-            pon(x ?? null)
-          }}
-          style={{ font: `400 12px/1 ${FUENTE.ui}`, color: COLOR.textoSuave }} />
-      </div>
-      <div style={{ marginTop: 7, font: `400 10px/1.4 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
-        {f ? `${f.name} · ${(f.size / 1048576).toFixed(1)} MB` : nota}
-      </div>
-    </div>
   )
 }
