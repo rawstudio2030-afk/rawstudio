@@ -104,11 +104,23 @@ export function BarraInferior() {
   )
 }
 
-/** Espacio para que el contenido no quede debajo de la barra. */
+/** Espacio para que el contenido no quede debajo de la barra.
+ *
+ *  flex 0 0 auto NO es decorativo: index.css tiene "#root > * { flex: 1 }"
+ *  para que las pantallas ocupen el alto completo, y esa regla le pone
+ *  flex-basis 0% a este div. Con el contenido desbordando no hay espacio
+ *  libre que repartir, asi que el alto se ignoraba y el hueco MEDIA CERO.
+ *  El espaciador existia, se dibujaba, y no separaba nada: la barra tapaba
+ *  los ultimos 64px de todas las pantallas. */
 export function HuecoBarra() {
   const aqui = useLocation().pathname
   const { papel } = usePapel()
   if (papel === 'visitante' || RUTAS_ENTRADA.includes(aqui)) return null
   if (RUTAS_PANEL.some(r => aqui.startsWith(r))) return null
-  return <div style={{ height: 'calc(64px + env(safe-area-inset-bottom))' }} />
+  return (
+    <div style={{
+      flex: '0 0 auto',
+      height: 'calc(64px + env(safe-area-inset-bottom))',
+    }} />
+  )
 }
