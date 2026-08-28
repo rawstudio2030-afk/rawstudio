@@ -1,7 +1,24 @@
 /* Armazon de la app. Se carga despues de deck.css para ganarle al fondo
    de lienzo que traia el deck (la rejilla) y dejar el fondo de app. */
-html, body, #root {
+html, body {
   height: 100%;
+  margin: 0;
+}
+
+/* #root va con MIN-height, no con height.
+ *
+ * Con height:100% el armazon media exactamente la pantalla y no crecia: el
+ * contenido de una pagina larga se desbordaba en vez de estirar el diseño, y
+ * el hueco que separa de la barra inferior quedaba DENTRO de esos 100%, no
+ * despues del contenido. Resultado: al llegar al final del scroll, los ultimos
+ * 64px seguian debajo de la barra y el boton de enviar era inalcanzable.
+ *
+ * Medido en el navegador: con height, el boton quedaba 64px POR DEBAJO del
+ * borde superior de la barra; con min-height, 40px por encima. Y agregar
+ * relleno inferior no lo arreglaba —se probo— porque el problema no era el
+ * espacio sino que el armazon no crecia. */
+#root {
+  min-height: 100%;
   margin: 0;
 }
 body {
