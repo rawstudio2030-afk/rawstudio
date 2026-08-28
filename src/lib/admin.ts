@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import { miniaturaDeVideo } from './miniatura'
+import { miniaturaDeVideo, tiraDeVideo } from './miniatura'
 
 /** Si es admin lo decide la base, no el cliente. Esta consulta solo sirve para
  *  DIBUJAR o no el panel; la proteccion de verdad son las politicas RLS: aunque
@@ -244,10 +244,16 @@ export async function publicarPara(
       portada = await miniaturaDeVideo(datos.video)
     }
 
+    // La tira sale del mismo archivo y antes de subir nada: si el formato no
+    // se puede decodificar, se sabe ya y no despues de mandar 200 MB.
+    alAvanzar?.('portada', 0)
+    const tira = await tiraDeVideo(datos.video)
+
     const rutaVideo = await subir('clips', datos.video, 'video')
     const rutaPortada = portada
       ? await subir('clip-covers', portada, 'portada')
       : null
+    const rutaTira = tira ? await subir('clip-covers', tira, 'portada') : null
 
     alAvanzar?.('guardando', 0)
     const { data, error } = await supabase.rpc('admin_publicar_para', {
@@ -257,6 +263,14 @@ export async function publicarPara(
       p_descripcion: datos.descripcion?.trim() || null,
     })
     if (error) { await limpiar(); return { error: error.message } }
+    // La tira se guarda DESPUES de que el clip existe. Si falla, el clip se
+    // queda sin vista previa y nada mas: no vale la pena tumbar una
+    // publicacion por una animacion.
+    if (rutaTira && (data as { clip?: string })?.clip) {
+      await supabase.rpc('admin_fijar_preview', {
+        clip: (data as { clip: string }).clip, ruta: rutaTira,
+      })
+    }
     alAvanzar?.('guardando', 1)
     return data as { ok: boolean; clip: string }
   } catch (e) {
@@ -974,23 +988,36 @@ export async function fijarValorCoin(centavos: number) {
  *  sola. */
 export async function generarPortada(clip: string, creadora: string) {
   const { urlVideoFirmada } = await import('./clips')
-  const { miniaturaDeUrl } = await import('./miniatura')
+  const { miniaturaDeUrl, tiraDeUrl } = await import('./miniatura')
 
   const acceso = await urlVideoFirmada(clip)
   if (!('url' in acceso) || !acceso.url) {
     return { error: ('error' in acceso && acceso.error) || 'No se pudo abrir el video' }
   }
+
+  const guardar = async (f: File) => {
+    const ruta = `${creadora}/${crypto.randomUUID()}.jpg`
+    const { error } = await supabase.storage.from('clip-covers')
+      .upload(ruta, f, { contentType: 'image/jpeg' })
+    return error ? null : ruta
+  }
+
   const imagen = await miniaturaDeUrl(acceso.url)
   if (!imagen) {
     return { error: 'El navegador no pudo decodificar ese video para sacar un cuadro' }
   }
-  const ruta = `${creadora}/${crypto.randomUUID()}.jpg`
-  const { error } = await supabase.storage.from('clip-covers')
-    .upload(ruta, imagen, { contentType: 'image/jpeg' })
+  const ruta = await guardar(imagen)
+  if (!ruta) return { error: 'No se pudo guardar la portada' }
+  const { error } = await supabase.rpc('admin_fijar_portada', { clip, ruta })
   if (error) return { error: error.message }
 
-  const { error: e2 } = await supabase.rpc('admin_fijar_portada', { clip, ruta })
-  if (e2) return { error: e2.message }
+  // La tira va aparte y en segundo lugar: si falla, el clip se queda con
+  // portada y sin animacion, que es mucho mejor que quedarse sin ninguna.
+  const tira = await tiraDeUrl(acceso.url)
+  if (tira) {
+    const rutaTira = await guardar(tira)
+    if (rutaTira) await supabase.rpc('admin_fijar_preview', { clip, ruta: rutaTira })
+  }
   return { ok: true }
 }
 

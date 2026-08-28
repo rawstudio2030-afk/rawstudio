@@ -9,6 +9,7 @@ export type Clip = {
   description: string | null
   storage_path: string | null
   cover_path: string | null
+  preview_path: string | null
   duration_s: number | null
   visibility: Visibilidad
   price_coins: number
@@ -109,6 +110,7 @@ export async function crearClip(c: {
   storage_path?: string | null; cover_path?: string | null; duration_s?: number | null
   visibility: Visibilidad; price_coins: number; published: boolean
   renta_horas?: number | null; renta_coins?: number | null
+  preview_path?: string | null
 }): Promise<{ id?: string; error?: string }> {
   const { data, error } = await supabase.from('clips').insert(c).select('id').single()
   if (error) return { error: error.message }

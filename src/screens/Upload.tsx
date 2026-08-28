@@ -5,7 +5,7 @@ import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import { subirArchivo, crearClip, type Visibilidad } from '../lib/clips'
-import { miniaturaDeVideo } from '../lib/miniatura'
+import { miniaturaDeVideo, tiraDeVideo } from '../lib/miniatura'
 import { COLOR, LINEA, TINTE, FUENTE } from '../lib/diseño'
 import MisClips from '../components/MisClips'
 
@@ -79,6 +79,9 @@ export default function Upload() {
       imagen = await miniaturaDeVideo(video)
     }
 
+    setPaso('Preparando la vista previa…')
+    const tira = await tiraDeVideo(video)
+
     setPaso('Subiendo el video…')
     const v = await subirArchivo('clips', sesion.user.id, video)
     if (v.error) { setEstado('error'); setDetalle(v.error); return }
@@ -93,6 +96,12 @@ export default function Upload() {
       coverPath = c.error ? null : (c.path ?? null)
     }
 
+    let previewPath: string | null = null
+    if (tira) {
+      const t = await subirArchivo('clip-covers', sesion.user.id, tira)
+      previewPath = t.error ? null : (t.path ?? null)
+    }
+
     setPaso('Publicando…')
     const r = await crearClip({
       creator_id: sesion.user.id,
@@ -104,6 +113,7 @@ export default function Upload() {
       price_coins: modo === 'pago' ? precio : 0,
       renta_horas: modo === 'pago' && renta ? rentaHoras : null,
       renta_coins: modo === 'pago' && renta ? rentaCoins : null,
+      preview_path: previewPath,
       published: true,
     })
     if (r.error) { setEstado('error'); setDetalle(r.error); return }

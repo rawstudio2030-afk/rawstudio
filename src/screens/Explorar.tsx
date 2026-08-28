@@ -9,6 +9,7 @@ import { useSesion } from '../lib/sesion'
 import { clipsPublicados, urlPortada, type ClipConAutora } from '../lib/clips'
 import { urlAvatar, creadoras, type FichaCreadora } from '../lib/perfiles'
 import { portadaDe } from '../lib/portadas'
+import TarjetaClip from '../components/TarjetaClip'
 import Wordmark from '../components/Wordmark'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 
@@ -137,11 +138,9 @@ export default function Explorar() {
               const f = urlAvatar(c.profiles?.avatar_path ?? null)
               const gratis = c.visibility === 'gratis'
               return (
-                <div key={c.id} onClick={() => nav(`/clip/${c.id}`)} style={{ cursor: 'pointer' }}>
-                  <div style={{
-                    aspectRatio: '3/4', position: 'relative', overflow: 'hidden',
-                    background: `center/cover url("${p}")`,
-                  }}>
+                <div key={c.id}>
+                  <TarjetaClip portada={p} tira={urlPortada(c.preview_path ?? null)}
+                    alTocar={() => nav(`/clip/${c.id}`)}>
                     <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,transparent 40%,rgba(8,8,10,.92) 100%)' }} />
                     {c.es_demo && (
                       <span style={{
@@ -161,7 +160,7 @@ export default function Explorar() {
                     <div style={{ position: 'absolute', left: 9, right: 9, bottom: 9 }}>
                       <div style={{ font: `600 12.5px/1.3 ${FUENTE.ui}` }}>{c.title}</div>
                     </div>
-                  </div>
+                  </TarjetaClip>
                   {c.profiles && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 7 }}>
                       <div style={{
