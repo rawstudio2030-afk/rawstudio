@@ -16,6 +16,7 @@ import type { Perfil } from '../lib/supabase'
 import { COLOR, FUENTE } from '../lib/diseño'
 import Reportar from '../components/Reportar'
 import OfertaCreadora from '../components/OfertaCreadora'
+import { usd } from '../lib/dinero'
 
 
 export default function CreatorProfile() {
@@ -165,7 +166,7 @@ export default function CreatorProfile() {
                       <div style={{ position: 'absolute', left: 9, right: 9, bottom: 9 }}>
                         <div style={{ font: `600 12px/1.3 ${FUENTE.ui}`, color: COLOR.texto }}>{c.title}</div>
                         <div style={{ font: `400 10px/1.4 ${FUENTE.mono}`, color: COLOR.dinero, marginTop: 3 }}>
-                          {c.visibility === 'gratis' ? 'gratis' : c.visibility === 'suscriptores' ? 'suscriptores' : `${c.price_coins} coins`}
+                          {c.visibility === 'gratis' ? 'gratis' : c.visibility === 'suscriptores' ? 'suscriptores' : `${usd(c.price_coins)}`}
                         </div>
                       </div>
                     </div>

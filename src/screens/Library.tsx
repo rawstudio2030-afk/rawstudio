@@ -7,6 +7,7 @@ import { useSesion } from '../lib/sesion'
 import { misCompras, type Comprado } from '../lib/monedero'
 import { urlPortada } from '../lib/clips'
 import { COLOR, FUENTE } from '../lib/diseño'
+import { usd } from '../lib/dinero'
 
 
 export default function Library() {
@@ -71,7 +72,7 @@ export default function Library() {
                     font: `700 8.5px/1 ${FUENTE.ui}`, letterSpacing: 1.1, textTransform: 'uppercase',
                   }}>Desbloqueado</span>
                   <span style={{ font: `400 10px/1.4 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
-                    {new Date(c.created_at).toLocaleDateString('es-MX')} · {c.price_coins} coins
+                    {new Date(c.created_at).toLocaleDateString('es-MX')} · {usd(c.price_coins)}
                   </span>
                 </div>
               </div>

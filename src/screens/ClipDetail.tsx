@@ -15,6 +15,7 @@ import { rentarClip, reembolsoDisponible, reclamarReembolso } from '../lib/canal
 import Reportar from '../components/Reportar'
 import MarcaDeAgua from '../components/MarcaDeAgua'
 import { COLOR, LINEA, VELO, TINTE, FUENTE } from '../lib/diseño'
+import { usd } from '../lib/dinero'
 
 
 export default function ClipDetail() {
@@ -198,7 +199,7 @@ export default function ClipDetail() {
               marginTop: 14, textAlign: 'center', padding: 16, cursor: 'pointer',
               background: COLOR.dinero, color: COLOR.fondo,
               font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase',
-            }}>Recuperar mis {devolucion} coins</div>
+            }}>Recuperar mis {usd(devolucion)}</div>
           </div>
         )}
         {bloqueo?.motivo === 'geobloqueo' ? (
@@ -233,7 +234,7 @@ export default function ClipDetail() {
             </div>
             {clip.visibility === 'pago' && (
               <div style={{ fontFamily: FUENTE.display, fontSize: 30, lineHeight: 1, color: COLOR.dinero, marginTop: 10 }}>
-                {clip.price_coins} coins
+                {usd(clip.price_coins)}
               </div>
             )}
             {clip.visibility === 'pago' ? (() => {
@@ -253,7 +254,7 @@ export default function ClipDetail() {
                     {comprando ? 'Desbloqueando…'
                       : !sesion ? 'Entra para desbloquear'
                       : alcanza ? 'Desbloquear este clip'
-                      : `Te faltan ${falta} coins`}
+                      : `Te faltan ${usd(falta)}`}
                   </div>
                   {sesion && (
                     <div onClick={() => nav('/wallet')} style={{
@@ -274,7 +275,7 @@ export default function ClipDetail() {
                       textTransform: 'uppercase', color: COLOR.textoSuave,
                     }}>
                       {rentando ? 'Rentando…'
-                        : `O réntalo ${clip.renta_horas} h por ${clip.renta_coins} coins`}
+                        : `O réntalo ${clip.renta_horas} h por ${usd(clip.renta_coins)}`}
                     </div>
                   )}
                   {errorCompra && (

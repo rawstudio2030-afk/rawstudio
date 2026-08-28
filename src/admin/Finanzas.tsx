@@ -1,10 +1,13 @@
 /* Modulo 5: finanzas.
  *
- * Las cifras van en COINS, no en pesos. No es pereza: la plataforma mueve dos
- * monedas —coins adentro, pesos afuera— y el puente entre ambas es la recarga,
- * que no existe porque no hay procesador de pagos. Nadie ha definido cuanto
- * vale un coin, asi que ponerle un signo de pesos a estas cifras seria
- * inventar los ingresos.
+ * DOS MONEDAS, Y SIGUEN SIN SUMARSE. La economia interna se cuenta en DOLARES:
+ * lo que paga quien compra y lo que gana quien publica. Las dispersiones van
+ * en PESOS, porque el SPEI es en pesos y el SAT retiene sobre pesos.
+ *
+ * El puente entre ambas es el tipo de cambio dolar-peso, que a diferencia del
+ * viejo valor del coin SI es un numero real y comprobable. Aun asi no se
+ * mezclan en la misma cifra: un total que sumara dolares con pesos no
+ * significaria nada.
  */
 import { useCallback, useEffect, useState } from 'react'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
@@ -13,6 +16,7 @@ import {
   type FilaFinanzas, type DineroReal, type PuntoSerie, type FilaRanking,
 } from '../lib/admin'
 import { Boton, Campo, Etiquetado, Tabla, fecha, type Columna } from './piezas'
+import { usd, usdPlano } from '../lib/dinero'
 
 const NOMBRE: Record<string, string> = {
   venta_clip: 'Venta de clips', renta: 'Rentas', propina: 'Propinas',
@@ -53,10 +57,10 @@ export default function Finanzas() {
   const ventas = filas.find(f => f.fuente === 'venta_clip')
 
   const csv = () => {
-    const cab = 'fuente,operaciones,bruto_coins,comision_coins,para_creadoras'
+    const cab = 'fuente,operaciones,bruto_usd,comision_usd,para_creadoras_usd'
     const cuerpo = filas.map(f =>
-      [NOMBRE[f.fuente] ?? f.fuente, f.operaciones, f.bruto_coins,
-       f.comision_coins, f.para_creadoras].join(',')).join('\n')
+      [NOMBRE[f.fuente] ?? f.fuente, f.operaciones, usdPlano(f.bruto_coins),
+       usdPlano(f.comision_coins), usdPlano(f.para_creadoras)].join(',')).join('\n')
     const blob = new Blob([`${cab}\n${cuerpo}\n`], { type: 'text/csv;charset=utf-8' })
     const a = document.createElement('a')
     a.href = URL.createObjectURL(blob)
@@ -69,14 +73,14 @@ export default function Finanzas() {
     { clave: 'fuente', titulo: 'Fuente', pinta: f => NOMBRE[f.fuente] ?? f.fuente },
     { clave: 'operaciones', titulo: 'Operaciones', numerica: true, pinta: f => f.operaciones },
     { clave: 'bruto', titulo: 'Bruto', numerica: true,
-      pinta: f => <span style={{ color: COLOR.dinero }}>{f.bruto_coins} ⨯</span> },
+      pinta: f => <span style={{ color: COLOR.dinero }}>{usd(f.bruto_coins)}</span> },
     { clave: 'comision', titulo: 'Comisión', numerica: true,
-      pinta: f => <span style={{ color: COLOR.admin }}>{f.comision_coins} ⨯</span> },
+      pinta: f => <span style={{ color: COLOR.admin }}>{usd(f.comision_coins)}</span> },
     { clave: 'creadoras', titulo: 'A creadoras', numerica: true,
-      pinta: f => <span style={{ color: COLOR.textoSuave }}>{f.para_creadoras} ⨯</span> },
+      pinta: f => <span style={{ color: COLOR.textoSuave }}>{usd(f.para_creadoras)}</span> },
     { clave: 'ticket', titulo: 'Ticket medio', numerica: true,
       pinta: f => <span style={{ color: COLOR.textoTenue }}>
-        {f.operaciones ? Math.round(f.bruto_coins / f.operaciones) : 0} ⨯</span> },
+        {usd(f.operaciones ? Math.round(f.bruto_coins / f.operaciones) : 0)}</span> },
   ]
 
   return (
@@ -85,7 +89,7 @@ export default function Finanzas() {
         marginBottom: 16, padding: '10px 13px', border: `1px solid ${LINEA.tenue}`,
         font: `400 11px/1.55 ${FUENTE.ui}`, color: COLOR.textoTenue,
       }}>
-        Las cifras de la economía interna van en <b style={{ color: COLOR.dinero }}>coins</b>, no
+        Las cifras de la economía interna van en <b style={{ color: COLOR.dinero }}>dólares</b>, no
         en pesos. Nadie ha definido cuánto vale un coin porque todavía no hay procesador de
         pagos; convertirlos sería inventar el número. El dinero real, abajo, sí va en pesos.
       </div>
@@ -108,10 +112,10 @@ export default function Finanzas() {
       {/* ---- Cifras principales ---- */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1,
         background: LINEA.tenue, border: `1px solid ${LINEA.tenue}`, marginBottom: 20 }}>
-        <Cifra t="Bruto movido" v={`${bruto} ⨯`} c={COLOR.dinero} />
-        <Cifra t="Comisión de la plataforma" v={`${comision} ⨯`} c={COLOR.admin}
+        <Cifra t="Bruto movido" v={`${usd(bruto)}`} c={COLOR.dinero} />
+        <Cifra t="Comisión de la plataforma" v={`${usd(comision)}`} c={COLOR.admin}
           pie={bruto ? `${Math.round(comision / bruto * 100)}% del bruto` : undefined} />
-        <Cifra t="Pagado a creadoras" v={`${paraEllas} ⨯`} c={COLOR.texto} />
+        <Cifra t="Pagado a creadoras" v={`${usd(paraEllas)}`} c={COLOR.texto} />
         <Cifra t="Operaciones" v={String(ops)} c={COLOR.texto}
           pie={ventas ? `${ventas.operaciones} clips vendidos` : undefined} />
       </div>
@@ -180,7 +184,7 @@ export default function Finanzas() {
                 {r.ventas} ventas · {r.propinas} propinas · {r.clips_publicados} clips
               </span>
               <span style={{ width: 90, textAlign: 'right',
-                font: `400 14px/1 ${FUENTE.mono}`, color: COLOR.dinero }}>{r.ganado} ⨯</span>
+                font: `400 14px/1 ${FUENTE.mono}`, color: COLOR.dinero }}>{usd(r.ganado)}</span>
             </div>
           ))}
         </div>
@@ -233,7 +237,7 @@ function Grafica({ serie }: { serie: PuntoSerie[] }) {
             <rect key={p.dia} x={i * paso + 1} y={al - h}
               width={Math.max(1, paso - 3)} height={h}
               fill={p.coins ? COLOR.dinero : LINEA.tenue}>
-              <title>{`${p.dia}: ${p.coins} coins en ${p.operaciones} operaciones`}</title>
+              <title>{`${p.dia}: ${usd(p.coins)} en ${p.operaciones} operaciones`}</title>
             </rect>
           )
         })}
@@ -242,7 +246,7 @@ function Grafica({ serie }: { serie: PuntoSerie[] }) {
       <div style={{ display: 'flex', justifyContent: 'space-between',
         font: `400 10px/1 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
         <span>{fecha(serie[0]?.dia)}</span>
-        <span>máximo {max} ⨯ en un día</span>
+        <span>máximo {usd(max)} en un día</span>
         <span>{fecha(serie[serie.length - 1]?.dia)}</span>
       </div>
     </div>

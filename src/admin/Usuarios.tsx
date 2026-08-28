@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { urlAvatar } from '../lib/perfiles'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
+import { usd, aCentavos } from '../lib/dinero'
 import {
   listarUsuarios, fichaUsuario, suspenderCuenta, banearCuenta, reactivarCuenta,
   ajustarSaldo, otorgarAdmin, revocarAdmin, marcarCreadora,
@@ -317,7 +318,7 @@ function Ficha({ fila, ficha, cierra, pide }: {
             ficha.clips.length === 0 ? <Vacio texto="No ha publicado nada" /> :
             ficha.clips.map(c => (
               <Renglon key={c.id} izq={c.titulo}
-                der={`${c.precio} ⨯`} pie={`${fecha(c.created_at)} · ${c.visibilidad}`}
+                der={`${usd(c.precio)}`} pie={`${fecha(c.created_at)} · ${c.visibilidad}`}
                 marca={c.publicado ? undefined : 'sin publicar'} />
             ))
           )}
@@ -395,10 +396,14 @@ function SaldoDialogo({ fila, cancela, listo }: {
   fila: FilaUsuario; cancela: () => void; listo: (m: string) => void
 }) {
   const [cantidad, setCantidad] = useState('')
-  const n = parseInt(cantidad || '0', 10)
+  // Se escribe en dolares y con signo: '-5.50' descuenta cinco cincuenta.
+  const negativo = cantidad.trim().startsWith('-')
+  const magnitud = aCentavos(cantidad.replace('-', '')) ?? 0
+  const n = negativo ? -magnitud : magnitud
   return (
     <Confirmar titulo="Ajustar saldo" tono="primario"
-      etiqueta={n === 0 ? 'Pon una cantidad' : n > 0 ? `Acreditar ${n}` : `Descontar ${-n}`}
+      etiqueta={n === 0 ? 'Pon una cantidad'
+        : n > 0 ? `Acreditar ${usd(n)}` : `Descontar ${usd(-n)}`}
       exigeMotivo
       cuerpo={<>Saldo actual de <b style={{ color: COLOR.texto }}>@{fila.handle}</b>:{' '}
         <b style={{ color: COLOR.dinero }}>{fila.saldo}</b>. Usa un número negativo para
@@ -407,7 +412,7 @@ function SaldoDialogo({ fila, cancela, listo }: {
       extra={() => (
         <div style={{ marginTop: 14 }}>
           <Etiquetado texto="Cantidad (negativa para descontar)" hijo={
-            <Campo tipo="number" valor={cantidad} cambia={setCantidad} mono autoFoco />
+            <Campo valor={cantidad} cambia={setCantidad} mono autoFoco marcador="5.00 o -5.00" />
           } />
           {n !== 0 && (
             <div style={{ marginTop: 8, font: `400 12px/1 ${FUENTE.mono}`, color: COLOR.textoTenue }}>

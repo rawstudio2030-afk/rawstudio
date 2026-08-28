@@ -7,6 +7,7 @@ import {
 } from '../lib/admin'
 import { urlPortada, urlVideoFirmada } from '../lib/clips'
 import { Boton, Confirmar, Paginador, Insignia, fecha, desde } from './piezas'
+import { usd } from '../lib/dinero'
 
 const POR_PAGINA = 24
 
@@ -153,7 +154,7 @@ function Tarjeta({ clip, al }: { clip: ClipEnCola; al: () => void }) {
           )}
         </div>
         <div style={{ marginTop: 3, font: `400 10px/1.4 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
-          {desde(clip.created_at)} · {clip.precio} ⨯
+          {desde(clip.created_at)} · {usd(clip.precio)}
         </div>
       </div>
     </div>
@@ -229,7 +230,7 @@ function Revisor({ clip, cierra, listo }: {
           <div style={{ marginTop: 14, font: `400 11px/1.7 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
             @{clip.creadora_handle} · {clip.creadora_nombre}<br />
             Subido {fecha(clip.created_at)}<br />
-            {clip.precio} ⨯ · {clip.visibilidad}
+            {usd(clip.precio)} · {clip.visibilidad}
             {clip.duracion != null && <> · {clip.duracion}s</>}
           </div>
 

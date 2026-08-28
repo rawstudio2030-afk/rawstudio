@@ -969,16 +969,20 @@ export async function encargosEnDisputa() {
   return (data ?? []) as EncargoDisputa[]
 }
 
-export async function valorCoin(): Promise<number | null> {
+/** Centavos de peso por dolar. 1850 = 18.50 MXN por USD.
+ *
+ *  Sustituye al viejo valor_coin_mxn: aquel era un numero inventado porque no
+ *  existe un mercado de coins; este se puede consultar en cualquier lado. */
+export async function tipoCambio(): Promise<number | null> {
   const { data } = await supabase.from('ajustes')
-    .select('valor').eq('clave', 'valor_coin_mxn').maybeSingle()
+    .select('valor').eq('clave', 'tipo_cambio_usd_mxn').maybeSingle()
   const v = data?.valor
   return typeof v === 'number' ? v : null
 }
 
-export async function fijarValorCoin(centavos: number) {
+export async function fijarTipoCambio(centavosPorDolar: number) {
   const { error } = await supabase.rpc('admin_ajustar_bandera_num', {
-    p_clave: 'valor_coin_mxn', p_valor: centavos,
+    p_clave: 'tipo_cambio_usd_mxn', p_valor: centavosPorDolar,
   })
   return error?.message ?? ''
 }

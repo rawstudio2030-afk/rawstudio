@@ -17,6 +17,7 @@ import {
 } from '../lib/canales'
 import { clipsDe } from '../lib/clips'
 import { Marco, Boton, Campo, Etiqueta, Aviso, Vacio } from './piezas'
+import { usd } from '../lib/dinero'
 
 export default function Encargos() {
   const [lista, setLista] = useState<Encargo[]>([])
@@ -61,7 +62,7 @@ export default function Encargos() {
                   overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box',
                   WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{e.descripcion}</div>
                 <div style={{ marginTop: 7, font: `400 15px/1 ${FUENTE.mono}`, color: COLOR.dinero }}>
-                  {e.coins} ⨯
+                  {usd(e.coins)}
                 </div>
               </div>
             )
@@ -110,7 +111,7 @@ function Detalle({ e, cierra, recarga }: {
       </div>
 
       <div style={{ marginTop: 14, font: `400 26px/1 ${FUENTE.mono}`, color: COLOR.dinero }}>
-        {e.coins} ⨯
+        {usd(e.coins)}
       </div>
 
       <Aviso texto={error} />
@@ -132,7 +133,7 @@ function Detalle({ e, cierra, recarga }: {
               )}
               {m.oferta_coins != null && (
                 <div style={{ marginTop: 6, font: `400 13px/1 ${FUENTE.mono}`, color: COLOR.dinero }}>
-                  Ofrece {m.oferta_coins} ⨯
+                  Ofrece {usd(m.oferta_coins)}
                 </div>
               )}
             </div>
@@ -146,7 +147,7 @@ function Detalle({ e, cierra, recarga }: {
           <Etiqueta texto="Responder" />
           <Campo valor={texto} cambia={setTexto} filas={3} marcador="Escribe algo" />
           <div style={{ height: 10 }} />
-          <Etiqueta texto="Contraoferta en coins (opcional)" />
+          <Etiqueta texto="Contraoferta en dólares (opcional)" />
           <Campo tipo="number" valor={oferta} cambia={setOferta} marcador={String(e.coins)} />
           <div style={{ display: 'flex', gap: 10, marginTop: 14, flexWrap: 'wrap' }}>
             <Boton activo={!!texto.trim() || !!oferta} al={() => responderEncargo(
@@ -154,7 +155,7 @@ function Detalle({ e, cierra, recarga }: {
               oferta ? parseInt(oferta, 10) : undefined).then(tras)}>Responder</Boton>
             {e.soy_creadora && (
               <Boton tono="primario" al={() => aceptarEncargo(e.id).then(tras)}>
-                Aceptar por {e.coins} ⨯
+                Aceptar por {usd(e.coins)}
               </Boton>
             )}
           </div>
@@ -163,7 +164,7 @@ function Detalle({ e, cierra, recarga }: {
 
       {e.estado === 'aceptado' && !e.soy_creadora && (
         <Boton tono="primario" al={() => pagarEncargo(e.id).then(tras)}>
-          Pagar {e.coins} ⨯
+          Pagar {usd(e.coins)}
         </Boton>
       )}
       {e.estado === 'aceptado' && e.soy_creadora && (
@@ -203,7 +204,7 @@ function Detalle({ e, cierra, recarga }: {
               <div style={{ marginBottom: 14, padding: '11px 13px',
                 border: `1px solid ${COLOR.dinero}`, font: `400 13px/1.55 ${FUENTE.ui}`,
                 color: COLOR.textoSuave }}>
-                Ya pagó. Sus <b style={{ color: COLOR.dinero }}>{e.coins} ⨯</b> están retenidos
+                Ya pagó. Sus <b style={{ color: COLOR.dinero }}>{usd(e.coins)}</b> están retenidos
                 y se te abonan en cuanto entregues.
               </div>
               <Boton tono="primario" al={async () => {

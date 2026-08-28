@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 import { useSesion } from '../lib/sesion'
+import { usd } from '../lib/dinero'
 import {
   nivelesDe, suscribirse, miSuscripcion, cancelarSuscripcion,
   crearEncargo, postsDe, type Nivel, type Post,
@@ -87,7 +88,7 @@ export default function OfertaCreadora({ creadora, handle }: {
                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
                     <span style={{ font: `400 17px/1.2 ${FUENTE.ui}` }}>{t.nombre}</span>
                     <span style={{ font: `400 19px/1 ${FUENTE.mono}`, color: COLOR.dinero,
-                      whiteSpace: 'nowrap' }}>{t.precio_coins} ⨯</span>
+                      whiteSpace: 'nowrap' }}>{usd(t.precio_coins)}</span>
                   </div>
                   {t.descripcion && (
                     <div style={{ marginTop: 7, font: `400 13px/1.55 ${FUENTE.ui}`,

@@ -46,7 +46,7 @@ export default function Wallet() {
         </div>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginTop: 12 }}>
           <span style={{ fontFamily: FUENTE.display, fontSize: 56, lineHeight: 1, color: COLOR.dinero }}>{coins}</span>
-          <span style={{ font: `400 14px/1 ${FUENTE.mono}`, color: COLOR.textoTenue, textTransform: 'uppercase', letterSpacing: 1.5 }}>coins</span>
+          <span style={{ font: `400 14px/1 ${FUENTE.mono}`, color: COLOR.textoTenue, textTransform: 'uppercase', letterSpacing: 1.5 }}>dólares</span>
         </div>
       </div>
 

@@ -211,7 +211,7 @@ export default function AltaCreadora() {
           <Archivo t="Portada" f={portada} onElegir={setPortada}
             acepta="image/*" nota="Lo único que se ve sin pagar. Si no pones, se genera una." />
 
-          <Etiquetado t="Precio en coins">
+          <Etiquetado t="Precio">
             <input type="number" value={precio} min={0} step={20}
               onChange={e => setPrecio(Math.max(0, parseInt(e.target.value || '0', 10)))}
               style={{ ...campo, fontFamily: FUENTE.mono }} />

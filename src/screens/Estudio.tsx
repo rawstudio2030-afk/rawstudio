@@ -100,7 +100,7 @@ export default function Estudio() {
           </div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 9 }}>
             <span style={{ fontFamily: FUENTE.display, fontSize: 34, lineHeight: 1, color: COLOR.dinero }}>{r.ganancias}</span>
-            <span style={{ font: `400 12px/1 ${FUENTE.mono}`, color: COLOR.textoTenue, textTransform: 'uppercase', letterSpacing: 1.4 }}>coins</span>
+            <span style={{ font: `400 12px/1 ${FUENTE.mono}`, color: COLOR.textoTenue, textTransform: 'uppercase', letterSpacing: 1.4 }}>dólares</span>
           </div>
         </div>
         <span style={{ color: COLOR.textoApagado }}>›</span>

@@ -8,6 +8,7 @@ import { subirArchivo, crearClip, type Visibilidad } from '../lib/clips'
 import { miniaturaDeVideo, tiraDeVideo } from '../lib/miniatura'
 import { COLOR, LINEA, TINTE, FUENTE } from '../lib/diseño'
 import MisClips from '../components/MisClips'
+import { usd } from '../lib/dinero'
 
 
 const etiqueta: React.CSSProperties = {
@@ -36,10 +37,10 @@ export default function Upload() {
   const [titulo, setTitulo] = useState('')
   const [desc, setDesc] = useState('')
   const [modo, setModo] = useState<Visibilidad>('pago')
-  const [precio, setPrecio] = useState(240)
+  const [precio, setPrecio] = useState(240)      // 2.40 USD
   const [renta, setRenta] = useState(false)
   const [rentaHoras, setRentaHoras] = useState<48 | 72>(48)
-  const [rentaCoins, setRentaCoins] = useState(80)
+  const [rentaCoins, setRentaCoins] = useState(80) // 0.80 USD
   const [estado, setEstado] = useState<'listo' | 'subiendo' | 'error'>('listo')
   const [detalle, setDetalle] = useState('')
   const [paso, setPaso] = useState('')
@@ -214,13 +215,13 @@ export default function Upload() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14 }}>
             <span style={etiqueta}>Precio</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <Paso t="−" al={() => setPrecio(p => Math.max(0, p - 20))} />
-              <span style={{ fontFamily: FUENTE.display, fontSize: 30, lineHeight: 1, color: COLOR.dinero }}>{precio}</span>
-              <Paso t="+" al={() => setPrecio(p => p + 20)} />
+              <Paso t="−" al={() => setPrecio(p => Math.max(0, p - 50))} />
+              <span style={{ fontFamily: FUENTE.display, fontSize: 30, lineHeight: 1, color: COLOR.dinero }}>{usd(precio)}</span>
+              <Paso t="+" al={() => setPrecio(p => p + 50)} />
             </div>
           </div>
           <div style={{ font: `400 12px/1.7 ${FUENTE.mono}`, color: COLOR.textoTenue, marginTop: 12, borderTop: '1px solid rgba(255,255,255,.09)', paddingTop: 12 }}>
-            plataforma 20% · <span style={{ color: COLOR.texto }}>tú recibes {gana} coins</span>
+            plataforma 20% · <span style={{ color: COLOR.texto }}>tú recibes {usd(gana)}</span>
           </div>
         </div>
       )}
@@ -263,9 +264,9 @@ export default function Upload() {
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14 }}>
                 <span style={etiqueta}>Precio de renta</span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <Paso t="−" al={() => setRentaCoins(p => Math.max(0, p - 10))} />
-                  <span style={{ fontFamily: FUENTE.display, fontSize: 26, lineHeight: 1, color: COLOR.admin }}>{rentaCoins}</span>
-                  <Paso t="+" al={() => setRentaCoins(p => p + 10)} />
+                  <Paso t="−" al={() => setRentaCoins(p => Math.max(0, p - 25))} />
+                  <span style={{ fontFamily: FUENTE.display, fontSize: 26, lineHeight: 1, color: COLOR.admin }}>{usd(rentaCoins)}</span>
+                  <Paso t="+" al={() => setRentaCoins(p => p + 25)} />
                 </div>
               </div>
               {rentaCoins >= precio && (

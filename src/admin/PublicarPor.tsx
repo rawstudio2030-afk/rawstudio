@@ -16,6 +16,7 @@ import {
   type CreadoraGestionable,
 } from '../lib/admin'
 import { urlAvatar } from '../lib/perfiles'
+import { aCentavos } from '../lib/dinero'
 import { Boton, Campo, Etiquetado, Insignia, Selector, desde } from './piezas'
 
 export default function PublicarPor() {
@@ -130,7 +131,7 @@ function tituloDesde(nombre: string) {
 function Formulario({ c, vuelve }: { c: CreadoraGestionable; vuelve: () => void }) {
   const [fila, setFila] = useState<EnFila[]>([])
   const [desc, setDesc] = useState('')
-  const [precio, setPrecio] = useState('240')
+  const [precio, setPrecio] = useState('2.40')
   const [visibilidad, setVisibilidad] = useState<'pago' | 'suscriptores' | 'gratis'>('pago')
   const [avatar, setAvatar] = useState<File | null>(null)
   const [ocupado, setOcupado] = useState(false)
@@ -156,7 +157,7 @@ function Formulario({ c, vuelve }: { c: CreadoraGestionable; vuelve: () => void 
       cambiar(i, { estado: 'subiendo', detalle: '' })
       const r = await publicarPara(
         { creadora: c.id, titulo: f.titulo, video: f.archivo, portada: null,
-          descripcion: desc, precio: parseInt(precio || '0', 10), visibilidad },
+          descripcion: desc, precio: aCentavos(precio) ?? 0, visibilidad },
         (etapa, frac) => setAvance(
           `${f.titulo} · ` + (etapa === 'guardando' ? 'guardando'
             : etapa === 'portada' && frac === 0 ? 'sacando la portada'
@@ -297,8 +298,8 @@ function Formulario({ c, vuelve }: { c: CreadoraGestionable; vuelve: () => void 
           } />
           <div style={{ height: 14 }} />
           <div style={{ display: 'flex', gap: 12 }}>
-            <Etiquetado texto="Precio en coins" hijo={
-              <Campo tipo="number" valor={precio} cambia={setPrecio} mono />
+            <Etiquetado texto="Precio" hijo={
+              <Campo valor={precio} cambia={setPrecio} mono marcador="2.40" />
             } />
             <Etiquetado texto="Visibilidad" hijo={
               <Selector valor={visibilidad} cambia={setVisibilidad} opciones={[

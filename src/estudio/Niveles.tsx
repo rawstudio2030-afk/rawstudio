@@ -2,7 +2,9 @@
 import { useEffect, useState } from 'react'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 import { misNiveles, crearNivel, borrarNivel, type Nivel } from '../lib/canales'
+import { aCentavos } from '../lib/dinero'
 import { Marco, Boton, Campo, Etiqueta, Aviso, Vacio } from './piezas'
+import { usd } from '../lib/dinero'
 
 export default function Niveles() {
   const [lista, setLista] = useState<Nivel[]>([])
@@ -16,7 +18,9 @@ export default function Niveles() {
   const cargar = () => misNiveles().then(l => { setLista(l); setCargando(false) })
   useEffect(() => { cargar() }, [])
 
-  const n = parseInt(precio || '0', 10)
+  // Se escribe en dolares y se guarda en centavos: la persona piensa en
+  // '3.00', no en '300'.
+  const n = aCentavos(precio) ?? 0
 
   return (
     <Marco titulo="Suscripción mensual">
@@ -44,7 +48,7 @@ export default function Niveles() {
                 )}
               </div>
               <div style={{ font: `400 18px/1 ${FUENTE.mono}`, color: COLOR.dinero }}>
-                {t.precio_coins} ⨯
+                {usd(t.precio_coins)}
               </div>
               <span onClick={async () => {
                 const m = await borrarNivel(t.id); if (m) setError(m); else cargar()
@@ -60,8 +64,8 @@ export default function Niveles() {
           <Etiqueta texto="Nombre del nivel" />
           <Campo valor={nombre} cambia={setNombre} marcador="Básico" />
           <div style={{ height: 14 }} />
-          <Etiqueta texto="Precio al mes, en coins" />
-          <Campo tipo="number" valor={precio} cambia={setPrecio} marcador="300" />
+          <Etiqueta texto="Precio al mes, en dólares" />
+          <Campo valor={precio} cambia={setPrecio} marcador="3.00" />
           <div style={{ marginTop: 6, font: `400 12px/1.5 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
             {n > 0 && <>Te quedan {n - Math.round(n * 0.2)} ⨯ de cada suscripción</>}
           </div>

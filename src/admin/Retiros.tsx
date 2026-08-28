@@ -1,16 +1,17 @@
 /* Modulo 8: retiros y reembolsos.
  *
  * Aqui sale dinero de verdad, asi que todo pasa por confirmacion y queda en la
- * bitacora con IP. El detalle que manda: la creadora tiene coins y el SPEI se
- * manda en pesos, y nadie ha definido el tipo de cambio. En vez de suponer
- * uno, la aprobacion se niega hasta que este puesto: un numero inventado aqui
- * se convierte en una transferencia real por la cantidad equivocada.
+ * bitacora con IP. El detalle que manda: la creadora gana en DOLARES y el SPEI
+ * se manda en PESOS. La aprobacion se niega mientras no este puesto el tipo de
+ * cambio: un numero supuesto aqui se convierte en una transferencia real por
+ * la cantidad equivocada.
  */
 import { useCallback, useEffect, useState } from 'react'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
+import { usd, aCentavos } from '../lib/dinero'
 import {
   listarRetiros, resolverRetiro, marcarPagado, encargosEnDisputa,
-  reembolsar, valorCoin, fijarValorCoin,
+  reembolsar, tipoCambio, fijarTipoCambio,
   type Retiro, type EstadoRetiro, type EncargoDisputa,
 } from '../lib/admin'
 import {
@@ -49,7 +50,7 @@ export default function Retiros() {
     setCargando(true)
     const r = await listarRetiros(estado, pagina, POR_PAGINA)
     setFilas(r.filas); setTotal(r.total); setError(r.error); setCargando(false)
-    setCoin(await valorCoin())
+    setCoin(await tipoCambio())
     setDisputas(await encargosEnDisputa())
   }, [estado, pagina])
 
@@ -70,17 +71,17 @@ export default function Retiros() {
       </div>
     ) },
     { clave: 'coins', titulo: 'Pide', numerica: true, ancho: 110,
-      pinta: r => <span style={{ color: COLOR.dinero }}>{r.coins} ⨯</span> },
+      pinta: r => <span style={{ color: COLOR.dinero }}>{usd(r.coins)}</span> },
     { clave: 'pesos', titulo: 'En pesos', numerica: true, ancho: 130,
       pinta: r => r.bruto_mxn != null
         ? <span>{pesos(r.bruto_mxn)}</span>
         : <span style={{ color: coin ? COLOR.textoTenue : '#FFB020' }}>
-            {coin ? pesos(r.coins * coin) : 'falta el tipo de cambio'}</span> },
+            {coin ? pesos(Math.round(r.coins * coin / 100)) : 'falta el tipo de cambio'}</span> },
     { clave: 'neto', titulo: 'Neto', numerica: true, ancho: 120,
       pinta: r => <span style={{ color: r.neto_mxn ? COLOR.dinero : COLOR.textoApagado }}>
         {pesos(r.neto_mxn)}</span> },
     { clave: 'saldo', titulo: 'Saldo actual', numerica: true, ancho: 110,
-      pinta: r => <span style={{ color: COLOR.textoTenue }}>{r.saldo_actual} ⨯</span> },
+      pinta: r => <span style={{ color: COLOR.textoTenue }}>{usd(r.saldo_actual)}</span> },
     { clave: 'cuando', titulo: 'Pedido', ancho: 120,
       pinta: r => <span style={{ color: COLOR.textoSuave }}>{desde(r.created_at)}</span> },
     { clave: 'acc', titulo: '', pinta: r => (
@@ -112,22 +113,22 @@ export default function Retiros() {
           <div style={{ flex: 1 }}>
             <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.3,
               textTransform: 'uppercase', color: coin ? COLOR.texto : '#FFB020' }}>
-              {coin ? `1 coin = ${pesos(coin)}` : 'Falta definir cuánto vale un coin'}
+              {coin ? `1 USD = ${pesos(coin)}` : 'Falta definir el tipo de cambio dólar-peso'}
             </div>
             <div style={{ marginTop: 6, font: `400 11px/1.55 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
               {coin
-                ? 'Con este valor se calculan el bruto, las retenciones del SAT y el neto de cada retiro.'
-                : 'Sin este número no se puede aprobar ningún retiro: no hay forma de saber cuánto dinero real corresponde. No lo invento yo.'}
+                ? 'Con este tipo de cambio se convierten los dólares que ganó a los pesos que se le transfieren, y sobre esos pesos se calculan las retenciones del SAT.'
+                : 'Sin este número no se puede aprobar ningún retiro: la creadora gana en dólares y el SPEI se manda en pesos.'}
             </div>
           </div>
           {editandoCoin ? (
             <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
-              <Etiquetado texto="Centavos por coin" hijo={
-                <Campo tipo="number" valor={nuevoCoin} cambia={setNuevoCoin} mono autoFoco />
+              <Etiquetado texto="Pesos por dólar" hijo={
+                <Campo valor={nuevoCoin} cambia={setNuevoCoin} mono autoFoco marcador="18.50" />
               } />
-              <Boton tono="primario" activo={parseInt(nuevoCoin || '0', 10) > 0}
+              <Boton tono="primario" activo={(aCentavos(nuevoCoin) ?? 0) > 0}
                 al={async () => {
-                  const m = await fijarValorCoin(parseInt(nuevoCoin, 10))
+                  const m = await fijarTipoCambio(aCentavos(nuevoCoin) ?? 0)
                   if (m) setError(m)
                   else { setEditandoCoin(false); setAviso('Tipo de cambio guardado.'); await cargar() }
                 }}>Guardar</Boton>
@@ -135,7 +136,7 @@ export default function Retiros() {
             </div>
           ) : (
             <Boton tono={coin ? 'normal' : 'primario'}
-              al={() => { setNuevoCoin(String(coin ?? 100)); setEditandoCoin(true) }}>
+              al={() => { setNuevoCoin(coin ? (coin / 100).toFixed(2) : '18.50'); setEditandoCoin(true) }}>
               {coin ? 'Cambiar' : 'Definirlo'}
             </Boton>
           )}
@@ -159,7 +160,7 @@ export default function Retiros() {
                   </div>
                   <div style={{ marginTop: 4, font: `400 10px/1.4 ${FUENTE.mono}`,
                     color: COLOR.textoTenue }}>
-                    @{d.fan_handle} pagó {d.coins} ⨯ a @{d.creadora_handle} ·{' '}
+                    @{d.fan_handle} pagó {usd(d.coins)} a @{d.creadora_handle} ·{' '}
                     <span style={{ color: '#FF4444' }}>{d.dias_de_retraso} días de retraso</span>
                   </div>
                 </div>
@@ -198,7 +199,7 @@ export default function Retiros() {
 
       {dialogo?.que === 'aprobar' && (
         <Confirmar titulo="Aprobar el retiro" tono="primario" etiqueta="Aprobar"
-          cuerpo={<>Se le descuentan <b style={{ color: COLOR.dinero }}>{dialogo.r.coins} coins</b> a
+          cuerpo={<>Se le descuentan <b style={{ color: COLOR.dinero }}>{usd(dialogo.r.coins)}</b> a
             @{dialogo.r.handle} y se calcula la dispersión con las retenciones de ISR e IVA que
             correspondan a su régimen. Todavía no manda el dinero: eso lo haces tú por SPEI y
             después lo marcas como pagado.
@@ -257,19 +258,19 @@ function PagarDialogo({ r, cancela, listo }: {
 function ReembolsoDialogo({ d, cancela, listo }: {
   d: EncargoDisputa; cancela: () => void; listo: (m: string) => void
 }) {
-  const [cantidad, setCantidad] = useState(String(d.coins))
-  const n = parseInt(cantidad || '0', 10)
+  const [cantidad, setCantidad] = useState((d.coins / 100).toFixed(2))
+  const n = aCentavos(cantidad) ?? 0
   return (
-    <Confirmar titulo="Reembolsar el encargo" etiqueta={n > 0 ? `Devolver ${n} ⨯` : 'Pon una cantidad'}
+    <Confirmar titulo="Reembolsar el encargo" etiqueta={n > 0 ? `Devolver ${usd(n)}` : 'Pon una cantidad'}
       exigeMotivo
-      cuerpo={<>Se le devuelven coins a @{d.fan_handle} y se le descuentan a @{d.creadora_handle}.
+      cuerpo={<>Se le devuelven dólares a @{d.fan_handle} y se le descuentan a @{d.creadora_handle}.
         Puedes devolver menos del total si hubo entrega parcial. Si la creadora ya se gastó el
         dinero, su saldo quedará en negativo: eso es a propósito, para poder cobrárselo después
         en vez de esconderlo.</>}
       extra={() => (
         <div style={{ marginTop: 14 }}>
-          <Etiquetado texto={`Cantidad a devolver (pagó ${d.coins})`} hijo={
-            <Campo tipo="number" valor={cantidad} cambia={setCantidad} mono autoFoco />
+          <Etiquetado texto={`Cantidad a devolver (pagó ${usd(d.coins)})`} hijo={
+            <Campo valor={cantidad} cambia={setCantidad} mono autoFoco marcador="2.40" />
           } />
         </div>
       )}
