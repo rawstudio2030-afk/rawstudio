@@ -177,3 +177,20 @@ export async function borrarPost(id: string) {
   const { error } = await supabase.rpc('borrar_post', { p_id: id })
   return error?.message ?? ''
 }
+
+/* ---------- Caducidad ---------- */
+
+export type ModoCaducidad = 'deja_de_venderse' | 'retiro_total'
+
+/** Pone o quita la fecha de retiro de un clip propio.
+ *
+ *  Pasar null la quita. La base rechaza una fecha pasada: para quitarlo ahora
+ *  mismo lo que corresponde es borrarlo, no fingir que caducó ayer. */
+export async function fijarCaducidad(
+  clip: string, cuando: string | null, modo: ModoCaducidad = 'deja_de_venderse',
+) {
+  const { error } = await supabase.rpc('fijar_caducidad', {
+    clip, cuando, modo,
+  })
+  return error?.message ?? ''
+}

@@ -10,6 +10,8 @@ export type Clip = {
   storage_path: string | null
   cover_path: string | null
   preview_path: string | null
+  caduca_at: string | null
+  caduca_modo: string
   duration_s: number | null
   visibility: Visibilidad
   price_coins: number
@@ -68,8 +70,13 @@ export async function clipsPublicados(limite = 30): Promise<ClipConAutora[]> {
   // Lo destacado va primero, en el orden que le puso la administracion, y
   // despues lo demas por fecha. nullsFirst:false manda al final lo que no
   // esta destacado, que es todo salvo un puñado.
+  // La caducidad se filtra AQUI y no con una tarea programada: una que
+  // dependiera de que un proceso haya corrido dejaria una ventana en la que
+  // el clip sigue en el catalogo despues de su fecha.
+  const ahora = new Date().toISOString()
   const { data, error } = await supabase.from('clips')
     .select(CON_AUTORA).eq('published', true)
+    .or(`caduca_at.is.null,caduca_at.gt.${ahora}`)
     .order('destacado_orden', { ascending: true, nullsFirst: false })
     .order('published_at', { ascending: false }).limit(limite)
   if (error) { console.warn('[clips] publicados:', error.message); return [] }
@@ -111,6 +118,7 @@ export async function crearClip(c: {
   visibility: Visibilidad; price_coins: number; published: boolean
   renta_horas?: number | null; renta_coins?: number | null
   preview_path?: string | null
+  caduca_at?: string | null
 }): Promise<{ id?: string; error?: string }> {
   const { data, error } = await supabase.from('clips').insert(c).select('id').single()
   if (error) return { error: error.message }
