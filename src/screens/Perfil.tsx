@@ -194,7 +194,11 @@ export default function Perfil() {
             Quiero publicar
           </div>
           <div style={{ font: `400 12px/1.5 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 5 }}>
-            Habilita tu perfil de creadora
+            {creadora
+              ? (perfil?.identidad_verificada
+                  ? 'Tu perfil de creadora está activo'
+                  : 'Falta verificar tu identidad para poder publicar')
+              : 'Habilita tu perfil de creadora'}
           </div>
         </div>
         <div style={{
@@ -209,6 +213,23 @@ export default function Perfil() {
           }} />
         </div>
       </div>
+
+      {/* Marcar la casilla no basta para publicar, y callarselo dejaria a la
+          persona esperando a que pase algo que no va a pasar sola. */}
+      {creadora && !perfil?.identidad_verificada && (
+        <div style={{
+          padding: '13px 15px', border: `1px solid ${COLOR.admin}`,
+          font: `400 13px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave,
+        }}>
+          Ya puedes entrar al estudio y subir, pero <b style={{ color: COLOR.texto }}>
+          nada se publica</b> hasta que verifiquemos tu identidad y tu edad.
+          <div onClick={() => nav('/verificar')} style={{
+            marginTop: 11, textAlign: 'center', padding: '12px 0', cursor: 'pointer',
+            background: COLOR.admin, color: COLOR.fondo,
+            font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.8, textTransform: 'uppercase',
+          }}>Verificar mi identidad</div>
+        </div>
+      )}
 
       {estado === 'error' && (
         <div style={{ font: `400 13px/1.5 ${FUENTE.ui}`, color: COLOR.acento }}>{detalle}</div>
