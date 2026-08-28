@@ -1090,3 +1090,121 @@ export async function creadorasGestionables(busqueda = '') {
   if (error) return { filas: [] as CreadoraGestionable[], error: error.message }
   return { filas: (data ?? []) as CreadoraGestionable[], error: '' }
 }
+
+/* ==================== Alta masiva de creadoras ==================== */
+
+export type FilaAlta = {
+  linea: number
+  handle: string; nombre: string; bio: string
+  fecha_consentimiento: string; nota: string
+  archivo_identificacion: string; archivo_consentimiento: string; foto_perfil: string
+  errores: string[]
+  estado: 'lista' | 'invalida' | 'creando' | 'creada' | 'fallo'
+  detalle: string
+}
+
+
+/** Lee un CSV respetando las comillas: las bios llevan comas y partir por
+ *  coma a secas las corta a la mitad. */
+export function leerCSV(texto: string): Record<string, string>[] {
+  const filas: string[][] = []
+  let campo = '', fila: string[] = [], enComillas = false
+  const t = texto.replace(/\r\n?/g, '\n')
+  for (let i = 0; i < t.length; i++) {
+    const c = t[i]
+    if (enComillas) {
+      if (c === '"') { if (t[i + 1] === '"') { campo += '"'; i++ } else enComillas = false }
+      else campo += c
+    } else if (c === '"') enComillas = true
+    else if (c === ',') { fila.push(campo); campo = '' }
+    else if (c === '\n') { fila.push(campo); filas.push(fila); fila = []; campo = '' }
+    else campo += c
+  }
+  if (campo || fila.length) { fila.push(campo); filas.push(fila) }
+  if (!filas.length) return []
+
+  const cab = filas[0].map(h => h.trim().toLowerCase())
+  return filas.slice(1)
+    .filter(f => f.some(c => c.trim()))
+    .map(f => Object.fromEntries(cab.map((h, i) => [h, (f[i] ?? '').trim()])))
+}
+
+/** Valida ANTES de crear nada. Las mismas reglas que la base, para que el
+ *  error salga en la pantalla y no a mitad de un alta de cincuenta. */
+export function validarAlta(
+  filas: Record<string, string>[], yaExisten: Set<string>,
+): FilaAlta[] {
+  const vistos = new Set<string>()
+  return filas.map((f, i) => {
+    const handle = (f.handle ?? '').toLowerCase()
+    const errores: string[] = []
+
+    if (!handle) errores.push('falta el usuario')
+    else if (!/^[a-z0-9_]{3,24}$/.test(handle))
+      errores.push('usuario inválido (a-z, 0-9, _, de 3 a 24)')
+    else if (vistos.has(handle)) errores.push('usuario repetido en el archivo')
+    else if (yaExisten.has(handle)) errores.push('ese usuario ya existe')
+    vistos.add(handle)
+
+    const nombre = f.nombre ?? ''
+    if (!nombre) errores.push('falta el nombre')
+    else if (nombre.length > 40) errores.push('nombre de más de 40 caracteres')
+
+    if ((f.bio ?? '').length > 300) errores.push('bio de más de 300 caracteres')
+
+    const fc = f.fecha_consentimiento ?? ''
+    if (fc && !/^\d{4}-\d{2}-\d{2}$/.test(fc))
+      errores.push('fecha de consentimiento con formato distinto de AAAA-MM-DD')
+
+    return {
+      linea: i + 2, handle, nombre, bio: f.bio ?? '',
+      fecha_consentimiento: fc, nota: f.nota_expediente ?? '',
+      archivo_identificacion: f.archivo_identificacion ?? '',
+      archivo_consentimiento: f.archivo_consentimiento ?? '',
+      foto_perfil: f.foto_perfil ?? '',
+      errores,
+      estado: errores.length ? 'invalida' : 'lista',
+      detalle: '',
+    }
+  })
+}
+
+export async function handlesExistentes(): Promise<Set<string>> {
+  const { data } = await supabase.from('profiles').select('handle').limit(5000)
+  return new Set((data ?? []).map((p: { handle: string }) => p.handle))
+}
+
+/** Da de alta UNA creadora y, si vienen los archivos, carga su expediente y su
+ *  foto. Los archivos se buscan por nombre entre los que se eligieron: es lo
+ *  que permite mandar la tabla y la carpeta de documentos de una sola vez. */
+export async function altaConDocumentos(f: FilaAlta, archivos: Map<string, File>) {
+  const r = await altaCreadora({
+    handle: f.handle, nombre: f.nombre, bio: f.bio || undefined,
+    consentimientoFecha: f.fecha_consentimiento || undefined,
+    nota: f.nota || undefined,
+  })
+  if ('error' in r) return { error: r.error }
+  const id = (r as { id: string }).id
+
+  const ident = archivos.get(f.archivo_identificacion.toLowerCase())
+  const consent = archivos.get(f.archivo_consentimiento.toLowerCase())
+  const foto = archivos.get(f.foto_perfil.toLowerCase())
+
+  if (foto) await fijarAvatar(id, foto)
+
+  if (ident && consent) {
+    const e = await subirExpediente(id, ident, consent, f.fecha_consentimiento || undefined)
+    if (e && 'error' in e) {
+      // La creadora YA existe: se avisa de lo que falto en vez de fingir que
+      // todo salio bien. Los documentos se pueden cargar despues.
+      return { ok: true, id, aviso: `creada, pero el expediente falló: ${e.error}` }
+    }
+    return { ok: true, id, aviso: '' }
+  }
+
+  const faltan = [
+    !f.archivo_identificacion ? 'identificación' : (!ident ? `no encontré ${f.archivo_identificacion}` : ''),
+    !f.archivo_consentimiento ? 'consentimiento' : (!consent ? `no encontré ${f.archivo_consentimiento}` : ''),
+  ].filter(Boolean)
+  return { ok: true, id, aviso: `creada SIN verificar — falta ${faltan.join(' y ')}` }
+}

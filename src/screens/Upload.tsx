@@ -56,12 +56,11 @@ export default function Upload() {
   // Se bloquea ANTES del formulario. La politica de la base ya lo impide, pero
   // dejar llenar todo para rechazar al final seria cruel: se sube el video, se
   // espera, y hasta entonces el error.
-  if (!perfil.identidad_verificada) return (
-    <Centro
-      texto="Antes de publicar necesitamos comprobar que eres mayor de edad. Es una sola vez."
-      accion={{ texto: 'Verificar identidad', al: () => nav('/verificar') }}
-    />
-  )
+  // NO se bloquea la pantalla a quien no esta verificada. La base ya la deja
+  // subir —el clip nace pendiente y no se puede aprobar ni cobrar hasta que se
+  // verifique— y cerrarle la puerta aqui la mandaba de vuelta sin haber hecho
+  // nada. Quien se registra y se va no suele volver. Sube, y mientras tanto se
+  // revisan sus documentos; si no cumple, se baja todo.
 
   const listo = !!video && titulo.trim().length > 0 && estado !== 'subiendo'
   const gana = modo === 'pago' ? Math.round(precio * 0.8) : 0
@@ -131,6 +130,21 @@ export default function Upload() {
         <span style={{ ...etiqueta, color: COLOR.dinero }}>Nuevo clip</span>
         <span style={{ width: 14 }} />
       </div>
+
+      {!perfil.identidad_verificada && (
+        <div style={{ padding: '13px 15px', border: `1px solid ${COLOR.admin}` }}>
+          <div style={{ font: `400 13px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
+            Puedes subir desde ahora. Tu clip queda guardado y{' '}
+            <b style={{ color: COLOR.texto }}>se publica en cuanto verifiquemos tu
+            identidad</b> — no tienes que volver a subirlo.
+          </div>
+          <div onClick={() => nav('/verificar')} style={{
+            marginTop: 11, textAlign: 'center', padding: '12px 0', cursor: 'pointer',
+            background: COLOR.admin, color: COLOR.fondo,
+            font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.8, textTransform: 'uppercase',
+          }}>Verificar mi identidad</div>
+        </div>
+      )}
 
       {/* video */}
       <div onClick={() => refVideo.current?.click()} style={{

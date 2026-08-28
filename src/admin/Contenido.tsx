@@ -17,12 +17,13 @@ import {
 } from '../lib/admin'
 import { urlPortada } from '../lib/clips'
 import PublicarPor from './PublicarPor'
+import AltaMasiva from './AltaMasiva'
 import {
   Tabla, Boton, Campo, Confirmar, Etiquetado, Insignia,
   desde, type Columna,
 } from './piezas'
 
-type Filtro = 'todos' | 'destacados' | 'borrados' | 'plataforma' | 'subir'
+type Filtro = 'todos' | 'destacados' | 'borrados' | 'plataforma' | 'subir' | 'masiva'
 
 const PESTANAS: { v: Filtro; t: string }[] = [
   { v: 'todos',      t: 'Todo el contenido' },
@@ -30,6 +31,7 @@ const PESTANAS: { v: Filtro; t: string }[] = [
   { v: 'plataforma', t: 'De la plataforma'  },
   { v: 'borrados',   t: 'Borrados'          },
   { v: 'subir',      t: 'Subir por una creadora' },
+  { v: 'masiva',     t: 'Alta masiva' },
 ]
 
 export default function Contenido() {
@@ -53,7 +55,7 @@ export default function Contenido() {
     setCargando(true)
     // 'subir' no lista clips, muestra otra pantalla: pedirle a la base un
     // filtro que no existe seria un viaje para nada.
-    if (filtro === 'subir') { setCargando(false); return }
+    if (filtro === 'subir' || filtro === 'masiva') { setCargando(false); return }
     const r = await clipsAdmin(filtro, busqueda)
     setFilas(r.filas); setError(r.error); setCargando(false)
     setPendientes(await porPurgar())
@@ -167,12 +169,13 @@ export default function Contenido() {
           // 'subir' es una ACCION, no un filtro de la lista. Pintada igual que
           // las demas se leia como un titulo mas y nadie la encontraba: se
           // separa a la derecha y lleva el color de accion.
-          const accion = p.v === 'subir'
+          const accion = p.v === 'subir' || p.v === 'masiva'
           return (
             <div key={p.v} onClick={() => setFiltro(p.v)} style={{
               padding: '9px 15px', cursor: 'pointer',
               font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
-              marginLeft: accion ? 'auto' : undefined,
+              marginLeft: p.v === 'subir' ? 'auto' : undefined,
+              marginRight: p.v === 'subir' ? 8 : undefined,
               color: filtro === p.v
                 ? (accion ? COLOR.fondo : COLOR.admin)
                 : (accion ? COLOR.acento : COLOR.textoTenue),
@@ -187,7 +190,8 @@ export default function Contenido() {
         })}
       </div>
 
-      {filtro === 'subir' ? <PublicarPor /> : <>
+      {filtro === 'subir' ? <PublicarPor />
+       : filtro === 'masiva' ? <AltaMasiva /> : <>
 
       <div style={{ display: 'flex', gap: 12, alignItems: 'flex-end', marginBottom: 16 }}>
         <Etiquetado texto="Buscar por título" ancho={280} hijo={
