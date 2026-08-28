@@ -11,7 +11,7 @@ import { useSesion } from '../lib/sesion'
 import { urlAvatar } from '../lib/perfiles'
 import { clipPorId, urlPortada, urlVideoFirmada, clipsPublicados, type ClipConAutora } from '../lib/clips'
 import { comprarClip, saldo } from '../lib/monedero'
-import { rentarClip } from '../lib/canales'
+import { rentarClip, reembolsoDisponible, reclamarReembolso } from '../lib/canales'
 import Reportar from '../components/Reportar'
 import MarcaDeAgua from '../components/MarcaDeAgua'
 import { COLOR, LINEA, VELO, TINTE, FUENTE } from '../lib/diseño'
@@ -28,6 +28,7 @@ export default function ClipDetail() {
   const [coins, setCoins] = useState<number | null>(null)
   const [comprando, setComprando] = useState(false)
   const [rentando, setRentando] = useState(false)
+  const [devolucion, setDevolucion] = useState(0)
   const [errorCompra, setErrorCompra] = useState('')
 
   useEffect(() => {
@@ -48,6 +49,9 @@ export default function ClipDetail() {
     }
     traer()
     if (sesion) saldo().then(v => { if (vivo) setCoins(v) })
+    // Si la creadora lo retiro y esta persona lo habia comprado, se le
+    // ofrece su dinero de vuelta sin que tenga que pedirlo.
+    if (sesion && id) reembolsoDisponible(id).then(v => { if (vivo) setDevolucion(v) })
     return () => { vivo = false }
   }, [id, sesion])
 
@@ -176,6 +180,27 @@ export default function ClipDetail() {
           {!clip.published && ' · borrador'}
         </div>
 
+        {devolucion > 0 && (
+          <div style={{ marginTop: 24, border: `1px solid ${COLOR.dinero}`, padding: 18 }}>
+            <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2,
+              textTransform: 'uppercase', color: COLOR.dinero }}>
+              La creadora retiró este clip
+            </div>
+            <div style={{ marginTop: 10, font: `400 13px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
+              Decidió que dejara de estar disponible. Te devolvemos lo que pagaste.
+            </div>
+            <div onClick={async () => {
+              if (!id) return
+              const r = await reclamarReembolso(id)
+              if ('error' in r) { setErrorCompra(r.error!); return }
+              setDevolucion(0); setCoins(await saldo())
+            }} style={{
+              marginTop: 14, textAlign: 'center', padding: 16, cursor: 'pointer',
+              background: COLOR.dinero, color: COLOR.fondo,
+              font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase',
+            }}>Recuperar mis {devolucion} coins</div>
+          </div>
+        )}
         {bloqueo?.motivo === 'geobloqueo' ? (
           <div style={{
             marginTop: 24, padding: '18px 16px',

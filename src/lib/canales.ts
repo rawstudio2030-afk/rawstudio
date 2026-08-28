@@ -194,3 +194,17 @@ export async function fijarCaducidad(
   })
   return error?.message ?? ''
 }
+
+/** Lo que se le puede devolver a quien compró un clip que la creadora retiró
+ *  por completo. Cero si no hay nada que devolver. */
+export async function reembolsoDisponible(clip: string): Promise<number> {
+  const { data, error } = await supabase.rpc('reembolso_disponible', { clip })
+  if (error) return 0
+  return Number(data ?? 0)
+}
+
+export async function reclamarReembolso(clip: string) {
+  const { data, error } = await supabase.rpc('reclamar_reembolso', { clip })
+  if (error) return { error: error.message }
+  return data as { ok: boolean; coins: number }
+}
