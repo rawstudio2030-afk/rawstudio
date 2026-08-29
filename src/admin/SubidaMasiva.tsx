@@ -166,7 +166,9 @@ export default function SubidaMasiva() {
             font: `400 12px/1 ${FUENTE.mono}` }}>
             <span style={{ color: COLOR.dinero }}>{porSubir} por subir</span>
             {cuenta('no_publica') > 0 && (
-              <span style={{ color: '#FFB020' }}>{cuenta('no_publica')} sin verificar</span>
+              <span style={{ color: '#FFB020' }}>
+                {cuenta('no_publica')} quedarán pendientes
+              </span>
             )}
             {cuenta('listo') > 0 && (
               <span style={{ color: COLOR.admin }}>{cuenta('listo')} subidos</span>
@@ -200,20 +202,30 @@ export default function SubidaMasiva() {
                       : v.estado === 'espera' ? COLOR.textoTenue : '#FFB020'
                     return (
                       <div key={i} style={{
-                        display: 'flex', alignItems: 'center', gap: 10, padding: '7px 13px 7px 26px',
+                        padding: '7px 13px 7px 26px',
                         borderBottom: `1px solid ${LINEA.tenue}`,
                       }}>
-                        <span style={{ flex: 1, font: `400 12px/1.3 ${FUENTE.ui}`,
-                          color: COLOR.texto, overflow: 'hidden', textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap' }}>{v.titulo}</span>
-                        <span style={{ font: `400 10px/1 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
-                          {usd(v.precio)} · {(v.archivo.size / 1048576).toFixed(0)} MB
-                        </span>
-                        <span style={{ font: `700 8px/1.6 ${FUENTE.ui}`, letterSpacing: 1,
-                          textTransform: 'uppercase', color, minWidth: 74, textAlign: 'right' }}>
-                          {v.estado === 'sin_creadora' ? '—'
-                            : v.estado === 'no_publica' ? 'sin verificar' : v.estado}
-                        </span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <span style={{ flex: 1, font: `400 12px/1.3 ${FUENTE.ui}`,
+                            color: COLOR.texto, overflow: 'hidden', textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap' }}>{v.titulo}</span>
+                          <span style={{ font: `400 10px/1 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
+                            {usd(v.precio)} · {(v.archivo.size / 1048576).toFixed(0)} MB
+                          </span>
+                          <span style={{ font: `700 8px/1.6 ${FUENTE.ui}`, letterSpacing: 1,
+                            textTransform: 'uppercase', color, minWidth: 74, textAlign: 'right' }}>
+                            {v.estado === 'sin_creadora' ? '—'
+                              : v.estado === 'no_publica' ? 'pendiente' : v.estado}
+                          </span>
+                        </div>
+                        {/* El motivo del fallo se guardaba y no se pintaba:
+                            "FALLO" a secas no le sirve a nadie para arreglarlo. */}
+                        {v.detalle && (
+                          <div style={{ marginTop: 3, font: `400 11px/1.45 ${FUENTE.ui}`,
+                            color: v.estado === 'fallo' ? '#FF4444' : COLOR.textoTenue }}>
+                            {v.detalle}
+                          </div>
+                        )}
                       </div>
                     )
                   })}

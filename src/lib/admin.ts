@@ -1265,11 +1265,13 @@ export function agruparVideos(
         titulo: tituloDeArchivo(f.name),
         descripcion: '', precio: 240, visibilidad: 'pago' as const,
         creadora: c?.id ?? null,
+        // Sin verificar YA NO impide subir: el clip queda pendiente y se
+        // publica solo en cuanto se cargue su expediente, sin volver a subirlo.
         estado: !c ? 'sin_creadora' as const
               : !c.verificada ? 'no_publica' as const
               : 'espera' as const,
         detalle: !c ? `no hay ninguna creadora con el usuario "${carpeta}"`
-               : !c.verificada ? 'le faltan documentos: subiría pero no se publicaría'
+               : !c.verificada ? 'se sube y queda pendiente hasta que cargues su expediente'
                : '',
       }
     })
