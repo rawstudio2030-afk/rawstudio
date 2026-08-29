@@ -1316,3 +1316,47 @@ export function aplicarCatalogo(
   const huerfanos = [...porRuta.keys()].filter(k => !usadas.has(k))
   return { lote: nuevo, emparejados: usadas.size, huerfanos }
 }
+
+/* ==================== Uso de almacenamiento ==================== */
+
+export type UsoBucket = {
+  bucket: string; archivos: number; bytes: number
+  total_bytes: number; base_bytes: number; limite_mb: number
+}
+
+export async function usoAlmacenamiento() {
+  const { data, error } = await supabase.rpc('admin_uso_almacenamiento')
+  if (error) return { filas: [] as UsoBucket[], error: error.message }
+  const filas = ((data ?? []) as UsoBucket[]).map(f => ({
+    ...f,
+    archivos: Number(f.archivos), bytes: Number(f.bytes),
+    total_bytes: Number(f.total_bytes), base_bytes: Number(f.base_bytes),
+    limite_mb: Number(f.limite_mb),
+  }))
+  return { filas, error: '' }
+}
+
+export async function usoPorCreadora() {
+  const { data, error } = await supabase.rpc('admin_uso_por_creadora')
+  if (error) return []
+  return ((data ?? []) as { id: string; handle: string; nombre: string; clips: number; bytes: number }[])
+    .map(f => ({ ...f, clips: Number(f.clips), bytes: Number(f.bytes) }))
+}
+
+export async function fijarLimiteAlmacenamiento(mb: number) {
+  const { error } = await supabase.rpc('admin_ajustar_bandera_num', {
+    p_clave: 'limite_almacenamiento_mb', p_valor: mb,
+  })
+  return error?.message ?? ''
+}
+
+/** Bytes a algo legible. Se usa base 1024 porque es la que usan los planes de
+ *  Supabase: decir 1.2 GB cuando el proveedor cuenta 1.1 GiB es prometer
+ *  espacio que no hay. */
+export function tamano(bytes: number): string {
+  const b = Number(bytes) || 0
+  if (b < 1024) return `${b} B`
+  if (b < 1048576) return `${(b / 1024).toFixed(0)} KB`
+  if (b < 1073741824) return `${(b / 1048576).toFixed(1)} MB`
+  return `${(b / 1073741824).toFixed(2)} GB`
+}

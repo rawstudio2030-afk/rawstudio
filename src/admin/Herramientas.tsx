@@ -7,6 +7,7 @@
  */
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import Almacenamiento from './Almacenamiento'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 import { sembrarDemo, borrarDemo } from '../lib/admin'
 import { Boton, Confirmar } from './piezas'
@@ -17,7 +18,14 @@ export default function Herramientas() {
   const [aviso, setAviso] = useState('')
 
   return (
-    <div style={{ display: 'grid', gap: 14, maxWidth: 620 }}>
+    <>
+      {/* El espacio va arriba y a lo ancho: es lo primero que hay que mirar
+          antes de subir nada, porque Supabase no avisa antes de llenarse. */}
+      <div style={{ marginBottom: 28 }}>
+        <Almacenamiento />
+      </div>
+
+      <div style={{ display: 'grid', gap: 14, maxWidth: 620 }}>
       <Tarjeta titulo="Alta de creadora"
         texto="Da de alta a una creadora, carga su expediente (identificación y consentimiento firmado) y publica sus primeros clips por ella. Sin expediente completo, la base rechaza la publicación."
         accion={<Boton tono="primario" al={() => nav('/alta-creadora')}>Abrir el alta</Boton>} />
@@ -54,7 +62,8 @@ export default function Herramientas() {
             setDialogo(null)
           }} />
       )}
-    </div>
+      </div>
+    </>
   )
 }
 
