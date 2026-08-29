@@ -14,6 +14,7 @@ import {
   leerCSV, validarAlta, handlesExistentes, altaConDocumentos, type FilaAlta,
 } from '../lib/admin'
 import { Boton } from './piezas'
+import SubidaMasiva from './SubidaMasiva'
 
 export default function AltaMasiva() {
   const [filas, setFilas] = useState<FilaAlta[]>([])
@@ -61,6 +62,11 @@ export default function AltaMasiva() {
 
   return (
     <>
+      <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2,
+        textTransform: 'uppercase', color: COLOR.dinero, marginBottom: 12 }}>
+        1 · Dar de alta las creadoras
+      </div>
+
       <div style={{ marginBottom: 18, padding: '12px 14px', border: `1px solid ${LINEA.tenue}`,
         font: `400 11px/1.6 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
         Sube la tabla con <b style={{ color: COLOR.texto }}>handle</b> y{' '}
@@ -172,6 +178,8 @@ export default function AltaMasiva() {
           </div>
         </>
       )}
+
+      <SubidaMasiva />
     </>
   )
 }

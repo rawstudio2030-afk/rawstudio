@@ -1212,3 +1212,105 @@ export async function altaConDocumentos(f: FilaAlta, archivos: Map<string, File>
   ].filter(Boolean)
   return { ok: true, id, aviso: `creada SIN verificar — falta ${faltan.join(' y ')}` }
 }
+
+/* ==================== Subida masiva de videos ==================== */
+
+export type VideoEnLote = {
+  archivo: File
+  carpeta: string          // nombre de la carpeta = handle de la creadora
+  ruta: string             // carpeta/archivo.mp4
+  titulo: string
+  descripcion: string
+  precio: number           // centavos de dolar
+  visibilidad: 'pago' | 'suscriptores' | 'gratis'
+  creadora: string | null  // id, si la carpeta empareja con alguien
+  estado: 'espera' | 'sin_creadora' | 'no_publica' | 'subiendo' | 'listo' | 'fallo'
+  detalle: string
+}
+
+const VIDEO = /\.(mp4|mov|webm|m4v)$/i
+
+/** Titulo a partir del nombre del archivo: sin extension y con los separadores
+ *  vueltos espacios. Escribir cientos de titulos a mano es justo lo que hace
+ *  imposible una subida masiva. */
+function tituloDeArchivo(nombre: string) {
+  return nombre.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ')
+    .replace(/\s+/g, ' ').trim().slice(0, 90) || 'Sin título'
+}
+
+/** Agrupa los archivos de una carpeta elegida y los empareja con creadoras por
+ *  el nombre de la carpeta.
+ *
+ *  Solo se empareja contra creadoras CON EXPEDIENTE, que son las mismas a las
+ *  que las politicas de almacenamiento permiten escribirles: emparejar con
+ *  otras seria prometer una subida que despues falla. */
+export function agruparVideos(
+  archivos: File[],
+  creadoras: { id: string; handle: string; verificada: boolean }[],
+): VideoEnLote[] {
+  const porHandle = new Map(creadoras.map(c => [c.handle.toLowerCase(), c]))
+
+  return archivos
+    .filter(f => VIDEO.test(f.name))
+    .map(f => {
+      // webkitRelativePath viene como "carpeta/archivo.mp4". Si el navegador
+      // no lo trae, se cae al nombre suelto y la carpeta queda vacia.
+      const rel = (f as File & { webkitRelativePath?: string }).webkitRelativePath || f.name
+      const partes = rel.split('/').filter(Boolean)
+      const carpeta = partes.length > 1 ? partes[partes.length - 2] : ''
+      const c = porHandle.get(carpeta.toLowerCase())
+
+      return {
+        archivo: f, carpeta, ruta: rel,
+        titulo: tituloDeArchivo(f.name),
+        descripcion: '', precio: 240, visibilidad: 'pago' as const,
+        creadora: c?.id ?? null,
+        estado: !c ? 'sin_creadora' as const
+              : !c.verificada ? 'no_publica' as const
+              : 'espera' as const,
+        detalle: !c ? `no hay ninguna creadora con el usuario "${carpeta}"`
+               : !c.verificada ? 'le faltan documentos: subiría pero no se publicaría'
+               : '',
+      }
+    })
+    .sort((a, b) => a.ruta.localeCompare(b.ruta))
+}
+
+/** Aplica un CSV de titulos y descripciones sobre la lista ya agrupada.
+ *
+ *  Empareja primero por ruta completa y despues por nombre de archivo: dos
+ *  creadoras pueden tener un "01.mp4", y la ruta las distingue. */
+export function aplicarCatalogo(
+  lote: VideoEnLote[], filas: Record<string, string>[],
+): { lote: VideoEnLote[]; emparejados: number; huerfanos: string[] } {
+  const porRuta = new Map<string, Record<string, string>>()
+  for (const f of filas) {
+    const clave = (f.archivo ?? '').trim().toLowerCase()
+    if (clave) porRuta.set(clave, f)
+  }
+  const usadas = new Set<string>()
+
+  const nuevo = lote.map(v => {
+    const f = porRuta.get(v.ruta.toLowerCase())
+      ?? porRuta.get(v.archivo.name.toLowerCase())
+    if (!f) return v
+    usadas.add((f.archivo ?? '').trim().toLowerCase())
+
+    const precio = f.precio !== undefined && f.precio !== ''
+      ? Math.round(parseFloat(String(f.precio).replace(',', '.')) * 100)
+      : v.precio
+    const vis = ['pago', 'suscriptores', 'gratis'].includes(f.visibilidad ?? '')
+      ? f.visibilidad as VideoEnLote['visibilidad'] : v.visibilidad
+
+    return {
+      ...v,
+      titulo: (f.titulo || v.titulo).slice(0, 90),
+      descripcion: (f.descripcion ?? '').slice(0, 600),
+      precio: Number.isFinite(precio) && precio >= 0 ? precio : v.precio,
+      visibilidad: vis,
+    }
+  })
+
+  const huerfanos = [...porRuta.keys()].filter(k => !usadas.has(k))
+  return { lote: nuevo, emparejados: usadas.size, huerfanos }
+}
