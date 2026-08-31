@@ -11,6 +11,7 @@
 import type { ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { COLOR, LINEA, TINTE, FUENTE } from '../lib/diseño'
+import Icono from './Iconos'
 import {
   REDES, QUE_ES, FORMAS_DE_GANAR, SEGURIDAD, VALORES, PASOS, PREGUNTAS,
 } from '../content/portada'
@@ -65,12 +66,7 @@ export default function Portada() {
         <div style={{ display: 'grid', gap: 1, background: LINEA.tenue,
           border: `1px solid ${LINEA.tenue}`, marginTop: 14 }}>
           {FORMAS_DE_GANAR.map(f => (
-            <div key={f.t} style={{ background: COLOR.fondo, padding: '14px 15px' }}>
-              <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.4,
-                textTransform: 'uppercase', color: COLOR.dinero }}>{f.t}</div>
-              <div style={{ marginTop: 7, font: `400 14px/1.5 ${FUENTE.ui}`,
-                color: COLOR.textoSuave }}>{f.d}</div>
-            </div>
+            <Fila key={f.t} icono={f.i} titulo={f.t} texto={f.d} color={COLOR.dinero} />
           ))}
         </div>
 
@@ -78,12 +74,7 @@ export default function Portada() {
         <div style={{ display: 'grid', gap: 1, background: LINEA.tenue,
           border: `1px solid ${LINEA.tenue}`, marginTop: 14 }}>
           {SEGURIDAD.map(f => (
-            <div key={f.t} style={{ background: COLOR.fondo, padding: '14px 15px' }}>
-              <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.4,
-                textTransform: 'uppercase', color: COLOR.admin }}>{f.t}</div>
-              <div style={{ marginTop: 7, font: `400 14px/1.5 ${FUENTE.ui}`,
-                color: COLOR.textoSuave }}>{f.d}</div>
-            </div>
+            <Fila key={f.t} icono={f.i} titulo={f.t} texto={f.d} color={COLOR.admin} />
           ))}
         </div>
 
@@ -219,6 +210,28 @@ export default function Portada() {
 }
 
 /* ---------- piezas ---------- */
+
+/** El icono va en su color y el texto en el suyo: si el icono llevara el mismo
+ *  gris que la descripcion se perderia, y si el titulo llevara el color del
+ *  icono habria dos cosas gritando a la vez. */
+function Fila({ icono, titulo, texto, color }: {
+  icono: string; titulo: string; texto: string; color: string
+}) {
+  return (
+    <div style={{
+      background: COLOR.fondo, padding: '15px 15px',
+      display: 'flex', gap: 13, alignItems: 'flex-start',
+    }}>
+      <span style={{ color, marginTop: 1 }}><Icono nombre={icono} /></span>
+      <div>
+        <div style={{ font: `700 11px/1.3 ${FUENTE.ui}`, letterSpacing: 1.4,
+          textTransform: 'uppercase', color }}>{titulo}</div>
+        <div style={{ marginTop: 7, font: `400 14px/1.5 ${FUENTE.ui}`,
+          color: COLOR.textoSuave }}>{texto}</div>
+      </div>
+    </div>
+  )
+}
 
 function Seccion({ rotulo, children }: { rotulo: string; children: ReactNode }) {
   return (

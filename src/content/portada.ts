@@ -19,20 +19,20 @@ export const QUE_ES = [
 ]
 
 export const FORMAS_DE_GANAR = [
-  { t: 'Venta permanente', d: 'Le pones precio a un video y quien lo compra lo conserva.' },
-  { t: 'Renta por tiempo', d: 'El mismo video, más barato, por 48 o 72 horas.' },
-  { t: 'Suscripción mensual', d: 'Acceso a todo lo tuyo mientras estén suscritas.' },
-  { t: 'Contenido a la medida', d: 'Alguien te pide algo concreto y negocian el precio. El dinero queda retenido hasta que entregas.' },
-  { t: 'Propinas', d: 'Sin pedir nada a cambio.' },
-  { t: 'Blog', d: 'Texto para tus suscriptoras, sin tener que grabar.' },
+  { i: 'etiqueta', t: 'Venta permanente', d: 'Le pones precio a un video y quien lo compra lo conserva.' },
+  { i: 'reloj', t: 'Renta por tiempo', d: 'El mismo video, más barato, por 48 o 72 horas.' },
+  { i: 'ciclo', t: 'Suscripción mensual', d: 'Acceso a todo lo tuyo mientras estén suscritas.' },
+  { i: 'lapiz', t: 'Contenido a la medida', d: 'Alguien te pide algo concreto y negocian el precio. El dinero queda retenido hasta que entregas.' },
+  { i: 'corazon', t: 'Propinas', d: 'Sin pedir nada a cambio.' },
+  { i: 'texto', t: 'Blog', d: 'Texto para tus suscriptoras, sin tener que grabar.' },
 ]
 
 export const SEGURIDAD = [
-  { t: 'Marca de agua con nombre', d: 'Quien mira tu video ve su propio nombre encima. Si se filtra, se sabe de quién salió.' },
-  { t: 'Bloqueo por país', d: 'Decides en qué países no se ve tu contenido. Útil si no quieres que te vean cerca de casa.' },
-  { t: 'Fecha de retiro', d: 'Le pones caducidad a lo que subes. Nada tiene que quedarse para siempre.' },
-  { t: 'Tus documentos no se guardan', d: 'Se revisan una vez y se borran. De ti queda un sí y una fecha, nada más.' },
-  { t: 'Verificación de edad', d: 'De todas, sin excepción. Nadie publica sin comprobar quién es.' },
+  { i: 'ojo', t: 'Marca de agua con nombre', d: 'Quien mira tu video ve su propio nombre encima. Si se filtra, se sabe de quién salió.' },
+  { i: 'globo', t: 'Bloqueo por país', d: 'Decides en qué países no se ve tu contenido. Útil si no quieres que te vean cerca de casa.' },
+  { i: 'arena', t: 'Fecha de retiro', d: 'Le pones caducidad a lo que subes. Nada tiene que quedarse para siempre.' },
+  { i: 'documento', t: 'Tus documentos no se guardan', d: 'Se revisan una vez y se borran. De ti queda un sí y una fecha, nada más.' },
+  { i: 'escudo', t: 'Verificación de edad', d: 'De todas, sin excepción. Nadie publica sin comprobar quién es.' },
 ]
 
 export const VALORES = [
