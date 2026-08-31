@@ -6,6 +6,7 @@ import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import Wordmark from '../components/Wordmark'
+import Portada from '../components/Portada'
 import { COLOR, TINTE, FUENTE } from '../lib/diseño'
 
 
@@ -55,7 +56,7 @@ export default function Entrar() {
             ¿Vas a publicar tú?
           </div>
           <div style={{ font: `400 15px/1.45 ${FUENTE.ui}`, color: COLOR.texto, marginBottom: 10 }}>
-            El <b style={{ fontWeight: 700 }}>80% de cada peso</b> es tuyo, pagos cada semana y sin exclusividad.
+            El <b style={{ fontWeight: 700 }}>80% de cada dólar</b> es tuyo, pagos por SPEI y sin exclusividad.
           </div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
             <span style={{ font: `400 11px/1.5 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
@@ -86,6 +87,8 @@ export default function Entrar() {
           Ya tengo cuenta
         </div>
       </div>
+
+      <Portada />
     </div>
   )
 }

@@ -50,6 +50,14 @@ export const PRIVACIDAD: Seccion[] = [
     'Escribe a [privacidad@rawstudio.biz] con tu nombre, un medio de contacto, un documento que acredite tu identidad, y la descripción de los datos.',
     'Ejercerlos es gratuito. Solo pueden cobrarse los costos de reproducción o envío.',
   ]},
+  { titulo: 'Si vives en California (CCPA)', cuerpo: [
+    'Esta sección existe porque la ley de California da derechos que se suman a los anteriores, y quien viva allí puede ejercerlos aunque esta plataforma sea mexicana.',
+    'Puedes pedir que te digamos qué datos personales tenemos sobre ti, de dónde salieron y con quién se compartieron en los últimos doce meses.',
+    'Puedes pedir que los borremos, con las excepciones que la propia ley marca: lo que estamos obligados a conservar por requerimiento fiscal o como prueba de que se verificó la mayoría de edad.',
+    'No vendemos tus datos personales ni los compartimos para publicidad dirigida. Como no lo hacemos, no hay de qué darse de baja.',
+    'Ejercer cualquiera de estos derechos no hará que te demos peor servicio ni precios distintos.',
+    'Para ejercerlos, escribe a [privacidad@rawstudio.biz]. Respondemos en un plazo de [45] días.',
+  ]},
   { titulo: 'Cuánto tiempo los conservamos', cuerpo: [
     'Mientras tu cuenta esté activa. Después de cancelarla: los registros de verificación de edad por [5] años, como evidencia de que impedimos el acceso a menores; los registros fiscales por 5 años conforme al Código Fiscal; el resto se elimina o se disocia.',
   ]},
