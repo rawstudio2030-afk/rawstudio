@@ -23,7 +23,7 @@ import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 import launchVideo from '../assets/launch.mp4'
 
 /** Segundo del video donde ya se ve la espiral. */
-const DESDE = 1.2
+const DESDE = 1.8
 
 const CINTILLO = [
   '80% para ti', 'sin exclusividad', 'pagos por SPEI',

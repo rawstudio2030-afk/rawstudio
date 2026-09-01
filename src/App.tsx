@@ -149,9 +149,22 @@ function GuardiaEdad() {
   return null
 }
 
+/* Al cambiar de pantalla se vuelve arriba.
+ *
+ * El router no toca el scroll: cambia el contenido y deja la pagina donde
+ * estaba. Con pantallas de una pantallada casi no se notaba. La portada mide
+ * seis mil pixeles, asi que quien la lee entera y toca «crear mi cuenta»
+ * aterrizaba a la mitad del formulario, con el titulo fuera de vista. */
+function VolverArriba() {
+  const aqui = useLocation().pathname
+  useEffect(() => { window.scrollTo(0, 0) }, [aqui])
+  return null
+}
+
 export default function App() {
   return (
     <>
+      <VolverArriba />
       <Routes>
         {SCREENS.map(s => <Route key={s.path} path={s.path} element={s.el} />)}
         {/* Perfil publico por handle. No entra al indice de pantallas porque
