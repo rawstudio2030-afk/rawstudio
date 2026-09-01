@@ -10,7 +10,7 @@ export type Papel = 'visitante' | 'usuaria' | 'creadora' | 'admin'
 
 /** Pantallas de entrada: se cruzan una vez. Nunca aparecen en la navegacion,
  *  porque volver a ellas estando dentro solo confunde. */
-export const RUTAS_ENTRADA = ['/', '/age', '/entrar', '/registro', '/acceso']
+export const RUTAS_ENTRADA = ['/', '/intro', '/age', '/entrar', '/registro', '/acceso']
 
 /** Con sesion abierta, estas rutas no tienen sentido y redirigen al contenido. */
 export const REDIRIGE_SI_HAY_SESION = ['/entrar', '/registro', '/acceso']

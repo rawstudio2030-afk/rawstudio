@@ -4,6 +4,7 @@ import { useSesion } from './lib/sesion'
 import { GuardiaRutas, BarraInferior, HuecoBarra } from './components/Navegacion'
 import CierrePorInactividad from './components/CierrePorInactividad'
 import Launch from './screens/Launch'
+import Portal from './screens/Portal'
 import AgeGate from './screens/AgeGate'
 import ClipDetail from './screens/ClipDetail'
 import Explorar from './screens/Explorar'
@@ -29,7 +30,8 @@ import AltaCreadora from './screens/AltaCreadora'
 import { COLOR } from './lib/diseño'
 
 export const SCREENS = [
-  { path: '/',          n: '00', title: 'Launch',         el: <Launch /> },
+  { path: '/',          n: '00', title: 'Portada',        el: <Portal /> },
+  { path: '/intro',     n: '00b', title: 'Intro',          el: <Launch /> },
   { path: '/age',       n: '01', title: 'Age gate',       el: <AgeGate /> },
   { path: '/clip',      n: '02', title: 'Explorar',       el: <Explorar /> },
   { path: '/wallet',    n: '03', title: 'Wallet',         el: <Wallet /> },
@@ -158,7 +160,7 @@ export default function App() {
         <Route path="/clip/:id" element={<ClipDetail />} />
         {/* El panel enruta sus modulos por parametro; /admin a secas cae en Usuarios. */}
         <Route path="/admin/:modulo" element={<Admin />} />
-        <Route path="*" element={<Launch />} />
+        <Route path="*" element={<Portal />} />
       </Routes>
       <GuardiaRutas />
       <CierrePorInactividad />

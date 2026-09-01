@@ -12,6 +12,8 @@ import type { ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { COLOR, LINEA, TINTE, FUENTE } from '../lib/diseño'
 import Icono from './Iconos'
+import { Regla, Marco } from './Hervor'
+import { FondoOpArt } from './OpArt'
 import {
   REDES, QUE_ES, FORMAS_DE_GANAR, SEGURIDAD, VALORES, PASOS, PREGUNTAS,
 } from '../content/portada'
@@ -37,10 +39,14 @@ export default function Portada() {
 
       {/* ---------- El 80% ---------- */}
       <div style={{
-        margin: '38px 0', padding: '26px 20px',
-        border: `1.5px solid ${COLOR.dinero}`, background: TINTE.dinero,
-        textAlign: 'center',
+        position: 'relative', margin: '38px 0', padding: '30px 22px',
+        background: TINTE.dinero, textAlign: 'center', overflow: 'hidden',
       }}>
+        {/* Los anillos van muy apagados: aqui hay una cifra que la gente
+            necesita leer sin esfuerzo, no un poster. */}
+        <FondoOpArt opacidad={.05} color={COLOR.texto} giro={140} />
+        <Marco color={COLOR.dinero} grosor={2.6} />
+        <div style={{ position: 'relative' }}>
         <div style={{
           fontFamily: FUENTE.display, fontSize: 64, lineHeight: 1,
           color: COLOR.dinero, textTransform: 'uppercase',
@@ -55,6 +61,7 @@ export default function Portada() {
           fontSize: 17, lineHeight: 1.4, color: COLOR.textoSuave,
         }}>
           Sin cuota mensual, sin cargo por publicar y sin exclusividad.
+        </div>
         </div>
       </div>
 
@@ -92,9 +99,10 @@ export default function Portada() {
 
       {/* ---------- Join us ---------- */}
       <div style={{
-        margin: '44px 0', padding: '28px 20px',
-        border: `1.5px dashed ${TINTE.acentoBorde}`, background: TINTE.acento,
+        position: 'relative', margin: '44px 0', padding: '30px 22px',
+        background: TINTE.acento,
       }}>
+        <Marco color={COLOR.acento} grosor={2.4} />
         <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.4,
           textTransform: 'uppercase', color: COLOR.acento }}>Join us</div>
         <div style={{ marginTop: 14, fontFamily: FUENTE.display, fontSize: 36,
@@ -222,7 +230,7 @@ function Fila({ icono, titulo, texto, color }: {
       background: COLOR.fondo, padding: '15px 15px',
       display: 'flex', gap: 13, alignItems: 'flex-start',
     }}>
-      <span style={{ color, marginTop: 1 }}><Icono nombre={icono} /></span>
+      <span style={{ color, marginTop: 1 }}><Icono nombre={icono} hierve /></span>
       <div>
         <div style={{ font: `700 11px/1.3 ${FUENTE.ui}`, letterSpacing: 1.4,
           textTransform: 'uppercase', color }}>{titulo}</div>
@@ -240,7 +248,7 @@ function Seccion({ rotulo, children }: { rotulo: string; children: ReactNode }) 
         font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.6,
         textTransform: 'uppercase', color: COLOR.textoTenue, marginBottom: 4,
       }}>{rotulo}</div>
-      <div style={{ width: 44, height: 2, background: COLOR.acento, margin: '12px 0 20px' }} />
+      <div style={{ margin: '12px 0 20px' }}><Regla ancho={48} /></div>
       {children}
     </div>
   )

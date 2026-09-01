@@ -64,3 +64,98 @@ details[open] > summary > .faq-signo {
   color: #08080A;
   transform: rotate(45deg);
 }
+
+/* ---------- Hervor de linea ----------
+ *
+ * Tres dibujos de la misma figura, alternandose. El salto es seco —step-end,
+ * sin interpolar— porque una transicion suave daria ondeo de bandera y no el
+ * temblor de algo redibujado a mano.
+ *
+ * .28s entre los tres = unos 11 dibujos por segundo: la animacion tradicional
+ * «a dos» (12) o «a tres» (8). A 24 se pierde el efecto y parece video. */
+@keyframes hervor {
+  0%,     33.33% { visibility: visible }
+  33.34%, 100%   { visibility: hidden }
+}
+.hervor > * {
+  visibility: hidden;
+  animation: hervor var(--hervor, .28s) step-end infinite;
+}
+/* Retrasos NEGATIVOS: los tres arrancan ya desfasados en vez de esperar turno,
+   asi el primer cuadro se ve desde el instante cero. */
+.hervor > :nth-child(1) { animation-delay: 0s }
+.hervor > :nth-child(2) { animation-delay: calc(var(--hervor, .28s) / -3 * 2) }
+.hervor > :nth-child(3) { animation-delay: calc(var(--hervor, .28s) / -3) }
+
+/* El recorte del ojo tambien hierve: son tres siluetas y se cambia de una a
+   otra. clip-path entre dos url() no se interpola, salta — que es justo lo
+   que se busca. */
+@keyframes hervorRecorte {
+  0%,     33.33% { clip-path: url(#ojo-0) }
+  33.34%, 66.66% { clip-path: url(#ojo-1) }
+  66.67%, 100%   { clip-path: url(#ojo-2) }
+}
+.ojo-recorte {
+  clip-path: url(#ojo-0);
+  animation: hervorRecorte var(--hervor, .28s) step-end infinite;
+}
+
+/* Giro lento del fondo op art. Va en transform para que lo mueva la tarjeta
+   grafica y no el hilo principal. */
+@keyframes girarLento { to { transform: rotate(360deg) } }
+@keyframes latir { 0%,100% { transform: scale(1) } 50% { transform: scale(1.045) } }
+
+/* Cintillo. El texto se duplica en el markup y se desplaza justo la mitad,
+   por eso el ciclo es invisible. */
+@keyframes cintillo { to { transform: translateX(-50%) } }
+
+/* Quien pidio menos movimiento no deberia recibir un fondo que gira y un
+   dibujo que tiembla once veces por segundo. Se congela todo en el primer
+   cuadro; el diseño sigue de pie porque las tres siluetas son casi iguales. */
+@media (prefers-reduced-motion: reduce) {
+  .hervor > *              { animation: none }
+  .hervor > :nth-child(1)  { visibility: visible }
+  .ojo-recorte             { animation: none }
+  [class*="opart"], .cintillo > * { animation: none !important }
+}
+
+/* La portada ocupa la pantalla completa. Va en CSS y no en estilo inline
+   porque necesita dos declaraciones: svh es la altura real del navegador de
+   celular —descontando la barra de direcciones— y vh queda de respaldo para
+   quien no la entienda. Inline no se pueden dar dos valores a la misma
+   propiedad. */
+.portal-alto {
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
+/* Portada: una columna en celular, dos cuando hay ancho.
+ *
+ * Va en CSS porque una consulta de medios no cabe en un estilo inline, y
+ * apilado no era opcion: en una portatil de 720 de alto los botones quedaban
+ * debajo del pliegue. */
+/* `position: relative` no es decorativo: el velo que va sobre el op art esta
+   posicionado, y un elemento posicionado se pinta ENCIMA de los que van en
+   flujo normal aunque esten antes en el markup. Sin esto, el velo tapaba el
+   titular y los botones y todo se veia apagado. */
+.portal-cuerpo {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.portal-marca { position: relative; width: 100%; max-width: 520px; display: flex; justify-content: center }
+.portal-ojo   { width: 100%; max-width: min(430px, 46vh); margin-top: 18px }
+.portal-texto { display: flex; flex-direction: column; align-items: center; text-align: center }
+
+@media (min-width: 940px) {
+  .portal-cuerpo { flex-direction: row-reverse; align-items: center; gap: 56px; max-width: 1060px }
+  /* La marca se alinea con la columna de texto. Centrada quedaba flotando en
+     el hueco entre las dos columnas, sin pertenecer a ninguna. */
+  .portal-marca  { max-width: 1060px; justify-content: flex-start; margin-bottom: 26px }
+  .portal-ojo    { flex: 0 1 46%; max-width: min(470px, 52vh); margin-top: 0 }
+  .portal-texto  { flex: 1 1 0; align-items: flex-start; text-align: left }
+  .portal-texto > h1 { margin-top: 0 }
+}

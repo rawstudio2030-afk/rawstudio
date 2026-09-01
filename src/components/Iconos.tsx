@@ -9,6 +9,8 @@
  * con los simbolos geometricos que ya usa la barra inferior.
  */
 
+import { Hervido } from './Hervor'
+
 const TRAZOS: Record<string, string> = {
   // ---- Formas de ganar ----
   /** Etiqueta de precio: se compra una vez y es tuya. */
@@ -41,17 +43,25 @@ const TRAZOS: Record<string, string> = {
 
 export type NombreIcono = keyof typeof TRAZOS
 
-export default function Icono({ nombre, tam = 22 }: {
-  nombre: string; tam?: number
+/** `hierve` deforma el icono con ruido en vez de redibujarlo. Estos once
+ *  iconos estan hechos de cadenas `d` con arcos, y en un arco hay numeros que
+ *  no son coordenadas —los de las banderas—: moverlos no despeina el trazo,
+ *  lo rompe. Con el filtro no hace falta rehacerlos.
+ *
+ *  Necesita <FiltrosHervor/> en algun lugar de la pagina; sin eso el
+ *  `url(#hervor-n)` no encuentra nada y el icono se ve, pero quieto. */
+export default function Icono({ nombre, tam = 22, hierve = false }: {
+  nombre: string; tam?: number; hierve?: boolean
 }) {
   const d = TRAZOS[nombre]
   if (!d) return null
+  const trazos = d.split('M').filter(Boolean).map((p, i) => <path key={i} d={'M' + p} />)
   return (
     <svg width={tam} height={tam} viewBox="0 0 24 24" fill="none"
       stroke="currentColor" strokeWidth={1.5}
       strokeLinecap="round" strokeLinejoin="round"
-      aria-hidden style={{ flex: '0 0 auto' }}>
-      {d.split('M').filter(Boolean).map((p, i) => <path key={i} d={'M' + p} />)}
+      aria-hidden style={{ flex: '0 0 auto', overflow: 'visible' }}>
+      {hierve ? <Hervido>{trazos}</Hervido> : trazos}
     </svg>
   )
 }
