@@ -4,6 +4,7 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
+import { marcarEdad } from '../lib/edad'
 import { supabase } from '../lib/supabase'
 import Wordmark from '../components/Wordmark'
 import cortina from '../assets/cortina.jpg'
@@ -33,10 +34,16 @@ export default function AgeGate() {
       nav('/clip')
       return
     }
-    // Sin sesion todavia: se guarda la intencion y se registra al volver del
-    // enlace magico, cuando ya existe una fila de perfil que actualizar.
-    localStorage.setItem('rawstudio.edad_confirmada', new Date().toISOString())
-    nav('/entrar')
+    // Sin sesion todavia: se guarda la constancia y se registra al abrir
+    // cuenta, cuando ya existe una fila de perfil que actualizar.
+    //
+    // Y se va al CATALOGO, no a la puerta de acceso. Quien acaba de decir
+    // «solo vengo a ver» y se topa con un formulario de registro se va: no
+    // ha visto nada por lo que valga la pena dar un correo. Asi funciona
+    // cualquier sitio de este giro —se mira primero y se paga despues—, y
+    // aqui cada clip trae su propio muro cuando toca cobrar.
+    marcarEdad()
+    nav('/clip')
   }
   return (
     <div style={{minHeight: "100%", boxSizing: "border-box", padding: "64px 26px 44px", background: COLOR.fondo, color: COLOR.texto, fontFamily: "'Space Grotesk',sans-serif", display: "flex", flexDirection: "column", position: "relative", overflow: "hidden"}}>

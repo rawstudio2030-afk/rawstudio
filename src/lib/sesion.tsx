@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import type { Session } from '@supabase/supabase-js'
+import { edadConfirmada, olvidarEdad } from './edad'
 import { supabase, type Perfil } from './supabase'
 import { registrarAcceso } from './admin'
 
@@ -22,11 +23,11 @@ export function ProveedorSesion({ children }: { children: ReactNode }) {
   // deja apuntada en localStorage y se escribe aqui, al volver del enlace
   // magico, que es cuando ya hay una fila de perfil que actualizar.
   const volcarEdadPendiente = async (id: string) => {
-    const pendiente = localStorage.getItem('rawstudio.edad_confirmada')
+    const pendiente = edadConfirmada()
     if (!pendiente) return
     const { error } = await supabase
       .from('profiles').update({ adult_confirmed_at: pendiente }).eq('id', id)
-    if (!error) localStorage.removeItem('rawstudio.edad_confirmada')
+    if (!error) olvidarEdad()
   }
 
   const traerPerfil = async (id: string | undefined) => {

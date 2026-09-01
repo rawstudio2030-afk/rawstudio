@@ -25,6 +25,19 @@ export const EXIGE_SESION = [
   '/estudio', '/estudio/niveles', '/estudio/encargos', '/estudio/blog',
 ]
 
+/** Rutas que NO exigen haber cruzado la puerta de edad: la portada, la propia
+ *  puerta, el alta, los avisos legales y la pagina para creadoras. Todo lo
+ *  demas es catalogo y si la exige.
+ *
+ *  Antes esto no hacia falta: la intro mandaba sola a la puerta y no habia
+ *  forma de llegar al contenido sin pasar por ahi. Ahora la raiz es una
+ *  portada que se puede leer entera sin cruzar nada, asi que la puerta tiene
+ *  que defenderse sola. */
+export const SIN_PUERTA_DE_EDAD = [
+  '/', '/intro', '/age', '/entrar', '/registro', '/acceso', '/nueva-clave',
+  '/privacidad', '/terminos', '/creadoras',
+]
+
 export type Destino = {
   path: string
   titulo: string
@@ -42,11 +55,13 @@ export type Destino = {
  *  creadora le estorba; a cambio, el estudio le quedaba enterrado dentro de
  *  "Yo" y la obligaba a usar esa pestaña como pasillo en vez de destino. */
 export const BARRA: Destino[] = [
-  { path: '/clip',    titulo: 'Explorar',   icono: '▶', papeles: ['usuaria', 'creadora', 'admin'] },
-  { path: '/library', titulo: 'Biblioteca', icono: '▤', papeles: ['usuaria'] },
-  { path: '/estudio', titulo: 'Estudio',    icono: '◆', papeles: ['creadora', 'admin'] },
-  { path: '/chat',    titulo: 'Mensajes',   icono: '✉', papeles: ['usuaria', 'creadora', 'admin'] },
-  { path: '/perfil',  titulo: 'Yo',         icono: '●', papeles: ['usuaria', 'creadora', 'admin'] },
+  { path: '/clip',      titulo: 'Explorar',   icono: '▶', papeles: ['visitante', 'usuaria', 'creadora', 'admin'] },
+  { path: '/library',   titulo: 'Biblioteca', icono: '▤', papeles: ['usuaria'] },
+  { path: '/estudio',   titulo: 'Estudio',    icono: '◆', papeles: ['creadora', 'admin'] },
+  { path: '/creadoras', titulo: 'Publicar',   icono: '✦', papeles: ['visitante'] },
+  { path: '/chat',      titulo: 'Mensajes',   icono: '✉', papeles: ['usuaria', 'creadora', 'admin'] },
+  { path: '/perfil',    titulo: 'Yo',         icono: '●', papeles: ['usuaria', 'creadora', 'admin'] },
+  { path: '/entrar',    titulo: 'Entrar',     icono: '→', papeles: ['visitante'] },
 ]
 
 /** Accesos que viven dentro de "Yo", segun quien seas. */

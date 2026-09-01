@@ -68,7 +68,10 @@ export function BarraInferior() {
 
   // Las pantallas de entrada son a pantalla completa: una barra ahi rompe su
   // intencion y ofrece destinos que todavia no aplican.
-  if (papel === 'visitante') return null
+  //
+  // Quien no ha entrado SI lleva barra, con tres destinos suyos: explorar,
+  // publicar y entrar. Antes no llevaba ninguna, asi que al llegar al
+  // catalogo sin cuenta se quedaba sin manera de ir a ningun lado.
   if (RUTAS_ENTRADA.includes(aqui)) return null
   // El panel trae barra lateral propia; la de abajo tapa filas de tabla.
   if (RUTAS_PANEL.some(r => aqui.startsWith(r))) return null
@@ -114,8 +117,7 @@ export function BarraInferior() {
  *  los ultimos 64px de todas las pantallas. */
 export function HuecoBarra() {
   const aqui = useLocation().pathname
-  const { papel } = usePapel()
-  if (papel === 'visitante' || RUTAS_ENTRADA.includes(aqui)) return null
+  if (RUTAS_ENTRADA.includes(aqui)) return null
   if (RUTAS_PANEL.some(r => aqui.startsWith(r))) return null
   return (
     <div style={{

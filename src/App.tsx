@@ -27,6 +27,8 @@ import NuevaClave from './screens/NuevaClave'
 import Verificar from './screens/Verificar'
 import { Privacidad, Terminos } from './screens/Legal'
 import AltaCreadora from './screens/AltaCreadora'
+import { SIN_PUERTA_DE_EDAD, EXIGE_SESION } from './lib/rutas'
+import { edadConfirmada } from './lib/edad'
 import { COLOR } from './lib/diseño'
 
 export const SCREENS = [
@@ -137,13 +139,31 @@ function GuardiaEdad() {
   const yaMandado = useRef(false)
 
   useEffect(() => {
-    if (cargando || !sesion || !perfil) return
+    if (cargando) return
+    if (SIN_PUERTA_DE_EDAD.includes(aqui)) return
+
+    // Sin sesion la unica constancia es la local. Antes este caso no existia:
+    // la intro mandaba sola a la puerta y no habia manera de llegar al
+    // catalogo sin cruzarla. Hoy la raiz es una portada, asi que alguien
+    // puede escribir /clip directo y hay que devolverlo a la puerta.
+    //
+    // Las rutas que ya exigen sesion se saltan: de esas se encarga
+    // GuardiaRutas mandando a /entrar, y si las dos empujan a la vez gana la
+    // ultima y la persona acaba donde no pidio.
+    if (!sesion) {
+      if (EXIGE_SESION.includes(aqui)) return
+      if (edadConfirmada()) return
+      nav('/age', { replace: true })
+      return
+    }
+
+    if (!perfil) return
     if (perfil.adult_confirmed_at) return
     if (yaMandado.current) return
     // El indice de pantallas del prototipo debe seguir sirviendo para saltar
     // libremente, asi que esto corre una sola vez por sesion, no en cada ruta.
     yaMandado.current = true
-    if (aqui !== '/age') nav('/age')
+    nav('/age')
   }, [cargando, sesion, perfil, aqui, nav])
 
   return null

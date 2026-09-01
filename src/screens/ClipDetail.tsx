@@ -242,14 +242,24 @@ export default function ClipDetail() {
               const falta = coins === null ? 0 : clip.price_coins - coins
               return (
                 <>
-                  <div onClick={sesion && alcanza ? desbloquear : undefined} style={{
+                  {/* Sin sesion el boton decia «entra para desbloquear» y no
+                      hacia nada: el unico callejon sin salida del recorrido de
+                      quien viene a mirar. Ahora lleva a la puerta, y en el
+                      magenta de las llamadas a la accion en vez del gris de
+                      lo deshabilitado, porque SI se puede tocar. */}
+                  <div onClick={
+                    !sesion ? () => nav('/entrar')
+                    : alcanza ? desbloquear
+                    : undefined
+                  } style={{
                     marginTop: 16,
-                    background: !sesion ? COLOR.superficieAlta : alcanza ? COLOR.dinero : COLOR.superficieAlta,
-                    color: !sesion ? COLOR.textoApagado : alcanza ? COLOR.fondo : COLOR.textoApagado,
+                    background: !sesion ? COLOR.acento : alcanza ? COLOR.dinero : COLOR.superficieAlta,
+                    color: !sesion || alcanza ? COLOR.fondo : COLOR.textoApagado,
                     textAlign: 'center', padding: 17,
                     font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase',
-                    cursor: sesion && alcanza ? 'pointer' : 'default',
-                    boxShadow: alcanza ? '0 0 30px rgba(200,255,61,.3)' : 'none',
+                    cursor: !sesion || alcanza ? 'pointer' : 'default',
+                    boxShadow: !sesion ? '0 0 30px rgba(255,43,209,.36)'
+                      : alcanza ? '0 0 30px rgba(200,255,61,.3)' : 'none',
                   }}>
                     {comprando ? 'Desbloqueando…'
                       : !sesion ? 'Entra para desbloquear'
