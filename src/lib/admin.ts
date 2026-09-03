@@ -1360,3 +1360,122 @@ export function tamano(bytes: number): string {
   if (b < 1073741824) return `${(b / 1048576).toFixed(1)} MB`
   return `${(b / 1073741824).toFixed(2)} GB`
 }
+
+// ── Expedientes en lote ─────────────────────────────────────────────────────
+
+export type ExpedienteEnLote = {
+  carpeta: string
+  creadora: string | null
+  identificacion: File | null
+  consentimiento: File | null
+  /** true cuando el reparto salio del orden alfabetico y no del nombre del
+   *  archivo. Se enseña en pantalla: adivinar cual documento es cual y no
+   *  decirlo es como se acaba con una credencial guardada de consentimiento. */
+  adivinado: boolean
+  sobran: string[]
+  estado: 'espera' | 'subiendo' | 'listo' | 'fallo' | 'sin_creadora' | 'incompleto' | 'ya'
+  detalle: string
+}
+
+const DOC = /\.(jpe?g|png|webp|pdf)$/i
+const ES_ID = /(^|[^a-z])(ine|ife|id|identificacion|identificación|pasaporte|passport|licencia|credencial)([^a-z]|$)/i
+const ES_CONSENT = /(consent|consentimiento|acuerdo|contrato|release|2257|cesion|cesión)/i
+
+/** Doce megas por archivo: es el limite del bucket. Vale mas avisar antes de
+ *  subir que ver fallar la fila numero cuarenta. */
+const TOPE = 12 * 1024 * 1024
+
+/** Agrupa los documentos de una carpeta —una subcarpeta por creadora, con el
+ *  nombre de usuario— y decide cual archivo es la identificacion y cual el
+ *  consentimiento.
+ *
+ *  Nunca calla una duda: si el reparto salio del orden alfabetico y no del
+ *  nombre, la fila queda marcada como adivinada para que se revise antes de
+ *  subir. Cargar la credencial en el lugar del consentimiento deja un
+ *  expediente que parece completo y no lo esta, y el disparador de la base
+ *  encenderia la verificacion igual. */
+export function agruparExpedientes(
+  archivos: File[],
+  creadoras: { id: string; handle: string; verificada: boolean }[],
+): ExpedienteEnLote[] {
+  const porHandle = new Map(creadoras.map(c => [c.handle.toLowerCase(), c]))
+  const porCarpeta = new Map<string, File[]>()
+
+  for (const f of archivos) {
+    const rel = (f as File & { webkitRelativePath?: string }).webkitRelativePath || f.name
+    const partes = rel.split('/').filter(Boolean)
+    const carpeta = partes.length > 1 ? partes[partes.length - 2] : ''
+    if (!carpeta) continue
+    const lista = porCarpeta.get(carpeta) ?? []
+    lista.push(f)
+    porCarpeta.set(carpeta, lista)
+  }
+
+  return [...porCarpeta.entries()]
+    .map(([carpeta, todos]) => {
+      const c = porHandle.get(carpeta.toLowerCase())
+      const docs = todos.filter(f => DOC.test(f.name))
+        .sort((a, b) => a.name.localeCompare(b.name))
+      const sobran = todos.filter(f => !DOC.test(f.name)).map(f => f.name)
+
+      let identificacion = docs.find(f => ES_ID.test(f.name)) ?? null
+      let consentimiento = docs.find(f => ES_CONSENT.test(f.name) && f !== identificacion) ?? null
+      let adivinado = false
+
+      // Nombres que no dicen nada: si hay exactamente dos, se reparten por
+      // orden alfabetico y se marca la duda.
+      if (!identificacion && !consentimiento && docs.length === 2) {
+        identificacion = docs[0]; consentimiento = docs[1]; adivinado = true
+      } else if (identificacion && !consentimiento) {
+        const resto = docs.filter(f => f !== identificacion)
+        if (resto.length === 1) { consentimiento = resto[0]; adivinado = true }
+      } else if (!identificacion && consentimiento) {
+        const resto = docs.filter(f => f !== consentimiento)
+        if (resto.length === 1) { identificacion = resto[0]; adivinado = true }
+      }
+
+      const pesado = [identificacion, consentimiento]
+        .filter((f): f is File => !!f && f.size > TOPE)
+        .map(f => f.name)
+
+      const estado: ExpedienteEnLote['estado'] =
+        !c ? 'sin_creadora'
+        : pesado.length ? 'incompleto'
+        : !identificacion || !consentimiento ? 'incompleto'
+        : c.verificada ? 'ya'
+        : 'espera'
+
+      const detalle =
+        !c ? `no hay ninguna creadora con el usuario «${carpeta}»`
+        : pesado.length ? `pasa de 12 MB: ${pesado.join(', ')}`
+        : !identificacion && !consentimiento ? 'no encontré documentos (busco jpg, png, webp y pdf)'
+        : !consentimiento ? 'falta el consentimiento'
+        : !identificacion ? 'falta la identificación'
+        : c.verificada ? 'ya está verificada; se puede volver a cargar si hace falta'
+        : ''
+
+      return { carpeta, creadora: c?.id ?? null, identificacion, consentimiento,
+               adivinado, sobran, estado, detalle }
+    })
+    .sort((a, b) => a.carpeta.localeCompare(b.carpeta))
+}
+
+/** Archivos idénticos usados en dos expedientes distintos.
+ *
+ *  A mano nadie comete este error; con cincuenta carpetas copiadas y pegadas,
+ *  si. Y el resultado seria una constancia de identidad respaldada por el
+ *  documento de otra persona, que es peor que no tener constancia. */
+export function documentosRepetidos(lote: ExpedienteEnLote[]): string[] {
+  const visto = new Map<string, string>()
+  const choques: string[] = []
+  for (const e of lote) {
+    for (const f of [e.identificacion, e.consentimiento]) {
+      if (!f) continue
+      const huella = `${f.name}|${f.size}|${f.lastModified}`
+      const antes = visto.get(huella)
+      if (antes && antes !== e.carpeta) choques.push(`«${f.name}» está en ${antes} y en ${e.carpeta}`)
+      else visto.set(huella, e.carpeta)
+    }
+  }
+  return choques
+}

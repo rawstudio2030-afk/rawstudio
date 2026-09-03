@@ -15,6 +15,7 @@ import {
 } from '../lib/admin'
 import { Boton } from './piezas'
 import SubidaMasiva from './SubidaMasiva'
+import ExpedientesMasivos from './ExpedientesMasivos'
 
 export default function AltaMasiva() {
   const [filas, setFilas] = useState<FilaAlta[]>([])
@@ -179,6 +180,7 @@ export default function AltaMasiva() {
         </>
       )}
 
+      <ExpedientesMasivos />
       <SubidaMasiva />
     </>
   )
