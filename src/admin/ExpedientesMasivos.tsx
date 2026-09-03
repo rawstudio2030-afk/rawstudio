@@ -16,7 +16,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 import {
-  creadorasGestionables, agruparExpedientes, documentosRepetidos, subirExpediente,
+  creadorasGestionables, agruparExpedientes, agruparExpedientesDeTabla,
+  documentosRepetidos, subirExpediente, leerCSV,
   type ExpedienteEnLote,
 } from '../lib/admin'
 import { Boton } from './piezas'
@@ -29,6 +30,7 @@ export default function ExpedientesMasivos() {
   const [error, setError] = useState('')
   const [ocupado, setOcupado] = useState(false)
   const [avance, setAvance] = useState('')
+  const [sueltos, setSueltos] = useState<Map<string, File>>(new Map())
 
   const cargarCreadoras = useCallback(async () => {
     const r = await creadorasGestionables('')
@@ -43,6 +45,28 @@ export default function ExpedientesMasivos() {
     setError(l.length ? '' : 'No encontré subcarpetas con documentos en esa carpeta.')
   }
 
+  /* Segunda via: una tabla que dice de quien es cada archivo, y los archivos
+     sueltos. Los documentos casi nunca llegan ya ordenados en una carpeta por
+     persona; llegan de un formulario, con nombres que no dicen de quien son.
+     Con la tabla no hay nada que adivinar. */
+  const cargarTabla = async (f: File) => {
+    try {
+      const filas = leerCSV(await f.text())
+      if (!filas.length) { setError('La tabla no tiene filas.'); return }
+      if (!('handle' in filas[0])) {
+        setError('A la tabla le falta la columna «handle».'); return
+      }
+      if (!sueltos.size) {
+        setError('Primero elige los archivos: la tabla dice sus nombres, pero los archivos hay que mandarlos.')
+        return
+      }
+      const l = agruparExpedientesDeTabla(filas, sueltos, creadoras)
+      setLote(l); setChoques(documentosRepetidos(l)); setError('')
+    } catch (e) {
+      setError(`No pude leer la tabla: ${(e as Error).message}`)
+    }
+  }
+
   const subir = async () => {
     const listos = lote.map((e, i) => ({ e, i })).filter(({ e }) => e.estado === 'espera')
     if (!listos.length || ocupado) return
@@ -51,7 +75,8 @@ export default function ExpedientesMasivos() {
       setLote(x => x.map((y, j) => j === i ? { ...y, estado: 'subiendo' } : y))
       setAvance(e.carpeta)
       // En fila: son cincuenta pares de archivos y en paralelo se estorban.
-      const r = await subirExpediente(e.creadora!, e.identificacion!, e.consentimiento!)
+      const r = await subirExpediente(
+        e.creadora!, e.identificacion!, e.consentimiento!, e.fecha || undefined)
       setLote(x => x.map((y, j) => j === i ? {
         ...y,
         estado: 'error' in r ? 'fallo' : 'listo',
@@ -95,6 +120,45 @@ export default function ExpedientesMasivos() {
           font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
         }}>Elegir carpeta de expedientes</span>
       </label>
+
+      <div style={{ marginTop: 16, paddingTop: 14, borderTop: `1px dashed ${LINEA.tenue}` }}>
+        <div style={{ font: `400 12px/1.6 ${FUENTE.ui}`, color: COLOR.textoTenue,
+          marginBottom: 10, maxWidth: 720 }}>
+          <b style={{ color: COLOR.textoSuave }}>O con una tabla</b>, si los documentos no
+          están ordenados por carpeta. Columnas: <code>handle</code>,{' '}
+          <code>archivo_identificacion</code>, <code>archivo_consentimiento</code> y,
+          opcional, <code>fecha_consentimiento</code> como AAAA-MM-DD. Elige primero los
+          archivos —todos de golpe, da igual el orden— y luego la tabla.
+        </div>
+        <div style={{ display: 'flex', gap: 22, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+          <div>
+            <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.4,
+              textTransform: 'uppercase', color: COLOR.textoTenue, marginBottom: 7 }}>
+              1 · Los archivos
+            </div>
+            <input type="file" multiple accept="image/*,application/pdf"
+              onChange={e => {
+                const m = new Map<string, File>()
+                for (const f of e.target.files ?? []) m.set(f.name.toLowerCase(), f)
+                e.target.value = ''
+                setSueltos(m)
+              }}
+              style={{ font: `400 12px/1 ${FUENTE.ui}`, color: COLOR.textoSuave }} />
+            <div style={{ marginTop: 6, font: `400 10px/1.4 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
+              {sueltos.size ? `${sueltos.size} archivos listos` : 'ninguno todavía'}
+            </div>
+          </div>
+          <div>
+            <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.4,
+              textTransform: 'uppercase', color: COLOR.textoTenue, marginBottom: 7 }}>
+              2 · La tabla
+            </div>
+            <input type="file" accept=".csv,text/csv"
+              onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) cargarTabla(f) }}
+              style={{ font: `400 12px/1 ${FUENTE.ui}`, color: COLOR.textoSuave }} />
+          </div>
+        </div>
+      </div>
 
       {error && <Aviso tono={COLOR.acento}>{error}</Aviso>}
 

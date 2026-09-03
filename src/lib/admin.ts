@@ -1373,6 +1373,9 @@ export type ExpedienteEnLote = {
    *  decirlo es como se acaba con una credencial guardada de consentimiento. */
   adivinado: boolean
   sobran: string[]
+  /** AAAA-MM-DD. Si va vacia se manda null y la base conserva la que ya
+   *  tuviera el expediente del alta. */
+  fecha: string
   estado: 'espera' | 'subiendo' | 'listo' | 'fallo' | 'sin_creadora' | 'incompleto' | 'ya'
   detalle: string
 }
@@ -1455,7 +1458,7 @@ export function agruparExpedientes(
         : ''
 
       return { carpeta, creadora: c?.id ?? null, identificacion, consentimiento,
-               adivinado, sobran, estado, detalle }
+               adivinado, sobran, fecha: '', estado, detalle }
     })
     .sort((a, b) => a.carpeta.localeCompare(b.carpeta))
 }
@@ -1478,4 +1481,66 @@ export function documentosRepetidos(lote: ExpedienteEnLote[]): string[] {
     }
   }
   return choques
+}
+
+/** El mismo lote, pero armado desde una tabla y los archivos sueltos.
+ *
+ *  Existe porque los documentos casi nunca llegan ya ordenados en una carpeta
+ *  por persona: llegan de un formulario, con nombres que no dicen de quien
+ *  son. Con la tabla no hay nada que adivinar —cada fila dice que archivo es
+ *  cual—, que es la ventaja real sobre el emparejado por carpeta.
+ *
+ *  Los archivos se buscan por nombre en minusculas, igual que en el alta
+ *  masiva: dos maneras distintas de emparejar lo mismo se contradicen tarde o
+ *  temprano.
+ */
+export function agruparExpedientesDeTabla(
+  filas: Record<string, string>[],
+  archivos: Map<string, File>,
+  creadoras: { id: string; handle: string; verificada: boolean }[],
+): ExpedienteEnLote[] {
+  const porHandle = new Map(creadoras.map(c => [c.handle.toLowerCase(), c]))
+
+  return filas.map(f => {
+    const handle = (f.handle ?? '').trim().toLowerCase()
+    const c = porHandle.get(handle)
+    const nId = (f.archivo_identificacion ?? '').trim()
+    const nCon = (f.archivo_consentimiento ?? '').trim()
+    const identificacion = nId ? archivos.get(nId.toLowerCase()) ?? null : null
+    const consentimiento = nCon ? archivos.get(nCon.toLowerCase()) ?? null : null
+    const fecha = (f.fecha_consentimiento ?? '').trim()
+
+    const faltantes = [
+      !nId ? 'falta la columna archivo_identificacion'
+        : !identificacion ? `no encontré «${nId}»` : '',
+      !nCon ? 'falta la columna archivo_consentimiento'
+        : !consentimiento ? `no encontré «${nCon}»` : '',
+    ].filter(Boolean)
+
+    const pesado = [identificacion, consentimiento]
+      .filter((x): x is File => !!x && x.size > TOPE).map(x => x.name)
+
+    const fechaMal = fecha && !/^\d{4}-\d{2}-\d{2}$/.test(fecha)
+
+    const estado: ExpedienteEnLote['estado'] =
+      !handle ? 'sin_creadora'
+      : !c ? 'sin_creadora'
+      : faltantes.length || pesado.length || fechaMal ? 'incompleto'
+      : c.verificada ? 'ya'
+      : 'espera'
+
+    const detalle =
+      !handle ? 'la fila no trae usuario'
+      : !c ? `no hay ninguna creadora con el usuario «${handle}»`
+      : fechaMal ? 'la fecha debe ir como AAAA-MM-DD'
+      : pesado.length ? `pasa de 12 MB: ${pesado.join(', ')}`
+      : faltantes.length ? faltantes.join(' y ')
+      : c.verificada ? 'ya está verificada; se puede volver a cargar si hace falta'
+      : ''
+
+    return { carpeta: handle || '(sin usuario)', creadora: c?.id ?? null,
+             identificacion, consentimiento, adivinado: false, sobran: [],
+             fecha, estado, detalle }
+  })
+  .sort((a, b) => a.carpeta.localeCompare(b.carpeta))
 }
