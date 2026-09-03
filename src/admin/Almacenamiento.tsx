@@ -13,6 +13,18 @@ import {
 } from '../lib/admin'
 import { Boton, Campo, Etiquetado } from './piezas'
 
+/* Los planes de Supabase, con su cuota de almacenamiento.
+ *
+ * Estan aqui y no como un numero que se teclea porque el aviso cambia de
+ * sentido segun de donde salga el limite: si es la cuota de un plan, pasarse
+ * significa que las subidas YA estan fallando; si es un tope que alguien se
+ * puso a mano, no significa nada de eso. Escribir «1024» a mano no distingue
+ * los dos casos, y el aviso tenia que hablar en condicional. */
+const PLANES = [
+  { mb: 1024,   nombre: 'Gratuito' },
+  { mb: 102400, nombre: 'Pro' },
+] as const
+
 const NOMBRE: Record<string, string> = {
   clips: 'Videos', 'clip-covers': 'Portadas y vistas previas',
   avatars: 'Fotos de perfil', verificacion: 'Verificación de identidad',
@@ -43,11 +55,17 @@ export default function Almacenamiento() {
   const cerca = pct >= 80
 
   const color = pasado ? '#FF4444' : cerca ? '#FFB020' : COLOR.dinero
+  const plan = PLANES.find(p => p.mb === limiteMb)
 
   // Cuanto cabe todavia, en videos del tamaño medio de los que ya hay.
   const medio = filas.find(f => f.bucket === 'clips')
   const tamMedio = medio && medio.archivos ? medio.bytes / medio.archivos : 0
   const caben = tamMedio > 0 ? Math.max(0, Math.floor((limiteBytes - total) / tamMedio)) : null
+
+  const guardar = async (mb: number) => {
+    const m = await fijarLimiteAlmacenamiento(mb)
+    if (m) setError(m); else { setEditando(false); await cargar() }
+  }
 
   return (
     <>
@@ -73,19 +91,23 @@ export default function Almacenamiento() {
           </span>
           <div style={{ flex: 1 }} />
           {editando ? (
-            <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
-              <Etiquetado texto="MB de tu plan" hijo={
+            <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', flexWrap: 'wrap' }}>
+              {PLANES.map(p => (
+                <Boton key={p.mb} tono={p.mb === limiteMb ? 'primario' : 'normal'}
+                  al={() => guardar(p.mb)}>
+                  {p.nombre} · {p.mb / 1024} GB
+                </Boton>
+              ))}
+              <Etiquetado texto="u otro, en MB" hijo={
                 <Campo tipo="number" valor={limite} cambia={setLimite} mono autoFoco />
               } />
-              <Boton tono="primario" activo={parseInt(limite || '0', 10) > 0} al={async () => {
-                const m = await fijarLimiteAlmacenamiento(parseInt(limite, 10))
-                if (m) setError(m); else { setEditando(false); await cargar() }
-              }}>Guardar</Boton>
+              <Boton activo={parseInt(limite || '0', 10) > 0}
+                al={() => guardar(parseInt(limite, 10))}>Guardar</Boton>
               <Boton al={() => setEditando(false)}>Cancelar</Boton>
             </div>
           ) : (
             <Boton al={() => { setLimite(String(limiteMb)); setEditando(true) }}>
-              Cambiar el límite
+              {plan ? `Plan ${plan.nombre}` : 'Límite a mano'} · cambiar
             </Boton>
           )}
         </div>
@@ -96,10 +118,17 @@ export default function Almacenamiento() {
         </div>
 
         <div style={{ marginTop: 10, font: `400 12px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
-          {pasado ? (
-            <><b style={{ color: '#FF4444' }}>Ya pasaste el límite que configuraste.</b> Si es
-            el real de tu plan, las subidas nuevas están fallando. Sube de plan o libera
-            espacio purgando lo borrado.</>
+          {pasado && plan ? (
+            <><b style={{ color: '#FF4444' }}>
+              Llenaste el {tamano(limiteBytes)} del plan {plan.nombre}.
+            </b> Las subidas nuevas están fallando: Supabase las rechaza cuando ya no cabe.
+            {plan.nombre === 'Gratuito'
+              ? ' Pasa a Pro (100 GB por 25 USD al mes) o libera espacio purgando lo borrado.'
+              : ' Libera espacio purgando lo borrado, o sube al siguiente plan.'}</>
+          ) : pasado ? (
+            <><b style={{ color: '#FF4444' }}>Pasaste el tope de {tamano(limiteBytes)} que
+            pusiste a mano.</b> Si coincide con la cuota de tu plan, las subidas nuevas ya
+            están fallando. Si solo era un aviso tuyo, no pasa nada todavía.</>
           ) : cerca ? (
             <><b style={{ color: '#FFB020' }}>Te queda poco: {tamano(limiteBytes - total)}.</b>
             {caben !== null && <> Caben unos {caben} videos más del tamaño medio de los tuyos.</>}</>
@@ -110,8 +139,9 @@ export default function Almacenamiento() {
         </div>
 
         <div style={{ marginTop: 8, font: `400 11px/1.5 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
-          El límite no se adivina: depende de tu plan. Gratuito 1024 MB · Pro 102400 MB.
-          Cambiarlo aquí no cambia tu plan, solo cuándo te avisa.
+          {plan
+            ? `Marcado como plan ${plan.nombre}. Esto no cambia tu plan en Supabase: solo le dice al medidor cuánto cabe.`
+            : 'Tope puesto a mano. Si es la cuota de tu plan, márcalo como Gratuito o Pro y el aviso será más claro.'}
         </div>
       </div>
 
