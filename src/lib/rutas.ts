@@ -6,11 +6,22 @@
  *
  *  Aqui se declara, en un solo lugar, quien puede ver que. */
 
-export type Papel = 'visitante' | 'usuaria' | 'creadora' | 'admin'
+/* El papel es QUIEN ERES, y no incluye 'admin'.
+ *
+ * Lo incluia, y ese fue el error de origen: con un solo valor, administrar
+ * quedo definido como «ser creadora con cosas extra», porque 'admin' ganaba y
+ * 'creadora' se perdia. De ahi salio que un administrador viera la barra de
+ * creadora, que el panel entero fuera un renglon dentro de «Yo», y que un
+ * administrador que NO sea creadora reciba una pestaña de Estudio que al
+ * tocarla le pide activar su perfil de creadora.
+ *
+ * Administrar es un permiso aparte —`esAdmin`— que se cruza con cualquiera de
+ * estos tres. Ver src/lib/modo.ts. */
+export type Papel = 'visitante' | 'usuaria' | 'creadora'
 
 /** Pantallas de entrada: se cruzan una vez. Nunca aparecen en la navegacion,
  *  porque volver a ellas estando dentro solo confunde. */
-export const RUTAS_ENTRADA = ['/', '/intro', '/age', '/entrar', '/registro', '/acceso']
+export const RUTAS_ENTRADA = ['/', '/intro', '/age', '/entrar', '/registro', '/acceso', '/modo']
 
 /** Con sesion abierta, estas rutas no tienen sentido y redirigen al contenido. */
 export const REDIRIGE_SI_HAY_SESION = ['/entrar', '/registro', '/acceso']
@@ -35,7 +46,7 @@ export const EXIGE_SESION = [
  *  que defenderse sola. */
 export const SIN_PUERTA_DE_EDAD = [
   '/', '/intro', '/age', '/entrar', '/registro', '/acceso', '/nueva-clave',
-  '/privacidad', '/terminos', '/creadoras',
+  '/privacidad', '/terminos', '/creadoras', '/modo',
 ]
 
 export type Destino = {
@@ -43,6 +54,10 @@ export type Destino = {
   titulo: string
   icono: string
   papeles: Papel[]
+  /** Solo para quien administra, sea cual sea su papel. La puerta al panel es
+   *  el unico destino asi: tiene que verse siempre —es el cambiador— pero no
+   *  pertenece a ningun papel. */
+  soloAdmin?: boolean
 }
 
 /** Barra inferior: cuatro destinos que cambian segun el papel.
@@ -55,36 +70,43 @@ export type Destino = {
  *  creadora le estorba; a cambio, el estudio le quedaba enterrado dentro de
  *  "Yo" y la obligaba a usar esa pestaña como pasillo en vez de destino. */
 export const BARRA: Destino[] = [
-  { path: '/clip',      titulo: 'Explorar',   icono: '▶', papeles: ['visitante', 'usuaria', 'creadora', 'admin'] },
+  { path: '/clip',      titulo: 'Explorar',   icono: '▶', papeles: ['visitante', 'usuaria', 'creadora'] },
   { path: '/library',   titulo: 'Biblioteca', icono: '▤', papeles: ['usuaria'] },
-  { path: '/estudio',   titulo: 'Estudio',    icono: '◆', papeles: ['creadora', 'admin'] },
+  { path: '/estudio',   titulo: 'Estudio',    icono: '◆', papeles: ['creadora'] },
   { path: '/creadoras', titulo: 'Publicar',   icono: '✦', papeles: ['visitante'] },
-  { path: '/chat',      titulo: 'Mensajes',   icono: '✉', papeles: ['usuaria', 'creadora', 'admin'] },
-  { path: '/perfil',    titulo: 'Yo',         icono: '●', papeles: ['usuaria', 'creadora', 'admin'] },
+  { path: '/chat',      titulo: 'Mensajes',   icono: '✉', papeles: ['usuaria', 'creadora'] },
+  { path: '/perfil',    titulo: 'Yo',         icono: '●', papeles: ['usuaria', 'creadora'] },
   { path: '/entrar',    titulo: 'Entrar',     icono: '→', papeles: ['visitante'] },
+  /* La puerta al panel va al final y es el cambiador de ida. El de vuelta es
+     «Volver a la aplicacion» en la barra lateral del panel. Antes esto era un
+     renglon enterrado en «Yo»: diez modulos escondidos entre «mis ganancias» y
+     «mi monedero». */
+  { path: '/admin',     titulo: 'Panel',      icono: '⚙', papeles: [], soloAdmin: true },
 ]
 
 /** Accesos que viven dentro de "Yo", segun quien seas. */
+/** Accesos que viven dentro de «Yo». Ya NO incluye el panel: administrar no es
+ *  un asunto personal y no cabe en la misma lista que el monedero. */
 export const ATAJOS_PERFIL: Destino[] = [
-  { path: '/upload',    titulo: 'Subir un clip',   icono: '↑', papeles: ['creadora', 'admin'] },
-  { path: '/library',   titulo: 'Lo que compré',   icono: '▤', papeles: ['creadora', 'admin'] },
-  { path: '/earnings',  titulo: 'Mis ganancias',   icono: '$', papeles: ['creadora', 'admin'] },
-  { path: '/wallet',    titulo: 'Mi monedero',     icono: '◎', papeles: ['usuaria', 'creadora', 'admin'] },
+  { path: '/upload',    titulo: 'Subir un clip',   icono: '↑', papeles: ['creadora'] },
+  { path: '/library',   titulo: 'Lo que compré',   icono: '▤', papeles: ['creadora'] },
+  { path: '/earnings',  titulo: 'Mis ganancias',   icono: '$', papeles: ['creadora'] },
+  { path: '/wallet',    titulo: 'Mi monedero',     icono: '◎', papeles: ['usuaria', 'creadora'] },
   { path: '/creadoras', titulo: 'Quiero publicar', icono: '✦', papeles: ['usuaria'] },
-  { path: '/admin',     titulo: 'Administración',  icono: '⚙', papeles: ['admin'] },
 ]
 
+/** Quien eres. Administrar no entra aqui: va aparte, porque se cruza con
+ *  cualquiera de los tres. */
 export function papelDe(
   haySesion: boolean,
   esCreadora: boolean | undefined,
-  esAdmin: boolean,
 ): Papel {
   if (!haySesion) return 'visitante'
-  if (esAdmin) return 'admin'
-  if (esCreadora) return 'creadora'
-  return 'usuaria'
+  return esCreadora ? 'creadora' : 'usuaria'
 }
 
-export function visiblesPara(lista: Destino[], papel: Papel): Destino[] {
-  return lista.filter(d => d.papeles.includes(papel))
+export function visiblesPara(
+  lista: Destino[], papel: Papel, esAdmin = false,
+): Destino[] {
+  return lista.filter(d => d.soloAdmin ? esAdmin : d.papeles.includes(papel))
 }

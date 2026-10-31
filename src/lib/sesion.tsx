@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { edadConfirmada, olvidarEdad } from './edad'
+import { olvidarModo } from './modo'
 import { supabase, type Perfil } from './supabase'
 import { registrarAcceso } from './admin'
 
@@ -82,7 +83,9 @@ export function ProveedorSesion({ children }: { children: ReactNode }) {
   const valor: Estado = {
     sesion, perfil, cargando,
     refrescarPerfil: () => traerPerfil(sesion?.user.id),
-    salir: async () => { await supabase.auth.signOut() },
+    // Se olvida el sombrero elegido: si no, la siguiente persona que entre
+    // en este navegador se salta el porton con la eleccion de la anterior.
+    salir: async () => { olvidarModo(); await supabase.auth.signOut() },
   }
 
   return <Ctx.Provider value={valor}>{children}</Ctx.Provider>

@@ -11,11 +11,16 @@ import {
   papelDe, visiblesPara, type Papel,
 } from '../lib/rutas'
 import { COLOR, FUENTE } from '../lib/diseño'
+import { elegirModo } from '../lib/modo'
 
 
-/** El papel se resuelve una vez y se comparte; consultar es_admin() en cada
- *  pantalla seria una ida a la base por render. */
-export function usePapel(): { papel: Papel; cargando: boolean } {
+/** El papel y el permiso de administrar se resuelven una vez y se comparten;
+ *  consultar es_admin() en cada pantalla seria una ida a la base por render.
+ *
+ *  Van SEPARADOS. Antes `papelDe` devolvia 'admin' y con eso se perdia si la
+ *  persona ademas era creadora, que es justo lo que hay que saber para armarle
+ *  la barra. */
+export function usePapel(): { papel: Papel; esAdmin: boolean; cargando: boolean } {
   const { sesion, perfil, cargando } = useSesion()
   const [admin, setAdmin] = useState<boolean | null>(null)
 
@@ -28,7 +33,8 @@ export function usePapel(): { papel: Papel; cargando: boolean } {
   }, [sesion, cargando])
 
   return {
-    papel: papelDe(!!sesion, perfil?.is_creator, admin === true),
+    papel: papelDe(!!sesion, perfil?.is_creator),
+    esAdmin: admin === true,
     cargando: cargando || (!!sesion && admin === null),
   }
 }
@@ -61,10 +67,15 @@ export function GuardiaRutas() {
   return null
 }
 
+/** El destino activo se pinta en magenta, salvo la puerta al panel, que va en
+ *  cian: es el color que el panel usa entero para decir «esto es
+ *  privilegiado», y la puerta tiene que verse como lo que abre. */
+const resalte = (d: { soloAdmin?: boolean }) => d.soloAdmin ? COLOR.admin : COLOR.acento
+
 export function BarraInferior() {
   const nav = useNavigate()
   const aqui = useLocation().pathname
-  const { papel } = usePapel()
+  const { papel, esAdmin } = usePapel()
 
   // Las pantallas de entrada son a pantalla completa: una barra ahi rompe su
   // intencion y ofrece destinos que todavia no aplican.
@@ -76,7 +87,7 @@ export function BarraInferior() {
   // El panel trae barra lateral propia; la de abajo tapa filas de tabla.
   if (RUTAS_PANEL.some(r => aqui.startsWith(r))) return null
 
-  const destinos = visiblesPara(BARRA, papel)
+  const destinos = visiblesPara(BARRA, papel, esAdmin)
 
   return (
     <nav style={{
@@ -89,11 +100,17 @@ export function BarraInferior() {
       {destinos.map(d => {
         const activo = aqui === d.path || aqui.startsWith(d.path + '/')
         return (
-          <div key={d.path} onClick={() => nav(d.path)} style={{
+          <div key={d.path} onClick={() => {
+            // Tocar la barra tambien deja apuntado el sombrero. Sin esto, quien
+            // entro al panel y volvio por aqui seguiria aterrizando en el panel
+            // la proxima vez, sin haberlo vuelto a pedir.
+            elegirModo(d.soloAdmin ? 'panel' : 'app')
+            nav(d.path)
+          }} style={{
             flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
             gap: 5, padding: '11px 4px 13px', cursor: 'pointer',
-            color: activo ? COLOR.acento : COLOR.textoTenue,
-            borderTop: `2px solid ${activo ? COLOR.acento : 'transparent'}`,
+            color: activo ? resalte(d) : d.soloAdmin ? COLOR.admin : COLOR.textoTenue,
+            borderTop: `2px solid ${activo ? resalte(d) : 'transparent'}`,
             marginTop: -1,
           }}>
             <span style={{ fontSize: 17, lineHeight: 1 }}>{d.icono}</span>

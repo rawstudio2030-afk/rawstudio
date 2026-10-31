@@ -9,6 +9,7 @@
 import { type ReactNode } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
+import { elegirModo } from '../lib/modo'
 import { ANCHO_MINIMO } from './piezas'
 
 export type Modulo = {
@@ -98,7 +99,10 @@ export function Marco({ children, titulo, resumen }: {
           })}
         </div>
 
-        <div onClick={() => nav('/clip')} style={{
+        {/* El cambiador de vuelta. Ademas de navegar, deja apuntado el
+            sombrero: si no, al recargar el porton volveria a aparecer o la
+            siguiente entrada caeria en el panel sin haberlo pedido. */}
+        <div onClick={() => { elegirModo('app'); nav('/clip') }} style={{
           padding: '14px 18px', borderTop: `1px solid ${LINEA.tenue}`,
           cursor: 'pointer', font: `400 11px/1 ${FUENTE.ui}`, color: COLOR.textoTenue,
         }}>‹ Volver a la aplicación</div>

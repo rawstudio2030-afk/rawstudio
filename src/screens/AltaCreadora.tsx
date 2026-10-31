@@ -30,7 +30,7 @@ type Paso = 'datos' | 'documentos' | 'clips' | 'listo'
 export default function AltaCreadora() {
   const nav = useNavigate()
   const { cargando } = useSesion()
-  const { papel } = usePapel()
+  const { esAdmin } = usePapel()
 
   const [paso, setPaso] = useState<Paso>('datos')
   const [creadora, setCreadora] = useState<{ id: string; handle: string } | null>(null)
@@ -56,7 +56,7 @@ export default function AltaCreadora() {
   const [subiendo, setSubiendo] = useState('')
 
   if (cargando) return <Centro texto="Cargando…" />
-  if (papel !== 'admin') return (
+  if (!esAdmin) return (
     <Centro texto="Esta sección es solo para administradores."
       accion={{ texto: 'Volver', al: () => nav('/entrar') }} />
   )

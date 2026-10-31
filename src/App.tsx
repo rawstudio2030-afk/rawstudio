@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import { useSesion } from './lib/sesion'
-import { GuardiaRutas, BarraInferior, HuecoBarra } from './components/Navegacion'
+import { GuardiaRutas, BarraInferior, HuecoBarra, usePapel } from './components/Navegacion'
 import CierrePorInactividad from './components/CierrePorInactividad'
 import Launch from './screens/Launch'
 import Portal from './screens/Portal'
+import Modo from './screens/Modo'
 import AgeGate from './screens/AgeGate'
 import ClipDetail from './screens/ClipDetail'
 import Explorar from './screens/Explorar'
@@ -27,7 +28,8 @@ import NuevaClave from './screens/NuevaClave'
 import Verificar from './screens/Verificar'
 import { Privacidad, Terminos } from './screens/Legal'
 import AltaCreadora from './screens/AltaCreadora'
-import { SIN_PUERTA_DE_EDAD, EXIGE_SESION } from './lib/rutas'
+import { SIN_PUERTA_DE_EDAD, EXIGE_SESION, RUTAS_ENTRADA } from './lib/rutas'
+import { modoElegido } from './lib/modo'
 import { edadConfirmada } from './lib/edad'
 import { COLOR } from './lib/diseño'
 
@@ -35,6 +37,7 @@ export const SCREENS = [
   { path: '/',          n: '00', title: 'Portada',        el: <Portal /> },
   { path: '/intro',     n: '00b', title: 'Intro',          el: <Launch /> },
   { path: '/age',       n: '01', title: 'Age gate',       el: <AgeGate /> },
+  { path: '/modo',      n: '01b', title: 'Cómo entras',    el: <Modo /> },
   { path: '/clip',      n: '02', title: 'Explorar',       el: <Explorar /> },
   { path: '/wallet',    n: '03', title: 'Wallet',         el: <Wallet /> },
   { path: '/creator',   n: '04', title: 'Creator',        el: <CreatorProfile /> },
@@ -132,6 +135,30 @@ function IndiceDesarrollo() {
    en el navegador interno de la app de correo, que es otro contexto. La marca
    local se pierde y la puerta quedaria sin cruzar. El perfil es estado del
    servidor y viaja con la cuenta, no con el dispositivo. */
+/* Manda al porton a quien administra y todavia no ha elegido sombrero.
+ *
+ * Una sola vez por sesion: en cuanto elige, `modoElegido()` deja de ser nulo y
+ * esto no vuelve a disparar hasta la proxima sesion. Despues se cambia de
+ * sombrero con el cambiador, sin pasar por aqui.
+ *
+ * Solo dispara en las rutas de contenido. Si disparara en las de entrada, el
+ * porton se pondria delante de la portada publica y del acceso. */
+function GuardiaModo() {
+  const { sesion, cargando } = useSesion()
+  const { esAdmin, cargando: cargandoPapel } = usePapel()
+  const nav = useNavigate()
+  const aqui = useLocation().pathname
+
+  useEffect(() => {
+    if (cargando || cargandoPapel || !sesion || !esAdmin) return
+    if (RUTAS_ENTRADA.includes(aqui)) return
+    if (modoElegido()) return
+    nav('/modo', { replace: true })
+  }, [cargando, cargandoPapel, sesion, esAdmin, aqui, nav])
+
+  return null
+}
+
 function GuardiaEdad() {
   const { sesion, perfil, cargando } = useSesion()
   const nav = useNavigate()
@@ -196,6 +223,7 @@ export default function App() {
         <Route path="*" element={<Portal />} />
       </Routes>
       <GuardiaRutas />
+      <GuardiaModo />
       <CierrePorInactividad />
       <GuardiaEdad />
       <HuecoBarra />
