@@ -85,6 +85,24 @@ export const BARRA: Destino[] = [
 ]
 
 /** Accesos que viven dentro de "Yo", segun quien seas. */
+/** Las opciones del estudio, para el riel de la izquierda en pantalla ancha.
+ *
+ *  En el telefono estas viven DENTRO de /estudio, en una lista, y esta bien:
+ *  no cabe otra cosa. En una pantalla de computadora esconderlas detras de un
+ *  destino es desperdiciar la columna entera que sobra a la izquierda, que es
+ *  justo lo que hacen TikTok Studio y cualquier panel de creador.
+ *
+ *  Son las mismas rutas que `canales()` ofrece en /estudio; aqui van sin
+ *  descripcion ni estado porque un riel no es una pantalla de inicio. Mensajes
+ *  no esta porque ya es un destino de la barra principal. */
+export const ESTUDIO: Destino[] = [
+  { path: '/upload',           titulo: 'Subir un clip',       icono: '↑', papeles: ['creadora'] },
+  { path: '/estudio/niveles',  titulo: 'Suscripción mensual', icono: '★', papeles: ['creadora'] },
+  { path: '/estudio/encargos', titulo: 'A la medida',         icono: '✎︎', papeles: ['creadora'] },
+  { path: '/estudio/blog',     titulo: 'Blog',                icono: '✍︎', papeles: ['creadora'] },
+  { path: '/earnings',         titulo: 'Mis ganancias',       icono: '$', papeles: ['creadora'] },
+]
+
 /** Accesos que viven dentro de «Yo». Ya NO incluye el panel: administrar no es
  *  un asunto personal y no cabe en la misma lista que el monedero. */
 export const ATAJOS_PERFIL: Destino[] = [

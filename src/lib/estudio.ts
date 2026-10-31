@@ -58,7 +58,7 @@ export function canales(r: ResumenEstudio): Canal[] {
       estado: 'listo',
     },
     {
-      clave: 'renta', titulo: 'Renta por tiempo', icono: '⏱', ruta: '/upload',
+      clave: 'renta', titulo: 'Renta por tiempo', icono: '⏱︎', ruta: '/upload',
       descripcion: 'Acceso de 48 o 72 horas, más barato que la compra',
       estado: 'listo',
     },
@@ -71,14 +71,14 @@ export function canales(r: ResumenEstudio): Canal[] {
       nota: r.niveles === 0 ? 'Aún no defines ningún nivel' : undefined,
     },
     {
-      clave: 'encargos', titulo: 'Contenido a la medida', icono: '✎', ruta: '/estudio/encargos',
+      clave: 'encargos', titulo: 'Contenido a la medida', icono: '✎︎', ruta: '/estudio/encargos',
       descripcion: r.encargosAbiertos > 0
         ? `${r.encargosAbiertos} ${r.encargosAbiertos === 1 ? 'solicitud abierta' : 'solicitudes abiertas'}`
         : 'Las fans piden algo y negocian el precio contigo',
       estado: 'listo',
     },
     {
-      clave: 'blog', titulo: 'Blog', icono: '✍', ruta: '/estudio/blog',
+      clave: 'blog', titulo: 'Blog', icono: '✍︎', ruta: '/estudio/blog',
       descripcion: r.posts > 0 ? `${r.posts} entrada(s)` : 'Texto para tus suscriptoras',
       estado: 'listo',
     },

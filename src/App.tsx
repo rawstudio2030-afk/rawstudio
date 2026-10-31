@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import { useSesion } from './lib/sesion'
-import { GuardiaRutas, BarraInferior, HuecoBarra, usePapel } from './components/Navegacion'
+import { GuardiaRutas, BarraInferior, BarraLateral, HuecoBarra, usePapel } from './components/Navegacion'
 import CierrePorInactividad from './components/CierrePorInactividad'
 import Launch from './screens/Launch'
 import Portal from './screens/Portal'
@@ -228,6 +228,7 @@ export default function App() {
       <GuardiaEdad />
       <HuecoBarra />
       <BarraInferior />
+      <BarraLateral />
       <IndiceDesarrollo />
     </>
   )

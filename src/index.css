@@ -159,3 +159,41 @@ details[open] > summary > .faq-signo {
   .portal-texto  { flex: 1 1 0; align-items: flex-start; text-align: left }
   .portal-texto > h1 { margin-top: 0 }
 }
+
+/* ---------- Riel de la izquierda en pantalla ancha ----------
+ *
+ * La barra de abajo es un patron de telefono. En 1280 pixeles queda repartida
+ * a lo ancho, con tres iconos perdidos, y la columna que sobra a la izquierda
+ * se desperdicia. A partir de 1024 se cambia por un riel, como hace TikTok al
+ * pasar de la aplicacion a la web.
+ *
+ * El corte lo hace CSS y no JavaScript: los dos componentes se pintan siempre
+ * y aqui se apaga el que no toca. Con JavaScript habria que escuchar el tamaño
+ * de la ventana y repintar al arrastrar el borde.
+ *
+ * `con-riel` la pone el propio riel al montarse. Asi reserva su espacio el, y
+ * en las pantallas donde no sale —la entrada, el panel— no lo pide. */
+.barra-lado  { display: none }
+.barra-abajo { display: flex }
+
+@media (min-width: 1024px) {
+  .barra-lado   { display: flex }
+  .barra-abajo  { display: none }
+  .hueco-barra  { display: none }
+  body.con-riel #root { padding-left: 228px }
+}
+
+/* Rejilla del catalogo. Dos columnas en el telefono; en pantalla ancha,
+   tantas como quepan. Con dos fijas, en 1280 pixeles salian dos tarjetas
+   gigantes: el telefono estirado. */
+.rejilla-clips {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 11px;
+}
+@media (min-width: 1024px) {
+  .rejilla-clips {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+  }
+}

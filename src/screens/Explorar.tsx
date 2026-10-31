@@ -132,7 +132,11 @@ export default function Explorar() {
               : undefined}
           />
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 11 }}>
+          /* Las columnas van en la hoja de estilos porque cambian con el
+             ancho: dos en el telefono, y tantas como quepan de 220 en
+             adelante. Fijas en dos, en una pantalla de computadora salian
+             dos tarjetas de medio metro. */
+          <div className="rejilla-clips">
             {visibles.map(c => {
               const p = portadaDe(c.id, urlPortada(c.cover_path))
               const f = urlAvatar(c.profiles?.avatar_path ?? null)
