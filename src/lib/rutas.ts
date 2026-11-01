@@ -100,7 +100,7 @@ export const ESTUDIO: Destino[] = [
   { path: '/estudio/niveles',  titulo: 'Suscripción mensual', icono: '★', papeles: ['creadora'] },
   { path: '/estudio/encargos', titulo: 'A la medida',         icono: '✎︎', papeles: ['creadora'] },
   { path: '/estudio/blog',     titulo: 'Blog',                icono: '✍︎', papeles: ['creadora'] },
-  { path: '/earnings',         titulo: 'Mis ganancias',       icono: '$', papeles: ['creadora'] },
+  { path: '/wallet',           titulo: 'Mi dinero',           icono: '$', papeles: ['creadora'] },
 ]
 
 /** Accesos que viven dentro de «Yo». Ya NO incluye el panel: administrar no es
@@ -108,8 +108,7 @@ export const ESTUDIO: Destino[] = [
 export const ATAJOS_PERFIL: Destino[] = [
   { path: '/upload',    titulo: 'Subir un clip',   icono: '↑', papeles: ['creadora'] },
   { path: '/library',   titulo: 'Lo que compré',   icono: '▤', papeles: ['creadora'] },
-  { path: '/earnings',  titulo: 'Mis ganancias',   icono: '$', papeles: ['creadora'] },
-  { path: '/wallet',    titulo: 'Mi monedero',     icono: '◎', papeles: ['usuaria', 'creadora'] },
+  { path: '/wallet',    titulo: 'Mi dinero',       icono: '$', papeles: ['usuaria', 'creadora'] },
   { path: '/creadoras', titulo: 'Quiero publicar', icono: '✦', papeles: ['usuaria'] },
 ]
 

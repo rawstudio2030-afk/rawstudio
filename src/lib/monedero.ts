@@ -4,7 +4,7 @@ export type Movimiento = {
   id: number
   user_id: string
   delta: number
-  motivo: 'recarga' | 'compra_clip' | 'venta_clip' | 'propina' | 'ajuste_admin' | 'reembolso'
+  motivo: 'recarga' | 'compra_clip' | 'venta_clip' | 'propina' | 'ajuste_admin' | 'reembolso' | 'retiro'
   ref_id: string | null
   nota: string | null
   created_at: string
@@ -17,6 +17,37 @@ export const NOMBRE_MOTIVO: Record<Movimiento['motivo'], string> = {
   propina: 'Propina',
   ajuste_admin: 'Ajuste',
   reembolso: 'Reembolso',
+  retiro: 'Retiro',
+}
+
+/** De que lado del dinero esta cada movimiento.
+ *
+ *  El motivo por si solo no alcanza: 'propina' sirve para las dos cosas, y el
+ *  signo es lo que dice si la diste o la recibiste. Por eso esto mira el
+ *  motivo Y el delta.
+ *
+ *  'cuenta' es todo lo que no es ni ganar ni gastar —recargas, retiros,
+ *  ajustes, devoluciones—: mueven el saldo pero no son actividad de la
+ *  plataforma, y mezclarlos con las ventas falsearia el total de lo ganado. */
+export type Cara = 'gane' | 'gaste' | 'cuenta'
+
+export function caraDe(m: Movimiento): Cara {
+  if (m.motivo === 'venta_clip') return 'gane'
+  if (m.motivo === 'compra_clip') return 'gaste'
+  if (m.motivo === 'propina') return m.delta > 0 ? 'gane' : 'gaste'
+  return 'cuenta'
+}
+
+/** Los totales de la pantalla de dinero, en centavos. */
+export function totales(movs: Movimiento[]) {
+  let gane = 0, gaste = 0, retirado = 0
+  for (const m of movs) {
+    const c = caraDe(m)
+    if (c === 'gane') gane += m.delta
+    else if (c === 'gaste') gaste += -m.delta
+    else if (m.motivo === 'retiro') retirado += -m.delta
+  }
+  return { gane, gaste, retirado }
 }
 
 /** El saldo se DERIVA de la suma del libro, no se guarda. Asi nunca puede

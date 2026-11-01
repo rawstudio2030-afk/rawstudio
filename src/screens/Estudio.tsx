@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import { resumen, canales, type Canal, type ResumenEstudio } from '../lib/estudio'
+import { usd } from '../lib/dinero'
 import { COLOR, FUENTE } from '../lib/diseño'
 
 
@@ -98,9 +99,12 @@ export default function Estudio() {
           <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', color: COLOR.textoTenue }}>
             Has ganado
           </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 9 }}>
-            <span style={{ fontFamily: FUENTE.display, fontSize: 34, lineHeight: 1, color: COLOR.dinero }}>{r.ganancias}</span>
-            <span style={{ font: `400 12px/1 ${FUENTE.mono}`, color: COLOR.textoTenue, textTransform: 'uppercase', letterSpacing: 1.4 }}>dólares</span>
+          {/* usd() y no el entero en crudo: el libro guarda CENTAVOS. Asi
+              como estaba, haber ganado 2.40 se leia como «240 dólares». */}
+          <div style={{ marginTop: 9 }}>
+            <span style={{ fontFamily: FUENTE.display, fontSize: 34, lineHeight: 1, color: COLOR.dinero }}>
+              {usd(r.ganancias)}
+            </span>
           </div>
         </div>
         <span style={{ color: COLOR.textoApagado }}>›</span>
