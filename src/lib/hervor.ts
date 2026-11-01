@@ -139,3 +139,30 @@ export function curvaEntre(a: Punto, b: Punto, comba: number, n = 12): Punto[] {
     return [ax + dx * t + nx * comba * k, ay + dy * t + ny * comba * k] as Punto
   })
 }
+
+/** Contorno de un poligono, con puntos repartidos a lo largo de cada lado.
+ *
+ *  Hacen falta los puntos intermedios: `curva()` pasa una Catmull-Rom por lo
+ *  que reciba, y con solo los vertices un rectangulo sale convertido en una
+ *  nube. Con tres o cuatro por lado, los tramos rectos salen rectos —la curva
+ *  entre puntos alineados es una recta— y las esquinas quedan apenas
+ *  redondeadas, que es justo como se ven dibujadas a mano. */
+export function poligono(vertices: Punto[], porLado = 4): Punto[] {
+  const salida: Punto[] = []
+  for (let i = 0; i < vertices.length; i++) {
+    const [ax, ay] = vertices[i]
+    const [bx, by] = vertices[(i + 1) % vertices.length]
+    // Hasta el siguiente vertice SIN incluirlo: lo aporta la vuelta siguiente.
+    for (let j = 0; j < porLado; j++) {
+      const t = j / porLado
+      salida.push([ax + (bx - ax) * t, ay + (by - ay) * t])
+    }
+  }
+  return salida
+}
+
+export function rectangulo(
+  x1: number, y1: number, x2: number, y2: number, porLado = 4,
+): Punto[] {
+  return poligono([[x1, y1], [x2, y1], [x2, y2], [x1, y2]], porLado)
+}

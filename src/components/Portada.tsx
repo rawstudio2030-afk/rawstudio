@@ -13,6 +13,7 @@ import { useNavigate } from 'react-router-dom'
 import { COLOR, LINEA, TINTE, FUENTE } from '../lib/diseño'
 import Icono from './Iconos'
 import { Regla, Marco } from './Hervor'
+import { Vineta, useEnPantalla } from './Vinetas'
 import { FondoOpArt } from './OpArt'
 import {
   REDES, QUE_ES, FORMAS_DE_GANAR, SEGURIDAD, VALORES, PASOS, PREGUNTAS,
@@ -123,39 +124,7 @@ export default function Portada() {
 
       {/* ---------- How to get started ---------- */}
       <Seccion rotulo="How to get started">
-        <div style={{ display: 'grid', gap: 14, marginTop: 6 }}>
-          {PASOS.map(p => (
-            <div key={p.n} style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
-              <span style={{ font: `400 22px/1 ${FUENTE.mono}`, color: COLOR.acento,
-                flex: '0 0 auto', width: 34 }}>{p.n}</span>
-              <div>
-                <div style={{ font: `700 12px/1.3 ${FUENTE.ui}`, letterSpacing: 1.2,
-                  textTransform: 'uppercase', color: COLOR.texto }}>{p.t}</div>
-                <div style={{ marginTop: 5, font: `400 14px/1.5 ${FUENTE.ui}`,
-                  color: COLOR.textoSuave }}>{p.d}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Seis huecos para capturas, dos columnas. Se dejan vacios a proposito
-            hasta tener las imagenes: una captura inventada de una pantalla que
-            no existe es una promesa que se rompe sola. */}
-        <div style={{
-          marginTop: 30, display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10,
-        }}>
-          {[0, 1, 2, 3, 4, 5].map(i => (
-            <div key={i} style={{
-              aspectRatio: '9/16', border: `1px dashed ${LINEA.marcada}`,
-              display: 'grid', placeItems: 'center',
-              background: `repeating-linear-gradient(130deg,${COLOR.superficieAlta} 0 8px,${COLOR.fondo} 8px 16px)`,
-            }}>
-              <span style={{ font: `400 11px/1 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
-                captura {i + 1}
-              </span>
-            </div>
-          ))}
-        </div>
+        <Pasos />
       </Seccion>
 
       {/* ---------- FAQ ---------- */}
@@ -299,5 +268,40 @@ function Red({ href, texto }: { href: string; texto: string }) {
       color: COLOR.textoSuave, textDecoration: 'none',
       font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.8, textTransform: 'uppercase',
     }}>{texto}</a>
+  )
+}
+
+/** Los seis pasos, cada uno con su dibujo.
+ *
+ *  Antes eran dos bloques: la lista numerada y, debajo, seis recuadros
+ *  punteados esperando capturas. Decian lo mismo dos veces y uno de los dos
+ *  estaba vacio. Ahora es un solo bloque donde el dibujo acompaña al paso.
+ *
+ *  La animacion se pausa cuando el bloque no se ve: son seis viñetas de
+ *  varios trazos cada una, y casi siempre estan fuera de pantalla. */
+function Pasos() {
+  const { ref, visible } = useEnPantalla<HTMLDivElement>()
+
+  return (
+    <div ref={ref} className={visible ? undefined : 'quieto'} style={{
+      marginTop: 6, display: 'grid', gap: 1,
+      gridTemplateColumns: 'repeat(auto-fill, minmax(218px, 1fr))',
+      background: LINEA.tenue, border: `1px solid ${LINEA.tenue}`,
+    }}>
+      {PASOS.map(p => (
+        <div key={p.n} style={{ background: COLOR.fondo, padding: '20px 18px 22px' }}>
+          <div style={{ height: 104, color: COLOR.acento, marginBottom: 14 }}>
+            <Vineta nombre={p.v} />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 9 }}>
+            <span style={{ font: `400 15px/1 ${FUENTE.mono}`, color: COLOR.acento }}>{p.n}</span>
+            <span style={{ font: `700 11.5px/1.3 ${FUENTE.ui}`, letterSpacing: 1.2,
+              textTransform: 'uppercase', color: COLOR.texto }}>{p.t}</span>
+          </div>
+          <div style={{ marginTop: 8, font: `400 13.5px/1.5 ${FUENTE.ui}`,
+            color: COLOR.textoSuave }}>{p.d}</div>
+        </div>
+      ))}
+    </div>
   )
 }

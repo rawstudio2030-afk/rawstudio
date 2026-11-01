@@ -197,3 +197,8 @@ details[open] > summary > .faq-signo {
     gap: 16px;
   }
 }
+
+/* Pausa el hervor de lo que no se esta viendo. No cambia nada visualmente:
+   la animacion se congela en el cuadro que tocaba, y como los tres dibujos
+   son casi iguales, cualquiera sirve de imagen fija. */
+.quieto .hervor > * { animation-play-state: paused }

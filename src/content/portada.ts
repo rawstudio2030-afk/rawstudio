@@ -55,12 +55,12 @@ export const VALORES = [
 ]
 
 export const PASOS = [
-  { n: '01', t: 'Crea tu cuenta', d: 'Correo y contraseña. Nada más por ahora.' },
-  { n: '02', t: 'Marca que quieres publicar', d: 'En tu perfil, la casilla «quiero publicar». Ahí se abre el estudio.' },
-  { n: '03', t: 'Sube tu primer video', d: 'Puedes subir desde ya, aunque todavía no estés verificada.' },
-  { n: '04', t: 'Verifica tu identidad', d: 'Una identificación y una selfie. Se revisan y se borran.' },
-  { n: '05', t: 'Ponle precio', d: 'Venta, renta, suscripción o las tres. Se cambia cuando quieras.' },
-  { n: '06', t: 'Cobra', d: 'A tu cuenta, por SPEI, con las retenciones que marca la ley ya calculadas.' },
+  { n: '01', v: 'cuenta',    t: 'Crea tu cuenta', d: 'Correo y contraseña. Nada más por ahora.' },
+  { n: '02', v: 'casilla',   t: 'Marca que quieres publicar', d: 'En tu perfil, la casilla «quiero publicar». Ahí se abre el estudio.' },
+  { n: '03', v: 'subir',     t: 'Sube tu primer video', d: 'Puedes subir desde ya, aunque todavía no estés verificada.' },
+  { n: '04', v: 'identidad', t: 'Verifica tu identidad', d: 'Una identificación y una selfie. Se revisan y se borran.' },
+  { n: '05', v: 'precio',    t: 'Ponle precio', d: 'Venta, renta, suscripción o las tres. Se cambia cuando quieras.' },
+  { n: '06', v: 'cobro',     t: 'Cobra', d: 'A tu cuenta, por SPEI, con las retenciones que marca la ley ya calculadas.' },
 ]
 
 export const PREGUNTAS = [
