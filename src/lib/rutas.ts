@@ -34,6 +34,7 @@ export const RUTAS_PANEL = ['/admin', '/alta-creadora']
 export const EXIGE_SESION = [
   '/library', '/chat', '/perfil', '/upload', '/earnings', '/admin', '/wallet',
   '/estudio', '/estudio/niveles', '/estudio/encargos', '/estudio/blog',
+  '/estudio/cobro', '/estudio/retirar',
 ]
 
 /** Rutas que NO exigen haber cruzado la puerta de edad: la portada, la propia
@@ -101,6 +102,7 @@ export const ESTUDIO: Destino[] = [
   { path: '/estudio/encargos', titulo: 'A la medida',         icono: '✎︎', papeles: ['creadora'] },
   { path: '/estudio/blog',     titulo: 'Blog',                icono: '✍︎', papeles: ['creadora'] },
   { path: '/wallet',           titulo: 'Mi dinero',           icono: '$', papeles: ['creadora'] },
+  { path: '/estudio/retirar',  titulo: 'Retirar',             icono: '↓', papeles: ['creadora'] },
 ]
 
 /** Accesos que viven dentro de «Yo». Ya NO incluye el panel: administrar no es

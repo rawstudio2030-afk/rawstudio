@@ -94,7 +94,7 @@ export default function Dinero() {
       </div>
 
       {/* ---------- Lo que todavía no se puede ---------- */}
-      <Pendiente creadora={esCreadora} />
+      <Pendiente creadora={esCreadora} nav={nav} />
 
       {/* ---------- Movimientos ---------- */}
       {esCreadora && (
@@ -160,31 +160,40 @@ function Cifra({ rotulo, valor, color }: { rotulo: string; valor: number; color:
   )
 }
 
-/** Lo que falta, dicho en claro.
+/** Retirar, y lo que todavia no se puede.
  *
- *  Las dos mitades del dinero tienen un hueco y callarlo deja a la persona
- *  esperando a que aparezca un boton que no existe. Recargar necesita un
- *  procesador de pagos; retirar necesita la pantalla de la cuenta bancaria
- *  —la funcion de la base ya esta y exige una cuenta registrada, que hoy no
- *  se puede registrar desde ningun lado. */
-function Pendiente({ creadora }: { creadora: boolean }) {
+ *  Recargar sigue sin existir —hace falta un procesador de pagos compatible
+ *  con este giro— y decirlo es mas util que un boton que no hace nada.
+ *  Retirar SI existe ya: la pantalla comprueba identidad, cuenta bancaria,
+ *  minimo y disponible, y dice cual falta. */
+function Pendiente({ creadora, nav }: { creadora: boolean; nav: (r: string) => void }) {
   return (
-    <div style={{
-      marginTop: 18, padding: '16px 16px',
-      border: `1px dashed ${LINEA.marcada}`,
-    }}>
-      <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase', color: COLOR.textoTenue }}>
-        Todavía no
+    <>
+      {creadora && (
+        <div onClick={() => nav('/estudio/retirar')} style={{
+          marginTop: 18, padding: '16px 18px', cursor: 'pointer',
+          border: `1px solid ${COLOR.dinero}`, background: 'rgba(200,255,61,.06)',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+        }}>
+          <div>
+            <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.8,
+              textTransform: 'uppercase', color: COLOR.dinero }}>Retirar</div>
+            <div style={{ font: `400 12.5px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave, marginTop: 7 }}>
+              A tu cuenta, por SPEI, con las retenciones ya calculadas.
+            </div>
+          </div>
+          <span style={{ font: `700 16px/1 ${FUENTE.ui}`, color: COLOR.dinero }}>&#8594;</span>
+        </div>
+      )}
+
+      <div style={{ marginTop: 12, padding: '14px 16px', border: `1px dashed ${LINEA.marcada}` }}>
+        <div style={{ font: `400 12.5px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
+          <b style={{ color: COLOR.texto }}>Recargar</b> todavía no se puede: falta un
+          procesador de pagos compatible con este giro. Mientras tanto, la administración
+          puede acreditarte saldo.
+        </div>
       </div>
-      <div style={{ font: `400 13px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave, marginTop: 9 }}>
-        <b style={{ color: COLOR.texto }}>Recargar</b> necesita un procesador de pagos
-        compatible con este giro; mientras tanto la administración puede acreditarte saldo.
-        {creadora && <>
-          {' '}<b style={{ color: COLOR.texto }}>Retirar</b> necesita que registres tu cuenta
-          bancaria, y esa pantalla todavía no existe. El dinero está contado y guardado.
-        </>}
-      </div>
-    </div>
+    </>
   )
 }
 
