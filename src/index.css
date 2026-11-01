@@ -202,3 +202,22 @@ details[open] > summary > .faq-signo {
    la animacion se congela en el cuadro que tocaba, y como los tres dibujos
    son casi iguales, cualquiera sirve de imagen fija. */
 .quieto .hervor > * { animation-play-state: paused }
+
+/* Barra de guardar de «Mi perfil». Va pegada abajo y solo sale cuando hay algo
+   que guardar. En telefono se apoya encima de la barra de navegacion; en
+   pantalla ancha esa barra no existe y en su lugar hay riel, asi que se pega
+   al borde y arranca despues del riel. */
+.barra-guardar {
+  position: fixed;
+  left: 0; right: 0;
+  bottom: calc(64px + env(safe-area-inset-bottom));
+  z-index: 850;
+  box-sizing: border-box;
+  padding: 12px 24px 14px;
+  background: rgba(8, 8, 10, .97);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(255, 255, 255, .09);
+}
+@media (min-width: 1024px) {
+  .barra-guardar { bottom: 0; left: 228px }
+}

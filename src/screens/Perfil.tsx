@@ -53,6 +53,20 @@ export default function Perfil() {
     />
   )
 
+  // Hay cambios sin guardar? De esto depende que aparezca la barra de guardar.
+  // Los paises se comparan ordenados: el componente los devuelve en el orden en
+  // que se tocaron, y sin ordenar, abrir y cerrar la lista marcaba la pantalla
+  // como sucia sin que nadie hubiera cambiado nada.
+  const mismos = (a: string[], b: string[]) =>
+    a.length === b.length && [...a].sort().every((v, i) => v === [...b].sort()[i])
+  const sucio = !!perfil && (
+    handle !== perfil.handle ||
+    nombre !== perfil.display_name ||
+    bio !== (perfil.bio ?? '') ||
+    creadora !== perfil.is_creator ||
+    !mismos(paises, perfil.paises_bloqueados ?? [])
+  )
+
   const handleOk = /^[a-z0-9_]{3,24}$/.test(handle)
   const nombreOk = nombre.trim().length >= 1 && nombre.trim().length <= 40
   const bioOk = bio.length <= 300
@@ -98,198 +112,264 @@ export default function Perfil() {
   }
 
   const foto = perfil?.avatar_path ? urlAvatar(perfil.avatar_path) : null
+  const atajos = visiblesPara(ATAJOS_PERFIL, papel)
 
   return (
     <div style={{
-      minHeight: '100%', boxSizing: 'border-box', padding: '54px 24px 44px',
+      minHeight: '100%', boxSizing: 'border-box',
+      padding: `54px 24px ${sucio || estado !== 'listo' ? 120 : 44}px`,
       background: COLOR.fondo, color: COLOR.texto, fontFamily: FUENTE.ui,
-      display: 'flex', flexDirection: 'column', gap: 22,
+      display: 'flex', flexDirection: 'column',
+      // Un formulario a mil pixeles de ancho no se llena: el ojo pierde la
+      // relacion entre la etiqueta y su campo. En el telefono no se nota
+      // porque no hay de otra; en pantalla ancha si.
+      width: '100%', maxWidth: 680, margin: '0 auto',
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 26 }}>
         <span onClick={() => nav(-1)} style={{ font: `400 26px/1 ${FUENTE.ui}`, color: COLOR.textoSuave, cursor: 'pointer' }}>‹</span>
         <span style={{ ...etiqueta, color: COLOR.dinero }}>Mi perfil</span>
         <span style={{ width: 14 }} />
       </div>
 
-      {/* foto */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-        <div
-          onClick={() => archivo.current?.click()}
-          style={{
-            width: 82, height: 82, borderRadius: '50%', flex: '0 0 auto', cursor: 'pointer',
-            border: `2px solid ${COLOR.acento}`, overflow: 'hidden',
-            background: foto ? `center/cover url(${foto})` : `repeating-linear-gradient(130deg,${COLOR.superficieAlta} 0 8px,${COLOR.superficie} 8px 16px)`,
-            display: 'grid', placeItems: 'center',
-          }}>
-          {!foto && <span style={{ ...etiqueta, color: COLOR.textoApagado }}>Foto</span>}
-        </div>
-        <div style={{ minWidth: 0 }}>
-          <div onClick={() => archivo.current?.click()} style={{
-            display: 'inline-block', border: '1px solid rgba(255,255,255,.16)', color: COLOR.textoSuave,
-            padding: '10px 13px', font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.8,
-            textTransform: 'uppercase', cursor: 'pointer',
-          }}>
-            {subiendo ? 'Subiendo…' : foto ? 'Cambiar foto' : 'Subir foto'}
-          </div>
-          <div style={{ font: `400 11px/1.5 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 8 }}>
-            JPG, PNG o WebP · máximo 2 MB
-          </div>
-        </div>
-        <input
-          ref={archivo} type="file" accept="image/jpeg,image/png,image/webp"
-          style={{ display: 'none' }}
-          onChange={e => { const f = e.target.files?.[0]; if (f) subirFoto(f) }}
-        />
-      </div>
+      {/* ---------- Lo que ve el público ---------- */}
+      <Seccion primera titulo="Tu perfil público"
+        nota="Es lo único que ve quien entra a tu página. Tu nombre legal no aparece en ninguna pantalla.">
 
-      {/* nombre artistico */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <span style={etiqueta}>Nombre artístico</span>
-        <input value={nombre} onChange={e => setNombre(e.target.value)}
-          placeholder="Como quieres que te vean" maxLength={40} style={campo} />
-        <span style={{ font: `400 11px/1.5 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
-          Es lo único visible. Tu nombre legal no aparece en ninguna pantalla.
-        </span>
-      </div>
-
-      {/* usuario */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <span style={etiqueta}>Usuario</span>
-        <div style={{ position: 'relative' }}>
-          <span style={{
-            position: 'absolute', left: 15, top: '50%', transform: 'translateY(-50%)',
-            font: `400 16px/1 ${FUENTE.ui}`, color: COLOR.textoTenue,
-          }}>@</span>
-          <input value={handle} maxLength={24}
-            onChange={e => setHandle(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
-            placeholder="tu_usuario" style={{ ...campo, paddingLeft: 32 }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div
+            onClick={() => archivo.current?.click()}
+            style={{
+              width: 82, height: 82, borderRadius: '50%', flex: '0 0 auto', cursor: 'pointer',
+              border: `2px solid ${COLOR.acento}`, overflow: 'hidden',
+              background: foto ? `center/cover url(${foto})` : `repeating-linear-gradient(130deg,${COLOR.superficieAlta} 0 8px,${COLOR.superficie} 8px 16px)`,
+              display: 'grid', placeItems: 'center',
+            }}>
+            {!foto && <span style={{ ...etiqueta, color: COLOR.textoApagado }}>Foto</span>}
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <div onClick={() => archivo.current?.click()} style={{
+              display: 'inline-block', border: '1px solid rgba(255,255,255,.16)', color: COLOR.textoSuave,
+              padding: '10px 13px', font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.8,
+              textTransform: 'uppercase', cursor: 'pointer',
+            }}>
+              {subiendo ? 'Subiendo…' : foto ? 'Cambiar foto' : 'Subir foto'}
+            </div>
+            <div style={{ font: `400 11px/1.5 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 8 }}>
+              JPG, PNG o WebP · máximo 2 MB
+            </div>
+          </div>
+          <input
+            ref={archivo} type="file" accept="image/jpeg,image/png,image/webp"
+            style={{ display: 'none' }}
+            onChange={e => { const f = e.target.files?.[0]; if (f) subirFoto(f) }}
+          />
         </div>
-        <span style={{ font: `400 11px/1.5 ${FUENTE.mono}`, color: handleOk || !handle ? COLOR.textoApagado : COLOR.acento }}>
-          {handleOk || !handle
+
+        <Campo etiquetaTexto="Nombre artístico"
+          pie="Como quieres que te vean. Se puede cambiar cuando quieras.">
+          <input value={nombre} onChange={e => setNombre(e.target.value)}
+            placeholder="Como quieres que te vean" maxLength={40} style={campo} />
+        </Campo>
+
+        <Campo etiquetaTexto="Usuario"
+          pie={handleOk || !handle
             ? 'Entre 3 y 24 caracteres: letras, números y guion bajo.'
             : 'Necesita entre 3 y 24 caracteres.'}
-        </span>
-      </div>
-
-      {/* bio */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <span style={etiqueta}>Sobre ti</span>
-        <textarea value={bio} onChange={e => setBio(e.target.value)} rows={3} maxLength={300}
-          placeholder="Una o dos líneas sobre lo que haces."
-          style={{ ...campo, resize: 'vertical', fontFamily: FUENTE.ui }} />
-        <span style={{ font: `400 11px/1.5 ${FUENTE.mono}`, color: COLOR.textoApagado }}>{bio.length}/300</span>
-      </div>
-
-      {/* creadora */}
-      <div
-        onClick={() => setCreadora(c => !c)}
-        style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14,
-          padding: '16px 15px', cursor: 'pointer',
-          border: `1px ${creadora ? 'solid' : 'dashed'} rgba(200,255,61,${creadora ? .5 : .3})`,
-          background: creadora ? 'rgba(200,255,61,.07)' : 'transparent',
-        }}>
-        <div>
-          <div style={{ font: `700 12px/1.3 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase', color: creadora ? COLOR.dinero : COLOR.textoSuave }}>
-            Quiero publicar
+          pieColor={handleOk || !handle ? undefined : COLOR.acento}>
+          <div style={{ position: 'relative' }}>
+            <span style={{
+              position: 'absolute', left: 15, top: '50%', transform: 'translateY(-50%)',
+              font: `400 16px/1 ${FUENTE.ui}`, color: COLOR.textoTenue,
+            }}>@</span>
+            <input value={handle} maxLength={24}
+              onChange={e => setHandle(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+              placeholder="tu_usuario" style={{ ...campo, paddingLeft: 32 }} />
           </div>
-          <div style={{ font: `400 12px/1.5 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 5 }}>
-            {creadora
-              ? (perfil?.identidad_verificada
-                  ? 'Tu perfil de creadora está activo'
-                  : 'Falta verificar tu identidad para poder publicar')
-              : 'Habilita tu perfil de creadora'}
+        </Campo>
+
+        <Campo etiquetaTexto="Sobre ti" pie={`${bio.length}/300`}>
+          <textarea value={bio} onChange={e => setBio(e.target.value)} rows={3} maxLength={300}
+            placeholder="Una o dos líneas sobre lo que haces."
+            style={{ ...campo, resize: 'vertical', fontFamily: FUENTE.ui }} />
+        </Campo>
+
+        {/* Va en esta seccion y no abajo con los botones: es la vista previa de
+            lo que se acaba de editar, no una accion de cuenta. */}
+        {perfil && (
+          <span onClick={() => nav(`/creator/${perfil.handle}`)} style={{
+            alignSelf: 'flex-start', cursor: 'pointer',
+            font: `400 12.5px/1 ${FUENTE.mono}`, color: COLOR.textoTenue,
+            textDecoration: 'underline', textUnderlineOffset: 5,
+          }}>Ver cómo se ve &#8594;</span>
+        )}
+      </Seccion>
+
+      {/* ---------- Publicar ---------- */}
+      <Seccion titulo="Publicar"
+        nota="Lo que decide si puedes subir contenido y quién puede verlo.">
+
+        <div
+          onClick={() => setCreadora(c => !c)}
+          style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14,
+            padding: '16px 15px', cursor: 'pointer',
+            border: `1px ${creadora ? 'solid' : 'dashed'} rgba(200,255,61,${creadora ? .5 : .3})`,
+            background: creadora ? 'rgba(200,255,61,.07)' : 'transparent',
+          }}>
+          <div>
+            <div style={{ font: `700 12px/1.3 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase', color: creadora ? COLOR.dinero : COLOR.textoSuave }}>
+              Quiero publicar
+            </div>
+            <div style={{ font: `400 12px/1.5 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 5 }}>
+              {creadora
+                ? (perfil?.identidad_verificada
+                    ? 'Tu perfil de creadora está activo'
+                    : 'Falta verificar tu identidad para poder publicar')
+                : 'Habilita tu perfil de creadora'}
+            </div>
           </div>
-        </div>
-        <div style={{
-          width: 46, height: 26, borderRadius: 13, flex: '0 0 auto',
-          background: creadora ? COLOR.dinero : COLOR.superficieAlta, position: 'relative',
-          transition: 'background .18s',
-        }}>
           <div style={{
-            position: 'absolute', top: 3, left: creadora ? 23 : 3,
-            width: 20, height: 20, borderRadius: '50%',
-            background: creadora ? COLOR.fondo : COLOR.textoApagado, transition: 'left .18s',
-          }} />
+            width: 46, height: 26, borderRadius: 13, flex: '0 0 auto',
+            background: creadora ? COLOR.dinero : COLOR.superficieAlta, position: 'relative',
+            transition: 'background .18s',
+          }}>
+            <div style={{
+              position: 'absolute', top: 3, left: creadora ? 23 : 3,
+              width: 20, height: 20, borderRadius: '50%',
+              background: creadora ? COLOR.fondo : COLOR.textoApagado, transition: 'left .18s',
+            }} />
+          </div>
         </div>
-      </div>
 
-      {/* Marcar la casilla no basta para publicar, y callarselo dejaria a la
-          persona esperando a que pase algo que no va a pasar sola. */}
-      {creadora && !perfil?.identidad_verificada && (
-        <div style={{
-          padding: '13px 15px', border: `1px solid ${COLOR.admin}`,
-          font: `400 13px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave,
-        }}>
-          Ya puedes entrar al estudio y subir, pero <b style={{ color: COLOR.texto }}>
-          nada se publica</b> hasta que verifiquemos tu identidad y tu edad.
-          <div onClick={() => nav('/verificar')} style={{
-            marginTop: 11, textAlign: 'center', padding: '12px 0', cursor: 'pointer',
-            background: COLOR.admin, color: COLOR.fondo,
-            font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.8, textTransform: 'uppercase',
-          }}>Verificar mi identidad</div>
-        </div>
-      )}
+        {/* Marcar la casilla no basta para publicar, y callarselo dejaria a la
+            persona esperando a que pase algo que no va a pasar sola. */}
+        {creadora && !perfil?.identidad_verificada && (
+          <div style={{
+            padding: '13px 15px', border: `1px solid ${COLOR.admin}`,
+            font: `400 13px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave,
+          }}>
+            Ya puedes entrar al estudio y subir, pero <b style={{ color: COLOR.texto }}>
+            nada se publica</b> hasta que verifiquemos tu identidad y tu edad.
+            <div onClick={() => nav('/verificar')} style={{
+              marginTop: 11, textAlign: 'center', padding: '12px 0', cursor: 'pointer',
+              background: COLOR.admin, color: COLOR.fondo,
+              font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.8, textTransform: 'uppercase',
+            }}>Verificar mi identidad</div>
+          </div>
+        )}
 
-      {estado === 'error' && (
-        <div style={{ font: `400 13px/1.5 ${FUENTE.ui}`, color: COLOR.acento }}>{detalle}</div>
-      )}
-
-      {/* El bloqueo por pais solo tiene sentido para quien publica. */}
-      {creadora && (
-        <div style={{ borderTop: '1px solid rgba(255,255,255,.09)', paddingTop: 18 }}>
+        {/* El bloqueo por pais solo tiene sentido para quien publica. */}
+        {creadora && (
           <PaisesBloqueados valor={paises} onCambio={setPaises}
             nota="Se aplica a todo lo que publiques, salvo que un clip diga otra cosa." />
-        </div>
+        )}
+      </Seccion>
+
+      {/* ---------- Atajos ---------- */}
+      {atajos.length > 0 && (
+        <Seccion titulo="Atajos">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            {atajos.map(a => (
+              <div key={a.path} onClick={() => nav(a.path)} style={{
+                display: 'flex', alignItems: 'center', gap: 13, padding: '15px 13px',
+                cursor: 'pointer', border: '1px solid rgba(255,255,255,.09)',
+              }}>
+                <span style={{ width: 26, textAlign: 'center', fontSize: 15, color: COLOR.dinero }}>
+                  {a.icono}
+                </span>
+                <span style={{ flex: 1, font: `500 15px/1.3 ${FUENTE.ui}`, color: COLOR.texto }}>{a.titulo}</span>
+                <span style={{ color: COLOR.textoApagado }}>›</span>
+              </div>
+            ))}
+          </div>
+        </Seccion>
       )}
 
-      {/* Accesos segun quien eres. Viven aqui y no en la barra inferior para
-          que la barra se quede en cuatro pestañas: seis no caben en movil ni se
-          leen de un vistazo. */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 1, marginTop: 4 }}>
-        {visiblesPara(ATAJOS_PERFIL, papel).map(a => (
-          <div key={a.path} onClick={() => nav(a.path)} style={{
-            display: 'flex', alignItems: 'center', gap: 13, padding: '15px 13px',
-            cursor: 'pointer', border: '1px solid rgba(255,255,255,.09)',
-            background: a.path === '/admin' ? 'rgba(0,229,255,.05)' : 'transparent',
-          }}>
-            <span style={{
-              width: 26, textAlign: 'center', fontSize: 15,
-              color: a.path === '/admin' ? COLOR.admin : COLOR.dinero,
-            }}>{a.icono}</span>
-            <span style={{ flex: 1, font: `500 15px/1.3 ${FUENTE.ui}`, color: COLOR.texto }}>{a.titulo}</span>
-            <span style={{ color: COLOR.textoApagado }}>›</span>
-          </div>
-        ))}
-      </div>
+      {/* ---------- Cuenta ---------- */}
+      <Seccion titulo="Cuenta">
+        {/* Cerrar sesion era un boton del mismo tamaño que «guardar cambios» y
+            pegado a el. En un telefono eso es una equivocacion de dedo que se
+            lleva por delante lo que estabas escribiendo. Aqui va al final, en
+            su propia seccion y sin peso de boton principal. */}
+        <span onClick={async () => { await salir(); nav('/entrar', { replace: true }) }} style={{
+          alignSelf: 'flex-start', cursor: 'pointer',
+          border: '1px solid rgba(255,43,209,.45)', color: COLOR.acento,
+          padding: '13px 20px', font: `700 11px/1 ${FUENTE.ui}`,
+          letterSpacing: 1.8, textTransform: 'uppercase',
+        }}>Cerrar sesión</span>
+      </Seccion>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 'auto', paddingTop: 12 }}>
-        <div onClick={guardar} style={{
-          background: puedeGuardar ? COLOR.acento : COLOR.superficieAlta,
-          color: puedeGuardar ? COLOR.fondo : COLOR.textoApagado,
-          textAlign: 'center', padding: 19,
-          font: `700 13px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
-          boxShadow: puedeGuardar ? '0 0 34px rgba(255,43,209,.42)' : 'none',
-          cursor: puedeGuardar ? 'pointer' : 'default',
-        }}>
-          {estado === 'guardando' ? 'Guardando…' : estado === 'guardado' ? '✓ Guardado' : 'Guardar cambios'}
-        </div>
-        <div onClick={async () => { await salir(); nav('/entrar', { replace: true }) }} style={{
-          border: '1px solid rgba(255,43,209,.5)', color: COLOR.acento, textAlign: 'center',
-          padding: 17, font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2,
-          textTransform: 'uppercase', cursor: 'pointer',
-        }}>
-          Cerrar sesión
-        </div>
-        {perfil && (
-          <div onClick={() => nav(`/creator/${perfil.handle}`)} style={{
-            border: '1px solid rgba(255,255,255,.16)', color: COLOR.textoSuave, textAlign: 'center',
-            padding: 18, font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase', cursor: 'pointer',
+      {/* ---------- Guardar ----------
+          Pegada abajo y solo cuando hay algo que guardar.
+          Antes el boton vivia hasta el final del todo, DESPUES de los atajos:
+          para guardar un cambio de nombre habia que pasar por encima de cinco
+          enlaces que te sacan de la pantalla, y salir sin guardar no avisaba
+          nada. Asi tambien se ve desde cualquier punto que quedo algo pendiente. */}
+      {(sucio || estado !== 'listo') && (
+        <div className="barra-guardar">
+          <div style={{ width: '100%', maxWidth: 680 - 48, margin: '0 auto' }}>
+          {estado === 'error' && (
+            <div style={{
+              font: `400 12.5px/1.45 ${FUENTE.ui}`, color: COLOR.acento, marginBottom: 10,
+            }}>{detalle}</div>
+          )}
+          <div onClick={guardar} style={{
+            background: puedeGuardar ? COLOR.acento : COLOR.superficieAlta,
+            color: puedeGuardar ? COLOR.fondo : COLOR.textoApagado,
+            textAlign: 'center', padding: 17,
+            font: `700 13px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
+            boxShadow: puedeGuardar ? '0 0 34px rgba(255,43,209,.42)' : 'none',
+            cursor: puedeGuardar ? 'pointer' : 'default',
           }}>
-            Ver cómo se ve
+            {estado === 'guardando' ? 'Guardando…'
+              : estado === 'guardado' ? '✓ Guardado'
+              : 'Guardar cambios'}
+          </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/** Una seccion con su rotulo. La pantalla tenia cinco asuntos distintos
+ *  —lo publico, publicar, los atajos, la cuenta y el guardado— uno detras de
+ *  otro, todos con el mismo peso y sin nada que dijera donde terminaba uno y
+ *  empezaba el siguiente. */
+function Seccion({ titulo, nota, primera, children }: {
+  titulo: string; nota?: string; primera?: boolean; children: React.ReactNode
+}) {
+  return (
+    <section style={{
+      display: 'flex', flexDirection: 'column', gap: 18,
+      marginTop: primera ? 0 : 28, paddingTop: primera ? 0 : 24,
+      borderTop: primera ? 'none' : '1px solid rgba(255,255,255,.09)',
+    }}>
+      <div>
+        <div style={etiqueta}>{titulo}</div>
+        {nota && (
+          <div style={{ marginTop: 8, font: `400 12px/1.55 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
+            {nota}
           </div>
         )}
       </div>
+      {children}
+    </section>
+  )
+}
+
+function Campo({ etiquetaTexto, pie, pieColor, children }: {
+  etiquetaTexto: string; pie?: string; pieColor?: string; children: React.ReactNode
+}) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <span style={etiqueta}>{etiquetaTexto}</span>
+      {children}
+      {pie && (
+        <span style={{ font: `400 11px/1.5 ${FUENTE.mono}`, color: pieColor ?? COLOR.textoApagado }}>
+          {pie}
+        </span>
+      )}
     </div>
   )
 }
