@@ -29,8 +29,9 @@ export default function AltaMasiva() {
     try {
       const filas = leerCSV(await f.text())
       if (!filas.length) { setError('El archivo no tiene filas.'); return }
-      if (!('handle' in filas[0]) || !('nombre' in filas[0])) {
-        setError('Faltan las columnas handle y nombre. Usa la plantilla.')
+      const faltan = ['handle', 'nombre', 'email', 'telefono'].filter(c => !(c in filas[0]))
+      if (faltan.length) {
+        setError(`A la tabla le faltan estas columnas: ${faltan.join(', ')}. Usa la plantilla.`)
         return
       }
       setFilas(validarAlta(filas, await handlesExistentes()))
@@ -70,8 +71,11 @@ export default function AltaMasiva() {
 
       <div style={{ marginBottom: 18, padding: '12px 14px', border: `1px solid ${LINEA.tenue}`,
         font: `400 11px/1.6 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
-        Sube la tabla con <b style={{ color: COLOR.texto }}>handle</b> y{' '}
-        <b style={{ color: COLOR.texto }}>nombre</b> como mínimo. Si además trae{' '}
+        Sube la tabla con <b style={{ color: COLOR.texto }}>handle</b>,{' '}
+        <b style={{ color: COLOR.texto }}>nombre</b>, <b style={{ color: COLOR.texto }}>email</b> y{' '}
+        <b style={{ color: COLOR.texto }}>telefono</b>. El correo es a donde le llega
+        «olvidé mi contraseña», así que tiene que ser suyo y real; el teléfono es el
+        respaldo si el correo rebota. Si además trae{' '}
         <code>archivo_identificacion</code> y <code>archivo_consentimiento</code>, elige
         también esos archivos abajo y se emparejan por nombre: así el expediente queda
         cargado y la creadora nace verificada. Sin documentos se crea igual, pero{' '}

@@ -9,6 +9,7 @@ import { subirAvatar, urlAvatar } from '../lib/perfiles'
 import PaisesBloqueados from '../components/PaisesBloqueados'
 import { usePapel } from '../components/Navegacion'
 import { ATAJOS_PERFIL, visiblesPara } from '../lib/rutas'
+import { miTelefono, guardarTelefono, telefonoCuadra, limpiarTelefono } from '../lib/contacto'
 import { COLOR, FUENTE } from '../lib/diseño'
 
 
@@ -35,6 +36,10 @@ export default function Perfil() {
   const [estado, setEstado] = useState<'listo' | 'guardando' | 'guardado' | 'error'>('listo')
   const [detalle, setDetalle] = useState('')
   const [subiendo, setSubiendo] = useState(false)
+  // El telefono vive en otra tabla, asi que se carga y se guarda aparte del
+  // resto del perfil, pero cuenta igual para la barra de guardar.
+  const [telefono, setTelefono] = useState('')
+  const [telGuardado, setTelGuardado] = useState('')
 
   useEffect(() => {
     if (!perfil) return
@@ -44,6 +49,13 @@ export default function Perfil() {
     setCreadora(perfil.is_creator)
     setPaises(perfil.paises_bloqueados ?? [])
   }, [perfil])
+
+  useEffect(() => {
+    if (!sesion) return
+    let vivo = true
+    miTelefono().then(t => { if (vivo) { setTelefono(t); setTelGuardado(t) } })
+    return () => { vivo = false }
+  }, [sesion])
 
   if (cargando) return <Aviso texto="Cargando…" />
   if (!sesion) return (
@@ -65,12 +77,13 @@ export default function Perfil() {
     bio !== (perfil.bio ?? '') ||
     creadora !== perfil.is_creator ||
     !mismos(paises, perfil.paises_bloqueados ?? [])
-  )
+  ) || limpiarTelefono(telefono) !== telGuardado
 
   const handleOk = /^[a-z0-9_]{3,24}$/.test(handle)
   const nombreOk = nombre.trim().length >= 1 && nombre.trim().length <= 40
   const bioOk = bio.length <= 300
-  const puedeGuardar = handleOk && nombreOk && bioOk && estado !== 'guardando'
+  const telOk = !telefono.trim() || telefonoCuadra(telefono)
+  const puedeGuardar = handleOk && nombreOk && bioOk && telOk && estado !== 'guardando'
 
   const guardar = async () => {
     if (!puedeGuardar || !sesion) return
@@ -91,6 +104,12 @@ export default function Perfil() {
         : error.message)
       return
     }
+    if (limpiarTelefono(telefono) !== telGuardado) {
+      const m = await guardarTelefono(sesion.user.id, telefono)
+      if (m) { setEstado('error'); setDetalle(m); return }
+      setTelGuardado(limpiarTelefono(telefono))
+    }
+
     await refrescarPerfil()
     setEstado('guardado')
     setTimeout(() => setEstado('listo'), 2200)
@@ -202,6 +221,31 @@ export default function Perfil() {
             textDecoration: 'underline', textUnderlineOffset: 5,
           }}>Ver cómo se ve &#8594;</span>
         )}
+      </Seccion>
+
+      {/* ---------- Contacto ---------- */}
+      <Seccion titulo="Contacto"
+        nota="No se muestra en ningún lado. Es para poder escribirte y para que puedas recuperar tu contraseña.">
+
+        <Campo etiquetaTexto="Correo"
+          pie="Es a donde llega «olvidé mi contraseña». Para cambiarlo, escríbenos.">
+          {/* De solo lectura a proposito: el correo es la llave de la cuenta.
+              Cambiarlo tiene que pasar por una confirmacion al correo viejo,
+              y eso todavia no existe; dejar el campo editable prometeria algo
+              que no se cumple. */}
+          <div style={{ ...campo, color: COLOR.textoSuave, userSelect: 'text' }}>
+            {sesion.user.email ?? '—'}
+          </div>
+        </Campo>
+
+        <Campo etiquetaTexto="Teléfono"
+          pie={telefono && !telOk
+            ? '10 dígitos si es de México, o con + y código de país.'
+            : 'Por si el correo rebota. Solo lo ve la administración.'}
+          pieColor={telefono && !telOk ? COLOR.acento : undefined}>
+          <input value={telefono} onChange={e => setTelefono(e.target.value)}
+            type="tel" placeholder="5512345678" style={campo} />
+        </Campo>
       </Seccion>
 
       {/* ---------- Publicar ---------- */}

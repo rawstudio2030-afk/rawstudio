@@ -4,7 +4,7 @@ import { urlAvatar } from '../lib/perfiles'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 import { usd, aCentavos } from '../lib/dinero'
 import {
-  listarUsuarios, fichaUsuario, suspenderCuenta, banearCuenta, reactivarCuenta,
+  listarUsuarios, fichaUsuario, suspenderCuenta, banearCuenta, reactivarCuenta, cambiarCorreo,
   ajustarSaldo, otorgarAdmin, revocarAdmin, marcarCreadora,
   type FilaUsuario, type FichaUsuario, type OrdenUsuarios,
   type RolUsuario, type EstadoCuenta,
@@ -19,7 +19,7 @@ const POR_PAGINA = 25
 
 /** Que confirmacion esta abierta. Cada accion destructiva o de dinero tiene
  *  la suya; ninguna se ejecuta con un solo clic desde la tabla. */
-type Dialogo = 'suspender' | 'banear' | 'reactivar' | 'saldo' | 'rol' | null
+type Dialogo = 'suspender' | 'banear' | 'reactivar' | 'saldo' | 'rol' | 'correo' | null
 
 export default function Usuarios() {
   const [filas, setFilas]   = useState<FilaUsuario[]>([])
@@ -125,7 +125,9 @@ export default function Usuarios() {
         </span>
       ) },
     { clave: 'saldo', titulo: 'Saldo', ordenable: true, numerica: true,
-      pinta: f => <span style={{ color: f.saldo > 0 ? COLOR.dinero : COLOR.textoApagado }}>{f.saldo}</span> },
+      // usd(): el libro guarda CENTAVOS. En crudo, un saldo de $2.40 se leia
+      // como 240 en la columna de dinero del panel.
+      pinta: f => <span style={{ color: f.saldo > 0 ? COLOR.dinero : COLOR.textoApagado }}>{usd(f.saldo)}</span> },
     { clave: 'total_ganado', titulo: 'Ganado', ordenable: true, numerica: true,
       pinta: f => <span style={{ color: f.total_ganado > 0 ? COLOR.dinero : COLOR.textoApagado }}>{f.total_ganado}</span> },
     { clave: 'clips_total', titulo: 'Clips', ordenable: true, numerica: true,
@@ -209,6 +211,9 @@ export default function Usuarios() {
       {dialogo === 'rol' && abierta && (
         <RolDialogo fila={abierta} cancela={() => setDialogo(null)} listo={tras} />
       )}
+      {dialogo === 'correo' && abierta && (
+        <CorreoDialogo fila={abierta} cancela={() => setDialogo(null)} listo={tras} />
+      )}
     </>
   )
 }
@@ -291,6 +296,7 @@ function Ficha({ fila, ficha, cierra, pide }: {
             : <Boton tono="primario" al={() => pide('reactivar')}>Reactivar</Boton>}
           <Boton al={() => pide('saldo')}>Ajustar saldo</Boton>
           <Boton al={() => pide('rol')}>Cambiar rol</Boton>
+          <Boton al={() => pide('correo')}>Corregir correo</Boton>
         </div>
 
         <div style={{ marginTop: 12, font: `400 11px/1.5 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
@@ -392,6 +398,40 @@ function SuspenderDialogo({ fila, cancela, listo }: {
   )
 }
 
+/** Corregir el correo de una cuenta.
+ *
+ *  Existe por las creadoras dadas de alta antes de que el alta pidiera correo:
+ *  el suyo se lo invento la plataforma —@alta.rawstudio.biz— asi que no les
+ *  llega nada, ni siquiera «olvidé mi contraseña». Sin esto se quedan
+ *  incomunicadas para siempre. */
+function CorreoDialogo({ fila, cancela, listo }: {
+  fila: FilaUsuario; cancela: () => void; listo: (m: string) => void
+}) {
+  const [correo, setCorreo] = useState('')
+  const ok = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(correo.trim())
+  const inventado = /@alta\.rawstudio\.biz$/i.test(fila.email)
+  return (
+    <Confirmar titulo="Corregir correo" tono="primario"
+      etiqueta={ok ? 'Cambiar el correo' : 'Escribe un correo'}
+      cuerpo={<>El correo de <b style={{ color: COLOR.texto }}>@{fila.handle}</b> es{' '}
+        <b style={{ color: inventado ? '#FFB020' : COLOR.texto }}>{fila.email}</b>
+        {inventado && <> — ese se lo inventó la plataforma al darla de alta, así que
+          hoy no le llega nada</>}. Es a donde irá «olvidé mi contraseña», así que
+        tiene que ser suyo y real. En la bitácora solo queda el dominio anterior,
+        no la dirección.</>}
+      extra={() => (
+        <div style={{ marginTop: 14 }}>
+          <Etiquetado texto="Correo nuevo" hijo={
+            <Campo valor={correo} cambia={setCorreo} mono autoFoco marcador="ella@ejemplo.com" />
+          } />
+        </div>
+      )}
+      cancela={cancela}
+      al={() => ok ? cambiarCorreo(fila.id, correo).then(m => listo(m ?? ''))
+                   : Promise.resolve(listo('Ese correo no tiene forma de correo.'))} />
+  )
+}
+
 function SaldoDialogo({ fila, cancela, listo }: {
   fila: FilaUsuario; cancela: () => void; listo: (m: string) => void
 }) {
@@ -406,7 +446,7 @@ function SaldoDialogo({ fila, cancela, listo }: {
         : n > 0 ? `Acreditar ${usd(n)}` : `Descontar ${usd(-n)}`}
       exigeMotivo
       cuerpo={<>Saldo actual de <b style={{ color: COLOR.texto }}>@{fila.handle}</b>:{' '}
-        <b style={{ color: COLOR.dinero }}>{fila.saldo}</b>. Usa un número negativo para
+        <b style={{ color: COLOR.dinero }}>{usd(fila.saldo)}</b>. Usa un número negativo para
         descontar. Esto NO edita un número suelto: escribe un asiento en el libro
         contable, que es append-only, y queda en la bitácora.</>}
       extra={() => (
@@ -416,7 +456,7 @@ function SaldoDialogo({ fila, cancela, listo }: {
           } />
           {n !== 0 && (
             <div style={{ marginTop: 8, font: `400 12px/1 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
-              {fila.saldo} → <b style={{ color: COLOR.dinero }}>{fila.saldo + n}</b>
+              {usd(fila.saldo)} → <b style={{ color: COLOR.dinero }}>{usd(fila.saldo + n)}</b>
             </div>
           )}
         </div>

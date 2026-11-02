@@ -139,8 +139,8 @@ export type Expediente = {
 }
 
 export async function altaCreadora(datos: {
-  handle: string; nombre: string; bio?: string
-  consentimientoFecha?: string; nota?: string
+  handle: string; nombre: string; email: string; telefono: string
+  bio?: string; consentimientoFecha?: string; nota?: string
 }) {
   const { data, error } = await supabase.rpc('admin_alta_creadora', {
     p_handle: datos.handle.trim().toLowerCase(),
@@ -148,9 +148,22 @@ export async function altaCreadora(datos: {
     p_bio: datos.bio?.trim() || null,
     p_consentimiento_fecha: datos.consentimientoFecha || null,
     p_nota: datos.nota?.trim() || null,
+    p_email: datos.email.trim().toLowerCase(),
+    p_telefono: datos.telefono.replace(/[\s()-]/g, ''),
   })
   if (error) return { error: error.message }
   return data as { ok: boolean; id: string; handle: string; verificada: boolean }
+}
+
+/** Corrige el correo de una cuenta ya creada.
+ *
+ *  Hace falta para las creadoras dadas de alta antes de que el alta pidiera
+ *  correo: tienen uno inventado —handle@alta.rawstudio.biz— y sin esto se
+ *  quedan sin forma de recuperar su contraseña. */
+export async function cambiarCorreo(id: string, correo: string): Promise<string | null> {
+  const { error } = await supabase.rpc('admin_cambiar_correo',
+    { objetivo: id, correo: correo.trim().toLowerCase() })
+  return error ? error.message : null
 }
 
 /** Sube los documentos del expediente. La verificación se enciende sola cuando
@@ -1100,6 +1113,7 @@ export async function creadorasGestionables(busqueda = '') {
 export type FilaAlta = {
   linea: number
   handle: string; nombre: string; bio: string
+  email: string; telefono: string
   fecha_consentimiento: string; nota: string
   archivo_identificacion: string; archivo_consentimiento: string; foto_perfil: string
   errores: string[]
@@ -1139,6 +1153,7 @@ export function validarAlta(
   filas: Record<string, string>[], yaExisten: Set<string>,
 ): FilaAlta[] {
   const vistos = new Set<string>()
+  const correosVistos = new Set<string>()
   return filas.map((f, i) => {
     const handle = (f.handle ?? '').toLowerCase()
     const errores: string[] = []
@@ -1156,12 +1171,29 @@ export function validarAlta(
 
     if ((f.bio ?? '').length > 300) errores.push('bio de más de 300 caracteres')
 
+    // Correo y telefono son obligatorios: sin correo no hay forma de
+    // recuperar la contraseña, y sin telefono no hay con que localizarla si
+    // el correo rebota. Se validan AQUI y no al crear porque el alta masiva
+    // comprueba todo antes de crear nada, y asi el error sale en la fila.
+    const email = (f.email ?? '').trim().toLowerCase()
+    if (!email) errores.push('falta el correo')
+    else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) errores.push('correo mal escrito')
+    else if (correosVistos.has(email)) errores.push('correo repetido en el archivo')
+    correosVistos.add(email)
+
+    const telefono = (f.telefono ?? '').replace(/[\s()-]/g, '')
+    if (!telefono) errores.push('falta el teléfono')
+    else if (!/^\+?[0-9]{10,15}$/.test(telefono))
+      errores.push('teléfono inválido (10 dígitos, o con + y código de país)')
+
     const fc = f.fecha_consentimiento ?? ''
     if (fc && !/^\d{4}-\d{2}-\d{2}$/.test(fc))
       errores.push('fecha de consentimiento con formato distinto de AAAA-MM-DD')
 
     return {
       linea: i + 2, handle, nombre, bio: f.bio ?? '',
+      email: (f.email ?? '').trim().toLowerCase(),
+      telefono: (f.telefono ?? '').replace(/[\s()-]/g, ''),
       fecha_consentimiento: fc, nota: f.nota_expediente ?? '',
       archivo_identificacion: f.archivo_identificacion ?? '',
       archivo_consentimiento: f.archivo_consentimiento ?? '',
@@ -1183,7 +1215,8 @@ export async function handlesExistentes(): Promise<Set<string>> {
  *  que permite mandar la tabla y la carpeta de documentos de una sola vez. */
 export async function altaConDocumentos(f: FilaAlta, archivos: Map<string, File>) {
   const r = await altaCreadora({
-    handle: f.handle, nombre: f.nombre, bio: f.bio || undefined,
+    handle: f.handle, nombre: f.nombre, email: f.email, telefono: f.telefono,
+    bio: f.bio || undefined,
     consentimientoFecha: f.fecha_consentimiento || undefined,
     nota: f.nota || undefined,
   })

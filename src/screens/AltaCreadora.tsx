@@ -42,6 +42,8 @@ export default function AltaCreadora() {
   const [handle, setHandle] = useState('')
   const [nombre, setNombre] = useState('')
   const [bio, setBio] = useState('')
+  const [email, setEmail] = useState('')
+  const [telefono, setTelefono] = useState('')
   const [nota, setNota] = useState('')
   // paso 2
   const [ident, setIdent] = useState<File | null>(null)
@@ -62,11 +64,15 @@ export default function AltaCreadora() {
   )
 
   const handleOk = /^[a-z0-9_]{3,24}$/.test(handle)
+  const emailOk = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())
+  const telLimpio = telefono.replace(/[\s()-]/g, '')
+  const telOk = /^\+?[0-9]{10,15}$/.test(telLimpio)
+  const puedeCrear = handleOk && !!nombre.trim() && emailOk && telOk && !ocupado
 
   const crear = async () => {
-    if (!handleOk || !nombre.trim() || ocupado) return
+    if (!puedeCrear) return
     setOcupado(true); setError('')
-    const r = await altaCreadora({ handle, nombre, bio, nota })
+    const r = await altaCreadora({ handle, nombre, email, telefono, bio, nota })
     setOcupado(false)
     if ('error' in r) { setError(r.error); return }
     setCreadora({ id: r.id, handle: r.handle })
@@ -144,6 +150,22 @@ export default function AltaCreadora() {
               onChange={e => setHandle(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
               placeholder="sin_espacios" style={campo} />
           </Etiquetado>
+          {/* Correo y telefono van ANTES de la bio porque sin ellos el alta
+              no sirve: el correo es el que usa «olvidé mi contraseña» —hasta
+              ahora se inventaba uno y la creadora quedaba sin poder entrar— y
+              el telefono es el respaldo si el correo rebota. */}
+          <Etiquetado t="Correo"
+            pista={email && !emailOk ? 'Ese correo no tiene forma de correo'
+              : 'Es a donde le llega «olvidé mi contraseña». Tiene que ser suyo y real.'}>
+            <input value={email} onChange={e => setEmail(e.target.value.trim())}
+              type="email" placeholder="ella@ejemplo.com" style={campo} />
+          </Etiquetado>
+          <Etiquetado t="Teléfono"
+            pista={telefono && !telOk ? '10 dígitos si es de México, o con + y código de país'
+              : 'Para localizarla si el correo rebota. No se muestra en ningún lado.'}>
+            <input value={telefono} onChange={e => setTelefono(e.target.value)}
+              type="tel" placeholder="5512345678" style={campo} />
+          </Etiquetado>
           <Etiquetado t="Sobre ella">
             <textarea value={bio} onChange={e => setBio(e.target.value)} rows={2} maxLength={300}
               style={{ ...campo, resize: 'vertical', fontFamily: FUENTE.ui }} />
@@ -152,7 +174,7 @@ export default function AltaCreadora() {
             <input value={nota} onChange={e => setNota(e.target.value)} maxLength={200}
               placeholder="Firmó contrato en marzo" style={campo} />
           </Etiquetado>
-          <Boton texto={ocupado ? 'Creando…' : 'Crear perfil'} activo={handleOk && !!nombre.trim() && !ocupado} al={crear} />
+          <Boton texto={ocupado ? 'Creando…' : 'Crear perfil'} activo={puedeCrear} al={crear} />
         </>
       )}
 
