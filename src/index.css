@@ -221,3 +221,7 @@ details[open] > summary > .faq-signo {
 @media (min-width: 1024px) {
   .barra-guardar { bottom: 0; left: 228px }
 }
+
+/* El selector de país del teléfono lleva el <select> encima e invisible, así
+   que el navegador no puede dibujarle el foco. Se le pinta a la caja. */
+.pais-caja:focus-within { outline: 2px solid #00E5FF; outline-offset: 2px }

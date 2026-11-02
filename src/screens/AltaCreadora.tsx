@@ -13,6 +13,7 @@ import { useSesion } from '../lib/sesion'
 import { usePapel } from '../components/Navegacion'
 import { altaCreadora, subirExpediente, publicarPara, fijarAvatar } from '../lib/admin'
 import Wordmark from '../components/Wordmark'
+import Telefono, { valorValido, pistaDe } from '../components/Telefono'
 import { COLOR, TINTE, FUENTE } from '../lib/diseño'
 
 
@@ -65,8 +66,7 @@ export default function AltaCreadora() {
 
   const handleOk = /^[a-z0-9_]{3,24}$/.test(handle)
   const emailOk = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())
-  const telLimpio = telefono.replace(/[\s()-]/g, '')
-  const telOk = /^\+?[0-9]{10,15}$/.test(telLimpio)
+  const telOk = valorValido(telefono)
   const puedeCrear = handleOk && !!nombre.trim() && emailOk && telOk && !ocupado
 
   const crear = async () => {
@@ -161,10 +161,9 @@ export default function AltaCreadora() {
               type="email" placeholder="ella@ejemplo.com" style={campo} />
           </Etiquetado>
           <Etiquetado t="Teléfono"
-            pista={telefono && !telOk ? '10 dígitos si es de México, o con + y código de país'
+            pista={telefono ? pistaDe(telefono)
               : 'Para localizarla si el correo rebota. No se muestra en ningún lado.'}>
-            <input value={telefono} onChange={e => setTelefono(e.target.value)}
-              type="tel" placeholder="5512345678" style={campo} />
+            <Telefono valor={telefono} cambia={setTelefono} />
           </Etiquetado>
           <Etiquetado t="Sobre ella">
             <textarea value={bio} onChange={e => setBio(e.target.value)} rows={2} maxLength={300}

@@ -9,7 +9,8 @@ import { subirAvatar, urlAvatar } from '../lib/perfiles'
 import PaisesBloqueados from '../components/PaisesBloqueados'
 import { usePapel } from '../components/Navegacion'
 import { ATAJOS_PERFIL, visiblesPara } from '../lib/rutas'
-import { miTelefono, guardarTelefono, telefonoCuadra, limpiarTelefono } from '../lib/contacto'
+import { miTelefono, guardarTelefono, limpiarTelefono } from '../lib/contacto'
+import Telefono, { valorValido, pistaDe } from '../components/Telefono'
 import { COLOR, FUENTE } from '../lib/diseño'
 
 
@@ -82,7 +83,7 @@ export default function Perfil() {
   const handleOk = /^[a-z0-9_]{3,24}$/.test(handle)
   const nombreOk = nombre.trim().length >= 1 && nombre.trim().length <= 40
   const bioOk = bio.length <= 300
-  const telOk = !telefono.trim() || telefonoCuadra(telefono)
+  const telOk = !telefono.trim() || valorValido(telefono)
   const puedeGuardar = handleOk && nombreOk && bioOk && telOk && estado !== 'guardando'
 
   const guardar = async () => {
@@ -239,12 +240,10 @@ export default function Perfil() {
         </Campo>
 
         <Campo etiquetaTexto="Teléfono"
-          pie={telefono && !telOk
-            ? '10 dígitos si es de México, o con + y código de país.'
+          pie={telefono ? pistaDe(telefono)
             : 'Por si el correo rebota. Solo lo ve la administración.'}
           pieColor={telefono && !telOk ? COLOR.acento : undefined}>
-          <input value={telefono} onChange={e => setTelefono(e.target.value)}
-            type="tel" placeholder="5512345678" style={campo} />
+          <Telefono valor={telefono} cambia={setTelefono} />
         </Campo>
       </Seccion>
 
