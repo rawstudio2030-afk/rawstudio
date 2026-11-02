@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import type { Session } from '@supabase/supabase-js'
 import { edadConfirmada, olvidarEdad } from './edad'
 import { olvidarModo } from './modo'
-import { supabase, type Perfil } from './supabase'
+import { supabase, COLUMNAS_PROPIAS, type Perfil } from './supabase'
 import { registrarAcceso } from './admin'
 
 type Estado = {
@@ -35,7 +35,7 @@ export function ProveedorSesion({ children }: { children: ReactNode }) {
     if (!id) { setPerfil(null); return }
     await volcarEdadPendiente(id)
     const { data, error } = await supabase
-      .from('profiles').select('*').eq('id', id).single()
+      .from('profiles').select(COLUMNAS_PROPIAS).eq('id', id).single()
     if (error) {
       console.warn('[sesion] no se pudo leer el perfil:', error.message)
       setPerfil(null)

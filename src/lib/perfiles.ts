@@ -1,4 +1,4 @@
-import { supabase, type Perfil } from './supabase'
+import { supabase, COLUMNAS_PUBLICAS, type PerfilPublico } from './supabase'
 
 /** URL publica de una foto de perfil. El bucket es publico en lectura, asi que
  *  no hace falta firmar nada. */
@@ -7,14 +7,14 @@ export function urlAvatar(path: string | null): string | null {
   return supabase.storage.from('avatars').getPublicUrl(path).data.publicUrl
 }
 
-export async function perfilPorHandle(handle: string): Promise<Perfil | null> {
+export async function perfilPorHandle(handle: string): Promise<PerfilPublico | null> {
   const { data, error } = await supabase
-    .from('profiles').select('*').eq('handle', handle.toLowerCase()).maybeSingle()
+    .from('profiles').select(COLUMNAS_PUBLICAS).eq('handle', handle.toLowerCase()).maybeSingle()
   if (error) {
     console.warn('[perfiles] no se pudo leer:', error.message)
     return null
   }
-  return (data as Perfil) ?? null
+  return (data as PerfilPublico) ?? null
 }
 
 /** Directorio de creadoras.

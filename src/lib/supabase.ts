@@ -25,7 +25,32 @@ export const supabase = createClient(url, key, {
   },
 })
 
-export type Perfil = {
+/* Las columnas de `profiles` que el cliente puede leer, y nada mas.
+ *
+ * La tabla tiene veintiuna. Cinco no salen de aqui porque la base ya no las
+ * deja leer con la llave publica —ver 20261101000002—: los dos hashes de
+ * identidad y las tres notas de moderacion. El hash de la CURP era el peor:
+ * una CURP se deriva de nombre y fecha de nacimiento, asi que el hash servia
+ * para comprobar si una persona concreta tiene cuenta aqui.
+ *
+ * Las listas y los tipos van juntos a proposito. Si se separan, un dia
+ * alguien agrega una columna al tipo, la pide, y la base responde con un
+ * error de permisos que no dice nada util.
+ */
+
+/** Lo que ve cualquiera: el directorio de creadoras. */
+export const COLUMNAS_PUBLICAS =
+  'id,handle,display_name,bio,avatar_path,is_creator,verified,es_demo,identidad_verificada,created_at,baneado_at' as const
+
+/** Lo de arriba mas el estado propio. Solo con sesion.
+ *
+ *  Escrita entera y no como PUBLICAS + el resto: supabase-js deduce el tipo
+ *  del resultado leyendo la cadena, y solo puede si es un literal. Concatenada
+ *  deja de serlo y el tipo se vuelve un error generico. */
+export const COLUMNAS_PROPIAS =
+  'id,handle,display_name,bio,avatar_path,is_creator,verified,es_demo,identidad_verificada,created_at,baneado_at,adult_confirmed_at,suspended_at,paises_bloqueados' as const
+
+export type PerfilPublico = {
   id: string
   handle: string
   display_name: string
@@ -33,15 +58,17 @@ export type Perfil = {
   avatar_path: string | null
   is_creator: boolean
   verified: boolean
-  adult_confirmed_at: string | null
-  // Marcadas por un admin; el propio usuario no puede escribirlas.
-  suspended_at: string | null
-  suspended_reason: string | null
-  // Escritas por el servicio de verificacion o por un admin al resolver.
-  identidad_verificada: boolean
-  identidad_verificada_at: string | null
-  paises_bloqueados: string[]
   es_demo: boolean
+  /** Escrita por el servicio de verificacion o por un admin al resolver. */
+  identidad_verificada: boolean
   created_at: string
-  updated_at: string
+  baneado_at: string | null
+}
+
+export type Perfil = PerfilPublico & {
+  adult_confirmed_at: string | null
+  /** Marcada por un admin; el propio usuario no puede escribirla. El motivo
+   *  y la fecha de fin se quedan del lado del panel. */
+  suspended_at: string | null
+  paises_bloqueados: string[]
 }

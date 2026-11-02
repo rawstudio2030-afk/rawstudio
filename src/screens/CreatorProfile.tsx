@@ -12,7 +12,7 @@ import { useSesion } from '../lib/sesion'
 import { perfilPorHandle, urlAvatar } from '../lib/perfiles'
 import { clipsDe, urlPortada, type Clip } from '../lib/clips'
 import { portadaDe } from '../lib/portadas'
-import type { Perfil } from '../lib/supabase'
+import type { PerfilPublico } from '../lib/supabase'
 import { COLOR, FUENTE } from '../lib/diseño'
 import Reportar from '../components/Reportar'
 import OfertaCreadora from '../components/OfertaCreadora'
@@ -24,7 +24,7 @@ export default function CreatorProfile() {
   const { handle } = useParams()
   const { perfil: mio, cargando: cargandoSesion } = useSesion()
 
-  const [perfil, setPerfil] = useState<Perfil | null>(null)
+  const [perfil, setPerfil] = useState<PerfilPublico | null>(null)
   const [cargando, setCargando] = useState(true)
   const [clips, setClips] = useState<Clip[]>([])
 
