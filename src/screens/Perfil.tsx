@@ -20,7 +20,7 @@ const etiqueta: React.CSSProperties = {
 const campo: React.CSSProperties = {
   width: '100%', boxSizing: 'border-box', background: COLOR.superficie,
   border: '1px solid rgba(255,255,255,.14)', color: COLOR.texto,
-  font: `400 16px/1.35 ${FUENTE.ui}`, padding: '15px', outline: 'none',
+  font: `400 16px/1.3 ${FUENTE.ui}`, padding: '15px', outline: 'none',
 }
 
 export default function Perfil() {
@@ -169,12 +169,12 @@ export default function Perfil() {
           <div style={{ minWidth: 0 }}>
             <div onClick={() => archivo.current?.click()} style={{
               display: 'inline-block', border: '1px solid rgba(255,255,255,.16)', color: COLOR.textoSuave,
-              padding: '10px 13px', font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.8,
+              padding: '10px 13px', font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6,
               textTransform: 'uppercase', cursor: 'pointer',
             }}>
               {subiendo ? 'Subiendo…' : foto ? 'Cambiar foto' : 'Subir foto'}
             </div>
-            <div style={{ font: `400 11px/1.5 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 8 }}>
+            <div style={{ font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 8 }}>
               JPG, PNG o WebP · máximo 2 MB
             </div>
           </div>
@@ -218,7 +218,7 @@ export default function Perfil() {
         {perfil && (
           <span onClick={() => nav(`/creator/${perfil.handle}`)} style={{
             alignSelf: 'flex-start', cursor: 'pointer',
-            font: `400 12.5px/1 ${FUENTE.mono}`, color: COLOR.textoTenue,
+            font: `400 12px/1 ${FUENTE.mono}`, color: COLOR.textoTenue,
             textDecoration: 'underline', textUnderlineOffset: 5,
           }}>Ver cómo se ve &#8594;</span>
         )}
@@ -263,7 +263,7 @@ export default function Perfil() {
             <div style={{ font: `700 12px/1.3 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase', color: creadora ? COLOR.dinero : COLOR.textoSuave }}>
               Quiero publicar
             </div>
-            <div style={{ font: `400 12px/1.5 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 5 }}>
+            <div style={{ font: `400 12px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 5 }}>
               {creadora
                 ? (perfil?.identidad_verificada
                     ? 'Tu perfil de creadora está activo'
@@ -296,7 +296,7 @@ export default function Perfil() {
             <div onClick={() => nav('/verificar')} style={{
               marginTop: 11, textAlign: 'center', padding: '12px 0', cursor: 'pointer',
               background: COLOR.admin, color: COLOR.fondo,
-              font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.8, textTransform: 'uppercase',
+              font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
             }}>Verificar mi identidad</div>
           </div>
         )}
@@ -317,10 +317,10 @@ export default function Perfil() {
                 display: 'flex', alignItems: 'center', gap: 13, padding: '15px 13px',
                 cursor: 'pointer', border: '1px solid rgba(255,255,255,.09)',
               }}>
-                <span style={{ width: 26, textAlign: 'center', fontSize: 15, color: COLOR.dinero }}>
+                <span style={{ width: 26, textAlign: 'center', fontSize: 16, color: COLOR.dinero }}>
                   {a.icono}
                 </span>
-                <span style={{ flex: 1, font: `500 15px/1.3 ${FUENTE.ui}`, color: COLOR.texto }}>{a.titulo}</span>
+                <span style={{ flex: 1, font: `500 16px/1.3 ${FUENTE.ui}`, color: COLOR.texto }}>{a.titulo}</span>
                 <span style={{ color: COLOR.textoApagado }}>›</span>
               </div>
             ))}
@@ -337,8 +337,8 @@ export default function Perfil() {
         <span onClick={async () => { await salir(); nav('/entrar', { replace: true }) }} style={{
           alignSelf: 'flex-start', cursor: 'pointer',
           border: '1px solid rgba(255,43,209,.45)', color: COLOR.acento,
-          padding: '13px 20px', font: `700 11px/1 ${FUENTE.ui}`,
-          letterSpacing: 1.8, textTransform: 'uppercase',
+          padding: '13px 20px', font: `700 10px/1 ${FUENTE.ui}`,
+          letterSpacing: 1.6, textTransform: 'uppercase',
         }}>Cerrar sesión</span>
       </Seccion>
 
@@ -353,7 +353,7 @@ export default function Perfil() {
           <div style={{ width: '100%', maxWidth: 680 - 48, margin: '0 auto' }}>
           {estado === 'error' && (
             <div style={{
-              font: `400 12.5px/1.45 ${FUENTE.ui}`, color: COLOR.acento, marginBottom: 10,
+              font: `400 12px/1.45 ${FUENTE.ui}`, color: COLOR.acento, marginBottom: 10,
             }}>{detalle}</div>
           )}
           <div onClick={guardar} style={{
@@ -391,7 +391,7 @@ function Seccion({ titulo, nota, primera, children }: {
       <div>
         <div style={etiqueta}>{titulo}</div>
         {nota && (
-          <div style={{ marginTop: 8, font: `400 12px/1.55 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
+          <div style={{ marginTop: 8, font: `400 12px/1.6 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
             {nota}
           </div>
         )}
@@ -409,7 +409,7 @@ function Campo({ etiquetaTexto, pie, pieColor, children }: {
       <span style={etiqueta}>{etiquetaTexto}</span>
       {children}
       {pie && (
-        <span style={{ font: `400 11px/1.5 ${FUENTE.mono}`, color: pieColor ?? COLOR.textoApagado }}>
+        <span style={{ font: `400 10px/1.45 ${FUENTE.mono}`, color: pieColor ?? COLOR.textoApagado }}>
           {pie}
         </span>
       )}
@@ -422,14 +422,14 @@ function Aviso({ texto, accion }: { texto: string; accion?: { texto: string; al:
     <div style={{
       minHeight: '100%', boxSizing: 'border-box', padding: '64px 26px',
       background: COLOR.fondo, color: COLOR.textoSuave, fontFamily: FUENTE.serif, fontStyle: 'italic',
-      fontSize: 20, display: 'flex', flexDirection: 'column',
+      fontSize: 19, display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center', gap: 20, textAlign: 'center',
     }}>
       {texto}
       {accion && (
         <span onClick={accion.al} style={{
           background: COLOR.acento, color: COLOR.fondo, padding: '15px 26px',
-          font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase',
+          font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
           fontStyle: 'normal', cursor: 'pointer',
         }}>{accion.texto}</span>
       )}

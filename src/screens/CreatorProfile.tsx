@@ -76,7 +76,7 @@ export default function CreatorProfile() {
         <span onClick={() => nav(-1)} style={{
           position: 'absolute', top: 18, left: 16, width: 38, height: 38,
           borderRadius: '50%', border: '1px solid rgba(255,255,255,.22)',
-          display: 'grid', placeItems: 'center', font: `400 20px/1 ${FUENTE.ui}`,
+          display: 'grid', placeItems: 'center', font: `400 19px/1 ${FUENTE.ui}`,
           color: COLOR.texto, cursor: 'pointer', background: 'rgba(8,8,10,.5)',
         }}>‹</span>
       </div>
@@ -90,30 +90,30 @@ export default function CreatorProfile() {
         }} />
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginTop: 15 }}>
-          <span style={{ fontFamily: FUENTE.display, fontSize: 30, lineHeight: 1, textTransform: 'uppercase' }}>
+          <span style={{ fontFamily: FUENTE.display, fontSize: 32, lineHeight: 1, textTransform: 'uppercase' }}>
             {perfil.display_name}
           </span>
-          {perfil.verified && <span style={{ color: COLOR.admin, fontSize: 17 }}>&#10038;</span>}
+          {perfil.verified && <span style={{ color: COLOR.admin, fontSize: 16 }}>&#10038;</span>}
         </div>
 
-        <div style={{ font: `400 13px/1.5 ${FUENTE.mono}`, color: COLOR.textoTenue, marginTop: 6 }}>
+        <div style={{ font: `400 13px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue, marginTop: 6 }}>
           @{perfil.handle}
           {perfil.is_creator && (
             <span style={{
               marginLeft: 9, background: COLOR.dinero, color: COLOR.fondo, padding: '4px 7px',
-              font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.3, textTransform: 'uppercase',
+              font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
             }}>Creadora</span>
           )}
           {perfil.es_demo && (
             <span style={{
               marginLeft: 7, background: COLOR.textoTenue, color: COLOR.fondo, padding: '4px 7px',
-              font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.3, textTransform: 'uppercase',
+              font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
             }}>Demostración</span>
           )}
         </div>
 
         {perfil.bio && (
-          <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 18, lineHeight: 1.4, color: COLOR.textoSuave, marginTop: 16 }}>
+          <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19, lineHeight: 1.45, color: COLOR.textoSuave, marginTop: 16 }}>
             {perfil.bio}
           </div>
         )}
@@ -122,7 +122,7 @@ export default function CreatorProfile() {
           <div onClick={() => nav('/perfil')} style={{
             marginTop: 24, border: '1px solid rgba(255,255,255,.16)', color: COLOR.textoSuave,
             textAlign: 'center', padding: 17, font: `700 12px/1 ${FUENTE.ui}`,
-            letterSpacing: 2, textTransform: 'uppercase', cursor: 'pointer',
+            letterSpacing: 2.2, textTransform: 'uppercase', cursor: 'pointer',
           }}>Editar mi perfil</div>
         )}
 
@@ -138,7 +138,7 @@ export default function CreatorProfile() {
               {esMio && (
                 <div onClick={() => nav('/upload')} style={{
                   marginTop: 16, display: 'inline-block', background: COLOR.acento, color: COLOR.fondo,
-                  padding: '14px 22px', font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.8,
+                  padding: '14px 22px', font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6,
                   textTransform: 'uppercase', cursor: 'pointer',
                 }}>Publicar el primero</div>
               )}
@@ -160,12 +160,12 @@ export default function CreatorProfile() {
                       {!c.published && (
                         <span style={{
                           position: 'absolute', top: 8, left: 8, background: COLOR.acento, color: COLOR.fondo,
-                          padding: '4px 6px', font: `700 8.5px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
+                          padding: '4px 6px', font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
                         }}>Borrador</span>
                       )}
                       <div style={{ position: 'absolute', left: 9, right: 9, bottom: 9 }}>
-                        <div style={{ font: `600 12px/1.3 ${FUENTE.ui}`, color: COLOR.texto }}>{c.title}</div>
-                        <div style={{ font: `400 10px/1.4 ${FUENTE.mono}`, color: COLOR.dinero, marginTop: 3 }}>
+                        <div style={{ font: `500 12px/1.3 ${FUENTE.ui}`, color: COLOR.texto }}>{c.title}</div>
+                        <div style={{ font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.dinero, marginTop: 3 }}>
                           {c.visibility === 'gratis' ? 'gratis' : c.visibility === 'suscriptores' ? 'suscriptores' : `${usd(c.price_coins)}`}
                         </div>
                       </div>
@@ -192,14 +192,14 @@ function Centro({ texto, accion }: { texto: string; accion?: { texto: string; al
     <div style={{
       minHeight: '100%', boxSizing: 'border-box', padding: '64px 26px',
       background: COLOR.fondo, color: COLOR.textoSuave, fontFamily: FUENTE.serif, fontStyle: 'italic',
-      fontSize: 20, display: 'flex', flexDirection: 'column',
+      fontSize: 19, display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center', gap: 20, textAlign: 'center',
     }}>
       {texto}
       {accion && (
         <span onClick={accion.al} style={{
           background: COLOR.acento, color: COLOR.fondo, padding: '15px 26px',
-          font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase',
+          font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
           fontStyle: 'normal', cursor: 'pointer',
         }}>{accion.texto}</span>
       )}

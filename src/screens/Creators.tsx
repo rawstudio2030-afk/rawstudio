@@ -13,7 +13,7 @@ import { TINTE, FUENTE } from '../lib/diseño'
 
 
 const etiqueta = (color: string): React.CSSProperties => ({
-  font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.4, textTransform: 'uppercase', color,
+  font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', color,
 })
 
 // Interlineado 1 y no .88/.9 como el deck: en español los titulares llevan
@@ -103,11 +103,11 @@ export default function Creators() {
           <div style={{ ...etiqueta(CYAN), marginBottom: 16 }}>
             Plataforma para creadoras · México y Estados Unidos
           </div>
-          <div style={{ fontFamily: FUENTE.display, fontSize: 62, lineHeight: .95, textTransform: 'uppercase', marginBottom: 20 }}>
+          <div style={{ fontFamily: FUENTE.display, fontSize: 60, lineHeight: 1, textTransform: 'uppercase', marginBottom: 20 }}>
             Tu contenido.<br />Tus reglas.<br />
             <span style={{ color: PINK, textShadow: '0 0 30px rgba(255,43,209,.5)' }}>Tu 80%.</span>
           </div>
-          <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 20, lineHeight: 1.35, color: MUTED, marginBottom: 28 }}>
+          <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19, lineHeight: 1.3, color: MUTED, marginBottom: 28 }}>
             Cobras directo de tus suscriptores, sin intermediarios y sin exclusividad.{' '}
             <span style={{ color: PAPER }}>Lo que subes sigue siendo tuyo</span>, y si alguien lo filtra, nosotros lo perseguimos.
           </div>
@@ -119,14 +119,14 @@ export default function Creators() {
           }}>Crear mi cuenta</div>
           <div onClick={() => saltar('proteccion')} style={{
             border: `1px solid ${CYAN}`, color: CYAN, textAlign: 'center', padding: 18,
-            font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase', cursor: 'pointer',
+            font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', cursor: 'pointer',
           }}>Cómo te protegemos</div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 1, background: LINE, marginTop: 34 }}>
             {[['80%', 'Para ti'], ['7 días', 'Entre pagos'], ['0', 'Exclusividad']].map(([n, t]) => (
               <div key={t} style={{ background: INK, padding: '18px 10px' }}>
-                <div style={{ fontFamily: FUENTE.display, fontSize: 30, lineHeight: 1, color: LIME, marginBottom: 6 }}>{n}</div>
-                <div style={{ font: `400 10px/1.3 ${FUENTE.mono}`, letterSpacing: 1, textTransform: 'uppercase', color: DIM }}>{t}</div>
+                <div style={{ fontFamily: FUENTE.display, fontSize: 32, lineHeight: 1, color: LIME, marginBottom: 6 }}>{n}</div>
+                <div style={{ font: `400 10px/1.3 ${FUENTE.mono}`, letterSpacing: 1.2, textTransform: 'uppercase', color: DIM }}>{t}</div>
               </div>
             ))}
           </div>
@@ -136,7 +136,7 @@ export default function Creators() {
         <div id="proteccion" style={{ paddingTop: 46, borderTop: `1px solid ${LINE}` }}>
           <div style={{ ...etiqueta(CYAN), marginBottom: 14 }}>Protección y seguridad</div>
           <div style={titular}>Pregunta lo <span style={{ color: PINK }}>incómodo</span></div>
-          <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 18, lineHeight: 1.35, color: MUTED, margin: '-8px 0 26px' }}>
+          <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19, lineHeight: 1.3, color: MUTED, margin: '-8px 0 26px' }}>
             Las dudas que todas tienen antes de subir el primer video. Aquí están contestadas sin adorno: lo que sí podemos hacer, y lo que no.
           </div>
 
@@ -146,12 +146,12 @@ export default function Creators() {
                 <summary style={{
                   listStyle: 'none', cursor: 'pointer', display: 'flex', gap: 12,
                   alignItems: 'flex-start', padding: '18px 2px',
-                  font: `500 16px/1.35 ${FUENTE.ui}`, color: PAPER,
+                  font: `500 16px/1.3 ${FUENTE.ui}`, color: PAPER,
                 }}>
                   <span className="faq-signo">+</span>
                   <span>{f.q}</span>
                 </summary>
-                <div style={{ padding: '0 2px 20px 33px', color: MUTED, font: `400 15px/1.55 ${FUENTE.ui}` }}>
+                <div style={{ padding: '0 2px 20px 33px', color: MUTED, font: `400 16px/1.6 ${FUENTE.ui}` }}>
                   {f.a.map((p, j) => <p key={j} style={{ margin: j ? '11px 0 0' : 0 }}>{p}</p>)}
                 </div>
               </details>
@@ -163,10 +163,10 @@ export default function Creators() {
             margin: '34px 0 6px', padding: '22px 18px',
             border: `1.5px dashed ${LIME}`, background: TINTE.dinero,
           }}>
-            <div style={{ fontFamily: FUENTE.display, fontSize: 25, lineHeight: 1.05, textTransform: 'uppercase', marginBottom: 13 }}>
+            <div style={{ fontFamily: FUENTE.display, fontSize: 26, lineHeight: 1, textTransform: 'uppercase', marginBottom: 13 }}>
               <span style={{ color: LIME }}>Lo que no</span> te vamos a prometer
             </div>
-            <ul style={{ margin: 0, paddingLeft: 17, color: MUTED, font: `400 15px/1.5 ${FUENTE.ui}` }}>
+            <ul style={{ margin: 0, paddingLeft: 17, color: MUTED, font: `400 16px/1.45 ${FUENTE.ui}` }}>
               {NO_PROMETEMOS.map((t, i) => <li key={i} style={{ marginBottom: i < NO_PROMETEMOS.length - 1 ? 9 : 0 }}>{t}</li>)}
             </ul>
           </div>
@@ -187,7 +187,7 @@ export default function Creators() {
                   <span style={{ flex: '0 0 auto', width: 31, height: 31, marginTop: 1, color: f.color }}>
                     {ICONS[f.icono]}
                   </span>
-                  <p style={{ margin: 0, font: `400 15.5px/1.45 ${FUENTE.ui}`, color: PAPER }}>
+                  <p style={{ margin: 0, font: `400 16px/1.45 ${FUENTE.ui}`, color: PAPER }}>
                     <b style={{ fontWeight: 700 }}>{f.fuerte}</b> <span style={{ color: MUTED }}>{f.resto}</span>
                   </p>
                 </div>
@@ -199,7 +199,7 @@ export default function Creators() {
         {/* ---------- cierre ---------- */}
         <div style={{ marginTop: 54, paddingTop: 42, borderTop: `1px solid ${LINE}`, textAlign: 'center' }}>
           <div style={{
-            fontFamily: FUENTE.display, fontSize: 34, lineHeight: 1,
+            fontFamily: FUENTE.display, fontSize: 32, lineHeight: 1,
             textTransform: 'uppercase', marginBottom: 24,
             textDecoration: 'underline', textDecorationColor: PINK,
             textUnderlineOffset: 9, textDecorationThickness: 3,
@@ -211,7 +211,7 @@ export default function Creators() {
             font: `700 13px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
             boxShadow: `5px 5px 0 ${LIME}`, cursor: 'pointer',
           }}>Crear mi cuenta</div>
-          <div style={{ marginTop: 20, font: `400 12px/1.5 ${FUENTE.mono}`, color: DIM }}>
+          <div style={{ marginTop: 20, font: `400 12px/1.45 ${FUENTE.mono}`, color: DIM }}>
             Verificación de edad obligatoria. Sólo mayores de 18 años.
           </div>
         </div>
@@ -219,7 +219,7 @@ export default function Creators() {
         <div style={{
           marginTop: 46, paddingTop: 24, borderTop: `1px solid ${LINE}`,
           display: 'flex', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap',
-          font: `400 11px/1.6 ${FUENTE.mono}`, color: DIM,
+          font: `400 10px/1.6 ${FUENTE.mono}`, color: DIM,
         }}>
           <span>© 2026 RAWstudio</span>
           <span style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>

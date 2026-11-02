@@ -117,7 +117,7 @@ export function BarraInferior() {
             borderTop: `2px solid ${activo ? resalte(d) : 'transparent'}`,
             marginTop: -1,
           }}>
-            <span style={{ fontSize: 17, lineHeight: 1 }}>{d.icono}</span>
+            <span style={{ fontSize: 16, lineHeight: 1 }}>{d.icono}</span>
             <span style={{
               font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
             }}>{d.titulo}</span>
@@ -197,7 +197,7 @@ export function BarraLateral() {
       <div onClick={() => nav('/clip')} style={{
         padding: '20px 18px 16px', cursor: 'pointer',
         font: `400 19px/1 ${FUENTE.display}`, textTransform: 'uppercase',
-        letterSpacing: .5, color: COLOR.texto,
+        letterSpacing: 0.5, color: COLOR.texto,
       }}>RAWstudio</div>
 
       <div style={{ padding: '4px 0 10px' }}>
@@ -211,7 +211,7 @@ export function BarraLateral() {
           <div onClick={() => nav('/estudio')} style={{
             padding: '14px 18px 8px', cursor: 'pointer',
             borderTop: `1px solid ${LINEA.tenue}`, marginTop: 4,
-            font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 2,
+            font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 2.2,
             textTransform: 'uppercase',
             color: aqui.startsWith('/estudio') ? COLOR.dinero : COLOR.textoTenue,
           }}>Estudio</div>
@@ -246,7 +246,7 @@ function Renglon({ d, aqui, nav, tono = COLOR.acento }: {
       borderLeft: `2px solid ${activo ? tono : 'transparent'}`,
       color: activo ? COLOR.texto : COLOR.textoSuave,
     }}>
-      <span style={{ width: 16, textAlign: 'center', fontSize: 14,
+      <span style={{ width: 16, textAlign: 'center', fontSize: 13,
         color: activo ? tono : COLOR.textoApagado }}>{d.icono}</span>
       <span style={{ font: `${activo ? 600 : 400} 13px/1 ${FUENTE.ui}` }}>{d.titulo}</span>
     </div>

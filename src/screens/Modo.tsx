@@ -60,7 +60,7 @@ export default function Modo() {
         }}>¿Cómo entras hoy?</h1>
         <p style={{
           margin: '12px 0 0', fontFamily: FUENTE.serif, fontStyle: 'italic',
-          fontSize: 18, lineHeight: 1.35, color: COLOR.textoSuave,
+          fontSize: 19, lineHeight: 1.3, color: COLOR.textoSuave,
         }}>
           Tu cuenta hace dos trabajos. Elige uno y el otro se quita de en medio.
         </p>
@@ -83,7 +83,7 @@ export default function Modo() {
         </div>
 
         <p style={{
-          marginTop: 24, font: `400 11.5px/1.6 ${FUENTE.mono}`, color: COLOR.textoApagado,
+          marginTop: 24, font: `400 12px/1.6 ${FUENTE.mono}`, color: COLOR.textoApagado,
         }}>
           Esto no cambia tus permisos, solo dónde aterrizas. Puedes saltar de un lado
           al otro cuando quieras: desde la pestaña «Panel» de la barra de abajo, y
@@ -105,18 +105,18 @@ function Puerta({ color, titulo, que, nota, al }: {
     }}>
       <div style={{ flex: 1 }}>
         <div style={{
-          font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase', color,
+          font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', color,
         }}>{titulo}</div>
-        <div style={{ marginTop: 9, font: `400 14px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
+        <div style={{ marginTop: 9, font: `400 13px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
           {que}
         </div>
         {nota && (
-          <div style={{ marginTop: 7, font: `400 11px/1.5 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
+          <div style={{ marginTop: 7, font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
             {nota}
           </div>
         )}
       </div>
-      <span style={{ font: `700 18px/1 ${FUENTE.ui}`, color }}>&#8594;</span>
+      <span style={{ font: `700 19px/1 ${FUENTE.ui}`, color }}>&#8594;</span>
     </div>
   )
 }

@@ -81,13 +81,13 @@ export default function CierrePorInactividad() {
     }}>
       <div style={{ width: 64, height: 3, background: COLOR.acento }} />
       <div style={{
-        fontFamily: FUENTE.display, fontSize: 40, lineHeight: 1,
+        fontFamily: FUENTE.display, fontSize: 38, lineHeight: 1,
         textTransform: 'uppercase', color: COLOR.texto,
       }}>
         ¿Sigues<br />ahí?
       </div>
       <div style={{
-        fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19, lineHeight: 1.4,
+        fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19, lineHeight: 1.45,
         color: COLOR.textoSuave, maxWidth: 320,
       }}>
         Por seguridad cerramos la sesión sola cuando nadie la usa. Nos quedan
@@ -107,7 +107,7 @@ export default function CierrePorInactividad() {
         style={{
           border: '1px solid rgba(255,255,255,.16)', color: COLOR.textoSuave,
           padding: '15px 28px', font: `700 12px/1 ${FUENTE.ui}`,
-          letterSpacing: 2, textTransform: 'uppercase', cursor: 'pointer',
+          letterSpacing: 2.2, textTransform: 'uppercase', cursor: 'pointer',
         }}>
         Cerrar ahora
       </div>

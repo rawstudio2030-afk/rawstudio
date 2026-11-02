@@ -22,7 +22,7 @@ export function Boton({ children, al, tono = 'normal', activo = true, chico }: {
   return (
     <button type="button" disabled={!activo} onClick={al} style={{
       font: `700 ${chico ? 9 : 10}px/1 ${FUENTE.ui}`,
-      letterSpacing: 1.4, textTransform: 'uppercase',
+      letterSpacing: 1.2, textTransform: 'uppercase',
       padding: chico ? '6px 10px' : '9px 14px',
       background: tono === 'primario' && activo ? COLOR.acento : 'transparent',
       color: tono === 'primario' && activo ? COLOR.fondo : color,
@@ -40,7 +40,7 @@ const campoBase = {
   width: '100%', boxSizing: 'border-box' as const,
   background: COLOR.fondo, color: COLOR.texto,
   border: `1px solid ${LINEA.suave}`, borderRadius: 0,
-  padding: '9px 11px', font: `400 13px/1.4 ${FUENTE.ui}`, outline: 'none',
+  padding: '9px 11px', font: `400 13px/1.45 ${FUENTE.ui}`, outline: 'none',
 }
 
 export function Campo({ valor, cambia, marcador, tipo = 'text', mono, autoFoco }: {
@@ -82,7 +82,7 @@ export function Etiquetado({ texto, hijo, ancho }: {
     <label style={{ display: 'block', width: ancho }}>
       <span style={{
         display: 'block', marginBottom: 5,
-        font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.3,
+        font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
         textTransform: 'uppercase', color: COLOR.textoTenue,
       }}>{texto}</span>
       {hijo}
@@ -127,12 +127,12 @@ export function Confirmar({ titulo, cuerpo, etiqueta, tono = 'peligro',
         border: `1px solid ${LINEA.fuerte}`, padding: 26,
       }}>
         <div style={{
-          font: `400 22px/1.15 ${FUENTE.display}`, textTransform: 'uppercase',
-          color: COLOR.texto, letterSpacing: .4,
+          font: `400 22px/1 ${FUENTE.display}`, textTransform: 'uppercase',
+          color: COLOR.texto, letterSpacing: 0.5,
         }}>{titulo}</div>
 
         <div style={{
-          marginTop: 12, font: `400 13px/1.55 ${FUENTE.ui}`, color: COLOR.textoSuave,
+          marginTop: 12, font: `400 13px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave,
         }}>{cuerpo}</div>
 
         {exigeMotivo && (
@@ -181,7 +181,7 @@ export function Tabla<T>({ columnas, filas, clave, orden, descendente, ordenar,
     return (
       <div style={{
         padding: '60px 20px', textAlign: 'center', color: COLOR.textoTenue,
-        font: `400 13px/1.5 ${FUENTE.ui}`, border: `1px solid ${LINEA.tenue}`,
+        font: `400 13px/1.45 ${FUENTE.ui}`, border: `1px solid ${LINEA.tenue}`,
       }}>{vacia ?? 'Sin resultados'}</div>
     )
   }
@@ -225,7 +225,7 @@ export function Tabla<T>({ columnas, filas, clave, orden, descendente, ordenar,
                   <td key={c.clave} style={{
                     padding: '9px 12px',
                     textAlign: c.numerica ? 'right' : 'left',
-                    font: `400 12px/1.4 ${c.numerica ? FUENTE.mono : FUENTE.ui}`,
+                    font: `400 12px/1.45 ${c.numerica ? FUENTE.mono : FUENTE.ui}`,
                     color: COLOR.texto,
                     borderBottom: `1px solid ${LINEA.tenue}`,
                     whiteSpace: 'nowrap',
@@ -251,7 +251,7 @@ export function Paginador({ pagina, porPagina, total, cambia }: {
   return (
     <div style={{
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      marginTop: 12, font: `400 11px/1 ${FUENTE.mono}`, color: COLOR.textoTenue,
+      marginTop: 12, font: `400 10px/1 ${FUENTE.mono}`, color: COLOR.textoTenue,
     }}>
       <span>{desde}–{hasta} de {total}</span>
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -269,7 +269,7 @@ export function Insignia({ texto, color }: { texto: string; color: string }) {
   return (
     <span style={{
       display: 'inline-block', padding: '2px 7px',
-      font: `700 9px/1.5 ${FUENTE.ui}`, letterSpacing: 1,
+      font: `700 9px/1.45 ${FUENTE.ui}`, letterSpacing: 1.2,
       textTransform: 'uppercase', color, border: `1px solid ${color}`,
     }}>{texto}</span>
   )

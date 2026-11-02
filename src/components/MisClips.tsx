@@ -67,17 +67,17 @@ export default function MisClips() {
             padding: '11px 0', borderBottom: `1px solid ${LINEA.tenue}`,
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
-              <span style={{ font: `400 13px/1.35 ${FUENTE.ui}`, color: COLOR.texto }}>
+              <span style={{ font: `400 13px/1.3 ${FUENTE.ui}`, color: COLOR.texto }}>
                 {f.title}
               </span>
               <span style={{
-                font: `700 9px/1.6 ${FUENTE.ui}`, letterSpacing: 1,
+                font: `700 9px/1.6 ${FUENTE.ui}`, letterSpacing: 1.2,
                 textTransform: 'uppercase', color: e.c, whiteSpace: 'nowrap',
               }}>{e.t}</span>
             </div>
             {(e.nota || f.motivo_rechazo) && (
               <div style={{
-                marginTop: 5, font: `400 11px/1.5 ${FUENTE.ui}`, color: COLOR.textoTenue,
+                marginTop: 5, font: `400 10px/1.45 ${FUENTE.ui}`, color: COLOR.textoTenue,
               }}>
                 {e.nota}
                 {f.motivo_rechazo && (
@@ -103,7 +103,7 @@ export default function MisClips() {
                     width: '100%', boxSizing: 'border-box', marginTop: 8,
                     background: 'transparent', color: COLOR.texto, colorScheme: 'dark',
                     border: `1px solid ${LINEA.suave}`, borderRadius: 0,
-                    padding: '11px 12px', font: `400 15px/1 ${FUENTE.ui}`, outline: 'none',
+                    padding: '11px 12px', font: `400 16px/1 ${FUENTE.ui}`, outline: 'none',
                   }} />
 
                 <div onClick={() => setModo(m =>
@@ -112,13 +112,13 @@ export default function MisClips() {
                     marginTop: 10, padding: '11px 12px', cursor: 'pointer',
                     border: `1px solid ${modo === 'retiro_total' ? '#FF4444' : LINEA.tenue}`,
                   }}>
-                  <div style={{ font: `400 13px/1.35 ${FUENTE.ui}`,
+                  <div style={{ font: `400 13px/1.3 ${FUENTE.ui}`,
                     color: modo === 'retiro_total' ? '#FF4444' : COLOR.textoSuave }}>
                     {modo === 'retiro_total'
                       ? 'Quitárselo también a quien lo compró'
                       : 'Dejar de venderlo'}
                   </div>
-                  <div style={{ marginTop: 5, font: `400 11px/1.5 ${FUENTE.ui}`,
+                  <div style={{ marginTop: 5, font: `400 10px/1.45 ${FUENTE.ui}`,
                     color: COLOR.textoTenue }}>
                     {modo === 'retiro_total'
                       ? 'Nadie podrá verlo, ni quien ya pagó por él. Tienen derecho a que se les devuelva su dinero.'
@@ -135,18 +135,18 @@ export default function MisClips() {
                   }} style={{
                     flex: 1, textAlign: 'center', padding: 11, cursor: 'pointer',
                     background: COLOR.acento, color: COLOR.fondo,
-                    font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.4,
+                    font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
                     textTransform: 'uppercase',
                   }}>{fecha ? 'Guardar' : 'Quitar la fecha'}</span>
                   <span onClick={() => { setAbierto(null); setError('') }} style={{
                     flex: 1, textAlign: 'center', padding: 11, cursor: 'pointer',
                     border: `1px solid ${LINEA.fuerte}`, color: COLOR.textoSuave,
-                    font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.4,
+                    font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
                     textTransform: 'uppercase',
                   }}>Cancelar</span>
                 </div>
                 {error && (
-                  <div style={{ marginTop: 9, font: `400 12px/1.4 ${FUENTE.ui}`,
+                  <div style={{ marginTop: 9, font: `400 12px/1.45 ${FUENTE.ui}`,
                     color: '#FF4444' }}>{error}</div>
                 )}
               </div>
@@ -157,7 +157,7 @@ export default function MisClips() {
                 setModo((f.caduca_modo as ModoCaducidad) ?? 'deja_de_venderse')
                 setError('')
               }} style={{
-                marginTop: 7, font: `400 11px/1.5 ${FUENTE.ui}`, cursor: 'pointer',
+                marginTop: 7, font: `400 10px/1.45 ${FUENTE.ui}`, cursor: 'pointer',
                 color: f.caduca_at ? '#FFB020' : COLOR.textoApagado,
                 textDecoration: 'underline', textUnderlineOffset: 3,
               }}>

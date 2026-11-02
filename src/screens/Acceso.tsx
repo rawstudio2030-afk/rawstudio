@@ -69,7 +69,7 @@ function Casilla({ marcada, onCambio, obligatoria, children }: {
         display: 'grid', placeItems: 'center',
         font: `700 12px/1 ${FUENTE.ui}`, color: COLOR.fondo,
       }}>{marcada ? '✓' : ''}</span>
-      <span style={{ font: `400 12.5px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
+      <span style={{ font: `400 12px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
         {children}
         {obligatoria && <span style={{ color: COLOR.acento }}> *</span>}
       </span>
@@ -226,11 +226,11 @@ export default function Acceso({ modo }: { modo: Modo }) {
 
         {aviso ? (
           <>
-            <div style={{ fontFamily: FUENTE.display, fontSize: 48, lineHeight: 1, textTransform: 'uppercase' }}>
+            <div style={{ fontFamily: FUENTE.display, fontSize: 46, lineHeight: 1, textTransform: 'uppercase' }}>
               {aviso.titulo[0]}<br />{aviso.titulo[1]}<br />
               <span style={{ color: COLOR.dinero }}>{aviso.titulo[2]}</span>
             </div>
-            <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 20, lineHeight: 1.35, color: COLOR.textoSuave }}>
+            <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19, lineHeight: 1.3, color: COLOR.textoSuave }}>
               {aviso.texto}
             </div>
             <div style={{ font: `400 12px/1.6 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
@@ -239,11 +239,11 @@ export default function Acceso({ modo }: { modo: Modo }) {
           </>
         ) : (
           <>
-            <div style={{ fontFamily: FUENTE.display, fontSize: 48, lineHeight: 1, textTransform: 'uppercase' }}>
+            <div style={{ fontFamily: FUENTE.display, fontSize: 46, lineHeight: 1, textTransform: 'uppercase' }}>
               {t.titulo[0]}<br />{t.titulo[1]}<br />
               <span style={{ color: COLOR.dinero }}>{t.titulo[2]}</span>
             </div>
-            <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 20, lineHeight: 1.35, color: COLOR.textoSuave }}>
+            <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19, lineHeight: 1.3, color: COLOR.textoSuave }}>
               {t.bajada}
             </div>
 
@@ -267,7 +267,7 @@ export default function Acceso({ modo }: { modo: Modo }) {
                 onClick={() => setVerClave(v => !v)}
                 style={{
                   position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)',
-                  font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.4, textTransform: 'uppercase',
+                  font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
                   color: COLOR.textoTenue, cursor: 'pointer', padding: 6,
                 }}>
                 {verClave ? 'Ocultar' : 'Ver'}
@@ -275,7 +275,7 @@ export default function Acceso({ modo }: { modo: Modo }) {
             </div>
 
             {modo === 'registro' && !claveOk && clave.length > 0 && (
-              <div style={{ font: `400 12px/1.5 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
+              <div style={{ font: `400 12px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
                 Mínimo 6 caracteres.
               </div>
             )}
@@ -304,7 +304,7 @@ export default function Acceso({ modo }: { modo: Modo }) {
             )}
 
             {estado === 'error' && (
-              <div style={{ font: `400 13px/1.5 ${FUENTE.ui}`, color: COLOR.acento }}>{detalle}</div>
+              <div style={{ font: `400 13px/1.45 ${FUENTE.ui}`, color: COLOR.acento }}>{detalle}</div>
             )}
           </>
         )}
@@ -314,7 +314,7 @@ export default function Acceso({ modo }: { modo: Modo }) {
         {aviso ? (
           <div onClick={() => { setEstado('listo'); nav('/entrar') }} style={{
             border: '1px solid rgba(255,255,255,.16)', color: COLOR.textoSuave, textAlign: 'center',
-            padding: 18, font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase', cursor: 'pointer',
+            padding: 18, font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', cursor: 'pointer',
           }}>Volver</div>
         ) : (
           <>
@@ -340,17 +340,17 @@ export default function Acceso({ modo }: { modo: Modo }) {
 
             <div onClick={() => nav(t.rutaAlterna)} style={{
               border: '1px solid rgba(255,255,255,.16)', color: COLOR.textoSuave, textAlign: 'center',
-              padding: 18, font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase', cursor: 'pointer',
+              padding: 18, font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', cursor: 'pointer',
             }}>{t.alterno}</div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginTop: 4, paddingRight: 58 }}>
               <span onClick={ligaAlCorreo} style={{
-                font: `400 12px/1.5 ${FUENTE.mono}`, color: COLOR.textoTenue,
+                font: `400 12px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue,
                 textDecoration: 'underline', cursor: 'pointer',
               }}>Entrar con liga</span>
               {modo === 'acceso' && (
                 <span onClick={olvide} style={{
-                  font: `400 12px/1.5 ${FUENTE.mono}`, color: COLOR.textoTenue,
+                  font: `400 12px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue,
                   textDecoration: 'underline', cursor: 'pointer', textAlign: 'right',
                 }}>Olvidé mi clave</span>
               )}

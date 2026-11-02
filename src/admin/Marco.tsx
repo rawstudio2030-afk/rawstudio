@@ -63,10 +63,10 @@ export function Marco({ children, titulo, resumen }: {
         }}>
           <div style={{
             font: `400 19px/1 ${FUENTE.display}`, textTransform: 'uppercase',
-            letterSpacing: .5, color: COLOR.texto,
+            letterSpacing: 0.5, color: COLOR.texto,
           }}>RAWstudio</div>
           <div style={{
-            marginTop: 5, font: `700 8px/1 ${FUENTE.ui}`, letterSpacing: 1.8,
+            marginTop: 5, font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.6,
             textTransform: 'uppercase', color: COLOR.admin,
           }}>Administración</div>
         </div>
@@ -104,7 +104,7 @@ export function Marco({ children, titulo, resumen }: {
             siguiente entrada caeria en el panel sin haberlo pedido. */}
         <div onClick={() => { elegirModo('app'); nav('/clip') }} style={{
           padding: '14px 18px', borderTop: `1px solid ${LINEA.tenue}`,
-          cursor: 'pointer', font: `400 11px/1 ${FUENTE.ui}`, color: COLOR.textoTenue,
+          cursor: 'pointer', font: `400 10px/1 ${FUENTE.ui}`, color: COLOR.textoTenue,
         }}>‹ Volver a la aplicación</div>
       </nav>
 
@@ -115,8 +115,8 @@ export function Marco({ children, titulo, resumen }: {
           paddingBottom: 16, borderBottom: `1px solid ${LINEA.tenue}`,
         }}>
           <h1 style={{
-            margin: 0, font: `400 27px/1 ${FUENTE.display}`,
-            textTransform: 'uppercase', letterSpacing: .5,
+            margin: 0, font: `400 26px/1 ${FUENTE.display}`,
+            textTransform: 'uppercase', letterSpacing: 0.5,
           }}>{titulo}</h1>
           {resumen && (
             <span style={{ font: `400 12px/1 ${FUENTE.mono}`, color: COLOR.textoTenue }}>

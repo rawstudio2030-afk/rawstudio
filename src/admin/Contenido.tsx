@@ -136,11 +136,11 @@ export default function Contenido() {
       {/* ---- Purga pendiente ---- */}
       {pendientes.length > 0 && (
         <div style={{ marginBottom: 16, padding: '13px 15px', border: '1px solid #FFB020' }}>
-          <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.3,
+          <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
             textTransform: 'uppercase', color: '#FFB020' }}>
             {pendientes.length} archivo{pendientes.length > 1 ? 's' : ''} cumplió los 30 días
           </div>
-          <div style={{ margin: '8px 0 12px', font: `400 11px/1.55 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
+          <div style={{ margin: '8px 0 12px', font: `400 10px/1.6 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
             Siguen ocupando espacio. Purgarlos borra el video y la portada de forma
             irreversible; la ficha del clip se conserva para la bitácora.
           </div>
@@ -161,7 +161,7 @@ export default function Contenido() {
 
       {aviso && (
         <div style={{ marginBottom: 14, padding: '10px 13px', border: `1px solid ${COLOR.dinero}`,
-          color: COLOR.dinero, font: `400 12px/1.4 ${FUENTE.ui}` }}>{aviso}</div>
+          color: COLOR.dinero, font: `400 12px/1.45 ${FUENTE.ui}` }}>{aviso}</div>
       )}
 
       <div style={{ display: 'flex', borderBottom: `1px solid ${LINEA.tenue}`, marginBottom: 16 }}>
@@ -203,7 +203,7 @@ export default function Contenido() {
 
       {error && (
         <div style={{ marginBottom: 14, padding: '10px 13px', border: '1px solid #FF4444',
-          color: '#FF4444', font: `400 12px/1.4 ${FUENTE.ui}` }}>{error}</div>
+          color: '#FF4444', font: `400 12px/1.45 ${FUENTE.ui}` }}>{error}</div>
       )}
 
       <div style={{ opacity: cargando ? .5 : 1 }}>
@@ -216,7 +216,7 @@ export default function Contenido() {
       </div>
 
       {filtro === 'destacados' && filas.length > 0 && (
-        <div style={{ marginTop: 12, font: `400 11px/1.5 ${FUENTE.ui}`, color: COLOR.textoApagado }}>
+        <div style={{ marginTop: 12, font: `400 10px/1.45 ${FUENTE.ui}`, color: COLOR.textoApagado }}>
           El número es la posición en la portada: el 1 sale primero. Lo no destacado va
           después, por fecha.
         </div>

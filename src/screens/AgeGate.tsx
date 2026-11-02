@@ -58,7 +58,7 @@ export default function AgeGate() {
       <Wordmark ancho={150} glow={16} />
       <div style={{flex: "1", display: "flex", flexDirection: "column", justifyContent: "center", gap: "22px", padding: "34px 0"}}>
         <div style={{width: "64px", height: "3px", background: COLOR.acento}} />
-        <div style={{fontFamily: FUENTE.display, fontSize: "58px", lineHeight: ".9", letterSpacing: "-.5px", textTransform: "uppercase"}}>
+        <div style={{fontFamily: FUENTE.display, fontSize: "60px", lineHeight: "1", letterSpacing: "-.5px", textTransform: "uppercase"}}>
           Prove
           <br />
           you're
@@ -67,14 +67,14 @@ export default function AgeGate() {
             grown.
           </span>
         </div>
-        <div style={{fontFamily: "'Instrument Serif',serif", fontStyle: "italic", fontSize: "21px", lineHeight: "1.35", color: COLOR.textoSuave}}>
+        <div style={{fontFamily: "'Instrument Serif',serif", fontStyle: "italic", fontSize: "22px", lineHeight: "1.3", color: COLOR.textoSuave}}>
           Everything past this door is paid, private, and made by people who chose to be here.
         </div>
         <div style={{display: "flex", gap: "8px", alignItems: "center", marginTop: "4px"}}>
-          <span style={{display: "inline-block", transform: "rotate(-4deg)", background: COLOR.dinero, color: COLOR.fondo, font: "700 9.5px/1 'Space Grotesk'", letterSpacing: "1.4px", textTransform: "uppercase", padding: "6px 9px"}}>
+          <span style={{display: "inline-block", transform: "rotate(-4deg)", background: COLOR.dinero, color: COLOR.fondo, font: "700 9px/1 'Space Grotesk'", letterSpacing: "1.2px", textTransform: "uppercase", padding: "6px 9px"}}>
             Screenshots blocked
           </span>
-          <span style={{display: "inline-block", transform: "rotate(3deg)", background: "#fff", color: COLOR.fondo, font: "700 9.5px/1 'Space Grotesk'", letterSpacing: "1.4px", textTransform: "uppercase", padding: "6px 9px"}}>
+          <span style={{display: "inline-block", transform: "rotate(3deg)", background: "#fff", color: COLOR.fondo, font: "700 9px/1 'Space Grotesk'", letterSpacing: "1.2px", textTransform: "uppercase", padding: "6px 9px"}}>
             No resale
           </span>
         </div>
@@ -83,10 +83,10 @@ export default function AgeGate() {
         <div style={{background: COLOR.acento, color: COLOR.fondo, textAlign: "center", padding: "19px", font: "700 13px/1 'Space Grotesk'", letterSpacing: "2.2px", textTransform: "uppercase", boxShadow: "0 0 34px rgba(255,43,209,.42)", cursor: "pointer"}} onClick={confirmarEdad}>
           I'm 18 or older
         </div>
-        <div style={{border: "1px solid rgba(255,255,255,.16)", color: COLOR.textoSuave, textAlign: "center", padding: "18px", font: "700 12px/1 'Space Grotesk'", letterSpacing: "2px", textTransform: "uppercase", cursor: "pointer"}} onClick={() => nav('/')}>
+        <div style={{border: "1px solid rgba(255,255,255,.16)", color: COLOR.textoSuave, textAlign: "center", padding: "18px", font: "700 12px/1 'Space Grotesk'", letterSpacing: "2.2px", textTransform: "uppercase", cursor: "pointer"}} onClick={() => nav('/')}>
           Not yet — show me out
         </div>
-        <div style={{font: "400 10.5px/1.5 'Space Mono',monospace", color: COLOR.textoApagado, textAlign: "center", padding: "8px 6px 0"}}>
+        <div style={{font: "400 10px/1.45 'Space Mono',monospace", color: COLOR.textoApagado, textAlign: "center", padding: "8px 6px 0"}}>
           ID check may be requested before your first payout. We store a hash, not your face.
         </div>
       </div>

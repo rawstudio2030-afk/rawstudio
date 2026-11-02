@@ -117,7 +117,7 @@ export default function ExpedientesMasivos() {
         <span style={{
           display: 'inline-block', padding: '11px 16px', cursor: 'pointer',
           border: `1px solid ${COLOR.admin}`, color: COLOR.admin,
-          font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
+          font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
         }}>Elegir carpeta de expedientes</span>
       </label>
 
@@ -132,7 +132,7 @@ export default function ExpedientesMasivos() {
         </div>
         <div style={{ display: 'flex', gap: 22, flexWrap: 'wrap', alignItems: 'flex-start' }}>
           <div>
-            <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.4,
+            <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
               textTransform: 'uppercase', color: COLOR.textoTenue, marginBottom: 7 }}>
               1 · Los archivos
             </div>
@@ -144,12 +144,12 @@ export default function ExpedientesMasivos() {
                 setSueltos(m)
               }}
               style={{ font: `400 12px/1 ${FUENTE.ui}`, color: COLOR.textoSuave }} />
-            <div style={{ marginTop: 6, font: `400 10px/1.4 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
+            <div style={{ marginTop: 6, font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
               {sueltos.size ? `${sueltos.size} archivos listos` : 'ninguno todavía'}
             </div>
           </div>
           <div>
-            <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.4,
+            <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
               textTransform: 'uppercase', color: COLOR.textoTenue, marginBottom: 7 }}>
               2 · La tabla
             </div>
@@ -190,12 +190,12 @@ export default function ExpedientesMasivos() {
 
           <div style={{ overflowX: 'auto', border: `1px solid ${LINEA.tenue}` }}>
             <table style={{ width: '100%', borderCollapse: 'collapse',
-              font: `400 12px/1.5 ${FUENTE.ui}` }}>
+              font: `400 12px/1.45 ${FUENTE.ui}` }}>
               <thead>
                 <tr>{['Creadora', 'Identificación', 'Consentimiento', 'Estado'].map(t => (
                   <th key={t} style={{ textAlign: 'left', padding: '9px 12px',
                     borderBottom: `1px solid ${LINEA.tenue}`, color: COLOR.textoTenue,
-                    font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.4,
+                    font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
                     textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{t}</th>
                 ))}</tr>
               </thead>
@@ -218,7 +218,7 @@ export default function ExpedientesMasivos() {
                     <td style={{ ...celda, color: colorDe(e.estado) }}>
                       {etiqueta(e.estado)}
                       {e.detalle && (
-                        <div style={{ color: COLOR.textoTenue, font: `400 11px/1.45 ${FUENTE.ui}` }}>
+                        <div style={{ color: COLOR.textoTenue, font: `400 10px/1.45 ${FUENTE.ui}` }}>
                           {e.detalle}
                         </div>
                       )}
@@ -240,7 +240,7 @@ export default function ExpedientesMasivos() {
             )}
           </div>
 
-          <p style={{ marginTop: 12, font: `400 11px/1.6 ${FUENTE.ui}`, color: COLOR.textoTenue,
+          <p style={{ marginTop: 12, font: `400 10px/1.6 ${FUENTE.ui}`, color: COLOR.textoTenue,
             maxWidth: 720 }}>
             Con los dos documentos cargados la verificación se enciende sola. Los clips que
             ya estén subidos <b>no</b> aparecen por eso: siguen pendientes de moderación

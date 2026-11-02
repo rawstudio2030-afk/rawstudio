@@ -44,7 +44,7 @@ export function Boton({ children, al, activo = true, tono = 'normal' }: {
       background: tono === 'primario' && activo ? COLOR.acento : 'transparent',
       border: `1px solid ${color ?? LINEA.fuerte}`,
       color: tono === 'primario' && activo ? COLOR.fondo : (color ?? COLOR.textoSuave),
-      font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.8, textTransform: 'uppercase',
+      font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
     }}>{children}</span>
   )
 }
@@ -57,7 +57,7 @@ export function Campo({ valor, cambia, marcador, tipo = 'text', filas }: {
     width: '100%', boxSizing: 'border-box' as const,
     background: 'transparent', color: COLOR.texto,
     border: `1px solid ${LINEA.suave}`, borderRadius: 0,
-    padding: '12px 13px', font: `400 15px/1.5 ${FUENTE.ui}`, outline: 'none',
+    padding: '12px 13px', font: `400 16px/1.45 ${FUENTE.ui}`, outline: 'none',
   }
   return filas
     ? <textarea value={valor} onChange={e => cambia(e.target.value)}
@@ -69,7 +69,7 @@ export function Campo({ valor, cambia, marcador, tipo = 'text', filas }: {
 export function Etiqueta({ texto }: { texto: string }) {
   return (
     <div style={{
-      font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.8,
+      font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.6,
       textTransform: 'uppercase', color: COLOR.textoTenue, marginBottom: 8,
     }}>{texto}</div>
   )
@@ -90,7 +90,7 @@ export function Vacio({ texto }: { texto: string }) {
   return (
     <div style={{
       padding: '48px 20px', textAlign: 'center', border: `1px solid ${LINEA.tenue}`,
-      font: `400 14px/1.6 ${FUENTE.serif}`, fontStyle: 'italic', color: COLOR.textoTenue,
+      font: `400 13px/1.6 ${FUENTE.serif}`, fontStyle: 'italic', color: COLOR.textoTenue,
     }}>{texto}</div>
   )
 }

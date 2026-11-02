@@ -70,7 +70,7 @@ export default function Almacenamiento() {
   return (
     <>
       <div style={{ marginBottom: 16, padding: '12px 14px', border: `1px solid ${LINEA.tenue}`,
-        font: `400 11px/1.6 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
+        font: `400 10px/1.6 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
         Supabase <b style={{ color: COLOR.texto }}>no avisa antes</b> de llegar al límite: la
         subida falla cuando ya no cabe, después de haber transferido el archivo entero. Este
         medidor está para que no te tome por sorpresa.
@@ -78,15 +78,15 @@ export default function Almacenamiento() {
 
       {error && (
         <div style={{ marginBottom: 14, padding: '10px 13px', border: '1px solid #FF4444',
-          color: '#FF4444', font: `400 12px/1.4 ${FUENTE.ui}` }}>{error}</div>
+          color: '#FF4444', font: `400 12px/1.45 ${FUENTE.ui}` }}>{error}</div>
       )}
 
       {/* ---- El medidor ---- */}
       <div style={{ border: `1px solid ${pasado || cerca ? color : LINEA.tenue}`,
         padding: '16px 18px', marginBottom: 18 }}>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
-          <span style={{ font: `400 30px/1 ${FUENTE.mono}`, color }}>{tamano(total)}</span>
-          <span style={{ font: `400 14px/1 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
+          <span style={{ font: `400 32px/1 ${FUENTE.mono}`, color }}>{tamano(total)}</span>
+          <span style={{ font: `400 13px/1 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
             de {tamano(limiteBytes)}
           </span>
           <div style={{ flex: 1 }} />
@@ -138,7 +138,7 @@ export default function Almacenamiento() {
           )}
         </div>
 
-        <div style={{ marginTop: 8, font: `400 11px/1.5 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
+        <div style={{ marginTop: 8, font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
           {plan
             ? `Marcado como plan ${plan.nombre}. Esto no cambia tu plan en Supabase: solo le dice al medidor cuánto cabe.`
             : 'Tope puesto a mano. Si es la cuota de tu plan, márcalo como Gratuito o Pro y el aviso será más claro.'}
@@ -155,11 +155,11 @@ export default function Almacenamiento() {
             <span style={{ flex: 1, font: `400 13px/1 ${FUENTE.ui}` }}>
               {NOMBRE[f.bucket] ?? f.bucket}
             </span>
-            <span style={{ font: `400 11px/1 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
+            <span style={{ font: `400 10px/1 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
               {f.archivos} archivos
             </span>
             <span style={{ width: 90, textAlign: 'right',
-              font: `400 14px/1 ${FUENTE.mono}`,
+              font: `400 13px/1 ${FUENTE.mono}`,
               color: f.bucket === 'clips' ? COLOR.dinero : COLOR.textoSuave }}>
               {tamano(f.bytes)}
             </span>
@@ -180,7 +180,7 @@ export default function Almacenamiento() {
       {porCreadora.length > 0 && (
         <>
           <div style={{ margin: '0 0 10px', font: `700 10px/1 ${FUENTE.ui}`,
-            letterSpacing: 1.4, textTransform: 'uppercase', color: COLOR.textoTenue }}>
+            letterSpacing: 1.2, textTransform: 'uppercase', color: COLOR.textoTenue }}>
             Quién ocupa más
           </div>
           <div style={{ border: `1px solid ${LINEA.tenue}` }}>
@@ -189,13 +189,13 @@ export default function Almacenamiento() {
                 display: 'flex', alignItems: 'center', gap: 12, padding: '9px 15px',
                 borderBottom: i < porCreadora.length - 1 ? `1px solid ${LINEA.tenue}` : 'none',
               }}>
-                <span style={{ width: 26, font: `400 11px/1 ${FUENTE.mono}`,
+                <span style={{ width: 26, font: `400 10px/1 ${FUENTE.mono}`,
                   color: COLOR.textoApagado }}>{i + 1}</span>
                 <span style={{ flex: 1, font: `400 13px/1 ${FUENTE.ui}` }}>
                   {c.nombre} <span style={{ color: COLOR.textoTenue,
-                    font: `400 11px/1 ${FUENTE.mono}` }}>@{c.handle}</span>
+                    font: `400 10px/1 ${FUENTE.mono}` }}>@{c.handle}</span>
                 </span>
-                <span style={{ font: `400 11px/1 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
+                <span style={{ font: `400 10px/1 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
                   {c.clips} clips
                 </span>
                 <span style={{ width: 80, textAlign: 'right',

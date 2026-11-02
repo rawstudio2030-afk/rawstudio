@@ -36,7 +36,7 @@ export default function Encargos() {
 
   return (
     <Marco titulo="Contenido a la medida">
-      <div style={{ font: `400 14px/1.65 ${FUENTE.ui}`, color: COLOR.textoSuave, marginBottom: 20 }}>
+      <div style={{ font: `400 13px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave, marginBottom: 20 }}>
         Alguien te pide algo concreto y propone un precio. Negocias, aceptas, te paga —
         y <b style={{ color: COLOR.texto }}>el dinero se queda retenido hasta que entregues</b>.
       </div>
@@ -52,16 +52,16 @@ export default function Encargos() {
                 padding: '14px 15px', border: `1px solid ${LINEA.tenue}`, cursor: 'pointer',
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
-                  <span style={{ font: `400 11px/1.4 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
+                  <span style={{ font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
                     {e.soy_creadora ? 'De' : 'Para'} @{e.otra_handle}
                   </span>
-                  <span style={{ font: `700 8px/1.5 ${FUENTE.ui}`, letterSpacing: 1,
+                  <span style={{ font: `700 9px/1.45 ${FUENTE.ui}`, letterSpacing: 1.2,
                     textTransform: 'uppercase', color: s.c, whiteSpace: 'nowrap' }}>{s.t}</span>
                 </div>
-                <div style={{ marginTop: 7, font: `400 14px/1.45 ${FUENTE.ui}`,
+                <div style={{ marginTop: 7, font: `400 13px/1.45 ${FUENTE.ui}`,
                   overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box',
                   WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{e.descripcion}</div>
-                <div style={{ marginTop: 7, font: `400 15px/1 ${FUENTE.mono}`, color: COLOR.dinero }}>
+                <div style={{ marginTop: 7, font: `400 16px/1 ${FUENTE.mono}`, color: COLOR.dinero }}>
                   {usd(e.coins)}
                 </div>
               </div>
@@ -103,10 +103,10 @@ function Detalle({ e, cierra, recarga }: {
         font: `400 12px/1 ${FUENTE.ui}`, color: COLOR.textoTenue }}>‹ Todos los encargos</div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ font: `400 11px/1.4 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
+        <span style={{ font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
           {e.soy_creadora ? 'De' : 'Para'} @{e.otra_handle}
         </span>
-        <span style={{ font: `700 9px/1.5 ${FUENTE.ui}`, letterSpacing: 1.2,
+        <span style={{ font: `700 9px/1.45 ${FUENTE.ui}`, letterSpacing: 1.2,
           textTransform: 'uppercase', color: s.c }}>{s.t}</span>
       </div>
 
@@ -127,7 +127,7 @@ function Detalle({ e, cierra, recarga }: {
               marginLeft: mio ? 28 : 0, marginRight: mio ? 0 : 28,
             }}>
               {m.cuerpo && (
-                <div style={{ font: `400 14px/1.55 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
+                <div style={{ font: `400 13px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
                   {m.cuerpo}
                 </div>
               )}
@@ -168,7 +168,7 @@ function Detalle({ e, cierra, recarga }: {
         </Boton>
       )}
       {e.estado === 'aceptado' && e.soy_creadora && (
-        <div style={{ font: `400 14px/1.6 ${FUENTE.serif}`, fontStyle: 'italic',
+        <div style={{ font: `400 13px/1.6 ${FUENTE.serif}`, fontStyle: 'italic',
           color: COLOR.textoTenue }}>
           Aceptado. Falta que pague para que empieces.
         </div>
@@ -188,7 +188,7 @@ function Detalle({ e, cierra, recarga }: {
                   {clips.map(c => (
                     <div key={c.id} onClick={() => entregarEncargo(e.id, c.id).then(tras)}
                       style={{ padding: '12px 14px', border: `1px solid ${LINEA.tenue}`,
-                        cursor: 'pointer', font: `400 14px/1.3 ${FUENTE.ui}` }}>
+                        cursor: 'pointer', font: `400 13px/1.3 ${FUENTE.ui}` }}>
                       {c.title}
                     </div>
                   ))}
@@ -202,7 +202,7 @@ function Detalle({ e, cierra, recarga }: {
           ) : (
             <>
               <div style={{ marginBottom: 14, padding: '11px 13px',
-                border: `1px solid ${COLOR.dinero}`, font: `400 13px/1.55 ${FUENTE.ui}`,
+                border: `1px solid ${COLOR.dinero}`, font: `400 13px/1.6 ${FUENTE.ui}`,
                 color: COLOR.textoSuave }}>
                 Ya pagó. Sus <b style={{ color: COLOR.dinero }}>{usd(e.coins)}</b> están retenidos
                 y se te abonan en cuanto entregues.
@@ -214,7 +214,7 @@ function Detalle({ e, cierra, recarga }: {
             </>
           )
         ) : (
-          <div style={{ font: `400 14px/1.6 ${FUENTE.serif}`, fontStyle: 'italic',
+          <div style={{ font: `400 13px/1.6 ${FUENTE.serif}`, fontStyle: 'italic',
             color: COLOR.textoTenue }}>
             Pagado. Tu dinero está retenido hasta que entregue
             {e.entrega_max && <>, y se comprometió a hacerlo antes

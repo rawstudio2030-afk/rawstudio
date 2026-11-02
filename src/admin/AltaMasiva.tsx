@@ -64,13 +64,13 @@ export default function AltaMasiva() {
 
   return (
     <>
-      <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2,
+      <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2,
         textTransform: 'uppercase', color: COLOR.dinero, marginBottom: 12 }}>
         1 · Dar de alta las creadoras
       </div>
 
       <div style={{ marginBottom: 18, padding: '12px 14px', border: `1px solid ${LINEA.tenue}`,
-        font: `400 11px/1.6 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
+        font: `400 10px/1.6 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
         Sube la tabla con <b style={{ color: COLOR.texto }}>handle</b>,{' '}
         <b style={{ color: COLOR.texto }}>nombre</b>, <b style={{ color: COLOR.texto }}>email</b> y{' '}
         <b style={{ color: COLOR.texto }}>telefono</b>. El correo es a donde le llega
@@ -85,20 +85,20 @@ export default function AltaMasiva() {
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 18 }}>
         <div style={{ border: `1px dashed ${LINEA.marcada}`, padding: '16px 15px' }}>
-          <div style={{ font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.4,
+          <div style={{ font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
             textTransform: 'uppercase', color: COLOR.textoTenue, marginBottom: 10 }}>
             1 · La tabla
           </div>
           <input type="file" accept=".csv,text/csv"
             onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) cargarTabla(f) }}
             style={{ font: `400 12px/1 ${FUENTE.ui}`, color: COLOR.textoSuave }} />
-          <div style={{ marginTop: 8, font: `400 10px/1.4 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
+          <div style={{ marginTop: 8, font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
             {filas.length ? `${filas.length} filas leídas` : 'CSV separado por comas'}
           </div>
         </div>
 
         <div style={{ border: `1px dashed ${LINEA.marcada}`, padding: '16px 15px' }}>
-          <div style={{ font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.4,
+          <div style={{ font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
             textTransform: 'uppercase', color: COLOR.textoTenue, marginBottom: 10 }}>
             2 · Los documentos y fotos
           </div>
@@ -110,7 +110,7 @@ export default function AltaMasiva() {
               setArchivos(m)
             }}
             style={{ font: `400 12px/1 ${FUENTE.ui}`, color: COLOR.textoSuave }} />
-          <div style={{ marginTop: 8, font: `400 10px/1.4 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
+          <div style={{ marginTop: 8, font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
             {archivos.size ? `${archivos.size} archivos listos` : 'Selecciónalos todos de golpe'}
           </div>
         </div>
@@ -158,11 +158,11 @@ export default function AltaMasiva() {
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ font: `400 13px/1.3 ${FUENTE.ui}`, color: COLOR.texto }}>
                       {f.nombre || <i style={{ color: '#FF4444' }}>sin nombre</i>}
-                      <span style={{ marginLeft: 8, font: `400 11px/1 ${FUENTE.mono}`,
+                      <span style={{ marginLeft: 8, font: `400 10px/1 ${FUENTE.mono}`,
                         color: COLOR.textoTenue }}>@{f.handle}</span>
                     </div>
                     {(f.errores.length > 0 || f.detalle) && (
-                      <div style={{ marginTop: 3, font: `400 11px/1.4 ${FUENTE.ui}`, color }}>
+                      <div style={{ marginTop: 3, font: `400 10px/1.45 ${FUENTE.ui}`, color }}>
                         {f.errores.join(' · ') || f.detalle}
                       </div>
                     )}
@@ -173,7 +173,7 @@ export default function AltaMasiva() {
                       {tieneDocs ? 'con expediente' : 'sin documentos'}
                     </span>
                   )}
-                  <span style={{ font: `700 8px/1.6 ${FUENTE.ui}`, letterSpacing: 1,
+                  <span style={{ font: `700 9px/1.6 ${FUENTE.ui}`, letterSpacing: 1.2,
                     textTransform: 'uppercase', color, minWidth: 62, textAlign: 'right' }}>
                     {f.estado === 'invalida' ? 'error' : f.estado}
                   </span>

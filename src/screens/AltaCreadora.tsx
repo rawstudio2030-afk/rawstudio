@@ -23,7 +23,7 @@ const etiqueta: React.CSSProperties = {
 const campo: React.CSSProperties = {
   width: '100%', boxSizing: 'border-box', background: COLOR.superficie,
   border: '1px solid rgba(255,255,255,.14)', color: COLOR.texto,
-  font: `400 16px/1.35 ${FUENTE.ui}`, padding: '15px', outline: 'none',
+  font: `400 16px/1.3 ${FUENTE.ui}`, padding: '15px', outline: 'none',
 }
 
 type Paso = 'datos' | 'documentos' | 'clips' | 'listo'
@@ -128,16 +128,16 @@ export default function AltaCreadora() {
       </div>
 
       <div>
-        <div style={{ fontFamily: FUENTE.display, fontSize: 36, lineHeight: 1, textTransform: 'uppercase' }}>
+        <div style={{ fontFamily: FUENTE.display, fontSize: 38, lineHeight: 1, textTransform: 'uppercase' }}>
           Alta de<br /><span style={{ color: COLOR.dinero }}>creadora</span>
         </div>
-        <div style={{ font: `400 11px/1.6 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 8 }}>
+        <div style={{ font: `400 10px/1.6 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 8 }}>
           {['datos', 'documentos', 'clips'].map((p, i) =>
             `${i + 1}. ${p}${paso === p ? '  ←' : ''}`).join('   ')}
         </div>
       </div>
 
-      {error && <div style={{ font: `400 13px/1.5 ${FUENTE.ui}`, color: COLOR.acento }}>{error}</div>}
+      {error && <div style={{ font: `400 13px/1.45 ${FUENTE.ui}`, color: COLOR.acento }}>{error}</div>}
 
       {paso === 'datos' && (
         <>
@@ -243,7 +243,7 @@ export default function AltaCreadora() {
 
           <div onClick={() => nav(`/creator/${creadora.handle}`)} style={{
             border: '1px solid rgba(255,255,255,.16)', color: COLOR.textoSuave, textAlign: 'center',
-            padding: 16, font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 2,
+            padding: 16, font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2,
             textTransform: 'uppercase', cursor: 'pointer',
           }}>Ver su perfil</div>
         </>
@@ -257,7 +257,7 @@ function Etiquetado({ t, pista, children }: { t: string; pista?: string; childre
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <span style={etiqueta}>{t}</span>
       {children}
-      {pista && <span style={{ font: `400 11px/1.5 ${FUENTE.mono}`, color: COLOR.textoApagado }}>{pista}</span>}
+      {pista && <span style={{ font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado }}>{pista}</span>}
     </div>
   )
 }
@@ -279,7 +279,7 @@ function Archivo({ t, f, onElegir, acepta, nota }: {
         }} />
         <div style={{ minWidth: 0 }}>
           <div style={{ ...etiqueta, color: f ? COLOR.dinero : COLOR.textoTenue }}>{f ? `${t} · listo` : t}</div>
-          <div style={{ font: `400 11.5px/1.5 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 6, wordBreak: 'break-all' }}>
+          <div style={{ font: `400 12px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 6, wordBreak: 'break-all' }}>
             {f ? `${f.name} · ${(f.size / 1048576).toFixed(1)} MB` : nota}
           </div>
         </div>
@@ -314,14 +314,14 @@ function Centro({ texto, accion }: { texto: string; accion?: { texto: string; al
     <div style={{
       minHeight: '100%', boxSizing: 'border-box', padding: '64px 26px',
       background: COLOR.fondo, color: COLOR.textoSuave, fontFamily: FUENTE.serif, fontStyle: 'italic',
-      fontSize: 20, display: 'flex', flexDirection: 'column',
+      fontSize: 19, display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center', gap: 20, textAlign: 'center',
     }}>
       {texto}
       {accion && (
         <span onClick={accion.al} style={{
           background: COLOR.acento, color: COLOR.fondo, padding: '15px 26px',
-          font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase',
+          font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
           fontStyle: 'normal', cursor: 'pointer',
         }}>{accion.texto}</span>
       )}

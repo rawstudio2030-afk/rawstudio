@@ -61,12 +61,12 @@ export default function OfertaCreadora({ creadora, handle }: {
           {suscrita ? (
             <div style={{ marginTop: 12, padding: '14px 15px',
               border: `1px solid ${COLOR.dinero}` }}>
-              <div style={{ font: `400 14px/1.5 ${FUENTE.ui}`, color: COLOR.texto }}>
+              <div style={{ font: `400 13px/1.45 ${FUENTE.ui}`, color: COLOR.texto }}>
                 Estás suscrita hasta el{' '}
                 {new Date(suscrita.periodo_fin).toLocaleDateString('es-MX')}
               </div>
               {suscrita.cancela_al_fin ? (
-                <div style={{ marginTop: 6, font: `400 12px/1.5 ${FUENTE.ui}`,
+                <div style={{ marginTop: 6, font: `400 12px/1.45 ${FUENTE.ui}`,
                   color: COLOR.textoTenue }}>
                   No se renovará. Conservas el acceso hasta esa fecha.
                 </div>
@@ -74,7 +74,7 @@ export default function OfertaCreadora({ creadora, handle }: {
                 <div onClick={async () => {
                   const m = await cancelarSuscripcion(creadora)
                   if (m) setError(m); else { setAviso('No se renovará.'); cargar() }
-                }} style={{ marginTop: 8, font: `400 12px/1.5 ${FUENTE.ui}`,
+                }} style={{ marginTop: 8, font: `400 12px/1.45 ${FUENTE.ui}`,
                   color: COLOR.textoApagado, cursor: 'pointer',
                   textDecoration: 'underline', textUnderlineOffset: 3 }}>
                   No renovar
@@ -86,12 +86,12 @@ export default function OfertaCreadora({ creadora, handle }: {
               {niveles.map(t => (
                 <div key={t.id} style={{ padding: '15px 16px', border: `1px solid ${LINEA.tenue}` }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
-                    <span style={{ font: `400 17px/1.2 ${FUENTE.ui}` }}>{t.nombre}</span>
+                    <span style={{ font: `400 16px/1.3 ${FUENTE.ui}` }}>{t.nombre}</span>
                     <span style={{ font: `400 19px/1 ${FUENTE.mono}`, color: COLOR.dinero,
                       whiteSpace: 'nowrap' }}>{usd(t.precio_coins)}</span>
                   </div>
                   {t.descripcion && (
-                    <div style={{ marginTop: 7, font: `400 13px/1.55 ${FUENTE.ui}`,
+                    <div style={{ marginTop: 7, font: `400 13px/1.6 ${FUENTE.ui}`,
                       color: COLOR.textoTenue }}>{t.descripcion}</div>
                   )}
                   {!mio && (
@@ -103,7 +103,7 @@ export default function OfertaCreadora({ creadora, handle }: {
                     }} style={{
                       marginTop: 13, textAlign: 'center', padding: 14, cursor: 'pointer',
                       background: COLOR.acento, color: COLOR.fondo,
-                      font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.8,
+                      font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6,
                       textTransform: 'uppercase',
                     }}>
                       {sesion ? 'Suscribirme 30 días' : 'Entra para suscribirte'}
@@ -126,7 +126,7 @@ export default function OfertaCreadora({ creadora, handle }: {
                 placeholder="Qué te gustaría que grabara"
                 style={{ width: '100%', boxSizing: 'border-box', background: 'transparent',
                   color: COLOR.texto, border: `1px solid ${LINEA.suave}`, borderRadius: 0,
-                  padding: '11px 12px', font: `400 14px/1.5 ${FUENTE.ui}`,
+                  padding: '11px 12px', font: `400 13px/1.45 ${FUENTE.ui}`,
                   outline: 'none', resize: 'vertical' }} />
               <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 12 }}>
                 <span style={{ font: `400 12px/1 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
@@ -136,9 +136,9 @@ export default function OfertaCreadora({ creadora, handle }: {
                   style={{ width: 100, background: 'transparent', color: COLOR.dinero,
                     border: `1px solid ${LINEA.suave}`, borderRadius: 0, padding: '9px 11px',
                     font: `400 16px/1 ${FUENTE.mono}`, outline: 'none' }} />
-                <span style={{ font: `400 14px/1 ${FUENTE.mono}`, color: COLOR.dinero }}>⨯</span>
+                <span style={{ font: `400 13px/1 ${FUENTE.mono}`, color: COLOR.dinero }}>⨯</span>
               </div>
-              <div style={{ marginTop: 10, font: `400 11px/1.55 ${FUENTE.ui}`,
+              <div style={{ marginTop: 10, font: `400 10px/1.6 ${FUENTE.ui}`,
                 color: COLOR.textoApagado }}>
                 Puede aceptar o pedirte otro precio. No pagas nada hasta que acepte, y el
                 dinero queda retenido hasta que entregue.
@@ -165,8 +165,8 @@ export default function OfertaCreadora({ creadora, handle }: {
               marginTop: 12, padding: '15px 16px', cursor: 'pointer',
               border: `1px solid ${LINEA.tenue}`,
             }}>
-              <div style={{ font: `400 15px/1.3 ${FUENTE.ui}` }}>Pídele algo a la medida</div>
-              <div style={{ marginTop: 6, font: `400 12px/1.55 ${FUENTE.ui}`,
+              <div style={{ font: `400 16px/1.3 ${FUENTE.ui}` }}>Pídele algo a la medida</div>
+              <div style={{ marginTop: 6, font: `400 12px/1.6 ${FUENTE.ui}`,
                 color: COLOR.textoTenue }}>
                 Le dices qué quieres y cuánto ofreces. Ella acepta o propone otro precio.
               </div>
@@ -183,18 +183,18 @@ export default function OfertaCreadora({ creadora, handle }: {
             {posts.map(p => (
               <div key={p.id} style={{ padding: '14px 15px', border: `1px solid ${LINEA.tenue}` }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
-                  <span style={{ font: `400 16px/1.25 ${FUENTE.ui}` }}>{p.titulo}</span>
+                  <span style={{ font: `400 16px/1.3 ${FUENTE.ui}` }}>{p.titulo}</span>
                   {!p.completo && (
-                    <span style={{ font: `700 8px/1.6 ${FUENTE.ui}`, letterSpacing: 1,
+                    <span style={{ font: `700 9px/1.6 ${FUENTE.ui}`, letterSpacing: 1.2,
                       textTransform: 'uppercase', color: COLOR.acento, whiteSpace: 'nowrap' }}>
                       Suscriptoras
                     </span>
                   )}
                 </div>
-                <div style={{ marginTop: 8, font: `400 14px/1.65 ${FUENTE.ui}`,
+                <div style={{ marginTop: 8, font: `400 13px/1.6 ${FUENTE.ui}`,
                   color: COLOR.textoSuave, whiteSpace: 'pre-wrap' }}>{p.cuerpo}</div>
                 {!p.completo && (
-                  <div style={{ marginTop: 8, font: `400 12px/1.5 ${FUENTE.ui}`,
+                  <div style={{ marginTop: 8, font: `400 12px/1.45 ${FUENTE.ui}`,
                     color: COLOR.textoApagado }}>
                     Suscríbete a @{handle} para leerlo completo.
                   </div>

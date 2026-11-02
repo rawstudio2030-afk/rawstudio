@@ -24,7 +24,7 @@ export default function Niveles() {
 
   return (
     <Marco titulo="Suscripción mensual">
-      <div style={{ font: `400 14px/1.65 ${FUENTE.ui}`, color: COLOR.textoSuave, marginBottom: 22 }}>
+      <div style={{ font: `400 13px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave, marginBottom: 22 }}>
         Quien se suscriba paga una vez y tiene 30 días de acceso a todo lo que marques
         como <b style={{ color: COLOR.texto }}>solo para suscriptoras</b>. Te queda el 80%.
       </div>
@@ -41,18 +41,18 @@ export default function Niveles() {
               display: 'flex', alignItems: 'center', gap: 12,
             }}>
               <div style={{ flex: 1 }}>
-                <div style={{ font: `400 16px/1.25 ${FUENTE.ui}` }}>{t.nombre}</div>
+                <div style={{ font: `400 16px/1.3 ${FUENTE.ui}` }}>{t.nombre}</div>
                 {t.descripcion && (
-                  <div style={{ marginTop: 5, font: `400 13px/1.5 ${FUENTE.ui}`,
+                  <div style={{ marginTop: 5, font: `400 13px/1.45 ${FUENTE.ui}`,
                     color: COLOR.textoTenue }}>{t.descripcion}</div>
                 )}
               </div>
-              <div style={{ font: `400 18px/1 ${FUENTE.mono}`, color: COLOR.dinero }}>
+              <div style={{ font: `400 19px/1 ${FUENTE.mono}`, color: COLOR.dinero }}>
                 {usd(t.precio_coins)}
               </div>
               <span onClick={async () => {
                 const m = await borrarNivel(t.id); if (m) setError(m); else cargar()
-              }} style={{ font: `400 20px/1 ${FUENTE.ui}`, color: COLOR.textoApagado,
+              }} style={{ font: `400 19px/1 ${FUENTE.ui}`, color: COLOR.textoApagado,
                 cursor: 'pointer', padding: '0 4px' }}>×</span>
             </div>
           ))}
@@ -66,7 +66,7 @@ export default function Niveles() {
           <div style={{ height: 14 }} />
           <Etiqueta texto="Precio al mes, en dólares" />
           <Campo valor={precio} cambia={setPrecio} marcador="3.00" />
-          <div style={{ marginTop: 6, font: `400 12px/1.5 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
+          <div style={{ marginTop: 6, font: `400 12px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
             {n > 0 && <>Te quedan {n - Math.round(n * 0.2)} ⨯ de cada suscripción</>}
           </div>
           <div style={{ height: 14 }} />

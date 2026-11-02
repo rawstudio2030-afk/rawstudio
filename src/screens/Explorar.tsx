@@ -72,7 +72,7 @@ export default function Explorar() {
             style={{
               width: '100%', boxSizing: 'border-box', background: 'transparent',
               color: COLOR.texto, border: `1px solid ${LINEA.suave}`, borderRadius: 0,
-              padding: '11px 13px', font: `400 14px/1 ${FUENTE.ui}`, outline: 'none',
+              padding: '11px 13px', font: `400 13px/1 ${FUENTE.ui}`, outline: 'none',
             }} />
         </div>
       )}
@@ -96,14 +96,14 @@ export default function Explorar() {
                       : COLOR.superficieAlta,
                   }} />
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ font: `400 15px/1.25 ${FUENTE.ui}` }}>
+                    <div style={{ font: `400 16px/1.3 ${FUENTE.ui}` }}>
                       {g.display_name}
                       {g.identidad_verificada && (
                         <span style={{ marginLeft: 6, color: COLOR.dinero,
                           font: `400 12px/1 ${FUENTE.ui}` }}>✓</span>
                       )}
                     </div>
-                    <div style={{ font: `400 11px/1.4 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
+                    <div style={{ font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
                       @{g.handle}
                       {g.es_demo && (
                         <span style={{ color: COLOR.textoApagado }}> · demostración</span>
@@ -150,19 +150,19 @@ export default function Explorar() {
                       <span style={{
                         position: 'absolute', top: 8, left: 8,
                         background: COLOR.textoTenue, color: COLOR.fondo, padding: '4px 6px',
-                        font: `700 8.5px/1 ${FUENTE.ui}`, letterSpacing: 1.1, textTransform: 'uppercase',
+                        font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
                       }}>Demo</span>
                     )}
                     <span style={{
                       position: 'absolute', top: 8, right: 8,
                       background: gratis ? COLOR.admin : COLOR.dinero, color: COLOR.fondo,
-                      padding: '4px 6px', font: `700 8.5px/1 ${FUENTE.ui}`,
-                      letterSpacing: 1.1, textTransform: 'uppercase',
+                      padding: '4px 6px', font: `700 9px/1 ${FUENTE.ui}`,
+                      letterSpacing: 1.2, textTransform: 'uppercase',
                     }}>
                       {gratis ? 'Gratis' : c.visibility === 'suscriptores' ? 'Subs' : `${c.price_coins}`}
                     </span>
                     <div style={{ position: 'absolute', left: 9, right: 9, bottom: 9 }}>
-                      <div style={{ font: `600 12.5px/1.3 ${FUENTE.ui}` }}>{c.title}</div>
+                      <div style={{ font: `500 12px/1.3 ${FUENTE.ui}` }}>{c.title}</div>
                     </div>
                   </TarjetaClip>
                   {c.profiles && (
@@ -173,7 +173,7 @@ export default function Explorar() {
                         border: '1px solid rgba(255,255,255,.16)',
                       }} />
                       <span style={{
-                        font: `400 11px/1.3 ${FUENTE.mono}`, color: COLOR.textoTenue,
+                        font: `400 10px/1.3 ${FUENTE.mono}`, color: COLOR.textoTenue,
                         overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                       }}>@{c.profiles.handle}</span>
                     </div>
@@ -198,7 +198,7 @@ function Vacio({ texto, accion }: { texto: string; accion?: { texto: string; al:
       {accion && (
         <div onClick={accion.al} style={{
           marginTop: 18, display: 'inline-block', background: COLOR.acento, color: COLOR.fondo,
-          padding: '14px 22px', font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.8,
+          padding: '14px 22px', font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6,
           textTransform: 'uppercase', cursor: 'pointer',
         }}>{accion.texto}</div>
       )}

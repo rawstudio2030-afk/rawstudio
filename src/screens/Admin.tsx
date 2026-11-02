@@ -53,7 +53,7 @@ export default function Admin() {
       {modulo.clave === 'herramientas' && <Herramientas />}
       {!['usuarios', 'moderacion', 'contenido', 'comunicacion', 'retiros', 'reportes', 'verificacion', 'finanzas', 'bitacora', 'herramientas'].includes(modulo.clave) && (
         <div style={{ padding: '70px 0', textAlign: 'center' }}>
-          <div style={{ font: `400 15px/1.5 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
+          <div style={{ font: `400 16px/1.45 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
             Este módulo todavía no está construido.
           </div>
         </div>
@@ -69,8 +69,8 @@ function Aviso({ texto, pie }: { texto: string; pie?: string }) {
       display: 'grid', placeItems: 'center', padding: 30, textAlign: 'center',
     }}>
       <div>
-        <div style={{ font: `400 16px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave }}>{texto}</div>
-        {pie && <div style={{ marginTop: 8, font: `400 12px/1.5 ${FUENTE.ui}`,
+        <div style={{ font: `400 16px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave }}>{texto}</div>
+        {pie && <div style={{ marginTop: 8, font: `400 12px/1.45 ${FUENTE.ui}`,
           color: COLOR.textoApagado }}>{pie}</div>}
       </div>
     </div>

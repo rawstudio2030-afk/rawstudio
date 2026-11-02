@@ -62,7 +62,7 @@ export default function Retirar() {
       {/* ---------- Lo que hay ---------- */}
       <div style={{ border: `1px solid ${LINEA.suave}`, padding: '20px 18px' }}>
         <Etiqueta texto="Disponible para retirar" />
-        <div style={{ fontFamily: FUENTE.display, fontSize: 44, lineHeight: 1, color: COLOR.dinero }}>
+        <div style={{ fontFamily: FUENTE.display, fontSize: 46, lineHeight: 1, color: COLOR.dinero }}>
           {usd(info.disponible)}
         </div>
         <p style={nota}>
@@ -124,18 +124,18 @@ export default function Retirar() {
                 padding: '14px 2px', borderBottom: `1px solid ${LINEA.tenue}`,
               }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ font: `600 15px/1.3 ${FUENTE.ui}` }}>{usd(s.coins)}</div>
-                  <div style={{ font: `400 11px/1.5 ${FUENTE.mono}`, color: COLOR.textoTenue, marginTop: 3 }}>
+                  <div style={{ font: `500 16px/1.3 ${FUENTE.ui}` }}>{usd(s.coins)}</div>
+                  <div style={{ font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue, marginTop: 3 }}>
                     {new Date(s.created_at).toLocaleDateString('es-MX')}
                   </div>
                   {s.motivo_rechazo && (
-                    <div style={{ font: `400 12px/1.5 ${FUENTE.ui}`, color: COLOR.acento, marginTop: 5 }}>
+                    <div style={{ font: `400 12px/1.45 ${FUENTE.ui}`, color: COLOR.acento, marginTop: 5 }}>
                       {s.motivo_rechazo}
                     </div>
                   )}
                 </div>
                 <span style={{
-                  font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.3, textTransform: 'uppercase',
+                  font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
                   padding: '6px 8px', whiteSpace: 'nowrap',
                   color: s.estado === 'pagada' ? COLOR.fondo
                     : s.estado === 'rechazada' ? '#FF4444' : COLOR.textoSuave,
@@ -157,16 +157,16 @@ function Puerta({ texto, boton, al, color }: {
 }) {
   return (
     <div style={{ marginTop: 18, padding: '16px 16px', border: `1px solid ${color}` }}>
-      <div style={{ font: `400 13.5px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>{texto}</div>
+      <div style={{ font: `400 13px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>{texto}</div>
       <div onClick={al} style={{
         marginTop: 13, textAlign: 'center', padding: '12px 0', cursor: 'pointer',
         background: color, color: COLOR.fondo,
-        font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.8, textTransform: 'uppercase',
+        font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
       }}>{boton}</div>
     </div>
   )
 }
 
 const nota: React.CSSProperties = {
-  margin: '8px 0 0', font: `400 11.5px/1.55 ${FUENTE.mono}`, color: COLOR.textoApagado,
+  margin: '8px 0 0', font: `400 12px/1.6 ${FUENTE.mono}`, color: COLOR.textoApagado,
 }

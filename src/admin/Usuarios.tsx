@@ -106,7 +106,7 @@ export default function Usuarios() {
       ),
     },
     { clave: 'email', titulo: 'Correo', ordenable: true,
-      pinta: f => <span style={{ font: `400 11px/1 ${FUENTE.mono}`, color: COLOR.textoSuave }}>{f.email}</span> },
+      pinta: f => <span style={{ font: `400 10px/1 ${FUENTE.mono}`, color: COLOR.textoSuave }}>{f.email}</span> },
     { clave: 'rol', titulo: 'Rol', ordenable: true,
       pinta: f => <Insignia texto={f.rol} color={COLOR_ROL[f.rol]} /> },
     { clave: 'estado', titulo: 'Estado', ordenable: true,
@@ -168,7 +168,7 @@ export default function Usuarios() {
       {error && (
         <div style={{
           marginBottom: 14, padding: '10px 13px', border: '1px solid #FF4444',
-          color: '#FF4444', font: `400 12px/1.4 ${FUENTE.ui}`,
+          color: '#FF4444', font: `400 12px/1.45 ${FUENTE.ui}`,
         }}>{error}</div>
       )}
 
@@ -238,7 +238,7 @@ function Ficha({ fila, ficha, cierra, pide }: {
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
-            <div style={{ font: `400 24px/1.1 ${FUENTE.display}`, textTransform: 'uppercase' }}>
+            <div style={{ font: `400 22px/1 ${FUENTE.display}`, textTransform: 'uppercase' }}>
               {fila.display_name}
             </div>
             <div style={{ marginTop: 4, font: `400 12px/1 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
@@ -258,7 +258,7 @@ function Ficha({ fila, ficha, cierra, pide }: {
           <div style={{
             marginTop: 14, padding: '10px 12px',
             border: `1px solid ${COLOR_ESTADO[fila.estado]}`,
-            font: `400 12px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave,
+            font: `400 12px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave,
           }}>
             <b style={{ color: COLOR_ESTADO[fila.estado] }}>
               {fila.estado === 'baneada' ? 'Baneada' : 'Suspendida'}
@@ -280,9 +280,9 @@ function Ficha({ fila, ficha, cierra, pide }: {
             { t: 'Clips', v: `${fila.clips_publicados}/${fila.clips_total}`, c: COLOR.texto },
           ].map(x => (
             <div key={x.t} style={{ background: COLOR.superficie, padding: '11px 13px' }}>
-              <div style={{ font: `700 8px/1 ${FUENTE.ui}`, letterSpacing: 1.3,
+              <div style={{ font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
                 textTransform: 'uppercase', color: COLOR.textoTenue }}>{x.t}</div>
-              <div style={{ marginTop: 5, font: `400 18px/1 ${FUENTE.mono}`, color: x.c }}>{x.v}</div>
+              <div style={{ marginTop: 5, font: `400 19px/1 ${FUENTE.mono}`, color: x.c }}>{x.v}</div>
             </div>
           ))}
         </div>
@@ -299,7 +299,7 @@ function Ficha({ fila, ficha, cierra, pide }: {
           <Boton al={() => pide('correo')}>Corregir correo</Boton>
         </div>
 
-        <div style={{ marginTop: 12, font: `400 11px/1.5 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
+        <div style={{ marginTop: 12, font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
           Alta {fecha(fila.created_at)} · último acceso {desde(fila.ultimo_acceso)}
         </div>
 
@@ -363,13 +363,13 @@ function Renglon({ izq, der, pie, colorDer, marca }: {
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
         <span style={{ font: `400 12px/1.3 ${FUENTE.ui}`, color: COLOR.texto }}>
           {izq}
-          {marca && <span style={{ marginLeft: 7, font: `700 8px/1 ${FUENTE.ui}`,
-            letterSpacing: 1, textTransform: 'uppercase', color: '#FFB020' }}>{marca}</span>}
+          {marca && <span style={{ marginLeft: 7, font: `700 9px/1 ${FUENTE.ui}`,
+            letterSpacing: 1.2, textTransform: 'uppercase', color: '#FFB020' }}>{marca}</span>}
         </span>
         {der && <span style={{ font: `400 12px/1.3 ${FUENTE.mono}`,
           color: colorDer ?? COLOR.textoSuave, whiteSpace: 'nowrap' }}>{der}</span>}
       </div>
-      {pie && <div style={{ marginTop: 3, font: `400 10px/1.4 ${FUENTE.mono}`,
+      {pie && <div style={{ marginTop: 3, font: `400 10px/1.45 ${FUENTE.mono}`,
         color: COLOR.textoApagado, wordBreak: 'break-word' }}>{pie}</div>}
     </div>
   )
@@ -482,10 +482,10 @@ function RolDialogo({ fila, cancela, listo }: {
         width: 460, maxWidth: '92vw', background: COLOR.superficie,
         border: `1px solid ${LINEA.fuerte}`, padding: 26,
       }}>
-        <div style={{ font: `400 22px/1.15 ${FUENTE.display}`, textTransform: 'uppercase' }}>
+        <div style={{ font: `400 22px/1 ${FUENTE.display}`, textTransform: 'uppercase' }}>
           Cambiar rol
         </div>
-        <div style={{ marginTop: 12, font: `400 13px/1.55 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
+        <div style={{ marginTop: 12, font: `400 13px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
           Los papeles NO son excluyentes: alguien puede ser creadora y administradora a
           la vez. Por eso son dos interruptores y no una lista.
         </div>
@@ -519,9 +519,9 @@ function Interruptor({ titulo, nota, puesto, activo, al }: {
       border: `1px solid ${puesto ? COLOR.admin : LINEA.tenue}`, padding: '12px 14px',
     }}>
       <div style={{ flex: 1 }}>
-        <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1,
+        <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
           textTransform: 'uppercase', color: puesto ? COLOR.admin : COLOR.texto }}>{titulo}</div>
-        <div style={{ marginTop: 5, font: `400 11px/1.45 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
+        <div style={{ marginTop: 5, font: `400 10px/1.45 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
           {nota}
         </div>
       </div>

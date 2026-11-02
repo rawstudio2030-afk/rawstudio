@@ -147,5 +147,5 @@ export default function Cobro() {
 }
 
 const nota: React.CSSProperties = {
-  margin: '8px 0 0', font: `400 11.5px/1.55 ${FUENTE.mono}`, color: COLOR.textoApagado,
+  margin: '8px 0 0', font: `400 12px/1.6 ${FUENTE.mono}`, color: COLOR.textoApagado,
 }

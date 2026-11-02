@@ -39,7 +39,7 @@ function Documento({ titulo, secciones }: { titulo: string[]; secciones: Seccion
       <div style={{ fontFamily: FUENTE.display, fontSize: 38, lineHeight: 1, textTransform: 'uppercase' }}>
         {titulo[0]}<br /><span style={{ color: COLOR.dinero }}>{titulo[1]}</span>
       </div>
-      <div style={{ font: `400 11px/1.6 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 10 }}>
+      <div style={{ font: `400 10px/1.6 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 10 }}>
         Versión {VERSION_LEGAL}
       </div>
 
@@ -47,14 +47,14 @@ function Documento({ titulo, secciones }: { titulo: string[]; secciones: Seccion
         marginTop: 22, padding: '16px 15px',
         border: '1.5px dashed rgba(255,43,209,.45)', background: TINTE.acento,
       }}>
-        <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase', color: COLOR.acento }}>
+        <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', color: COLOR.acento }}>
           Borrador sin revisión legal
         </div>
         <div style={{ font: `400 13px/1.6 ${FUENTE.ui}`, color: COLOR.texto, marginTop: 9 }}>
           Este texto aún no lo revisa un abogado. Lo resaltado en rosa son datos
           por definir. No debe operar con público hasta resolverlo.
         </div>
-        <ul style={{ margin: '10px 0 0', paddingLeft: 17, font: `400 11.5px/1.7 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
+        <ul style={{ margin: '10px 0 0', paddingLeft: 17, font: `400 12px/1.6 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
           {PENDIENTES_ABOGADO.map(p => <li key={p}>{p}</li>)}
         </ul>
       </div>
@@ -62,11 +62,11 @@ function Documento({ titulo, secciones }: { titulo: string[]; secciones: Seccion
       {secciones.map(s => (
         <div key={s.titulo} style={{ marginTop: 30 }}>
           <div style={{
-            font: `700 11px/1.4 ${FUENTE.ui}`, letterSpacing: 1.8, textTransform: 'uppercase',
+            font: `700 10px/1.45 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
             color: COLOR.dinero, marginBottom: 12,
           }}>{s.titulo}</div>
           {s.cuerpo.map((p, i) => (
-            <p key={i} style={{ margin: '0 0 12px', font: `400 14.5px/1.65 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
+            <p key={i} style={{ margin: '0 0 12px', font: `400 16px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
               {resaltar(p)}
             </p>
           ))}

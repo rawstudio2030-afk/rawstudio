@@ -17,7 +17,7 @@ const etiqueta: React.CSSProperties = {
 const campo: React.CSSProperties = {
   width: '100%', boxSizing: 'border-box', background: COLOR.superficie,
   border: '1px solid rgba(255,255,255,.14)', color: COLOR.texto,
-  font: `400 16px/1.35 ${FUENTE.ui}`, padding: '15px', outline: 'none',
+  font: `400 16px/1.3 ${FUENTE.ui}`, padding: '15px', outline: 'none',
 }
 
 const MODOS: { v: Visibilidad; t: string }[] = [
@@ -142,7 +142,7 @@ export default function Upload() {
           <div onClick={() => nav('/verificar')} style={{
             marginTop: 11, textAlign: 'center', padding: '12px 0', cursor: 'pointer',
             background: COLOR.admin, color: COLOR.fondo,
-            font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.8, textTransform: 'uppercase',
+            font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
           }}>Verificar mi identidad</div>
         </div>
       )}
@@ -175,7 +175,7 @@ export default function Upload() {
         }} />
         <div>
           <div style={etiqueta}>{portada ? 'Cambiar portada' : 'Portada'}</div>
-          <div style={{ font: `400 12px/1.5 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 6 }}>
+          <div style={{ font: `400 12px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 6 }}>
             Es lo único que se ve sin pagar
           </div>
         </div>
@@ -201,7 +201,7 @@ export default function Upload() {
           {MODOS.map(m => (
             <span key={m.v} onClick={() => setModo(m.v)} style={{
               flex: 1, textAlign: 'center', padding: '13px 6px', cursor: 'pointer',
-              font: `700 10px/1.2 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
+              font: `700 10px/1.3 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
               background: modo === m.v ? COLOR.dinero : 'transparent',
               color: modo === m.v ? COLOR.fondo : COLOR.textoSuave,
               border: `1px solid ${modo === m.v ? COLOR.dinero : LINEA.media}`,
@@ -216,11 +216,11 @@ export default function Upload() {
             <span style={etiqueta}>Precio</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <Paso t="−" al={() => setPrecio(p => Math.max(0, p - 50))} />
-              <span style={{ fontFamily: FUENTE.display, fontSize: 30, lineHeight: 1, color: COLOR.dinero }}>{usd(precio)}</span>
+              <span style={{ fontFamily: FUENTE.display, fontSize: 32, lineHeight: 1, color: COLOR.dinero }}>{usd(precio)}</span>
               <Paso t="+" al={() => setPrecio(p => p + 50)} />
             </div>
           </div>
-          <div style={{ font: `400 12px/1.7 ${FUENTE.mono}`, color: COLOR.textoTenue, marginTop: 12, borderTop: '1px solid rgba(255,255,255,.09)', paddingTop: 12 }}>
+          <div style={{ font: `400 12px/1.6 ${FUENTE.mono}`, color: COLOR.textoTenue, marginTop: 12, borderTop: '1px solid rgba(255,255,255,.09)', paddingTop: 12 }}>
             plataforma 20% · <span style={{ color: COLOR.texto }}>tú recibes {usd(gana)}</span>
           </div>
         </div>
@@ -233,7 +233,7 @@ export default function Upload() {
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14, cursor: 'pointer' }}>
             <div>
               <div style={{ ...etiqueta, color: renta ? COLOR.admin : COLOR.textoTenue }}>También en renta</div>
-              <div style={{ font: `400 12px/1.5 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 6 }}>
+              <div style={{ font: `400 12px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 6 }}>
                 Acceso por tiempo, más barato que comprarlo
               </div>
             </div>
@@ -254,7 +254,7 @@ export default function Upload() {
                 {([48, 72] as const).map(h => (
                   <span key={h} onClick={() => setRentaHoras(h)} style={{
                     flex: 1, textAlign: 'center', padding: '12px 6px', cursor: 'pointer',
-                    font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.4, textTransform: 'uppercase',
+                    font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
                     background: rentaHoras === h ? COLOR.admin : 'transparent',
                     color: rentaHoras === h ? COLOR.fondo : COLOR.textoSuave,
                     border: `1px solid ${rentaHoras === h ? COLOR.admin : LINEA.media}`,
@@ -270,7 +270,7 @@ export default function Upload() {
                 </div>
               </div>
               {rentaCoins >= precio && (
-                <div style={{ font: `400 11px/1.6 ${FUENTE.mono}`, color: COLOR.acento, marginTop: 12 }}>
+                <div style={{ font: `400 10px/1.6 ${FUENTE.mono}`, color: COLOR.acento, marginTop: 12 }}>
                   Rentar cuesta igual o más que comprarlo. Nadie elegiría la renta.
                 </div>
               )}
@@ -280,7 +280,7 @@ export default function Upload() {
       )}
 
       {estado === 'error' && (
-        <div style={{ font: `400 13px/1.5 ${FUENTE.ui}`, color: COLOR.acento }}>{detalle}</div>
+        <div style={{ font: `400 13px/1.45 ${FUENTE.ui}`, color: COLOR.acento }}>{detalle}</div>
       )}
 
       <div onClick={publicar} style={{
@@ -301,7 +301,7 @@ function Paso({ t, al }: { t: string; al: () => void }) {
     <span onClick={al} style={{
       width: 38, height: 38, display: 'grid', placeItems: 'center',
       border: '1px solid rgba(255,255,255,.18)', color: COLOR.texto,
-      font: `400 18px/1 ${FUENTE.ui}`, cursor: 'pointer',
+      font: `400 19px/1 ${FUENTE.ui}`, cursor: 'pointer',
     }}>{t}</span>
   )
 }
@@ -311,14 +311,14 @@ function Centro({ texto, accion }: { texto: string; accion?: { texto: string; al
     <div style={{
       minHeight: '100%', boxSizing: 'border-box', padding: '64px 26px',
       background: COLOR.fondo, color: COLOR.textoSuave, fontFamily: FUENTE.serif, fontStyle: 'italic',
-      fontSize: 20, display: 'flex', flexDirection: 'column',
+      fontSize: 19, display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center', gap: 20, textAlign: 'center',
     }}>
       {texto}
       {accion && (
         <span onClick={accion.al} style={{
           background: COLOR.acento, color: COLOR.fondo, padding: '15px 26px',
-          font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase',
+          font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
           fontStyle: 'normal', cursor: 'pointer',
         }}>{accion.texto}</span>
       )}

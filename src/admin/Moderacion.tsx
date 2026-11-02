@@ -54,10 +54,10 @@ export default function Moderacion() {
       }}>
         <div style={{ flex: 1 }}>
           <div style={{
-            font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.3,
+            font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
             textTransform: 'uppercase', color: bandera ? '#FFB020' : COLOR.texto,
           }}>Revisión previa forzada · {bandera ? 'encendida' : 'apagada'}</div>
-          <div style={{ marginTop: 6, font: `400 11px/1.5 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
+          <div style={{ marginTop: 6, font: `400 10px/1.45 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
             {bandera
               ? 'Todo clip nuevo nace pendiente, sin importar el historial de la creadora.'
               : 'Una creadora verificada con 5 o más clips aprobados publica sola; el resto pasa por revisión previa.'}
@@ -88,13 +88,13 @@ export default function Moderacion() {
 
       {error && (
         <div style={{ marginBottom: 14, padding: '10px 13px', border: '1px solid #FF4444',
-          color: '#FF4444', font: `400 12px/1.4 ${FUENTE.ui}` }}>{error}</div>
+          color: '#FF4444', font: `400 12px/1.45 ${FUENTE.ui}` }}>{error}</div>
       )}
 
       {/* ---- Cuadrícula ---- */}
       {filas.length === 0 ? (
         <div style={{ padding: '70px 20px', textAlign: 'center', color: COLOR.textoTenue,
-          font: `400 13px/1.5 ${FUENTE.ui}`, border: `1px solid ${LINEA.tenue}` }}>
+          font: `400 13px/1.45 ${FUENTE.ui}`, border: `1px solid ${LINEA.tenue}` }}>
           {cargando ? 'Cargando…' : `Nada ${estado === 'pendiente' ? 'esperando revisión' : `en «${estado}»`}`}
         </div>
       ) : (
@@ -137,23 +137,23 @@ function Tarjeta({ clip, al }: { clip: ClipEnCola; al: () => void }) {
         {clip.duracion != null && (
           <div style={{
             position: 'absolute', bottom: 8, right: 8, padding: '2px 6px',
-            background: 'rgba(8,8,10,.8)', font: `400 10px/1.4 ${FUENTE.mono}`,
+            background: 'rgba(8,8,10,.8)', font: `400 10px/1.45 ${FUENTE.mono}`,
             color: COLOR.texto,
           }}>{clip.duracion}s</div>
         )}
       </div>
       <div style={{ padding: '10px 11px' }}>
-        <div style={{ font: `400 12px/1.35 ${FUENTE.ui}`, color: COLOR.texto,
+        <div style={{ font: `400 12px/1.3 ${FUENTE.ui}`, color: COLOR.texto,
           overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {clip.titulo}
         </div>
-        <div style={{ marginTop: 5, font: `400 10px/1.4 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
+        <div style={{ marginTop: 5, font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
           @{clip.creadora_handle}
           {!clip.creadora_verificada && (
             <span style={{ color: '#FFB020' }}> · sin verificar</span>
           )}
         </div>
-        <div style={{ marginTop: 3, font: `400 10px/1.4 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
+        <div style={{ marginTop: 3, font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
           {desde(clip.created_at)} · {usd(clip.precio)}
         </div>
       </div>
@@ -198,7 +198,7 @@ function Revisor({ clip, cierra, listo }: {
             <video src={url} controls autoPlay style={{ width: '100%', maxHeight: '90vh' }} />
           ) : (
             <div style={{ padding: 40, textAlign: 'center',
-              font: `400 12px/1.5 ${FUENTE.ui}`, color: fallo ? '#FF4444' : COLOR.textoTenue }}>
+              font: `400 12px/1.45 ${FUENTE.ui}`, color: fallo ? '#FF4444' : COLOR.textoTenue }}>
               {fallo || 'Abriendo el video…'}
             </div>
           )}
@@ -207,7 +207,7 @@ function Revisor({ clip, cierra, listo }: {
         {/* Ficha y acciones */}
         <div style={{ padding: '20px 22px', overflowY: 'auto' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
-            <div style={{ font: `400 19px/1.2 ${FUENTE.display}`, textTransform: 'uppercase' }}>
+            <div style={{ font: `400 19px/1.3 ${FUENTE.display}`, textTransform: 'uppercase' }}>
               {clip.titulo}
             </div>
             <Boton chico al={cierra}>Cerrar</Boton>
@@ -227,7 +227,7 @@ function Revisor({ clip, cierra, listo }: {
             {clip.descripcion || <span style={{ color: COLOR.textoApagado }}>Sin descripción</span>}
           </div>
 
-          <div style={{ marginTop: 14, font: `400 11px/1.7 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
+          <div style={{ marginTop: 14, font: `400 10px/1.6 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
             @{clip.creadora_handle} · {clip.creadora_nombre}<br />
             Subido {fecha(clip.created_at)}<br />
             {usd(clip.precio)} · {clip.visibilidad}
@@ -236,7 +236,7 @@ function Revisor({ clip, cierra, listo }: {
 
           {clip.motivo_rechazo && (
             <div style={{ marginTop: 14, padding: '9px 11px', border: '1px solid #FF4444',
-              font: `400 11px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
+              font: `400 10px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
               <b style={{ color: '#FF4444' }}>Motivo registrado:</b> {clip.motivo_rechazo}
             </div>
           )}

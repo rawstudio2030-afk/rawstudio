@@ -137,7 +137,7 @@ export default function Portal() {
             <p style={{
               margin: '16px 0 0', maxWidth: 430,
               fontFamily: FUENTE.serif, fontStyle: 'italic',
-              fontSize: 'clamp(17px, 4.6vw, 21px)', lineHeight: 1.35,
+              fontSize: 'clamp(17px, 4.6vw, 21px)', lineHeight: 1.3,
               color: COLOR.textoSuave,
             }}>
               El 80% de cada dólar es tuyo. Sin exclusividad, sin cuota mensual y
@@ -154,7 +154,7 @@ export default function Portal() {
               <span onClick={() => nav('/acceso')} style={{
                 textAlign: 'center', padding: 18, cursor: 'pointer',
                 border: `1px solid ${LINEA.fuerte}`, color: COLOR.textoSuave,
-                font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase',
+                font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
               }}>Ya tengo cuenta</span>
             </div>
 
@@ -162,13 +162,13 @@ export default function Portal() {
                 falta una salida explicita para quien solo viene a mirar. */}
             <span onClick={() => nav('/age')} style={{
               marginTop: 17, cursor: 'pointer',
-              font: `400 12.5px/1 ${FUENTE.mono}`, color: COLOR.textoTenue,
+              font: `400 12px/1 ${FUENTE.mono}`, color: COLOR.textoTenue,
               textDecoration: 'underline', textUnderlineOffset: 5,
             }}>Solo vengo a ver &#8594;</span>
 
             <div style={{
-              marginTop: 22, font: `400 9.5px/1 ${FUENTE.mono}`,
-              letterSpacing: 1.8, textTransform: 'uppercase', color: COLOR.textoApagado,
+              marginTop: 22, font: `400 9px/1 ${FUENTE.mono}`,
+              letterSpacing: 1.6, textTransform: 'uppercase', color: COLOR.textoApagado,
             }}>Solo mayores de 18</div>
           </div>
         </div>
@@ -205,7 +205,7 @@ function Cintillo() {
         }}>
           {items.concat(items).map((t, i) => (
             <span key={i} style={{
-              font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 2.4,
+              font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2,
               textTransform: 'uppercase', whiteSpace: 'nowrap', padding: '0 15px',
               display: 'inline-flex', alignItems: 'center', gap: 15,
             }}>

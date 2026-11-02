@@ -52,7 +52,7 @@ export default function Verificacion() {
   return (
     <>
       <div style={{ marginBottom: 16, padding: '10px 13px', border: `1px solid ${LINEA.tenue}`,
-        font: `400 11px/1.55 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
+        font: `400 10px/1.6 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
         Los documentos se ven con una liga firmada que caduca en cinco minutos y no se
         copian a ningún lado. De cada persona solo se conserva un sí o un no y la fecha;
         las imágenes se borran en la fecha marcada en su ficha.
@@ -75,12 +75,12 @@ export default function Verificacion() {
 
       {error && (
         <div style={{ marginBottom: 14, padding: '10px 13px', border: '1px solid #FF4444',
-          color: '#FF4444', font: `400 12px/1.4 ${FUENTE.ui}` }}>{error}</div>
+          color: '#FF4444', font: `400 12px/1.45 ${FUENTE.ui}` }}>{error}</div>
       )}
 
       {filas.length === 0 ? (
         <div style={{ padding: '70px 20px', textAlign: 'center', color: COLOR.textoTenue,
-          font: `400 13px/1.5 ${FUENTE.ui}`, border: `1px solid ${LINEA.tenue}` }}>
+          font: `400 13px/1.45 ${FUENTE.ui}`, border: `1px solid ${LINEA.tenue}` }}>
           {cargando ? 'Cargando…' : 'Nada aquí'}
         </div>
       ) : (
@@ -93,9 +93,9 @@ export default function Verificacion() {
               <div style={{ flex: 1 }}>
                 <div style={{ font: `400 13px/1.3 ${FUENTE.ui}` }}>
                   {v.nombre} <span style={{ color: COLOR.textoTenue,
-                    font: `400 11px/1 ${FUENTE.mono}` }}>@{v.handle}</span>
+                    font: `400 10px/1 ${FUENTE.mono}` }}>@{v.handle}</span>
                 </div>
-                <div style={{ marginTop: 5, font: `400 10px/1.5 ${FUENTE.mono}`,
+                <div style={{ marginTop: 5, font: `400 10px/1.45 ${FUENTE.mono}`,
                   color: COLOR.textoApagado }}>
                   Solicitó {desde(v.created_at)}
                   {v.edad != null && <> · {v.edad} años</>}
@@ -148,10 +148,10 @@ function Ficha({ v, cierra, listo }: {
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
-            <div style={{ font: `400 23px/1.15 ${FUENTE.display}`, textTransform: 'uppercase' }}>
+            <div style={{ font: `400 22px/1 ${FUENTE.display}`, textTransform: 'uppercase' }}>
               {v.nombre}
             </div>
-            <div style={{ marginTop: 5, font: `400 11px/1.5 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
+            <div style={{ marginTop: 5, font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
               @{v.handle} · {v.email}
             </div>
           </div>
@@ -176,13 +176,13 @@ function Ficha({ v, cierra, listo }: {
 
         {v.paso_fallido && (
           <div style={{ marginTop: 14, padding: '9px 12px', border: '1px solid #FFB020',
-            font: `400 12px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
+            font: `400 12px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
             <b style={{ color: '#FFB020' }}>Falló en:</b> {v.paso_fallido}
             {v.motivo && <> — {v.motivo}</>}
           </div>
         )}
 
-        <div style={{ marginTop: 14, font: `400 11px/1.7 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
+        <div style={{ marginTop: 14, font: `400 10px/1.6 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
           Solicitó {fechaHora(v.created_at)}<br />
           {v.borrar_despues_de
             ? <>Las imágenes se borran el {fecha(v.borrar_despues_de)}</>
@@ -193,7 +193,7 @@ function Ficha({ v, cierra, listo }: {
 
         {v.clips_pendientes > 0 && (
           <div style={{ marginTop: 14, padding: '9px 12px', border: `1px solid ${COLOR.admin}`,
-            font: `400 12px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
+            font: `400 12px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
             Tiene <b style={{ color: COLOR.admin }}>{v.clips_pendientes} clips esperando</b>. No se
             pueden aprobar hasta que esta verificación quede resuelta: la base lo impide.
           </div>
@@ -226,7 +226,7 @@ function Ficha({ v, cierra, listo }: {
 function Documento({ titulo, url }: { titulo: string; url: string | null }) {
   return (
     <div>
-      <div style={{ font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.3,
+      <div style={{ font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
         textTransform: 'uppercase', color: COLOR.textoTenue, marginBottom: 6 }}>{titulo}</div>
       <div style={{
         aspectRatio: '4/3', border: `1px solid ${LINEA.tenue}`, background: COLOR.fondo,
@@ -234,7 +234,7 @@ function Documento({ titulo, url }: { titulo: string; url: string | null }) {
       }}>
         {url
           ? <img src={url} alt={titulo} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-          : <span style={{ font: `400 11px/1 ${FUENTE.ui}`, color: COLOR.textoApagado }}>
+          : <span style={{ font: `400 10px/1 ${FUENTE.ui}`, color: COLOR.textoApagado }}>
               Sin archivo
             </span>}
       </div>
@@ -245,9 +245,9 @@ function Documento({ titulo, url }: { titulo: string; url: string | null }) {
 function Dato({ t, v, c }: { t: string; v: string; c?: string }) {
   return (
     <div style={{ background: COLOR.superficie, padding: '11px 13px' }}>
-      <div style={{ font: `700 8px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
+      <div style={{ font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
         textTransform: 'uppercase', color: COLOR.textoTenue }}>{t}</div>
-      <div style={{ marginTop: 6, font: `400 15px/1 ${FUENTE.mono}`, color: c ?? COLOR.texto }}>{v}</div>
+      <div style={{ marginTop: 6, font: `400 16px/1 ${FUENTE.mono}`, color: c ?? COLOR.texto }}>{v}</div>
     </div>
   )
 }

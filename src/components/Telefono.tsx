@@ -157,7 +157,7 @@ export default function Telefono({ valor, cambia, autoFoco }: {
   const caja: React.CSSProperties = {
     background: 'transparent', color: COLOR.texto,
     border: `1px solid ${LINEA.suave}`, borderRadius: 0,
-    padding: '12px 13px', font: `400 15px/1.5 ${FUENTE.ui}`, outline: 'none',
+    padding: '12px 13px', font: `400 16px/1.45 ${FUENTE.ui}`, outline: 'none',
     boxSizing: 'border-box', height: 46,
   }
 
@@ -177,7 +177,7 @@ export default function Telefono({ valor, cambia, autoFoco }: {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6,
       }}>
         <span style={{ whiteSpace: 'nowrap' }}>{corto}</span>
-        <span aria-hidden style={{ color: COLOR.textoTenue, fontSize: 11 }}>&#9662;</span>
+        <span aria-hidden style={{ color: COLOR.textoTenue, fontSize: 10 }}>&#9662;</span>
         <select
           aria-label="País del teléfono" id={id} value={pais}
           onChange={e => cambia(juntar(e.target.value, nacional))}

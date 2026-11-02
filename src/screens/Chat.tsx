@@ -27,7 +27,7 @@ export default function Pantalla() {
         alignItems: 'center', justifyContent: 'center', gap: 18, textAlign: 'center',
       }}>
         <div style={{ width: 64, height: 3, background: COLOR.acento }} />
-        <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 20, lineHeight: 1.4, color: COLOR.textoSuave, maxWidth: 320 }}>
+        <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19, lineHeight: 1.45, color: COLOR.textoSuave, maxWidth: 320 }}>
           Los mensajes con propinas llegan cuando construyamos esa parte. Por ahora no hay conversaciones reales.
         </div>
       </div>

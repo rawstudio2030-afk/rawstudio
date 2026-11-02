@@ -45,7 +45,7 @@ export default function Library() {
           </div>
           <div onClick={() => nav('/clip')} style={{
             marginTop: 18, display: 'inline-block', background: COLOR.acento, color: COLOR.fondo,
-            padding: '14px 22px', font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.8,
+            padding: '14px 22px', font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6,
             textTransform: 'uppercase', cursor: 'pointer',
           }}>Explorar clips</div>
         </div>
@@ -62,16 +62,16 @@ export default function Library() {
                 background: p ? `center/cover url(${p})` : `repeating-linear-gradient(130deg,${COLOR.superficieAlta} 0 8px,${COLOR.superficie} 8px 16px)`,
               }} />
               <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                <div style={{ font: `600 15px/1.3 ${FUENTE.ui}` }}>{c.clips?.title ?? 'Clip eliminado'}</div>
-                <div style={{ font: `400 11px/1.5 ${FUENTE.mono}`, color: COLOR.textoTenue, marginTop: 5 }}>
+                <div style={{ font: `500 16px/1.3 ${FUENTE.ui}` }}>{c.clips?.title ?? 'Clip eliminado'}</div>
+                <div style={{ font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue, marginTop: 5 }}>
                   @{c.clips?.profiles?.handle ?? '—'}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginTop: 8 }}>
                   <span style={{
                     background: COLOR.dinero, color: COLOR.fondo, padding: '3px 6px',
-                    font: `700 8.5px/1 ${FUENTE.ui}`, letterSpacing: 1.1, textTransform: 'uppercase',
+                    font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
                   }}>Desbloqueado</span>
-                  <span style={{ font: `400 10px/1.4 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
+                  <span style={{ font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
                     {new Date(c.created_at).toLocaleDateString('es-MX')} · {usd(c.price_coins)}
                   </span>
                 </div>
@@ -89,7 +89,7 @@ function Centro({ texto }: { texto: string }) {
     <div style={{
       minHeight: '100%', boxSizing: 'border-box', padding: '64px 26px',
       background: COLOR.fondo, color: COLOR.textoSuave, fontFamily: FUENTE.serif, fontStyle: 'italic',
-      fontSize: 20, display: 'flex', alignItems: 'center', justifyContent: 'center',
+      fontSize: 19, display: 'flex', alignItems: 'center', justifyContent: 'center',
     }}>{texto}</div>
   )
 }

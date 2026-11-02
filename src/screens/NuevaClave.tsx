@@ -66,25 +66,25 @@ export default function NuevaClave() {
 
         {estado === 'hecho' ? (
           <>
-            <div style={{ fontFamily: FUENTE.display, fontSize: 48, lineHeight: 1, textTransform: 'uppercase' }}>
+            <div style={{ fontFamily: FUENTE.display, fontSize: 46, lineHeight: 1, textTransform: 'uppercase' }}>
               Listo,<br />ya<br /><span style={{ color: COLOR.dinero }}>quedó.</span>
             </div>
-            <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 20, lineHeight: 1.35, color: COLOR.textoSuave }}>
+            <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19, lineHeight: 1.3, color: COLOR.textoSuave }}>
               Tu contraseña nueva ya está guardada. La próxima vez entras directo con ella.
             </div>
           </>
         ) : haySesion === false ? (
           <>
-            <div style={{ fontFamily: FUENTE.display, fontSize: 44, lineHeight: 1, textTransform: 'uppercase' }}>
+            <div style={{ fontFamily: FUENTE.display, fontSize: 46, lineHeight: 1, textTransform: 'uppercase' }}>
               Este enlace<br /><span style={{ color: COLOR.dinero }}>ya expiró.</span>
             </div>
-            <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19, lineHeight: 1.35, color: COLOR.textoSuave }}>
+            <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19, lineHeight: 1.3, color: COLOR.textoSuave }}>
               Los enlaces de recuperación duran poco, a propósito. Pide uno nuevo y ábrelo en cuanto llegue.
             </div>
           </>
         ) : (
           <>
-            <div style={{ fontFamily: FUENTE.display, fontSize: 48, lineHeight: 1, textTransform: 'uppercase' }}>
+            <div style={{ fontFamily: FUENTE.display, fontSize: 46, lineHeight: 1, textTransform: 'uppercase' }}>
               Pon tu<br />contraseña<br /><span style={{ color: COLOR.dinero }}>nueva.</span>
             </div>
 
@@ -96,7 +96,7 @@ export default function NuevaClave() {
                 style={campo(estado === 'error')} />
               <span onClick={() => setVer(v => !v)} style={{
                 position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)',
-                font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.4, textTransform: 'uppercase',
+                font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
                 color: COLOR.textoTenue, cursor: 'pointer', padding: 6,
               }}>{ver ? 'Ocultar' : 'Ver'}</span>
             </div>
@@ -115,7 +115,7 @@ export default function NuevaClave() {
             </div>
 
             {estado === 'error' && (
-              <div style={{ font: `400 13px/1.5 ${FUENTE.ui}`, color: COLOR.acento }}>{detalle}</div>
+              <div style={{ font: `400 13px/1.45 ${FUENTE.ui}`, color: COLOR.acento }}>{detalle}</div>
             )}
           </>
         )}

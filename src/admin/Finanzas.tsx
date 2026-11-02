@@ -87,7 +87,7 @@ export default function Finanzas() {
     <>
       <div style={{
         marginBottom: 16, padding: '10px 13px', border: `1px solid ${LINEA.tenue}`,
-        font: `400 11px/1.55 ${FUENTE.ui}`, color: COLOR.textoTenue,
+        font: `400 10px/1.6 ${FUENTE.ui}`, color: COLOR.textoTenue,
       }}>
         Las cifras de la economía interna van en <b style={{ color: COLOR.dinero }}>dólares</b>, no
         en pesos. Nadie ha definido cuánto vale un coin porque todavía no hay procesador de
@@ -106,7 +106,7 @@ export default function Finanzas() {
 
       {error && (
         <div style={{ marginBottom: 14, padding: '10px 13px', border: '1px solid #FF4444',
-          color: '#FF4444', font: `400 12px/1.4 ${FUENTE.ui}` }}>{error}</div>
+          color: '#FF4444', font: `400 12px/1.45 ${FUENTE.ui}` }}>{error}</div>
       )}
 
       {/* ---- Cifras principales ---- */}
@@ -125,7 +125,7 @@ export default function Finanzas() {
 
       {/* ---- Desglose ---- */}
       <div style={{ margin: '22px 0 10px', font: `700 10px/1 ${FUENTE.ui}`,
-        letterSpacing: 1.4, textTransform: 'uppercase', color: COLOR.textoTenue }}>
+        letterSpacing: 1.2, textTransform: 'uppercase', color: COLOR.textoTenue }}>
         Por fuente de ingreso
       </div>
       <Tabla columnas={columnas} filas={filas} clave={f => f.fuente}
@@ -133,7 +133,7 @@ export default function Finanzas() {
 
       {/* ---- Dinero real ---- */}
       <div style={{ margin: '26px 0 10px', font: `700 10px/1 ${FUENTE.ui}`,
-        letterSpacing: 1.4, textTransform: 'uppercase', color: COLOR.textoTenue }}>
+        letterSpacing: 1.2, textTransform: 'uppercase', color: COLOR.textoTenue }}>
         Dinero real, en pesos
       </div>
       {real && (real.ordenes_pagadas > 0 || real.ordenes_pendientes > 0) ? (
@@ -158,7 +158,7 @@ export default function Finanzas() {
 
       {/* ---- Ranking ---- */}
       <div style={{ margin: '26px 0 10px', font: `700 10px/1 ${FUENTE.ui}`,
-        letterSpacing: 1.4, textTransform: 'uppercase', color: COLOR.textoTenue }}>
+        letterSpacing: 1.2, textTransform: 'uppercase', color: COLOR.textoTenue }}>
         Creadoras por ingresos
       </div>
       {ranking.length === 0 ? (
@@ -178,20 +178,20 @@ export default function Finanzas() {
               </span>
               <span style={{ flex: 1, font: `400 13px/1 ${FUENTE.ui}` }}>
                 {r.nombre} <span style={{ color: COLOR.textoTenue,
-                  font: `400 11px/1 ${FUENTE.mono}` }}>@{r.handle}</span>
+                  font: `400 10px/1 ${FUENTE.mono}` }}>@{r.handle}</span>
               </span>
-              <span style={{ font: `400 11px/1 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
+              <span style={{ font: `400 10px/1 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
                 {r.ventas} ventas · {r.propinas} propinas · {r.clips_publicados} clips
               </span>
               <span style={{ width: 90, textAlign: 'right',
-                font: `400 14px/1 ${FUENTE.mono}`, color: COLOR.dinero }}>{usd(r.ganado)}</span>
+                font: `400 13px/1 ${FUENTE.mono}`, color: COLOR.dinero }}>{usd(r.ganado)}</span>
             </div>
           ))}
         </div>
       )}
 
       <div style={{ marginTop: 22, padding: '10px 13px', border: `1px dashed ${LINEA.tenue}`,
-        font: `400 11px/1.55 ${FUENTE.ui}`, color: COLOR.textoApagado }}>
+        font: `400 10px/1.6 ${FUENTE.ui}`, color: COLOR.textoApagado }}>
         <b>Falta la tasa de conversión.</b> No se puede calcular sin contar cuánta gente vio
         un clip sin comprarlo, y hoy no se registran las vistas. Requiere decidir antes qué
         se guarda de cada visita, que es una decisión de privacidad además de técnica.
@@ -203,9 +203,9 @@ export default function Finanzas() {
 function Cifra({ t, v, c, pie }: { t: string; v: string; c: string; pie?: string }) {
   return (
     <div style={{ background: COLOR.superficie, padding: '13px 15px' }}>
-      <div style={{ font: `700 8px/1 ${FUENTE.ui}`, letterSpacing: 1.3,
+      <div style={{ font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
         textTransform: 'uppercase', color: COLOR.textoTenue }}>{t}</div>
-      <div style={{ marginTop: 7, font: `400 21px/1 ${FUENTE.mono}`, color: c }}>{v}</div>
+      <div style={{ marginTop: 7, font: `400 22px/1 ${FUENTE.mono}`, color: c }}>{v}</div>
       {pie && <div style={{ marginTop: 5, font: `400 10px/1.3 ${FUENTE.mono}`,
         color: COLOR.textoApagado }}>{pie}</div>}
     </div>
@@ -222,7 +222,7 @@ function Grafica({ serie }: { serie: PuntoSerie[] }) {
   if (vacia) {
     return (
       <div style={{ padding: '30px 20px', border: `1px solid ${LINEA.tenue}`,
-        font: `400 12px/1.5 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
+        font: `400 12px/1.45 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
         Sin movimiento en los últimos 30 días. No se dibuja una gráfica plana en cero
         porque parecería que algo se rompió.
       </div>

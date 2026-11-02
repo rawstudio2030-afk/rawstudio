@@ -143,10 +143,10 @@ export default function Verificar() {
       </div>
 
       <div>
-        <div style={{ fontFamily: FUENTE.display, fontSize: 40, lineHeight: 1, textTransform: 'uppercase' }}>
+        <div style={{ fontFamily: FUENTE.display, fontSize: 38, lineHeight: 1, textTransform: 'uppercase' }}>
           Comprueba<br />que eres<br /><span style={{ color: COLOR.dinero }}>tú.</span>
         </div>
-        <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 18, lineHeight: 1.4, color: COLOR.textoSuave, marginTop: 14 }}>
+        <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19, lineHeight: 1.45, color: COLOR.textoSuave, marginTop: 14 }}>
           Solo hace falta una vez, y solo para publicar o cobrar. Quien únicamente mira no pasa por aquí.
         </div>
       </div>
@@ -157,12 +157,12 @@ export default function Verificar() {
         padding: '16px 15px',
       }}>
         <div style={{ ...etiqueta, color: COLOR.dinero }}>Qué hacemos con esto</div>
-        <div style={{ font: `400 13.5px/1.6 ${FUENTE.ui}`, color: COLOR.texto, marginTop: 9 }}>
+        <div style={{ font: `400 13px/1.6 ${FUENTE.ui}`, color: COLOR.texto, marginTop: 9 }}>
           {SERVICIO
             ? <>Las fotos se revisan <b>en memoria</b> y no se guardan. De todo esto solo conservamos que eres mayor de edad y la fecha.</>
             : <>Una persona del equipo revisa tus fotos y las <b>borra al terminar</b>. De todo esto solo conservamos que eres mayor de edad y la fecha.</>}
         </div>
-        <div style={{ font: `400 11.5px/1.6 ${FUENTE.mono}`, color: COLOR.textoTenue, marginTop: 9 }}>
+        <div style={{ font: `400 12px/1.6 ${FUENTE.mono}`, color: COLOR.textoTenue, marginTop: 9 }}>
           {SERVICIO
             ? 'Única excepción: si el cotejo no es concluyente, las guardamos hasta que una persona lo revise, y se borran al resolverlo.'
             : 'Tu documento nunca se guarda completo, solo una huella que no permite reconstruirlo.'}
@@ -179,7 +179,7 @@ export default function Verificar() {
             color: COLOR.texto, font: `400 16px/1 ${FUENTE.ui}`,
             padding: '16px 15px', outline: 'none', colorScheme: 'dark',
           }} />
-        <span style={{ font: `400 11px/1.5 ${FUENTE.mono}`, color: nacimiento && !edadOk ? COLOR.acento : COLOR.textoApagado }}>
+        <span style={{ font: `400 10px/1.45 ${FUENTE.mono}`, color: nacimiento && !edadOk ? COLOR.acento : COLOR.textoApagado }}>
           {!nacimiento ? 'Debe coincidir con tu identificación.'
             : !edadOk ? 'Necesitas 18 años o más para publicar.'
             : `${edad} años.`}
@@ -197,9 +197,9 @@ export default function Verificar() {
           style={{
             width: '100%', boxSizing: 'border-box', background: COLOR.superficie,
             border: '1px solid rgba(255,255,255,.14)', color: COLOR.texto,
-            font: `400 15px/1 ${FUENTE.mono}`, letterSpacing: 1, padding: '16px 15px', outline: 'none',
+            font: `400 16px/1 ${FUENTE.mono}`, letterSpacing: 1.2, padding: '16px 15px', outline: 'none',
           }} />
-        <span style={{ font: `400 11px/1.5 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
+        <span style={{ font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
           Solo guardamos una huella, nunca el número.
         </span>
       </div>
@@ -213,7 +213,7 @@ export default function Verificar() {
         onElegir={f => { setSelfie(f); if (estado === 'error') setEstado('listo') }} />
 
       {estado === 'error' && (
-        <div style={{ font: `400 13px/1.5 ${FUENTE.ui}`, color: COLOR.acento }}>{detalle}</div>
+        <div style={{ font: `400 13px/1.45 ${FUENTE.ui}`, color: COLOR.acento }}>{detalle}</div>
       )}
 
       <div onClick={enviar} style={{
@@ -250,7 +250,7 @@ function Foto({ etiqueta: et, nota, archivo, refInput, camara, onElegir }: {
           <div style={{ ...etiquetaBase, color: archivo ? COLOR.dinero : COLOR.textoTenue }}>
             {archivo ? `${et} · listo` : et}
           </div>
-          <div style={{ font: `400 11.5px/1.5 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 6 }}>{nota}</div>
+          <div style={{ font: `400 12px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 6 }}>{nota}</div>
         </div>
       </div>
       {/* capture abre la camara directo en movil, que es donde se hace esto */}
@@ -276,20 +276,20 @@ function Centro({ titulo, texto, accion }: {
     }}>
       {titulo && (
         <div style={{
-          fontFamily: FUENTE.display, fontSize: 42, lineHeight: 1,
+          fontFamily: FUENTE.display, fontSize: 38, lineHeight: 1,
           textTransform: 'uppercase', color: COLOR.texto,
         }}>
           {titulo[0]}<br />{titulo[1]}<br /><span style={{ color: COLOR.dinero }}>{titulo[2]}</span>
         </div>
       )}
       <div style={{
-        fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19, lineHeight: 1.4,
+        fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19, lineHeight: 1.45,
         color: COLOR.textoSuave, maxWidth: 330,
       }}>{texto}</div>
       {accion && (
         <span onClick={accion.al} style={{
           background: COLOR.acento, color: COLOR.fondo, padding: '15px 26px',
-          font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase',
+          font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
           cursor: 'pointer',
         }}>{accion.texto}</span>
       )}

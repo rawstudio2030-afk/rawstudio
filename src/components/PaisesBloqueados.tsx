@@ -58,11 +58,11 @@ export default function PaisesBloqueados({
           style={{
             width: 130, boxSizing: 'border-box', background: COLOR.superficie,
             border: '1px solid rgba(255,255,255,.14)', color: COLOR.texto,
-            font: `400 14px/1 ${FUENTE.mono}`, padding: '11px', outline: 'none',
+            font: `400 13px/1 ${FUENTE.mono}`, padding: '11px', outline: 'none',
           }} />
         <span onClick={agregarOtro} style={{
           padding: '11px 14px', border: '1px solid rgba(255,255,255,.16)',
-          color: COLOR.textoSuave, font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.4,
+          color: COLOR.textoSuave, font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
           textTransform: 'uppercase', cursor: 'pointer',
         }}>Agregar</span>
       </div>
@@ -79,13 +79,13 @@ export default function PaisesBloqueados({
         </div>
       )}
 
-      <div style={{ font: `400 11.5px/1.6 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
+      <div style={{ font: `400 12px/1.6 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
         {nota ?? 'Quien se conecte desde ahí no podrá abrirlo.'}
       </div>
 
       {/* Se dice el limite real. Prometer un bloqueo infalible seria lo peor
           que se le puede decir a alguien que se esconde de su entorno. */}
-      <div style={{ font: `400 11px/1.6 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
+      <div style={{ font: `400 10px/1.6 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
         Ojo: una VPN salta esto. Reduce mucho el riesgo, no lo elimina.
       </div>
     </div>

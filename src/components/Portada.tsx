@@ -49,17 +49,17 @@ export default function Portada() {
         <Marco color={COLOR.dinero} grosor={2.6} />
         <div style={{ position: 'relative' }}>
         <div style={{
-          fontFamily: FUENTE.display, fontSize: 64, lineHeight: 1,
+          fontFamily: FUENTE.display, fontSize: 60, lineHeight: 1,
           color: COLOR.dinero, textTransform: 'uppercase',
         }}>80%</div>
         <div style={{
-          marginTop: 12, font: `400 17px/1.45 ${FUENTE.ui}`, color: COLOR.texto,
+          marginTop: 12, font: `400 16px/1.45 ${FUENTE.ui}`, color: COLOR.texto,
         }}>
           De cada dólar que te pagan, <b>ochenta centavos son tuyos.</b>
         </div>
         <div style={{
           marginTop: 9, fontFamily: FUENTE.serif, fontStyle: 'italic',
-          fontSize: 17, lineHeight: 1.4, color: COLOR.textoSuave,
+          fontSize: 16, lineHeight: 1.45, color: COLOR.textoSuave,
         }}>
           Sin cuota mensual, sin cargo por publicar y sin exclusividad.
         </div>
@@ -91,7 +91,7 @@ export default function Portada() {
             <div key={v.t}>
               <div style={{ fontFamily: FUENTE.display, fontSize: 26, lineHeight: 1,
                 textTransform: 'uppercase', color: COLOR.texto }}>{v.t}</div>
-              <div style={{ marginTop: 8, font: `400 15px/1.55 ${FUENTE.ui}`,
+              <div style={{ marginTop: 8, font: `400 16px/1.6 ${FUENTE.ui}`,
                 color: COLOR.textoSuave }}>{v.d}</div>
             </div>
           ))}
@@ -104,9 +104,9 @@ export default function Portada() {
         background: TINTE.acento,
       }}>
         <Marco color={COLOR.acento} grosor={2.4} />
-        <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.4,
+        <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2,
           textTransform: 'uppercase', color: COLOR.acento }}>Join us</div>
-        <div style={{ marginTop: 14, fontFamily: FUENTE.display, fontSize: 36,
+        <div style={{ marginTop: 14, fontFamily: FUENTE.display, fontSize: 38,
           lineHeight: 1, textTransform: 'uppercase' }}>
           Un sitio nuevo,<br /><span style={{ color: COLOR.acento }}>desde acá.</span>
         </div>
@@ -134,13 +134,13 @@ export default function Portada() {
             <details key={i} style={{ borderBottom: `1px solid ${LINEA.tenue}` }}>
               <summary style={{
                 display: 'flex', gap: 12, alignItems: 'flex-start', cursor: 'pointer',
-                padding: '18px 2px', font: `500 16px/1.35 ${FUENTE.ui}`, color: COLOR.texto,
+                padding: '18px 2px', font: `500 16px/1.3 ${FUENTE.ui}`, color: COLOR.texto,
               }}>
                 <span className="faq-signo">+</span>
                 <span>{f.q}</span>
               </summary>
               <div style={{ padding: '0 2px 20px 33px', color: COLOR.textoSuave,
-                font: `400 15px/1.55 ${FUENTE.ui}` }}>
+                font: `400 16px/1.6 ${FUENTE.ui}` }}>
                 {f.a.map((p, j) => <p key={j} style={{ margin: j ? '11px 0 0' : 0 }}>{p}</p>)}
               </div>
             </details>
@@ -177,7 +177,7 @@ export default function Portada() {
 
         <div style={{
           marginTop: 22, textAlign: 'center',
-          font: `400 11px/1.6 ${FUENTE.mono}`, color: COLOR.textoApagado,
+          font: `400 10px/1.6 ${FUENTE.mono}`, color: COLOR.textoApagado,
         }}>
           © 2026 RAWstudio · All rights reserved
         </div>
@@ -201,9 +201,9 @@ function Fila({ icono, titulo, texto, color }: {
     }}>
       <span style={{ color, marginTop: 1 }}><Icono nombre={icono} hierve /></span>
       <div>
-        <div style={{ font: `700 11px/1.3 ${FUENTE.ui}`, letterSpacing: 1.4,
+        <div style={{ font: `700 10px/1.3 ${FUENTE.ui}`, letterSpacing: 1.2,
           textTransform: 'uppercase', color }}>{titulo}</div>
-        <div style={{ marginTop: 7, font: `400 14px/1.5 ${FUENTE.ui}`,
+        <div style={{ marginTop: 7, font: `400 13px/1.45 ${FUENTE.ui}`,
           color: COLOR.textoSuave }}>{texto}</div>
       </div>
     </div>
@@ -214,7 +214,7 @@ function Seccion({ rotulo, children }: { rotulo: string; children: ReactNode }) 
   return (
     <div style={{ marginTop: 44 }}>
       <div style={{
-        font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.6,
+        font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2,
         textTransform: 'uppercase', color: COLOR.textoTenue, marginBottom: 4,
       }}>{rotulo}</div>
       <div style={{ margin: '12px 0 20px' }}><Regla ancho={48} /></div>
@@ -228,7 +228,7 @@ function Titular({ children }: { children: ReactNode }) {
   // el interlineado apretado la linea de arriba se los come.
   return (
     <div style={{
-      fontFamily: FUENTE.display, fontSize: 42, lineHeight: 1,
+      fontFamily: FUENTE.display, fontSize: 38, lineHeight: 1,
       textTransform: 'uppercase', color: COLOR.texto,
     }}>{children}</div>
   )
@@ -237,7 +237,7 @@ function Titular({ children }: { children: ReactNode }) {
 function Sub({ children, estilo }: { children: ReactNode; estilo?: React.CSSProperties }) {
   return (
     <div style={{
-      font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.8,
+      font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6,
       textTransform: 'uppercase', color: COLOR.texto, ...estilo,
     }}>{children}</div>
   )
@@ -266,7 +266,7 @@ function Red({ href, texto }: { href: string; texto: string }) {
     <a href={href} target="_blank" rel="noopener noreferrer" style={{
       padding: '10px 18px', border: `1px solid ${LINEA.fuerte}`,
       color: COLOR.textoSuave, textDecoration: 'none',
-      font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.8, textTransform: 'uppercase',
+      font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
     }}>{texto}</a>
   )
 }
@@ -294,11 +294,11 @@ function Pasos() {
             <Vineta nombre={p.v} />
           </div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 9 }}>
-            <span style={{ font: `400 15px/1 ${FUENTE.mono}`, color: COLOR.acento }}>{p.n}</span>
-            <span style={{ font: `700 11.5px/1.3 ${FUENTE.ui}`, letterSpacing: 1.2,
+            <span style={{ font: `400 16px/1 ${FUENTE.mono}`, color: COLOR.acento }}>{p.n}</span>
+            <span style={{ font: `700 12px/1.3 ${FUENTE.ui}`, letterSpacing: 1.2,
               textTransform: 'uppercase', color: COLOR.texto }}>{p.t}</span>
           </div>
-          <div style={{ marginTop: 8, font: `400 13.5px/1.5 ${FUENTE.ui}`,
+          <div style={{ marginTop: 8, font: `400 13px/1.45 ${FUENTE.ui}`,
             color: COLOR.textoSuave }}>{p.d}</div>
         </div>
       ))}

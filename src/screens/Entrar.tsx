@@ -37,7 +37,7 @@ export default function Entrar() {
         <div style={{ fontFamily: FUENTE.display, fontSize: 52, lineHeight: 1, textTransform: 'uppercase' }}>
           Elige<br />cómo<br /><span style={{ color: COLOR.dinero }}>entras.</span>
         </div>
-        <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 21, lineHeight: 1.35, color: COLOR.textoSuave }}>
+        <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 22, lineHeight: 1.3, color: COLOR.textoSuave }}>
           Con tu correo y una contraseña. El acceso por liga también sigue ahí.
         </div>
 
@@ -55,14 +55,14 @@ export default function Entrar() {
           <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', color: COLOR.dinero, marginBottom: 9 }}>
             ¿Vas a publicar tú?
           </div>
-          <div style={{ font: `400 15px/1.45 ${FUENTE.ui}`, color: COLOR.texto, marginBottom: 10 }}>
+          <div style={{ font: `400 16px/1.45 ${FUENTE.ui}`, color: COLOR.texto, marginBottom: 10 }}>
             El <b style={{ fontWeight: 700 }}>80% de cada dólar</b> es tuyo, pagos por SPEI y sin exclusividad.
           </div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
-            <span style={{ font: `400 11px/1.5 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
+            <span style={{ font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
               Nadie ve tu nombre real
             </span>
-            <span style={{ font: `700 14px/1 ${FUENTE.ui}`, color: COLOR.dinero }}>&#8594;</span>
+            <span style={{ font: `700 13px/1 ${FUENTE.ui}`, color: COLOR.dinero }}>&#8594;</span>
           </div>
         </div>
       </div>
@@ -82,7 +82,7 @@ export default function Entrar() {
           style={{
             border: '1px solid rgba(255,255,255,.16)', color: COLOR.textoSuave,
             textAlign: 'center', padding: 18,
-            font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase', cursor: 'pointer',
+            font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', cursor: 'pointer',
           }}>
           Ya tengo cuenta
         </div>

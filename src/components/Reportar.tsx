@@ -36,7 +36,7 @@ export default function Reportar({ clip, perfil, etiqueta = 'Reportar' }: {
   return (
     <>
       <span onClick={() => setAbierto(true)} style={{
-        font: `400 11px/1 ${FUENTE.ui}`, color: COLOR.textoApagado,
+        font: `400 10px/1 ${FUENTE.ui}`, color: COLOR.textoApagado,
         cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 3,
       }}>{etiqueta}</span>
 
@@ -51,7 +51,7 @@ export default function Reportar({ clip, perfil, etiqueta = 'Reportar' }: {
           }}>
             {estado === 'listo' || estado === 'repetido' ? (
               <>
-                <div style={{ font: `400 21px/1.15 ${FUENTE.display}`,
+                <div style={{ font: `400 22px/1 ${FUENTE.display}`,
                   textTransform: 'uppercase', color: COLOR.dinero }}>
                   {estado === 'repetido' ? 'Ya lo habías reportado' : 'Gracias'}
                 </div>
@@ -69,10 +69,10 @@ export default function Reportar({ clip, perfil, etiqueta = 'Reportar' }: {
               </>
             ) : (
               <>
-                <div style={{ font: `400 21px/1.15 ${FUENTE.display}`, textTransform: 'uppercase' }}>
+                <div style={{ font: `400 22px/1 ${FUENTE.display}`, textTransform: 'uppercase' }}>
                   Reportar
                 </div>
-                <div style={{ marginTop: 10, font: `400 12px/1.55 ${FUENTE.ui}`,
+                <div style={{ marginTop: 10, font: `400 12px/1.6 ${FUENTE.ui}`,
                   color: COLOR.textoTenue }}>
                   Lo revisa una persona, no un programa. Quien lo publicó no sabe quién reportó.
                 </div>
@@ -84,10 +84,10 @@ export default function Reportar({ clip, perfil, etiqueta = 'Reportar' }: {
                       border: `1px solid ${motivo === m.v ? COLOR.acento : LINEA.tenue}`,
                       background: motivo === m.v ? 'rgba(255,43,209,.06)' : 'transparent',
                     }}>
-                      <div style={{ font: `400 13px/1.35 ${FUENTE.ui}`,
+                      <div style={{ font: `400 13px/1.3 ${FUENTE.ui}`,
                         color: motivo === m.v ? COLOR.texto : COLOR.textoSuave }}>{m.t}</div>
                       {motivo === m.v && m.ayuda && (
-                        <div style={{ marginTop: 5, font: `400 11px/1.45 ${FUENTE.ui}`,
+                        <div style={{ marginTop: 5, font: `400 10px/1.45 ${FUENTE.ui}`,
                           color: COLOR.textoTenue }}>{m.ayuda}</div>
                       )}
                     </div>
@@ -100,11 +100,11 @@ export default function Reportar({ clip, perfil, etiqueta = 'Reportar' }: {
                     width: '100%', boxSizing: 'border-box', marginTop: 14,
                     background: COLOR.fondo, color: COLOR.texto, resize: 'vertical',
                     border: `1px solid ${LINEA.suave}`, borderRadius: 0,
-                    padding: '10px 12px', font: `400 13px/1.5 ${FUENTE.ui}`, outline: 'none',
+                    padding: '10px 12px', font: `400 13px/1.45 ${FUENTE.ui}`, outline: 'none',
                   }} />
 
                 {error && (
-                  <div style={{ marginTop: 10, font: `400 12px/1.4 ${FUENTE.ui}`, color: '#FF4444' }}>
+                  <div style={{ marginTop: 10, font: `400 12px/1.45 ${FUENTE.ui}`, color: '#FF4444' }}>
                     {error}
                   </div>
                 )}

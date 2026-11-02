@@ -63,7 +63,7 @@ export default function Comunicacion() {
 
   const columnas: Columna<Campana>[] = [
     { clave: 'fecha', titulo: 'Cuándo', ancho: 165,
-      pinta: c => <span style={{ font: `400 11px/1.3 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
+      pinta: c => <span style={{ font: `400 10px/1.3 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
         {fechaHora(c.created_at)}</span> },
     { clave: 'canal', titulo: 'Canal', ancho: 100,
       pinta: c => <Insignia texto={c.canal} color={c.canal === 'correo' ? COLOR.admin : COLOR.acento} /> },
@@ -100,20 +100,20 @@ export default function Comunicacion() {
           vacia="Todavía no se ha mandado ninguna campaña" />
       ) : pestana === 'redes_sociales' ? (
         <div style={{ padding: '20px', border: `1px solid ${LINEA.tenue}`, borderRadius: 4 }}>
-          <div style={{ font: `400 14px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave, marginBottom: 20 }}>
+          <div style={{ font: `400 13px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave, marginBottom: 20 }}>
             ℹ️ Módulo de Redes Sociales en desarrollo. Próximamente podrás publicar directamente en X y TikTok.
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 15 }}>
             <div style={{ padding: 15, border: `1px solid ${LINEA.tenue}`, borderRadius: 4 }}>
               <div style={{ font: `700 12px/1 ${FUENTE.ui}`, marginBottom: 10 }}>X (Twitter)</div>
-              <div style={{ font: `400 11px/1.5 ${FUENTE.ui}`, color: COLOR.textoTenue, marginBottom: 15 }}>
+              <div style={{ font: `400 10px/1.45 ${FUENTE.ui}`, color: COLOR.textoTenue, marginBottom: 15 }}>
                 Publica tuits y expande tu audiencia en X.
               </div>
               <Boton tono="primario" activo={false} al={() => {}}>Configurar X</Boton>
             </div>
             <div style={{ padding: 15, border: `1px solid ${LINEA.tenue}`, borderRadius: 4 }}>
               <div style={{ font: `700 12px/1 ${FUENTE.ui}`, marginBottom: 10 }}>TikTok</div>
-              <div style={{ font: `400 11px/1.5 ${FUENTE.ui}`, color: COLOR.textoTenue, marginBottom: 15 }}>
+              <div style={{ font: `400 10px/1.45 ${FUENTE.ui}`, color: COLOR.textoTenue, marginBottom: 15 }}>
                 Publica videos cortos en TikTok y llega a más personas.
               </div>
               <Boton tono="primario" activo={false} al={() => {}}>Configurar TikTok</Boton>
@@ -139,7 +139,7 @@ export default function Comunicacion() {
 
             <div style={{ marginBottom: 16, padding: '10px 12px',
               border: `1px solid ${gente.length ? LINEA.tenue : '#FFB020'}`,
-              font: `400 11px/1.55 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
+              font: `400 10px/1.6 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
               {gente.length === 0
                 ? <span style={{ color: '#FFB020' }}>Ese segmento no tiene a nadie ahora mismo.</span>
                 : <><b style={{ color: COLOR.dinero }}>{gente.length} destinatario
@@ -163,7 +163,7 @@ export default function Comunicacion() {
                   : 'Escribe en texto plano; el formato lo pone la plantilla.'} />
             } />
 
-            <div style={{ marginTop: 8, font: `400 11px/1.6 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
+            <div style={{ marginTop: 8, font: `400 10px/1.6 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
               Variables: {'{nombre_usuario}'} · {'{handle}'} · {'{correo}'}
             </div>
 
@@ -173,7 +173,7 @@ export default function Comunicacion() {
             )}
             {aviso && (
               <div style={{ marginTop: 14, padding: '10px 13px', border: `1px solid ${COLOR.dinero}`,
-                color: COLOR.dinero, font: `400 12px/1.4 ${FUENTE.ui}` }}>{aviso}</div>
+                color: COLOR.dinero, font: `400 12px/1.45 ${FUENTE.ui}` }}>{aviso}</div>
             )}
 
             <div style={{ display: 'flex', gap: 10, marginTop: 18, alignItems: 'center' }}>
@@ -188,41 +188,41 @@ export default function Comunicacion() {
 
           {/* ---- Vista previa y plantillas ---- */}
           <div>
-            <div style={{ font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.3,
+            <div style={{ font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
               textTransform: 'uppercase', color: COLOR.textoTenue, marginBottom: 8 }}>
               Vista previa
             </div>
             <div style={{ border: `1px solid ${LINEA.tenue}`, padding: 14, background: COLOR.fondo }}>
               {muestra ? (
                 <>
-                  <div style={{ font: `400 10px/1.4 ${FUENTE.mono}`, color: COLOR.textoApagado,
+                  <div style={{ font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado,
                     paddingBottom: 8, borderBottom: `1px solid ${LINEA.tenue}` }}>
                     Como lo vería @{muestra.handle}
                   </div>
                   {canal === 'correo' && asunto && (
-                    <div style={{ marginTop: 10, font: `700 13px/1.4 ${FUENTE.ui}`, color: COLOR.texto }}>
+                    <div style={{ marginTop: 10, font: `700 13px/1.45 ${FUENTE.ui}`, color: COLOR.texto }}>
                       {personalizar(asunto, muestra)}
                     </div>
                   )}
-                  <div style={{ marginTop: 10, font: `400 13px/1.65 ${FUENTE.ui}`,
+                  <div style={{ marginTop: 10, font: `400 13px/1.6 ${FUENTE.ui}`,
                     color: COLOR.textoSuave, whiteSpace: 'pre-wrap' }}>
                     {cuerpo ? personalizar(cuerpo, muestra)
                       : <span style={{ color: COLOR.textoApagado }}>Escribe algo y aparecerá aquí</span>}
                   </div>
                 </>
               ) : (
-                <div style={{ font: `400 12px/1.5 ${FUENTE.ui}`, color: COLOR.textoApagado }}>
+                <div style={{ font: `400 12px/1.45 ${FUENTE.ui}`, color: COLOR.textoApagado }}>
                   Sin destinatarios, no hay a quién previsualizar.
                 </div>
               )}
             </div>
 
             <div style={{ margin: '20px 0 8px', font: `700 9px/1 ${FUENTE.ui}`,
-              letterSpacing: 1.3, textTransform: 'uppercase', color: COLOR.textoTenue }}>
+              letterSpacing: 1.2, textTransform: 'uppercase', color: COLOR.textoTenue }}>
               Plantillas
             </div>
             {lista.length === 0 ? (
-              <div style={{ padding: '16px 0', font: `400 11px/1.5 ${FUENTE.ui}`,
+              <div style={{ padding: '16px 0', font: `400 10px/1.45 ${FUENTE.ui}`,
                 color: COLOR.textoApagado }}>Todavía no has guardado ninguna.</div>
             ) : lista.map(p => (
               <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 8,
@@ -231,7 +231,7 @@ export default function Comunicacion() {
                   setCanal(p.canal); setAsunto(p.asunto ?? ''); setCuerpo(p.cuerpo)
                 }} style={{ flex: 1, cursor: 'pointer' }}>
                   <div style={{ font: `400 12px/1.3 ${FUENTE.ui}`, color: COLOR.texto }}>{p.nombre}</div>
-                  <div style={{ font: `400 10px/1.4 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
+                  <div style={{ font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
                     {p.canal}
                   </div>
                 </div>

@@ -138,7 +138,7 @@ export default function ClipDetail() {
         <span onClick={() => nav(-1)} style={{
           position: 'absolute', top: 16, left: 16, width: 38, height: 38, borderRadius: '50%',
           border: '1px solid rgba(255,255,255,.22)', background: VELO.ligero,
-          display: 'grid', placeItems: 'center', font: `400 20px/1 ${FUENTE.ui}`,
+          display: 'grid', placeItems: 'center', font: `400 19px/1 ${FUENTE.ui}`,
           color: COLOR.texto, cursor: 'pointer', zIndex: 2,
         }}>‹</span>
       </div>
@@ -155,28 +155,28 @@ export default function ClipDetail() {
             background: foto ? `center/cover url(${foto})` : `repeating-linear-gradient(130deg,${COLOR.superficieAlta} 0 6px,${COLOR.superficie} 6px 12px)`,
           }} />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ font: `700 15px/1.3 ${FUENTE.ui}`, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={{ font: `700 16px/1.3 ${FUENTE.ui}`, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 6 }}>
               {autora.display_name}
               {autora.verified && <span style={{ color: COLOR.admin, fontSize: 13 }}>&#10038;</span>}
             </div>
-            <div style={{ font: `400 12px/1.4 ${FUENTE.mono}`, color: COLOR.textoTenue }}>@{autora.handle}</div>
+            <div style={{ font: `400 12px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue }}>@{autora.handle}</div>
           </div>
           <span style={{ color: COLOR.textoApagado }}>›</span>
         </div>
       )}
 
       <div style={{ padding: '20px 20px 40px' }}>
-        <div style={{ fontFamily: FUENTE.display, fontSize: 34, lineHeight: 1, textTransform: 'uppercase' }}>
+        <div style={{ fontFamily: FUENTE.display, fontSize: 32, lineHeight: 1, textTransform: 'uppercase' }}>
           {clip.title}
         </div>
 
         {clip.description && (
-          <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 18, lineHeight: 1.4, color: COLOR.textoSuave, marginTop: 12 }}>
+          <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19, lineHeight: 1.45, color: COLOR.textoSuave, marginTop: 12 }}>
             {clip.description}
           </div>
         )}
 
-        <div style={{ font: `400 11px/1.7 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 14 }}>
+        <div style={{ font: `400 10px/1.6 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 14 }}>
           publicado {clip.published_at ? new Date(clip.published_at).toLocaleDateString('es-MX') : '—'}
           {!clip.published && ' · borrador'}
         </div>
@@ -198,7 +198,7 @@ export default function ClipDetail() {
             }} style={{
               marginTop: 14, textAlign: 'center', padding: 16, cursor: 'pointer',
               background: COLOR.dinero, color: COLOR.fondo,
-              font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase',
+              font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
             }}>Recuperar mis {usd(devolucion)}</div>
           </div>
         )}
@@ -210,7 +210,7 @@ export default function ClipDetail() {
             <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', color: COLOR.admin }}>
               No disponible en tu país
             </div>
-            <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 16, lineHeight: 1.4, color: COLOR.textoSuave, marginTop: 9 }}>
+            <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 16, lineHeight: 1.45, color: COLOR.textoSuave, marginTop: 9 }}>
               Quien publicó este clip decidió no mostrarlo aquí. No es un error
               ni falta de pago: es su elección, y la respetamos.
             </div>
@@ -233,7 +233,7 @@ export default function ClipDetail() {
               {clip.visibility === 'pago' ? 'Desbloquear para siempre' : 'Solo suscriptores'}
             </div>
             {clip.visibility === 'pago' && (
-              <div style={{ fontFamily: FUENTE.display, fontSize: 30, lineHeight: 1, color: COLOR.dinero, marginTop: 10 }}>
+              <div style={{ fontFamily: FUENTE.display, fontSize: 32, lineHeight: 1, color: COLOR.dinero, marginTop: 10 }}>
                 {usd(clip.price_coins)}
               </div>
             )}
@@ -256,7 +256,7 @@ export default function ClipDetail() {
                     background: !sesion ? COLOR.acento : alcanza ? COLOR.dinero : COLOR.superficieAlta,
                     color: !sesion || alcanza ? COLOR.fondo : COLOR.textoApagado,
                     textAlign: 'center', padding: 17,
-                    font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase',
+                    font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
                     cursor: !sesion || alcanza ? 'pointer' : 'default',
                     boxShadow: !sesion ? '0 0 30px rgba(255,43,209,.36)'
                       : alcanza ? '0 0 30px rgba(200,255,61,.3)' : 'none',
@@ -268,7 +268,7 @@ export default function ClipDetail() {
                   </div>
                   {sesion && (
                     <div onClick={() => nav('/wallet')} style={{
-                      font: `400 11px/1.6 ${FUENTE.mono}`, color: COLOR.textoTenue, marginTop: 10,
+                      font: `400 10px/1.6 ${FUENTE.mono}`, color: COLOR.textoTenue, marginTop: 10,
                       textAlign: 'center', cursor: 'pointer', textDecoration: 'underline',
                     }}>
                       Tu saldo: {coins ?? '…'} coins
@@ -281,7 +281,7 @@ export default function ClipDetail() {
                     <div onClick={rentando ? undefined : rentar} style={{
                       marginTop: 10, textAlign: 'center', padding: 14,
                       border: `1px solid ${LINEA.fuerte}`, cursor: 'pointer',
-                      font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.6,
+                      font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6,
                       textTransform: 'uppercase', color: COLOR.textoSuave,
                     }}>
                       {rentando ? 'Rentando…'
@@ -289,7 +289,7 @@ export default function ClipDetail() {
                     </div>
                   )}
                   {errorCompra && (
-                    <div style={{ font: `400 12px/1.5 ${FUENTE.ui}`, color: COLOR.acento, marginTop: 10, textAlign: 'center' }}>
+                    <div style={{ font: `400 12px/1.45 ${FUENTE.ui}`, color: COLOR.acento, marginTop: 10, textAlign: 'center' }}>
                       {errorCompra}
                     </div>
                   )}
@@ -298,7 +298,7 @@ export default function ClipDetail() {
             })() : (
               <div style={{
                 marginTop: 16, background: COLOR.superficieAlta, color: COLOR.textoApagado, textAlign: 'center',
-                padding: 17, font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase',
+                padding: 17, font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
               }}>
                 Faltan las suscripciones
               </div>
@@ -321,14 +321,14 @@ function Centro({ texto, accion }: { texto: string; accion?: { texto: string; al
     <div style={{
       minHeight: '100%', boxSizing: 'border-box', padding: '64px 26px',
       background: COLOR.fondo, color: COLOR.textoSuave, fontFamily: FUENTE.serif, fontStyle: 'italic',
-      fontSize: 20, display: 'flex', flexDirection: 'column',
+      fontSize: 19, display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center', gap: 20, textAlign: 'center',
     }}>
       {texto}
       {accion && (
         <span onClick={accion.al} style={{
           background: COLOR.acento, color: COLOR.fondo, padding: '15px 26px',
-          font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase',
+          font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
           fontStyle: 'normal', cursor: 'pointer',
         }}>{accion.texto}</span>
       )}

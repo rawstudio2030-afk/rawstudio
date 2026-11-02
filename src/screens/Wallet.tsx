@@ -77,7 +77,7 @@ export default function Dinero() {
         <div style={{ fontFamily: FUENTE.display, fontSize: 52, lineHeight: 1, color: COLOR.dinero, marginTop: 12 }}>
           {usd(centavos)}
         </div>
-        <div style={{ font: `400 11.5px/1.5 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 8 }}>
+        <div style={{ font: `400 12px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 8 }}>
           {esCreadora ? 'Lo que puedes gastar o retirar.' : 'Lo que puedes gastar.'}
         </div>
       </div>
@@ -120,7 +120,7 @@ export default function Dinero() {
       </div>
 
       {visibles.length === 0 ? (
-        <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 17, color: COLOR.textoTenue, padding: '22px 0' }}>
+        <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 16, color: COLOR.textoTenue, padding: '22px 0' }}>
           {pestana === 'gane' ? 'Todavía no has ganado nada.'
             : pestana === 'gaste' ? 'Todavía no has gastado nada.'
             : 'Todavía no hay movimientos.'}
@@ -131,14 +131,14 @@ export default function Dinero() {
           padding: '14px 2px', borderBottom: `1px solid ${LINEA.tenue}`,
         }}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ font: `600 14px/1.3 ${FUENTE.ui}` }}>{NOMBRE_MOTIVO[m.motivo]}</div>
-            <div style={{ font: `400 11px/1.5 ${FUENTE.mono}`, color: COLOR.textoTenue, marginTop: 3 }}>
+            <div style={{ font: `500 13px/1.3 ${FUENTE.ui}` }}>{NOMBRE_MOTIVO[m.motivo]}</div>
+            <div style={{ font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue, marginTop: 3 }}>
               {new Date(m.created_at).toLocaleDateString('es-MX')}
               {m.nota && ` · ${m.nota}`}
             </div>
           </div>
           <span style={{
-            fontFamily: FUENTE.mono, fontSize: 15, lineHeight: 1,
+            fontFamily: FUENTE.mono, fontSize: 16, lineHeight: 1,
             color: m.delta > 0 ? COLOR.dinero : COLOR.acento,
           }}>
             {m.delta > 0 ? '+' : '−'}{usd(Math.abs(m.delta))}
@@ -176,9 +176,9 @@ function Pendiente({ creadora, nav }: { creadora: boolean; nav: (r: string) => v
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
         }}>
           <div>
-            <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.8,
+            <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6,
               textTransform: 'uppercase', color: COLOR.dinero }}>Retirar</div>
-            <div style={{ font: `400 12.5px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave, marginTop: 7 }}>
+            <div style={{ font: `400 12px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave, marginTop: 7 }}>
               A tu cuenta, por SPEI, con las retenciones ya calculadas.
             </div>
           </div>
@@ -187,7 +187,7 @@ function Pendiente({ creadora, nav }: { creadora: boolean; nav: (r: string) => v
       )}
 
       <div style={{ marginTop: 12, padding: '14px 16px', border: `1px dashed ${LINEA.marcada}` }}>
-        <div style={{ font: `400 12.5px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
+        <div style={{ font: `400 12px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
           <b style={{ color: COLOR.texto }}>Recargar</b> todavía no se puede: falta un
           procesador de pagos compatible con este giro. Mientras tanto, la administración
           puede acreditarte saldo.
@@ -202,7 +202,7 @@ function Centro({ texto }: { texto: string }) {
     <div style={{
       minHeight: '100%', boxSizing: 'border-box', padding: '64px 26px',
       background: COLOR.fondo, color: COLOR.textoSuave, fontFamily: FUENTE.serif, fontStyle: 'italic',
-      fontSize: 20, display: 'flex', alignItems: 'center', justifyContent: 'center',
+      fontSize: 19, display: 'flex', alignItems: 'center', justifyContent: 'center',
     }}>{texto}</div>
   )
 }

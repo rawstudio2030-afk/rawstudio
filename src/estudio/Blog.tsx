@@ -40,11 +40,11 @@ export default function Blog() {
           border: `1px solid ${soloSubs ? COLOR.acento : LINEA.tenue}`,
           background: soloSubs ? 'rgba(255,43,209,.06)' : 'transparent',
         }}>
-          <div style={{ font: `400 14px/1.3 ${FUENTE.ui}`,
+          <div style={{ font: `400 13px/1.3 ${FUENTE.ui}`,
             color: soloSubs ? COLOR.texto : COLOR.textoSuave }}>
             {soloSubs ? 'Solo para suscriptoras' : 'Público'}
           </div>
-          <div style={{ marginTop: 5, font: `400 12px/1.5 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
+          <div style={{ marginTop: 5, font: `400 12px/1.45 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
             {soloSubs
               ? 'Quien no esté suscrita ve el título y las primeras líneas, nada más.'
               : 'Lo puede leer cualquiera. Toca para hacerlo de suscriptoras.'}
@@ -72,7 +72,7 @@ export default function Blog() {
 
   return (
     <Marco titulo="Blog">
-      <div style={{ font: `400 14px/1.65 ${FUENTE.ui}`, color: COLOR.textoSuave, marginBottom: 20 }}>
+      <div style={{ font: `400 13px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave, marginBottom: 20 }}>
         Texto, no video. Sirve para contar cosas entre publicaciones y para dar algo
         a quien te paga la suscripción sin tener que grabar.
       </div>
@@ -86,15 +86,15 @@ export default function Blog() {
               padding: '14px 15px', border: `1px solid ${LINEA.tenue}`, cursor: 'pointer',
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
-                <span style={{ font: `400 16px/1.25 ${FUENTE.ui}` }}>{p.titulo}</span>
+                <span style={{ font: `400 16px/1.3 ${FUENTE.ui}` }}>{p.titulo}</span>
                 {p.visibilidad === 'suscriptores' && (
-                  <span style={{ font: `700 8px/1.6 ${FUENTE.ui}`, letterSpacing: 1,
+                  <span style={{ font: `700 9px/1.6 ${FUENTE.ui}`, letterSpacing: 1.2,
                     textTransform: 'uppercase', color: COLOR.acento, whiteSpace: 'nowrap' }}>
                     Suscriptoras
                   </span>
                 )}
               </div>
-              <div style={{ marginTop: 6, font: `400 13px/1.5 ${FUENTE.ui}`,
+              <div style={{ marginTop: 6, font: `400 13px/1.45 ${FUENTE.ui}`,
                 color: COLOR.textoTenue, overflow: 'hidden', textOverflow: 'ellipsis',
                 display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                 {p.cuerpo}

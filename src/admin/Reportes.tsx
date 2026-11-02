@@ -84,12 +84,12 @@ export default function Reportes() {
 
       {error && (
         <div style={{ marginBottom: 14, padding: '10px 13px', border: '1px solid #FF4444',
-          color: '#FF4444', font: `400 12px/1.4 ${FUENTE.ui}` }}>{error}</div>
+          color: '#FF4444', font: `400 12px/1.45 ${FUENTE.ui}` }}>{error}</div>
       )}
 
       {filas.length === 0 ? (
         <div style={{ padding: '70px 20px', textAlign: 'center', color: COLOR.textoTenue,
-          font: `400 13px/1.5 ${FUENTE.ui}`, border: `1px solid ${LINEA.tenue}` }}>
+          font: `400 13px/1.45 ${FUENTE.ui}`, border: `1px solid ${LINEA.tenue}` }}>
           {cargando ? 'Cargando…' : estado === 'nuevo'
             ? 'Nada esperando. Es la mejor noticia de este panel.'
             : 'Nada aquí'}
@@ -173,7 +173,7 @@ function Ficha({ r, pide, tras }: {
           )}
         </div>
 
-        <div style={{ marginTop: 8, font: `400 13px/1.35 ${FUENTE.ui}`, color: COLOR.texto }}>
+        <div style={{ marginTop: 8, font: `400 13px/1.3 ${FUENTE.ui}`, color: COLOR.texto }}>
           {r.clip_id
             ? <>Clip «{r.clip_titulo ?? 'sin título'}» de @{r.creadora_handle}</>
             : <>Perfil de @{r.perfil_handle}</>}
@@ -181,18 +181,18 @@ function Ficha({ r, pide, tras }: {
 
         {r.comentario && (
           <div style={{ marginTop: 6, padding: '7px 10px', background: COLOR.fondo,
-            font: `400 12px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
+            font: `400 12px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
             «{r.comentario}»
           </div>
         )}
 
-        <div style={{ marginTop: 7, font: `400 10px/1.5 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
+        <div style={{ marginTop: 7, font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
           Reportó @{r.reporta_handle ?? '—'} · {desde(r.created_at)} · {fechaHora(r.created_at)}
           {r.ip && <> · {r.ip}</>}
         </div>
 
         {r.nota_resolucion && (
-          <div style={{ marginTop: 7, font: `400 11px/1.5 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
+          <div style={{ marginTop: 7, font: `400 10px/1.45 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
             <b style={{ color: COLOR.dinero }}>Resolución:</b> {r.nota_resolucion}
           </div>
         )}

@@ -39,7 +39,7 @@ export default function Herramientas() {
 
       {aviso && (
         <div style={{ padding: '10px 13px', border: `1px solid ${COLOR.dinero}`,
-          color: COLOR.dinero, font: `400 12px/1.4 ${FUENTE.ui}` }}>{aviso}</div>
+          color: COLOR.dinero, font: `400 12px/1.45 ${FUENTE.ui}` }}>{aviso}</div>
       )}
 
       {dialogo === 'sembrar' && (
@@ -72,9 +72,9 @@ function Tarjeta({ titulo, texto, accion }: {
 }) {
   return (
     <div style={{ border: `1px solid ${LINEA.tenue}`, padding: '16px 18px' }}>
-      <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.4,
+      <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
         textTransform: 'uppercase', color: COLOR.texto }}>{titulo}</div>
-      <div style={{ margin: '9px 0 14px', font: `400 12px/1.55 ${FUENTE.ui}`,
+      <div style={{ margin: '9px 0 14px', font: `400 12px/1.6 ${FUENTE.ui}`,
         color: COLOR.textoSuave }}>{texto}</div>
       {accion}
     </div>

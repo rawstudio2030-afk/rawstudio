@@ -99,7 +99,7 @@ function IndiceDesarrollo() {
         }}>
           <div style={{
             font: "700 10px/1 'Space Grotesk', system-ui, sans-serif",
-            letterSpacing: 2.4, textTransform: 'uppercase',
+            letterSpacing: 2.2, textTransform: 'uppercase',
             color: COLOR.textoTenue, marginBottom: 14,
           }}>Índice de desarrollo · {SCREENS.length} pantallas</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -119,7 +119,7 @@ function IndiceDesarrollo() {
                     padding: '5px 6px',
                   }}>{s.n}</span>
                   <span style={{
-                    font: "500 14px/1 'Space Grotesk', system-ui, sans-serif",
+                    font: "500 13px/1 'Space Grotesk', system-ui, sans-serif",
                     color: act ? '#fff' : COLOR.textoSuave,
                   }}>{s.title}</span>
                 </div>

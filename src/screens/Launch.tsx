@@ -80,17 +80,17 @@ export default function Launch() {
         <div style={{position: "relative", width: "242px", height: "90px", margin: "0 auto", transform: "rotate(-2deg)", filter: "drop-shadow(0 0 22px rgba(255,43,209,.7))"}}>
           <img src={wordmark} alt="RAWstudio" style={{width: "100%", height: "auto", display: "block"}} />
         </div>
-        <div style={{fontFamily: "'Instrument Serif',serif", fontStyle: "italic", fontSize: "17px", color: COLOR.textoSuave, marginTop: "8px"}}>
+        <div style={{fontFamily: "'Instrument Serif',serif", fontStyle: "italic", fontSize: "16px", color: COLOR.textoSuave, marginTop: "8px"}}>
           pay to see it
         </div>
       </div>
       <div style={{position: "absolute", bottom: "78px", width: "96px", height: "2px", background: "#1E1E24", overflow: "hidden"}}>
         <span ref={barraRef} style={{display: "block", height: "2px", background: COLOR.dinero, boxShadow: `0 0 10px ${COLOR.dinero}`, animation: "agBar 6.5s ease-out both"}} />
       </div>
-      <div style={{position: "absolute", bottom: "46px", font: "400 9.5px/1 'Space Mono',monospace", letterSpacing: "1.6px", textTransform: "uppercase", color: "#7E7A83"}}>
+      <div style={{position: "absolute", bottom: "46px", font: "400 9px/1 'Space Mono',monospace", letterSpacing: "1.6px", textTransform: "uppercase", color: "#7E7A83"}}>
         18+ only
       </div>
-      <div style={{position: "absolute", top: "56px", right: "16px", font: "700 9px/1 'Space Grotesk'", letterSpacing: "1.4px", textTransform: "uppercase", color: COLOR.fondo, background: COLOR.admin, padding: "7px 9px", cursor: "pointer"}} onClick={(e) => { e.stopPropagation(); replay() }}>
+      <div style={{position: "absolute", top: "56px", right: "16px", font: "700 9px/1 'Space Grotesk'", letterSpacing: "1.2px", textTransform: "uppercase", color: COLOR.fondo, background: COLOR.admin, padding: "7px 9px", cursor: "pointer"}} onClick={(e) => { e.stopPropagation(); replay() }}>
         Replay
       </div>
     </div>

@@ -75,7 +75,7 @@ export default function Bitacora() {
 
   const columnas: Columna<EventoBitacora>[] = [
     { clave: 'created_at', titulo: 'Cuándo', ancho: 165,
-      pinta: e => <span style={{ font: `400 11px/1.3 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
+      pinta: e => <span style={{ font: `400 10px/1.3 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
         {fechaHora(e.created_at)}</span> },
     { clave: 'actor', titulo: 'Quién', ancho: 165,
       pinta: e => e.actor_handle
@@ -93,7 +93,7 @@ export default function Bitacora() {
         : <span style={{ color: COLOR.textoApagado }}>—</span> },
     { clave: 'ip', titulo: 'IP', ancho: 130,
       pinta: e => e.ip
-        ? <span style={{ font: `400 11px/1.3 ${FUENTE.mono}`, color: COLOR.textoSuave }}>{e.ip}</span>
+        ? <span style={{ font: `400 10px/1.3 ${FUENTE.mono}`, color: COLOR.textoSuave }}>{e.ip}</span>
         : <span style={{ font: `400 10px/1.3 ${FUENTE.mono}`, color: COLOR.textoApagado }}
             title="El evento no nació de una petición HTTP, o no había cabeceras">sin IP</span> },
     { clave: 'detalle', titulo: 'Detalle',
@@ -103,7 +103,7 @@ export default function Bitacora() {
         return (
           <span onClick={ev => { ev.stopPropagation(); setAbierto(abierto_ ? null : e.id) }}
             style={{
-              font: `400 10px/1.4 ${FUENTE.mono}`, color: COLOR.textoTenue,
+              font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue,
               cursor: 'pointer',
               whiteSpace: abierto_ ? 'pre-wrap' : 'nowrap',
               display: 'inline-block',
@@ -120,7 +120,7 @@ export default function Bitacora() {
     <>
       <div style={{
         marginBottom: 14, padding: '9px 12px', border: `1px solid ${LINEA.tenue}`,
-        font: `400 11px/1.5 ${FUENTE.ui}`, color: COLOR.textoTenue,
+        font: `400 10px/1.45 ${FUENTE.ui}`, color: COLOR.textoTenue,
       }}>
         Registro inmutable. La base rechaza cualquier intento de editarlo o borrarlo,
         venga de donde venga.
@@ -155,7 +155,7 @@ export default function Bitacora() {
       {error && (
         <div style={{
           marginBottom: 14, padding: '10px 13px', border: '1px solid #FF4444',
-          color: '#FF4444', font: `400 12px/1.4 ${FUENTE.ui}`,
+          color: '#FF4444', font: `400 12px/1.45 ${FUENTE.ui}`,
         }}>{error}</div>
       )}
 
