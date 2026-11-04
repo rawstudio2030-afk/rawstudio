@@ -6,6 +6,7 @@
  * que no pueden vivir en el cliente.
  */
 import { supabase } from './supabase'
+import { leido, noSePudo, type Lectura } from './lectura'
 
 export type Regimen = 'persona_fisica' | 'rif' | 'moral' | 'sin_registro'
 
@@ -48,17 +49,20 @@ export const NOMBRE_ESTADO: Record<Solicitud['estado'], string> = {
   rechazada: 'Rechazada',
 }
 
-export async function infoRetiro(): Promise<InfoRetiro | null> {
+export async function infoRetiro(): Promise<Lectura<InfoRetiro | null>> {
   const { data, error } = await supabase.rpc('retiro_info')
-  if (error) { console.warn('[retiro] info:', error.message); return null }
-  return data as InfoRetiro
+  if (error) return noSePudo(null, error)
+  return leido(data as InfoRetiro)
 }
 
-export async function miCuenta(): Promise<CuentaCobro | null> {
+/** La cuenta a la que cobra. null significaba «no tiene ninguna registrada»,
+ *  y eso es lo que la pantalla le decia tambien cuando la consulta fallaba:
+ *  volvia a escribir su CLABE creyendo que se habia perdido. */
+export async function miCuenta(): Promise<Lectura<CuentaCobro | null>> {
   const { data, error } = await supabase.from('payout_accounts')
     .select('titular,clabe,banco,rfc,regimen,verificado').maybeSingle()
-  if (error) { console.warn('[retiro] cuenta:', error.message); return null }
-  return (data as CuentaCobro) ?? null
+  if (error) return noSePudo(null, error)
+  return leido((data as CuentaCobro) ?? null)
 }
 
 export async function guardarCuenta(id: string, c: {
@@ -89,12 +93,14 @@ export async function pedirRetiro(centavos: number): Promise<string | null> {
   return error ? error.message : null
 }
 
-export async function misSolicitudes(): Promise<Solicitud[]> {
+/** Sus retiros pedidos. Lista vacia por fallo le dice que no ha pedido
+ *  ninguno, y puede pedir otro encima del que ya estaba en camino. */
+export async function misSolicitudes(): Promise<Lectura<Solicitud[]>> {
   const { data, error } = await supabase.from('solicitudes_retiro')
     .select('id,coins,estado,motivo_rechazo,created_at,resuelta_at')
     .order('created_at', { ascending: false }).limit(50)
-  if (error) { console.warn('[retiro] solicitudes:', error.message); return [] }
-  return (data ?? []) as Solicitud[]
+  if (error) return noSePudo([], error)
+  return leido((data ?? []) as Solicitud[])
 }
 
 /* ---------- CLABE ---------- */

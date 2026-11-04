@@ -32,16 +32,25 @@ export default function Retirar() {
   const [bien, setBien] = useState('')
   const [enviando, setEnviando] = useState(false)
   const [listo, setListo] = useState(false)
+  // Una lista vacia de solicitudes le dice que no ha pedido ningun retiro, y
+  // podria pedir otro encima del que ya iba en camino.
+  const [fallo, setFallo] = useState<string | null>(null)
 
   const cargar = useCallback(async () => {
     const [i, l] = await Promise.all([infoRetiro(), misSolicitudes()])
-    setInfo(i); setLista(l); setListo(true)
+    setInfo(i.datos); setLista(l.datos); setFallo(i.fallo ?? l.fallo); setListo(true)
   }, [])
 
   useEffect(() => { if (!cargando && sesion) cargar() }, [cargando, sesion, cargar])
 
   if (cargando || !listo) return <Marco titulo="Retirar"><p style={nota}>Cargando…</p></Marco>
-  if (!info) return <Marco titulo="Retirar"><Aviso texto="No pude leer tu información de cobro." /></Marco>
+  if (fallo) return (
+    <Marco titulo="Retirar">
+      <Aviso texto="No pudimos leer tu información de cobro ni tus retiros pedidos. Tu dinero y tus solicitudes siguen donde estaban — lo que falló fue la consulta." />
+      <Boton al={() => { setListo(false); cargar() }}>Reintentar</Boton>
+    </Marco>
+  )
+  if (!info) return <Marco titulo="Retirar"><Aviso texto="Todavía no tienes información de cobro." /></Marco>
 
   const centavos = aCentavos(cantidad)
   const pasaMinimo = centavos !== null && centavos >= info.minimo

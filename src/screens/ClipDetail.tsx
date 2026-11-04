@@ -25,6 +25,9 @@ export default function ClipDetail() {
   const { sesion, perfil: perfilPropio } = useSesion()
   const [clip, setClip] = useState<ClipConAutora | null>(null)
   const [cargando, setCargando] = useState(true)
+  // «Este clip ya no existe» es definitivo: quien llega por un enlace
+  // compartido lo entiende como que se borro. No se dice por un fallo de red.
+  const [fallo, setFallo] = useState<string | null>(null)
   const [video, setVideo] = useState<string | null>(null)
   const [bloqueo, setBloqueo] = useState<{ motivo?: string; pais?: string } | null>(null)
   const [coins, setCoins] = useState<number | null>(null)
@@ -39,9 +42,10 @@ export default function ClipDetail() {
     const traer = async () => {
       // Sin id en la ruta se muestra el mas reciente, que es lo util al entrar
       // desde el age gate mientras no exista una pantalla de descubrimiento.
-      const c = id ? await clipPorId(id) : (await clipsPublicados(1))[0] ?? null
+      const r = id ? await clipPorId(id) : await clipsPublicados(1)
       if (!vivo) return
-      setClip(c); setCargando(false)
+      const c = Array.isArray(r.datos) ? r.datos[0] ?? null : r.datos
+      setClip(c); setFallo(r.fallo); setCargando(false)
       if (c?.tiene_video && sesion) {
         const a = await urlVideoFirmada(c.id)
         if (!vivo) return
@@ -50,7 +54,9 @@ export default function ClipDetail() {
       }
     }
     traer()
-    if (sesion) saldo().then(v => { if (vivo) setCoins(v) })
+    // El saldo se deja en null si no se pudo leer: cero diria que no tiene
+    // dinero, y de ahi sale el boton de «recargar» en vez del de comprar.
+    if (sesion) saldo().then(r => { if (vivo && !r.fallo) setCoins(r.datos) })
     // Si la creadora lo retiro y esta persona lo habia comprado, se le
     // ofrece su dinero de vuelta sin que tenga que pedirlo.
     if (sesion && id) reembolsoDisponible(id).then(v => { if (vivo) setDevolucion(v) })
@@ -84,6 +90,13 @@ export default function ClipDetail() {
   }
 
   if (cargando) return <Centro texto="Cargando…" />
+
+  if (fallo) return (
+    <Centro
+      texto="No pudimos cargar este clip. No es que no exista."
+      accion={{ texto: 'Reintentar', al: () => window.location.reload() }}
+    />
+  )
 
   if (!clip) return (
     <Centro
@@ -195,7 +208,9 @@ export default function ClipDetail() {
               if (!id) return
               const r = await reclamarReembolso(id)
               if ('error' in r) { setErrorCompra(r.error!); return }
-              setDevolucion(0); setCoins(await saldo())
+              setDevolucion(0)
+              const s = await saldo()
+              if (!s.fallo) setCoins(s.datos)
             }} style={{
               marginTop: 14, textAlign: 'center', padding: 16, cursor: 'pointer',
               background: COLOR.dinero, color: COLOR.fondo,

@@ -27,6 +27,9 @@ export default function CreatorProfile() {
 
   const [perfil, setPerfil] = useState<PerfilPublico | null>(null)
   const [cargando, setCargando] = useState(true)
+  const [falloPerfil, setFalloPerfil] = useState<string | null>(null)
+  const [falloClips, setFalloClips] = useState<string | null>(null)
+  const [intento, setIntento] = useState(0)
   const [clips, setClips] = useState<Clip[]>([])
 
   // Sin handle en la ruta se muestra el propio, que es el caso de "ver como se
@@ -38,20 +41,35 @@ export default function CreatorProfile() {
       setPerfil(mio); setCargando(false); return
     }
     setCargando(true)
-    perfilPorHandle(handle).then(p => { if (vivo) { setPerfil(p); setCargando(false) } })
+    perfilPorHandle(handle).then(r => {
+      if (!vivo) return
+      setPerfil(r.datos); setFalloPerfil(r.fallo); setCargando(false)
+    })
     return () => { vivo = false }
-  }, [handle, mio, cargandoSesion])
+  }, [handle, mio, cargandoSesion, intento])
 
   // RLS decide que se ve: a una tercera persona solo le llegan los publicados,
   // a la propia autora tambien sus borradores.
   useEffect(() => {
     if (!perfil) { setClips([]); return }
     let vivo = true
-    clipsDe(perfil.id).then(c => { if (vivo) setClips(c) })
+    clipsDe(perfil.id).then(r => {
+      if (!vivo) return
+      setClips(r.datos); setFalloClips(r.fallo)
+    })
     return () => { vivo = false }
   }, [perfil])
 
   if (cargando) return <Centro texto="Cargando…" />
+
+  // «No existe @fulanita» es una afirmacion fuerte: para ella significa que su
+  // enlace no sirve. No se dice cuando lo que paso es que no pudimos leer.
+  if (falloPerfil) return (
+    <Centro
+      texto="No pudimos cargar este perfil. No es que no exista."
+      accion={{ texto: 'Reintentar', al: () => setIntento(n => n + 1) }}
+    />
+  )
 
   if (!perfil) return (
     <Centro
@@ -130,12 +148,14 @@ export default function CreatorProfile() {
 
         <div style={{ marginTop: 28 }}>
           {clips.length === 0 ? (
-            <div style={{ padding: '26px 18px', textAlign: 'center', border: '1px dashed rgba(255,255,255,.12)' }}>
+            <div style={{ padding: '26px 18px', textAlign: 'center', border: `1px ${falloClips ? 'solid' : 'dashed'} ${falloClips ? COLOR.acento : 'rgba(255,255,255,.12)'}` }}>
               <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', color: COLOR.textoApagado }}>
-                Sin clips todavía
+                {falloClips ? 'No se pudieron cargar' : 'Sin clips todavía'}
               </div>
               <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 16, color: COLOR.textoTenue, marginTop: 10 }}>
-                {esMio ? 'Cuando publiques, tus clips aparecen aquí.' : 'Esta creadora aún no publica nada.'}
+                {falloClips ? 'No significa que no haya publicado nada.'
+                  : esMio ? 'Cuando publiques, tus clips aparecen aquí.'
+                  : 'Esta creadora aún no publica nada.'}
               </div>
               {esMio && (
                 <Enlace a="/upload" style={{

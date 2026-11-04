@@ -7,6 +7,11 @@ import { miniaturaDeVideo, tiraDeVideo } from './miniatura'
  *  rechazando cada escritura. */
 export async function soyAdmin(): Promise<boolean> {
   const { data, error } = await supabase.rpc('es_admin')
+  // Este NO devuelve Lectura, a proposito. Las demas lecturas se envolvieron
+  // porque devolver vacio al fallar es mentir; aqui devolver false al fallar
+  // es la respuesta correcta: ante la duda, no eres administrador. Darle al
+  // llamador un `fallo` que inspeccionar solo invitaria a tratarlo como
+  // «pues dejalo pasar».
   if (error) { console.warn('[admin] es_admin:', error.message); return false }
   return data === true
 }
@@ -35,12 +40,6 @@ export type PerfilAdmin = {
  *  una funcion security definer que comprueba es_admin() del lado del servidor:
  *  a un no-admin le devuelve cero filas, y un anonimo ni siquiera puede
  *  ejecutarla. */
-export async function listarPerfiles(busqueda: string): Promise<PerfilAdmin[]> {
-  const { data, error } = await supabase
-    .rpc('admin_listar_usuarios', { busqueda: busqueda.trim() })
-  if (error) { console.warn('[admin] listar:', error.message); return [] }
-  return (data ?? []) as PerfilAdmin[]
-}
 
 /** Toda accion de admin queda en la bitacora. Se escribe DESPUES del cambio y
  *  no antes: si el cambio falla por RLS, no queda una entrada que afirme algo
@@ -84,12 +83,11 @@ export type Entrada = {
   objetivo: string | null; detalle: Record<string, unknown>; created_at: string
 }
 
-export async function bitacora(limite = 40): Promise<Entrada[]> {
-  const { data, error } = await supabase.from('admin_log')
-    .select('*').order('created_at', { ascending: false }).limit(limite)
-  if (error) { console.warn('[admin] bitacora:', error.message); return [] }
-  return (data ?? []) as Entrada[]
-}
+/* `listarPerfiles` y `bitacora` vivian aqui y devolvian lista vacia cuando
+ * fallaban. No se convirtieron al tipo Lectura: se borraron, porque no los
+ * llamaba nadie. Los sustituyeron `usuarios` y `leerBitacora`, que ya
+ * devuelven su error —`leerBitacora` con la forma { filas, total, error }
+ * desde que se escribio, que es la misma idea que ahora tiene nombre—. */
 
 /** Mover privilegios pasa por funciones del servidor y no por una politica:
  *  hacen falta salvaguardas que una politica no puede expresar —nadie se quita

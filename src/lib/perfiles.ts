@@ -1,4 +1,5 @@
 import { supabase, COLUMNAS_PUBLICAS, type PerfilPublico } from './supabase'
+import { leido, noSePudo, type Lectura } from './lectura'
 
 /** URL publica de una foto de perfil. El bucket es publico en lectura, asi que
  *  no hace falta firmar nada. */
@@ -7,14 +8,14 @@ export function urlAvatar(path: string | null): string | null {
   return supabase.storage.from('avatars').getPublicUrl(path).data.publicUrl
 }
 
-export async function perfilPorHandle(handle: string): Promise<PerfilPublico | null> {
+export async function perfilPorHandle(handle: string): Promise<Lectura<PerfilPublico | null>> {
   const { data, error } = await supabase
     .from('profiles').select(COLUMNAS_PUBLICAS).eq('handle', handle.toLowerCase()).maybeSingle()
-  if (error) {
-    console.warn('[perfiles] no se pudo leer:', error.message)
-    return null
-  }
-  return (data as PerfilPublico) ?? null
+  // null decia «esa creadora no existe». Si fallo la consulta, existe y no la
+  // pudimos leer, que para ella es la diferencia entre un enlace roto y un
+  // momento malo del servidor.
+  if (error) return noSePudo(null, error)
+  return leido((data as PerfilPublico) ?? null)
 }
 
 /** Directorio de creadoras.
@@ -41,8 +42,8 @@ export async function creadoras(busqueda = '', limite = 60, desde = 0) {
     q = q.or(`handle.ilike.%${b}%,display_name.ilike.%${b}%`)
   }
   const { data, error } = await q
-  if (error) { console.warn('[perfiles] creadoras:', error.message); return [] }
-  return (data ?? []) as FichaCreadora[]
+  if (error) return noSePudo([], error)
+  return leido((data ?? []) as FichaCreadora[])
 }
 
 /** Sube una foto de perfil y devuelve su ruta.

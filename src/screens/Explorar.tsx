@@ -26,12 +26,22 @@ export default function Explorar() {
   const [filtro, setFiltro] = useState<Filtro>('todo')
   const [gente, setGente] = useState<FichaCreadora[]>([])
   const [busca, setBusca] = useState('')
+  // «No hay clips» y «no pude pedir los clips» se pintan distinto. Sin esto,
+  // el 4 de noviembre de 2026 esta pantalla dijo «todavia nadie ha publicado
+  // nada» durante veinte minutos, con 186 clips en la base.
+  const [fallo, setFallo] = useState<string | null>(null)
+  const [intento, setIntento] = useState(0)
+  const reintentar = () => setIntento(n => n + 1)
 
   useEffect(() => {
     let vivo = true
-    clipsPublicados(60).then(c => { if (vivo) { setClips(c); setCargando(false) } })
+    setCargando(true)
+    clipsPublicados(60).then(r => {
+      if (!vivo) return
+      setClips(r.datos); setFallo(r.fallo); setCargando(false)
+    })
     return () => { vivo = false }
-  }, [])
+  }, [intento])
 
   // El directorio se pide aparte y solo cuando hace falta: son cientos de
   // filas y no tiene sentido traerlas para quien viene a ver clips.
@@ -39,7 +49,10 @@ export default function Explorar() {
     if (filtro !== 'creadoras') return
     let vivo = true
     const t = setTimeout(() => {
-      creadoras(busca, 60).then(g => { if (vivo) setGente(g) })
+      creadoras(busca, 60).then(r => {
+        if (!vivo) return
+        setGente(r.datos); setFallo(r.fallo)
+      })
     }, busca ? 300 : 0)
     return () => { vivo = false; clearTimeout(t) }
   }, [filtro, busca])
@@ -124,6 +137,11 @@ export default function Explorar() {
           )
         ) : cargando ? (
           <Vacio texto="Cargando…" />
+        ) : fallo ? (
+          <Vacio
+            texto="No pudimos cargar el catálogo. No es que esté vacío: no conseguimos preguntar."
+            accion={{ texto: 'Reintentar', al: reintentar }}
+          />
         ) : visibles.length === 0 ? (
           <Vacio
             texto={clips.length === 0

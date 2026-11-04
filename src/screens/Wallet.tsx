@@ -38,15 +38,21 @@ export default function Dinero() {
   const [movs, setMovs] = useState<Movimiento[]>([])
   const [pestana, setPestana] = useState<Pestana>('todo')
 
+  // Un saldo de cero es una respuesta legitima, asi que si la consulta falla
+  // NO se puede pintar cero: seria decirle a alguien que no tiene dinero.
+  // Esta pantalla prefiere no enseñar cifra a enseñar una falsa.
+  const [fallo, setFallo] = useState<string | null>(null)
+  const [intento, setIntento] = useState(0)
+
   useEffect(() => {
     if (cargandoSesion || !sesion) return
     let vivo = true
     Promise.all([saldo(), movimientos(CUANTOS)]).then(([s, m]) => {
       if (!vivo) return
-      setCentavos(s); setMovs(m)
+      setCentavos(s.datos); setMovs(m.datos); setFallo(s.fallo ?? m.fallo)
     })
     return () => { vivo = false }
-  }, [sesion, cargandoSesion])
+  }, [sesion, cargandoSesion, intento])
 
   if (cargandoSesion || centavos === null) return <Centro texto="Cargando…" />
 
@@ -76,12 +82,29 @@ export default function Dinero() {
         {/* usd() y no el entero en crudo: el libro guarda CENTAVOS. Antes esta
             cifra se pintaba tal cual con la palabra «dólares» al lado, asi que
             $2.40 se leia como «240 dólares». */}
-        <div style={{ fontFamily: FUENTE.display, fontSize: 52, lineHeight: 1, color: COLOR.dinero, marginTop: 12 }}>
-          {usd(centavos)}
+        <div style={{
+          fontFamily: FUENTE.display, fontSize: 52, lineHeight: 1, marginTop: 12,
+          color: fallo ? COLOR.textoApagado : COLOR.dinero,
+        }}>
+          {fallo ? '—' : usd(centavos)}
         </div>
-        <div style={{ font: `400 12px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 8 }}>
-          {esCreadora ? 'Lo que puedes gastar o retirar.' : 'Lo que puedes gastar.'}
-        </div>
+        {fallo ? (
+          <div style={{ marginTop: 8 }}>
+            <div style={{ font: `400 12px/1.45 ${FUENTE.mono}`, color: COLOR.acento }}>
+              No pudimos leer tu saldo. Tu dinero está donde estaba — lo que falló
+              fue la consulta.
+            </div>
+            <Pulsable al={() => setIntento(n => n + 1)} style={{
+              marginTop: 10, padding: '9px 14px', cursor: 'pointer',
+              border: `1px solid ${LINEA.media}`, color: COLOR.texto,
+              font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
+            }}>Reintentar</Pulsable>
+          </div>
+        ) : (
+          <div style={{ font: `400 12px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 8 }}>
+            {esCreadora ? 'Lo que puedes gastar o retirar.' : 'Lo que puedes gastar.'}
+          </div>
+        )}
       </div>
 
       {/* ---------- Las dos caras ---------- */}
@@ -123,7 +146,8 @@ export default function Dinero() {
 
       {visibles.length === 0 ? (
         <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 16, color: COLOR.textoTenue, padding: '22px 0' }}>
-          {pestana === 'gane' ? 'Todavía no has ganado nada.'
+          {fallo ? 'No pudimos leer tus movimientos. No es que no haya.'
+            : pestana === 'gane' ? 'Todavía no has ganado nada.'
             : pestana === 'gaste' ? 'Todavía no has gastado nada.'
             : 'Todavía no hay movimientos.'}
         </div>

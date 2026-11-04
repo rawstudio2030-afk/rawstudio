@@ -32,12 +32,19 @@ export default function Cobro() {
   const [error, setError] = useState('')
   const [bien, setBien] = useState('')
   const [guardando, setGuardando] = useState(false)
+  // Si no se pudo leer la cuenta NO se enseña el formulario vacio: pareceria
+  // que no tiene ninguna registrada, y lo que escribiera encima pisaria la
+  // que si esta guardada.
+  const [fallo, setFallo] = useState<string | null>(null)
+  const [intento, setIntento] = useState(0)
 
   useEffect(() => {
     if (cargando || !sesion) return
     let vivo = true
-    miCuenta().then(c => {
+    miCuenta().then(r => {
       if (!vivo) return
+      setFallo(r.fallo)
+      const c = r.datos
       if (c) {
         setTitular(c.titular); setClabe(c.clabe); setBanco(c.banco ?? '')
         setRfc(c.rfc ?? ''); setRegimen(c.regimen)
@@ -45,7 +52,7 @@ export default function Cobro() {
       setCargada(true)
     })
     return () => { vivo = false }
-  }, [sesion, cargando])
+  }, [sesion, cargando, intento])
 
   const digitos = clabe.replace(/\D/g, '')
   const clabeOk = digitos.length === 18
@@ -64,6 +71,13 @@ export default function Cobro() {
   }
 
   if (cargando || !cargada) return <Marco titulo="Cuenta para cobrar"><p style={nota}>Cargando…</p></Marco>
+
+  if (fallo) return (
+    <Marco titulo="Cuenta para cobrar" volverA="/wallet">
+      <Aviso texto="No pudimos leer tu cuenta de cobro. No quiere decir que no tengas una: por eso no te enseñamos el formulario en blanco, para que no acabes escribiendo encima de la que ya está guardada." />
+      <Boton al={() => { setCargada(false); setIntento(n => n + 1) }}>Reintentar</Boton>
+    </Marco>
+  )
 
   return (
     <Marco titulo="Cuenta para cobrar" volverA="/wallet">

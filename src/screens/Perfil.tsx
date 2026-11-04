@@ -55,7 +55,12 @@ export default function Perfil() {
   useEffect(() => {
     if (!sesion) return
     let vivo = true
-    miTelefono().then(t => { if (vivo) { setTelefono(t); setTelGuardado(t) } })
+    // Si la lectura falla NO se pinta cadena vacia: el campo quedaria en
+    // blanco y, al guardar, borraria el telefono que si estaba guardado.
+    miTelefono().then(r => {
+      if (!vivo || r.fallo) return
+      setTelefono(r.datos); setTelGuardado(r.datos)
+    })
     return () => { vivo = false }
   }, [sesion])
 

@@ -211,7 +211,13 @@ function Detalle({ e, cierra, recarga }: {
                 y se te abonan en cuanto entregues.
               </div>
               <Boton tono="primario" al={async () => {
-                if (sesion) setClips(await clipsDe(sesion.user.id))
+                // Si falla, no se abre el selector con la lista vacia: diria
+                // que no tiene clips que entregar cuando si los tiene.
+                if (sesion) {
+                  const r = await clipsDe(sesion.user.id)
+                  if (r.fallo) { setError('No pudimos leer tus clips. Intenta otra vez.'); return }
+                  setClips(r.datos)
+                }
                 setEligiendo(true)
               }}>Entregar</Boton>
             </>

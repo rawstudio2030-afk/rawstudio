@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { leido, noSePudo, type Lectura } from './lectura'
 
 export type Movimiento = {
   id: number
@@ -52,17 +53,20 @@ export function totales(movs: Movimiento[]) {
 
 /** El saldo se DERIVA de la suma del libro, no se guarda. Asi nunca puede
  *  quedar desincronizado de sus movimientos. */
-export async function saldo(): Promise<number> {
+export async function saldo(): Promise<Lectura<number>> {
   const { data, error } = await supabase.rpc('saldo')
-  if (error) { console.warn('[monedero] saldo:', error.message); return 0 }
-  return (data as number) ?? 0
+  // Cero es una respuesta legitima —hay cuentas sin saldo— y por eso devolver
+  // cero cuando la consulta falla era de lo peor de esta familia: a quien si
+  // tiene dinero se le enseñaba que no tiene ninguno.
+  if (error) return noSePudo(0, error)
+  return leido((data as number) ?? 0)
 }
 
-export async function movimientos(limite = 50): Promise<Movimiento[]> {
+export async function movimientos(limite = 50): Promise<Lectura<Movimiento[]>> {
   const { data, error } = await supabase.from('coin_ledger')
     .select('*').order('created_at', { ascending: false }).limit(limite)
-  if (error) { console.warn('[monedero] movimientos:', error.message); return [] }
-  return (data ?? []) as Movimiento[]
+  if (error) return noSePudo([], error)
+  return leido((data ?? []) as Movimiento[])
 }
 
 export async function comprarClip(clipId: string): Promise<{ ok: boolean; error?: string; saldo?: number }> {
@@ -89,12 +93,15 @@ export type Comprado = {
   } | null
 }
 
-export async function misCompras(): Promise<Comprado[]> {
+/** Lo que esta persona ya pago. Si esto falla y se devuelve lista vacia, a
+ *  quien compro se le dice que no ha comprado nada: pierde el acceso a lo que
+ *  pago, y encima parece que nunca lo pago. */
+export async function misCompras(): Promise<Lectura<Comprado[]>> {
   const { data, error } = await supabase.from('purchases')
     .select('id,clip_id,price_coins,created_at,clips(id,title,cover_path,duration_s,profiles!clips_creator_id_fkey(handle,display_name))')
     .order('created_at', { ascending: false })
-  if (error) { console.warn('[monedero] compras:', error.message); return [] }
-  return (data ?? []) as unknown as Comprado[]
+  if (error) return noSePudo([], error)
+  return leido((data ?? []) as unknown as Comprado[])
 }
 
 export async function ajustarSaldo(id: string, cantidad: number, motivo: string) {

@@ -7,19 +7,26 @@ import { misCompras, type Comprado } from '../lib/monedero'
 import { urlPortada } from '../lib/clips'
 import { COLOR, FUENTE } from '../lib/diseño'
 import { usd } from '../lib/dinero'
-import { Enlace } from '../components/Pulsable'
+import { Pulsable, Enlace } from '../components/Pulsable'
 
 
 export default function Library() {
   const { sesion, cargando } = useSesion()
   const [compras, setCompras] = useState<Comprado[] | null>(null)
+  // Decirle «no has desbloqueado nada» a alguien que SI pago es lo peor que
+  // puede hacer esta pantalla: parece que perdio lo que compro.
+  const [fallo, setFallo] = useState<string | null>(null)
+  const [intento, setIntento] = useState(0)
 
   useEffect(() => {
     if (cargando || !sesion) return
     let vivo = true
-    misCompras().then(c => { if (vivo) setCompras(c) })
+    misCompras().then(r => {
+      if (!vivo) return
+      setCompras(r.datos); setFallo(r.fallo)
+    })
     return () => { vivo = false }
-  }, [sesion, cargando])
+  }, [sesion, cargando, intento])
 
   if (cargando || compras === null) return <Centro texto="Cargando…" />
 
@@ -33,11 +40,26 @@ export default function Library() {
           Tuyo <span style={{ color: COLOR.dinero }}>para siempre</span>
         </div>
         <div style={{ font: `400 12px/1.6 ${FUENTE.mono}`, color: COLOR.textoTenue, marginTop: 8 }}>
-          {compras.length} {compras.length === 1 ? 'clip desbloqueado' : 'clips desbloqueados'}
+          {fallo ? '—'
+            : `${compras.length} ${compras.length === 1 ? 'clip desbloqueado' : 'clips desbloqueados'}`}
         </div>
       </div>
 
-      {compras.length === 0 ? (
+      {fallo ? (
+        <div style={{ padding: '50px 20px', textAlign: 'center', border: `1px solid ${COLOR.acento}` }}>
+          <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19, color: COLOR.textoSuave }}>
+            No pudimos leer lo que compraste.
+          </div>
+          <div style={{ font: `400 12px/1.6 ${FUENTE.mono}`, color: COLOR.textoTenue, marginTop: 10 }}>
+            No significa que no esté. Nada de lo que pagaste se pierde por esto.
+          </div>
+          <Pulsable al={() => setIntento(n => n + 1)} style={{
+            marginTop: 18, display: 'inline-block', background: COLOR.acento, color: COLOR.fondo,
+            padding: '14px 22px', font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6,
+            textTransform: 'uppercase', cursor: 'pointer',
+          }}>Reintentar</Pulsable>
+        </div>
+      ) : compras.length === 0 ? (
         <div style={{ padding: '50px 20px', textAlign: 'center', border: '1px dashed rgba(255,255,255,.12)' }}>
           <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19, color: COLOR.textoSuave }}>
             Todavía no has desbloqueado nada.

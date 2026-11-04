@@ -10,6 +10,7 @@
  * cualquiera con la llave anonima.
  */
 import { supabase } from './supabase'
+import { leido, noSePudo, type Lectura } from './lectura'
 
 /** Quita lo que la gente escribe por costumbre —espacios, guiones,
  *  parentesis— y deja digitos con un + opcional, que es lo que acepta la
@@ -23,11 +24,14 @@ export function telefonoCuadra(t: string): boolean {
   return /^\+?[0-9]{10,15}$/.test(limpiarTelefono(t))
 }
 
-export async function miTelefono(): Promise<string> {
+/** Su telefono guardado. Devolver cadena vacia por fallo es peligroso aqui y
+ *  no solo confuso: el formulario se pinta en blanco, y si lo guarda asi
+ *  BORRA el telefono que si estaba. */
+export async function miTelefono(): Promise<Lectura<string>> {
   const { data, error } = await supabase.from('contactos')
     .select('telefono').maybeSingle()
-  if (error) { console.warn('[contacto] leer:', error.message); return '' }
-  return data?.telefono ?? ''
+  if (error) return noSePudo('', error)
+  return leido(data?.telefono ?? '')
 }
 
 export async function guardarTelefono(id: string, telefono: string): Promise<string | null> {

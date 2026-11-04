@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { leido, noSePudo, type Lectura } from './lectura'
 
 export type Visibilidad = 'pago' | 'suscriptores' | 'gratis'
 
@@ -68,6 +69,9 @@ export function urlPortada(path: string | null): string | null {
  *  geobloqueo no se puede decidir en el navegador —la base no sabe de que pais
  *  llega la peticion— asi que cuando se haga ira por la funcion de borde
  *  `ver-clip`, igual que el video. Ver `urlVideoFirmada`. */
+/* Tampoco devuelve Lectura, y aqui si es por poca cosa: si falla, arriba se
+ * cae a la portada borrosa de siempre. Nadie se queda sin saber nada ni ve
+ * una afirmacion falsa — ve una imagen peor. */
 export async function urlPortadaNitida(
   path: string | null, segundos = 60,
 ): Promise<string | null> {
@@ -110,7 +114,7 @@ export async function urlVideoFirmada(clipId: string): Promise<Acceso> {
   }
 }
 
-export async function clipsPublicados(limite = 30): Promise<ClipConAutora[]> {
+export async function clipsPublicados(limite = 30): Promise<Lectura<ClipConAutora[]>> {
   // Lo destacado va primero, en el orden que le puso la administracion, y
   // despues lo demas por fecha. nullsFirst:false manda al final lo que no
   // esta destacado, que es todo salvo un puñado.
@@ -123,32 +127,37 @@ export async function clipsPublicados(limite = 30): Promise<ClipConAutora[]> {
     .or(`caduca_at.is.null,caduca_at.gt.${ahora}`)
     .order('destacado_orden', { ascending: true, nullsFirst: false })
     .order('published_at', { ascending: false }).limit(limite)
-  if (error) { console.warn('[clips] publicados:', error.message); return [] }
+  // Devolver lista vacia aqui hacia que el catalogo dijera «todavia nadie ha
+  // publicado nada» con 186 clips en la base. Paso de verdad, veinte minutos,
+  // el 4 de noviembre de 2026.
+  if (error) return noSePudo([], error)
   // `as unknown as` solo por la cardinalidad del join: sin tipos generados de
   // la base, supabase-js no sabe que clips_creator_id_fkey es muchos-a-uno y
   // asume que `profiles` es un array. En ejecucion llega un objeto —o null—,
   // que es lo que dice `ClipConAutora` y lo que usa toda la interfaz. Las
   // COLUMNAS si quedan comprobadas: si una deja de coincidir con `Clip`, esto
   // vuelve a fallar aqui.
-  return (data ?? []) as unknown as ClipConAutora[]
+  return leido((data ?? []) as unknown as ClipConAutora[])
 }
 
-export async function clipPorId(id: string): Promise<ClipConAutora | null> {
+export async function clipPorId(id: string): Promise<Lectura<ClipConAutora | null>> {
   const { data, error } = await supabase.from('clips')
     .select(CON_AUTORA).eq('id', id).maybeSingle()
-  if (error) { console.warn('[clips] por id:', error.message); return null }
+  // null significaba «ese clip no existe». Si la consulta fallo, significa
+  // otra cosa muy distinta, y la pantalla decia «este clip ya no existe».
+  if (error) return noSePudo(null, error)
   // Mismo motivo que arriba: la cardinalidad del join, no las columnas.
-  return (data as unknown as ClipConAutora) ?? null
+  return leido((data as unknown as ClipConAutora) ?? null)
 }
 
 /** Incluye borradores solo cuando quien consulta es la propia autora: de eso
  *  se encarga RLS, no este codigo. */
-export async function clipsDe(creatorId: string): Promise<Clip[]> {
+export async function clipsDe(creatorId: string): Promise<Lectura<Clip[]>> {
   const { data, error } = await supabase.from('clips')
     .select(COLUMNAS).eq('creator_id', creatorId)
     .order('created_at', { ascending: false })
-  if (error) { console.warn('[clips] de creadora:', error.message); return [] }
-  return (data ?? []) as Clip[]
+  if (error) return noSePudo([], error)
+  return leido((data ?? []) as Clip[])
 }
 
 export type Bucket = 'clips' | 'clip-covers' | 'clip-covers-full'
