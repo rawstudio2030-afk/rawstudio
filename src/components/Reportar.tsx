@@ -10,7 +10,7 @@
  */
 import { useState } from 'react'
 import { useSesion } from '../lib/sesion'
-import { reportar, MOTIVOS, type MotivoReporte } from '../lib/admin'
+import { reportar, MOTIVOS, type MotivoReporte } from '../lib/reportes'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 import { Pulsable } from './Pulsable'
 import { useEscape } from '../lib/teclado'

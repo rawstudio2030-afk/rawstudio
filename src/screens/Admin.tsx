@@ -7,7 +7,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
-import { soyAdmin } from '../lib/admin'
+import { soyAdmin } from '../lib/papel'
 import { COLOR, FUENTE } from '../lib/diseño'
 import { Marco, useModulo } from '../admin/Marco'
 import Usuarios from '../admin/Usuarios'

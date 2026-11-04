@@ -9,9 +9,10 @@ import { useCallback, useEffect, useState } from 'react'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 import {
   listarReportes, conteoReportes, resolverReporte, cerrarReportesDe,
-  moderar, banearCuenta, MOTIVOS,
-  type Reporte, type EstadoReporte, type MotivoReporte,
+  moderar, banearCuenta,
+  type Reporte, type EstadoReporte,
 } from '../lib/admin'
+import { MOTIVOS, type MotivoReporte } from '../lib/reportes'
 import { urlPortada } from '../lib/clips'
 import {
   Boton, Confirmar, Paginador, Selector, Etiquetado, Insignia,

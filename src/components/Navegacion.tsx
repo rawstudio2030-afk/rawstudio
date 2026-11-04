@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Enlace } from './Pulsable'
 import { useSesion } from '../lib/sesion'
-import { soyAdmin } from '../lib/admin'
+import { soyAdmin } from '../lib/papel'
 import type { Destino } from '../lib/rutas'
 import {
   BARRA, ESTUDIO, RUTAS_ENTRADA, RUTAS_PANEL, REDIRIGE_SI_HAY_SESION, EXIGE_SESION,

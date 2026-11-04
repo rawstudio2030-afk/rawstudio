@@ -3,7 +3,7 @@ import type { Session } from '@supabase/supabase-js'
 import { edadConfirmada, olvidarEdad } from './edad'
 import { olvidarModo } from './modo'
 import { supabase, COLUMNAS_PROPIAS, type Perfil } from './supabase'
-import { registrarAcceso } from './admin'
+import { registrarAcceso } from './bitacora'
 
 type Estado = {
   sesion: Session | null

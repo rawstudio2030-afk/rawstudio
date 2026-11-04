@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import { useSesion } from './lib/sesion'
 import { GuardiaRutas, BarraInferior, BarraLateral, HuecoBarra, usePapel } from './components/Navegacion'
@@ -19,7 +19,12 @@ import Creators from './screens/Creators'
 import Acceso from './screens/Acceso'
 import Entrar from './screens/Entrar'
 import PerfilPropio from './screens/Perfil'
-import Admin from './screens/Admin'
+/* El panel se carga aparte, y solo cuando alguien entra en /admin.
+ *
+ * Son 224 K de fuente —tablas, graficas, moderacion, finanzas— que usan diez
+ * personas como mucho, y hasta hoy viajaban en el mismo paquete que abre
+ * cualquiera que entre a la portada desde el telefono. */
+const Admin = lazy(() => import('./screens/Admin'))
 import Niveles from './estudio/Niveles'
 import Encargos from './estudio/Encargos'
 import Blog from './estudio/Blog'
@@ -29,7 +34,10 @@ import Estudio from './screens/Estudio'
 import NuevaClave from './screens/NuevaClave'
 import Verificar from './screens/Verificar'
 import { Privacidad, Terminos } from './screens/Legal'
-import AltaCreadora from './screens/AltaCreadora'
+/* Tambien solo para administracion, y tambien se lleva medio `lib/admin`
+   consigo: dar de alta una creadora sube expediente, publica por ella y le
+   fija avatar. */
+const AltaCreadora = lazy(() => import('./screens/AltaCreadora'))
 import { SIN_PUERTA_DE_EDAD, EXIGE_SESION, RUTAS_ENTRADA } from './lib/rutas'
 import { modoElegido } from './lib/modo'
 import { edadConfirmada } from './lib/edad'
@@ -214,10 +222,27 @@ function VolverArriba() {
   return null
 }
 
+/** Lo que se ve mientras llega un trozo que no venia en el paquete. Sobrio a
+ *  proposito: si parpadea medio segundo, un cartel grande molesta mas que
+ *  ayuda. */
+function CargandoPantalla() {
+  return (
+    <div style={{
+      minHeight: '100vh', display: 'grid', placeItems: 'center',
+      background: COLOR.fondo, color: COLOR.textoTenue,
+      font: '400 13px/1 system-ui',
+    }}>Cargando…</div>
+  )
+}
+
 export default function App() {
   return (
     <>
       <VolverArriba />
+      {/* El fallback solo se ve al entrar al panel, que es la unica pantalla
+          que llega aparte. En las demas el elemento ya esta cargado y
+          Suspense no se interpone. */}
+      <Suspense fallback={<CargandoPantalla />}>
       <Routes>
         {SCREENS.map(s => <Route key={s.path} path={s.path} element={s.el} />)}
         {/* Perfil publico por handle. No entra al indice de pantallas porque
@@ -228,6 +253,7 @@ export default function App() {
         <Route path="/admin/:modulo" element={<Admin />} />
         <Route path="*" element={<Portal />} />
       </Routes>
+      </Suspense>
       <GuardiaRutas />
       <GuardiaModo />
       <CierrePorInactividad />

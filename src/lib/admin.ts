@@ -1,20 +1,19 @@
 import { supabase } from './supabase'
+import type { MotivoReporte } from './reportes'
+
+/* `soyAdmin` y el reporte de contenido vivian aqui y se mudaron a
+ * `./papel` y `./reportes` el 4 de noviembre de 2026.
+ *
+ * No fue orden: era lo unico que impedia sacar este archivo del paquete que
+ * descarga todo el mundo. `Navegacion` pedia `soyAdmin` y `Reportar` pedia
+ * `MOTIVOS` —dos cosas pequeñas— y con eso los 68 K de aqui, que son tablas,
+ * finanzas y moderacion, viajaban al telefono de cualquiera que abriera la
+ * portada. Comprobado en el paquete construido: estaban dentro.
+ *
+ * O sea: lo que decide que un modulo se pueda cargar aparte no es su tamaño,
+ * es quien lo toca. Un solo import desde el tronco lo ancla entero. */
 import { miniaturaDeVideo, tiraDeVideo } from './miniatura'
 
-/** Si es admin lo decide la base, no el cliente. Esta consulta solo sirve para
- *  DIBUJAR o no el panel; la proteccion de verdad son las politicas RLS: aunque
- *  alguien forzara esto a true editando el JavaScript, la base seguiria
- *  rechazando cada escritura. */
-export async function soyAdmin(): Promise<boolean> {
-  const { data, error } = await supabase.rpc('es_admin')
-  // Este NO devuelve Lectura, a proposito. Las demas lecturas se envolvieron
-  // porque devolver vacio al fallar es mentir; aqui devolver false al fallar
-  // es la respuesta correcta: ante la duda, no eres administrador. Darle al
-  // llamador un `fallo` que inspeccionar solo invitaria a tratarlo como
-  // «pues dejalo pasar».
-  if (error) { console.warn('[admin] es_admin:', error.message); return false }
-  return data === true
-}
 
 export type PerfilAdmin = {
   id: string
@@ -427,13 +426,6 @@ export async function accionesBitacora() {
   return (data ?? []) as { accion: string; cuantas: number }[]
 }
 
-/** Se llama al entrar. La IP NO la manda el navegador —no conoce la suya—
- *  sino que la lee el servidor de las cabeceras que pone Cloudflare. Aqui
- *  solo se avisa de que hubo un acceso y con que metodo. */
-export async function registrarAcceso(metodo: string) {
-  const { error } = await supabase.rpc('registrar_acceso', { metodo })
-  if (error) console.warn('[admin] registrar acceso:', error.message)
-}
 
 /* ==================== Modulo 2: moderacion ==================== */
 
@@ -491,21 +483,6 @@ export async function leerBandera(): Promise<boolean> {
   return data.valor === true
 }
 
-export type MotivoReporte =
-  | 'menor_de_edad' | 'no_consentido' | 'violencia'
-  | 'contenido_ilegal' | 'derechos_autor' | 'spam' | 'otro'
-
-export async function reportar(
-  objetivo: { clip?: string; perfil?: string },
-  motivo: MotivoReporte, comentario?: string,
-) {
-  const { data, error } = await supabase.rpc('reportar', {
-    p_clip: objetivo.clip ?? null, p_perfil: objetivo.perfil ?? null,
-    p_motivo: motivo, p_comentario: comentario ?? null,
-  })
-  if (error) return { error: error.message }
-  return data as { ok: boolean; repetido: boolean }
-}
 
 /* ==================== Modulo 5: finanzas ==================== */
 
@@ -627,18 +604,6 @@ export async function cerrarReportesDe(objetivo: { clip?: string; perfil?: strin
   return data as { ok: boolean; cerrados: number }
 }
 
-export const MOTIVOS: { v: MotivoReporte; t: string; ayuda: string }[] = [
-  { v: 'menor_de_edad',    t: 'Parece una persona menor de edad',
-    ayuda: 'Lo revisamos de inmediato y con prioridad sobre todo lo demás.' },
-  { v: 'no_consentido',    t: 'Se publicó sin consentimiento',
-    ayuda: 'Alguien aparece aquí sin haber aceptado que se publicara.' },
-  { v: 'violencia',        t: 'Violencia o daño real', ayuda: '' },
-  { v: 'contenido_ilegal', t: 'Otro contenido ilegal', ayuda: '' },
-  { v: 'derechos_autor',   t: 'Es mío y lo subieron sin permiso',
-    ayuda: 'Si eres la persona titular, dínoslo en el comentario.' },
-  { v: 'spam',             t: 'Spam o engaño', ayuda: '' },
-  { v: 'otro',             t: 'Otra cosa', ayuda: 'Cuéntanos qué pasa.' },
-]
 
 /* ==================== Modulo 9: verificacion ==================== */
 
