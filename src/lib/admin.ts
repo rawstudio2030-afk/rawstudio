@@ -733,8 +733,20 @@ export async function purgar(c: PorPurgar) {
     if (error) errores.push(`video: ${error.message}`)
   }
   if (c.cover_path) {
-    const { error } = await supabase.storage.from('clip-covers').remove([c.cover_path])
-    if (error) errores.push(`portada: ${error.message}`)
+    // La portada vive en DOS buckets con la MISMA ruta: la de 32 px en el
+    // publico y la nitida en el privado. Borrar solo la publica dejaria la
+    // nitida ahi para siempre — una copia intacta de algo que alguien mando
+    // destruir, que es justo lo contrario de purgar.
+    //
+    // Esto se rompio el 3 de noviembre de 2026 al partir la portada en dos
+    // copias: la funcion seguia borrando una sola. No llego a morder a nadie
+    // porque el unico clip borrado se purgo antes de que existiera el bucket
+    // privado, pero habria empezado a acumular copias con el primer clip
+    // nuevo que se borrara.
+    for (const bucket of ['clip-covers', 'clip-covers-full'] as const) {
+      const { error } = await supabase.storage.from(bucket).remove([c.cover_path])
+      if (error) errores.push(`portada (${bucket}): ${error.message}`)
+    }
   }
   if (errores.length) return errores.join(' · ')
   const { error } = await supabase.rpc('admin_marcar_purgado', { clip: c.id })

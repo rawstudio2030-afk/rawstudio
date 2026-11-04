@@ -6,12 +6,13 @@
  * horizontal en vez de reacomodarse: preferimos que se vea incomodo a que se
  * vea distinto, porque una tabla apilada en tarjetas deja de ser una tabla.
  */
-import { type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 import { elegirModo } from '../lib/modo'
 import { ANCHO_MINIMO } from './piezas'
 import { Pulsable, Enlace } from '../components/Pulsable'
+import { porPurgar } from '../lib/admin'
 
 export type Modulo = {
   clave: string; titulo: string; n: string
@@ -39,11 +40,40 @@ export function useModulo() {
   return MODULOS.find(m => m.clave === modulo) ?? MODULOS[0]
 }
 
+/* Archivos vencidos esperando a que alguien pulse «Purgar».
+ *
+ * La purga funciona y esta bien hecha, pero NADA la dispara: hay que entrar a
+ * Contenido y pulsar. Se descubrio el 3 de noviembre de 2026 que llevaba sin
+ * pulsarse desde que existe — un clip borrado el 28 de agosto, con fecha de
+ * purga el 27 de septiembre, seguia con su portada descargable sin
+ * credenciales treinta y siete dias despues.
+ *
+ * El arreglo no es automatizarla. Borrar archivos de verdad necesita la API
+ * de Storage, no SQL, y el orden importa —archivos primero, rutas despues, o
+ * quedan huerfanos invisibles—; una tarea programada que lo hiciera mal
+ * borraria cosas sin nadie mirando. Lo que faltaba no era el musculo, era el
+ * aviso: que no haga falta acordarse de ir a ver.
+ *
+ * Por eso cuenta solo lo VENCIDO (de eso ya se encarga `admin_por_purgar`, que
+ * filtra por `purgar_despues_de <= now()`): lo que todavia esta en su plazo de
+ * treinta dias no es una tarea pendiente, es una espera a proposito.
+ */
+function usePorPurgar() {
+  const [cuantos, setCuantos] = useState(0)
+  useEffect(() => {
+    let vivo = true
+    porPurgar().then(f => { if (vivo) setCuantos(f.length) })
+    return () => { vivo = false }
+  }, [])
+  return cuantos
+}
+
 export function Marco({ children, titulo, resumen }: {
   children: ReactNode; titulo: string; resumen?: ReactNode
 }) {
   const nav = useNavigate()
   const actual = useModulo()
+  const vencidos = usePorPurgar()
 
   return (
     <div style={{
@@ -76,11 +106,18 @@ export function Marco({ children, titulo, resumen }: {
         <div style={{ flex: 1, overflowY: 'auto', padding: '10px 0' }}>
           {MODULOS.map(m => {
             const aqui = m.clave === actual.clave
+            const aviso = m.clave === 'contenido' && vencidos > 0
+              ? `${vencidos} ${vencidos === 1 ? 'archivo vencido' : 'archivos vencidos'} por purgar`
+              : null
             return (
               <Pulsable key={m.clave}
                 al={() => nav(`/admin/${m.clave}`)}
                 activo={m.listo}
-                titulo={m.listo ? undefined : 'Todavía no construido'}
+                // Un numero suelto no dice nada en voz alta. Con rotulo, el
+                // lector lee «Contenido, 3 archivos vencidos por purgar» en
+                // vez de «Contenido 3».
+                rotulo={aviso ? `${m.titulo}, ${aviso}` : undefined}
+                titulo={m.listo ? (aviso ?? undefined) : 'Todavía no construido'}
                 style={{
                   boxSizing: 'border-box', width: '100%', textAlign: 'left',
                   display: 'flex', alignItems: 'center', gap: 10,
@@ -98,6 +135,17 @@ export function Marco({ children, titulo, resumen }: {
                   font: `${aqui ? 700 : 400} 12px/1 ${FUENTE.ui}`,
                   color: aqui ? COLOR.texto : COLOR.textoSuave,
                 }}>{m.titulo}</span>
+
+                {/* El aviso va en magenta y no en el cian del panel: el cian
+                    es «estas aqui», y esto es «hay algo que hacer». */}
+                {m.clave === 'contenido' && vencidos > 0 && (
+                  <span style={{
+                    marginLeft: 'auto', flex: '0 0 auto',
+                    background: COLOR.acento, color: COLOR.fondo,
+                    borderRadius: 9, padding: '2px 7px',
+                    font: `700 10px/1.4 ${FUENTE.mono}`,
+                  }}>{vencidos}</span>
+                )}
               </Pulsable>
             )
           })}
