@@ -29,9 +29,31 @@ export type ClipConAutora = Clip & {
 
 const CON_AUTORA = '*, profiles!clips_creator_id_fkey(handle,display_name,avatar_path,verified)'
 
+/** La portada que ve cualquiera: la de 32 px del bucket publico.
+ *
+ *  El nombre no miente aunque devuelva la version chica. La ruta es la misma
+ *  en los dos buckets —`clip-covers` publico y `clip-covers-full` privado—,
+ *  asi que lo que decide cuanto se ve es de donde se lee, no cual se pide. */
 export function urlPortada(path: string | null): string | null {
   if (!path) return null
   return supabase.storage.from('clip-covers').getPublicUrl(path).data.publicUrl
+}
+
+/** La portada nitida, firmada y de vida corta. Solo la abre su autora o un
+ *  admin: el bucket privado no tiene politica de lectura para nadie mas.
+ *
+ *  A quien PAGA todavia no se le entrega por aqui, y es a proposito: el
+ *  geobloqueo no se puede decidir en el navegador —la base no sabe de que pais
+ *  llega la peticion— asi que cuando se haga ira por la funcion de borde
+ *  `ver-clip`, igual que el video. Ver `urlVideoFirmada`. */
+export async function urlPortadaNitida(
+  path: string | null, segundos = 60,
+): Promise<string | null> {
+  if (!path) return null
+  const { data, error } = await supabase.storage
+    .from('clip-covers-full').createSignedUrl(path, segundos)
+  if (error) { console.warn('[clips] portada nitida:', error.message); return null }
+  return data?.signedUrl ?? null
 }
 
 export type Acceso =
@@ -100,16 +122,43 @@ export async function clipsDe(creatorId: string): Promise<Clip[]> {
   return (data ?? []) as Clip[]
 }
 
+export type Bucket = 'clips' | 'clip-covers' | 'clip-covers-full'
+
 export async function subirArchivo(
-  bucket: 'clips' | 'clip-covers', uid: string, archivo: File,
+  bucket: Bucket, uid: string, archivo: File, ruta?: string,
 ): Promise<{ path?: string; error?: string }> {
   // La ruta DEBE empezar con el uid: las politicas de storage se apoyan en eso.
   const ext = (archivo.name.split('.').pop() || 'bin').toLowerCase()
-  const path = `${uid}/${crypto.randomUUID()}.${ext}`
+  const path = ruta ?? `${uid}/${crypto.randomUUID()}.${ext}`
   const { error } = await supabase.storage.from(bucket)
     .upload(path, archivo, { contentType: archivo.type, upsert: false })
   if (error) return { error: error.message }
   return { path }
+}
+
+/** Sube la portada en sus dos tamaños, A LA MISMA RUTA en los dos buckets.
+ *
+ *  Esa igualdad de rutas es lo que hace que `clips.cover_path` sirva para las
+ *  dos y que no haga falta una columna nueva. Vive en una sola funcion para
+ *  que no se pueda romper por descuido desde dos pantallas distintas.
+ *
+ *  El orden importa: primero la PRIVADA. Si fuera al contrario y la segunda
+ *  subida fallara, quedaria la version publica sin su original guardada en
+ *  ninguna parte — la nitida se perderia, y es la unica copia que existe de
+ *  ese cuadro. Al revés, lo que queda es una nitida huerfana en un bucket
+ *  privado: ocupa espacio y no se ve, que es el fallo barato de los dos. */
+export async function subirPortada(
+  uid: string, nitida: File, chica: File,
+): Promise<{ path?: string; error?: string }> {
+  const ruta = `${uid}/${crypto.randomUUID()}.jpg`
+
+  const n = await subirArchivo('clip-covers-full', uid, nitida, ruta)
+  if (n.error) return { error: n.error }
+
+  const c = await subirArchivo('clip-covers', uid, chica, ruta)
+  if (c.error) return { error: c.error }
+
+  return { path: ruta }
 }
 
 export async function crearClip(c: {

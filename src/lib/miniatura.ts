@@ -180,3 +180,116 @@ async function tiraDeFuente(url: string): Promise<File | null> {
     v.load()
   }
 }
+
+/* ---------- Las dos copias de la portada ---------- */
+
+/** Ancho de la copia PUBLICA. La tarjeta mide 243, asi que a 32 se estira
+ *  unas 7 veces: queda la mancha de color y la silueta, nada mas.
+ *
+ *  Antes del 3 de noviembre de 2026 solo habia una copia, de 720 px, en el
+ *  bucket publico: el catalogo entero se podia bajar sin pagar ni entrar.
+ *  Ahora salen dos de la misma imagen —la chica para el mundo y la nitida
+ *  para el bucket privado, en la misma ruta— y por eso viven juntas aqui:
+ *  son el mismo cuadro a dos tamaños, no dos decisiones distintas. */
+export const ANCHO_PUBLICO = 32
+const CALIDAD_PUBLICA = 0.4
+
+/** Cuantos cuadros se le ofrecen a la creadora para que elija portada. */
+export const CUADROS_A_ELEGIR = 6
+
+/** Reduce una imagen a `ancho` pixeles de ancho, conservando la proporcion.
+ *
+ *  Se hace con un canvas y no pidiendole la transformacion al servidor porque
+ *  la transformacion del servidor trabaja sobre un objeto YA SUBIDO: para
+ *  usarla habria que publicar primero la version grande, que es exactamente
+ *  lo que no se quiere. Aqui la grande nunca llega al bucket publico. */
+export async function achicar(imagen: File, ancho = ANCHO_PUBLICO): Promise<File | null> {
+  try {
+    const mapa = await createImageBitmap(imagen)
+    const alto = Math.max(1, Math.round((mapa.height / mapa.width) * ancho))
+    const c = document.createElement('canvas')
+    c.width = ancho
+    c.height = alto
+    const ctx = c.getContext('2d')
+    if (!ctx) { mapa.close(); return null }
+    ctx.drawImage(mapa, 0, 0, ancho, alto)
+    mapa.close()
+    return await new Promise<File | null>(res => {
+      c.toBlob(
+        b => res(b ? new File([b], 'portada-chica.jpg', { type: 'image/jpeg' }) : null),
+        'image/jpeg', CALIDAD_PUBLICA,
+      )
+    })
+  } catch {
+    // Un formato que createImageBitmap no sepa leer cae aqui. Arriba se
+    // traduce en "no pude preparar la portada", no en una subida a medias.
+    return null
+  }
+}
+
+export type Cuadro = {
+  /** Segundo del video de donde salio, para rotularlo. */
+  segundo: number
+  /** El cuadro a 720 px: es lo que va al bucket privado. */
+  nitida: File
+  /** URL local para enseñarlo en la pantalla. Hay que revocarla al salir. */
+  vista: string
+}
+
+/** Saca varios cuadros repartidos por el video para que la creadora elija
+ *  cual es la portada.
+ *
+ *  Hasta ahora la portada la elegia una constante: el 10% del video. Eso
+ *  evitaba el negro del arranque, pero seguia siendo una moneda al aire —el
+ *  10% de un clip puede ser cualquier cosa, y quien lo grabo es la unica que
+ *  sabe que cuadro quiere que se vea—. Se ofrecen varios y decide ella.
+ *
+ *  Del 8% al 88%: ni el arranque ni el fundido del cierre, que no dicen nada.
+ *  Si el navegador no puede con el formato se devuelve lista vacia y arriba se
+ *  cae al cuadro automatico de siempre. */
+export async function cuadrosDeVideo(
+  archivo: File, cuantos = CUADROS_A_ELEGIR,
+): Promise<Cuadro[]> {
+  const fuente = URL.createObjectURL(archivo)
+  const v = document.createElement('video')
+  v.preload = 'auto'; v.muted = true; v.playsInline = true
+
+  const esperar = (ev: string, ms: number) => new Promise<boolean>(res => {
+    const reloj = setTimeout(() => res(false), ms)
+    v.addEventListener(ev, () => { clearTimeout(reloj); res(true) }, { once: true })
+    v.addEventListener('error', () => { clearTimeout(reloj); res(false) }, { once: true })
+  })
+
+  const sacados: Cuadro[] = []
+  try {
+    v.src = fuente
+    if (!await esperar('loadedmetadata', 12000)) return []
+    const d = v.duration
+    if (!isFinite(d) || d <= 0) return []
+
+    const escala = Math.min(1, ANCHO_MAXIMO / (v.videoWidth || ANCHO_MAXIMO))
+    const c = document.createElement('canvas')
+    c.width = Math.round((v.videoWidth || ANCHO_MAXIMO) * escala)
+    c.height = Math.round((v.videoHeight || ANCHO_MAXIMO) * escala)
+    const ctx = c.getContext('2d')
+    if (!ctx || !c.width || !c.height) return []
+
+    for (let i = 0; i < cuantos; i++) {
+      const t = cuantos === 1 ? d * 0.1 : d * (0.08 + (0.80 * i) / (cuantos - 1))
+      v.currentTime = Math.min(Math.max(t, 0.05), Math.max(d - 0.05, 0.05))
+      if (!await esperar('seeked', 8000)) break
+      ctx.drawImage(v, 0, 0, c.width, c.height)
+      const b = await new Promise<Blob | null>(res => c.toBlob(res, 'image/jpeg', 0.82))
+      if (!b) continue
+      const nitida = new File([b], `portada-${i}.jpg`, { type: 'image/jpeg' })
+      sacados.push({ segundo: v.currentTime, nitida, vista: URL.createObjectURL(nitida) })
+    }
+    return sacados
+  } catch {
+    return sacados
+  } finally {
+    v.removeAttribute('src')
+    v.load()
+    URL.revokeObjectURL(fuente)
+  }
+}
