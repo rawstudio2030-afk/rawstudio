@@ -6,8 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "oxlint",
-    "preview": "vite preview"
+    "lint": "oxlint && node scripts/dinero-crudo.mjs",
+    "preview": "vite preview",
+    "lint:dinero": "node scripts/dinero-crudo.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.3",
