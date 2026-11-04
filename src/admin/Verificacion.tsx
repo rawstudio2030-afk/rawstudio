@@ -15,6 +15,8 @@ import {
   type Verificacion, type EstadoVerificacion,
 } from '../lib/admin'
 import { Boton, Confirmar, Paginador, Insignia, fecha, fechaHora, desde } from './piezas'
+import { Pulsable } from '../components/Pulsable'
+import { useEscape } from '../lib/teclado'
 
 const POR_PAGINA = 25
 
@@ -60,7 +62,7 @@ export default function Verificacion() {
 
       <div style={{ display: 'flex', borderBottom: `1px solid ${LINEA.tenue}`, marginBottom: 18 }}>
         {PESTANAS.map(p => (
-          <div key={p.v} onClick={() => { setEstado(p.v); setPagina(0) }} style={{
+          <Pulsable key={p.v} al={() => { setEstado(p.v); setPagina(0) }} activado={estado === p.v} style={{
             padding: '9px 15px', cursor: 'pointer',
             font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
             color: estado === p.v ? COLOR.admin : COLOR.textoTenue,
@@ -69,7 +71,7 @@ export default function Verificacion() {
             {p.t}
             <span style={{ marginLeft: 7, font: `400 10px/1 ${FUENTE.mono}`,
               color: COLOR.textoApagado }}>{conteo[p.v] ?? 0}</span>
-          </div>
+          </Pulsable>
         ))}
       </div>
 
@@ -86,7 +88,8 @@ export default function Verificacion() {
       ) : (
         <div style={{ display: 'grid', gap: 10, opacity: cargando ? .5 : 1 }}>
           {filas.map(v => (
-            <div key={v.id} onClick={() => setAbierta(v)} style={{
+            <Pulsable key={v.id} al={() => setAbierta(v)} style={{
+              boxSizing: 'border-box', width: '100%', textAlign: 'left',
               display: 'flex', alignItems: 'center', gap: 14, padding: '13px 15px',
               border: `1px solid ${LINEA.tenue}`, background: COLOR.superficie, cursor: 'pointer',
             }}>
@@ -111,7 +114,7 @@ export default function Verificacion() {
                     color={Number(v.similitud) > .7 ? COLOR.dinero : '#FFB020'} />
                 )}
               </div>
-            </div>
+            </Pulsable>
           ))}
         </div>
       )}
@@ -129,6 +132,7 @@ function Ficha({ v, cierra, listo }: {
   const [ine, setIne] = useState<string | null>(null)
   const [selfie, setSelfie] = useState<string | null>(null)
   const [dialogo, setDialogo] = useState<'aprobar' | 'rechazar' | null>(null)
+  useEscape(true, cierra)
 
   useEffect(() => {
     let vivo = true

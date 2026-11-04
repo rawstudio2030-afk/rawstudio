@@ -7,6 +7,7 @@ import { useSesion } from '../lib/sesion'
 import wordmark from '../assets/wordmark.png'
 import launchVideo from '../assets/launch.mp4'
 import { COLOR } from '../lib/diseño'
+import { Pulsable } from '../components/Pulsable'
 
 export default function Launch() {
   const nav = useNavigate()
@@ -87,12 +88,12 @@ export default function Launch() {
       <div style={{position: "absolute", bottom: "78px", width: "96px", height: "2px", background: "#1E1E24", overflow: "hidden"}}>
         <span ref={barraRef} style={{display: "block", height: "2px", background: COLOR.dinero, boxShadow: `0 0 10px ${COLOR.dinero}`, animation: "agBar 6.5s ease-out both"}} />
       </div>
-      <div style={{position: "absolute", bottom: "46px", font: "400 9px/1 'Space Mono',monospace", letterSpacing: "1.6px", textTransform: "uppercase", color: "#7E7A83"}}>
-        18+ only
-      </div>
-      <div style={{position: "absolute", top: "56px", right: "16px", font: "700 9px/1 'Space Grotesk'", letterSpacing: "1.2px", textTransform: "uppercase", color: COLOR.fondo, background: COLOR.admin, padding: "7px 9px", cursor: "pointer"}} onClick={(e) => { e.stopPropagation(); replay() }}>
+      <Pulsable al={() => nav('/age')} style={{position: "absolute", bottom: "46px", font: "400 9px/1 'Space Mono',monospace", letterSpacing: "1.6px", textTransform: "uppercase", color: "#7E7A83", cursor: "pointer"}}>
+        18+ only — entrar
+      </Pulsable>
+      <Pulsable style={{position: "absolute", top: "56px", right: "16px", font: "700 9px/1 'Space Grotesk'", letterSpacing: "1.2px", textTransform: "uppercase", color: COLOR.fondo, background: COLOR.admin, padding: "7px 9px", cursor: "pointer"}} al={replay}>
         Replay
-      </div>
+      </Pulsable>
     </div>
   )
 }

@@ -10,6 +10,7 @@ import { supabase } from '../lib/supabase'
 import { useSesion } from '../lib/sesion'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 import { fijarCaducidad, type ModoCaducidad } from '../lib/canales'
+import { Pulsable } from './Pulsable'
 
 type Fila = {
   id: string; title: string; estado: string
@@ -106,9 +107,11 @@ export default function MisClips() {
                     padding: '11px 12px', font: `400 16px/1 ${FUENTE.ui}`, outline: 'none',
                   }} />
 
-                <div onClick={() => setModo(m =>
+                <Pulsable al={() => setModo(m =>
                   m === 'retiro_total' ? 'deja_de_venderse' : 'retiro_total')}
+                  activado={modo === 'retiro_total'}
                   style={{
+                    boxSizing: 'border-box', width: '100%', textAlign: 'left',
                     marginTop: 10, padding: '11px 12px', cursor: 'pointer',
                     border: `1px solid ${modo === 'retiro_total' ? '#FF4444' : LINEA.tenue}`,
                   }}>
@@ -124,10 +127,10 @@ export default function MisClips() {
                       ? 'Nadie podrá verlo, ni quien ya pagó por él. Tienen derecho a que se les devuelva su dinero.'
                       : 'Desaparece del catálogo y nadie más puede comprarlo. Quien ya lo compró lo conserva: eso fue lo que le vendiste.'}
                   </div>
-                </div>
+                </Pulsable>
 
                 <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-                  <span onClick={async () => {
+                  <Pulsable al={async () => {
                     const m = await fijarCaducidad(f.id,
                       fecha ? new Date(fecha + 'T23:59:59').toISOString() : null, modo)
                     if (m) { setError(m); return }
@@ -137,13 +140,13 @@ export default function MisClips() {
                     background: COLOR.acento, color: COLOR.fondo,
                     font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
                     textTransform: 'uppercase',
-                  }}>{fecha ? 'Guardar' : 'Quitar la fecha'}</span>
-                  <span onClick={() => { setAbierto(null); setError('') }} style={{
+                  }}>{fecha ? 'Guardar' : 'Quitar la fecha'}</Pulsable>
+                  <Pulsable al={() => { setAbierto(null); setError('') }} style={{
                     flex: 1, textAlign: 'center', padding: 11, cursor: 'pointer',
                     border: `1px solid ${LINEA.fuerte}`, color: COLOR.textoSuave,
                     font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
                     textTransform: 'uppercase',
-                  }}>Cancelar</span>
+                  }}>Cancelar</Pulsable>
                 </div>
                 {error && (
                   <div style={{ marginTop: 9, font: `400 12px/1.45 ${FUENTE.ui}`,
@@ -151,7 +154,7 @@ export default function MisClips() {
                 )}
               </div>
             ) : (
-              <div onClick={() => {
+              <Pulsable al={() => {
                 setAbierto(f.id)
                 setFecha(f.caduca_at ? f.caduca_at.slice(0, 10) : '')
                 setModo((f.caduca_modo as ModoCaducidad) ?? 'deja_de_venderse')
@@ -164,7 +167,7 @@ export default function MisClips() {
                 {f.caduca_at
                   ? `Se retira el ${new Date(f.caduca_at).toLocaleDateString('es-MX')}`
                   : 'Ponerle fecha de retiro'}
-              </div>
+              </Pulsable>
             )}
           </div>
         )

@@ -14,6 +14,8 @@ import {
   COLOR_ESTADO, COLOR_ROL, fecha, fechaHora, desde,
   type Columna,
 } from './piezas'
+import { Pulsable } from '../components/Pulsable'
+import { useEscape } from '../lib/teclado'
 
 const POR_PAGINA = 25
 
@@ -129,7 +131,7 @@ export default function Usuarios() {
       // como 240 en la columna de dinero del panel.
       pinta: f => <span style={{ color: f.saldo > 0 ? COLOR.dinero : COLOR.textoApagado }}>{usd(f.saldo)}</span> },
     { clave: 'total_ganado', titulo: 'Ganado', ordenable: true, numerica: true,
-      pinta: f => <span style={{ color: f.total_ganado > 0 ? COLOR.dinero : COLOR.textoApagado }}>{f.total_ganado}</span> },
+      pinta: f => <span style={{ color: f.total_ganado > 0 ? COLOR.dinero : COLOR.textoApagado }}>{usd(f.total_ganado)}</span> },
     { clave: 'clips_total', titulo: 'Clips', ordenable: true, numerica: true,
       pinta: f => (
         <span style={{ color: f.clips_total ? COLOR.textoSuave : COLOR.textoApagado }}>
@@ -225,6 +227,7 @@ function Ficha({ fila, ficha, cierra, pide }: {
   cierra: () => void; pide: (d: Dialogo) => void
 }) {
   const [pestana, setPestana] = useState<'clips' | 'movimientos' | 'acciones'>('clips')
+  useEscape(true, cierra)
 
   return (
     <div onClick={cierra} style={{
@@ -275,8 +278,8 @@ function Ficha({ fila, ficha, cierra, pide }: {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 1, marginTop: 18,
           background: LINEA.tenue, border: `1px solid ${LINEA.tenue}` }}>
           {[
-            { t: 'Saldo', v: fila.saldo, c: COLOR.dinero },
-            { t: 'Total ganado', v: fila.total_ganado, c: COLOR.dinero },
+            { t: 'Saldo', v: usd(fila.saldo), c: COLOR.dinero },
+            { t: 'Total ganado', v: usd(fila.total_ganado), c: COLOR.dinero },
             { t: 'Clips', v: `${fila.clips_publicados}/${fila.clips_total}`, c: COLOR.texto },
           ].map(x => (
             <div key={x.t} style={{ background: COLOR.superficie, padding: '11px 13px' }}>
@@ -309,12 +312,12 @@ function Ficha({ fila, ficha, cierra, pide }: {
           {([['clips', `Clips (${ficha?.clips.length ?? 0})`],
              ['movimientos', `Movimientos (${ficha?.movimientos.length ?? 0})`],
              ['acciones', `Historial (${ficha?.acciones.length ?? 0})`]] as const).map(([k, t]) => (
-            <div key={k} onClick={() => setPestana(k)} style={{
+            <Pulsable key={k} al={() => setPestana(k)} activado={pestana === k} style={{
               padding: '8px 13px', cursor: 'pointer',
               font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
               color: pestana === k ? COLOR.admin : COLOR.textoTenue,
               borderBottom: `2px solid ${pestana === k ? COLOR.admin : 'transparent'}`,
-            }}>{t}</div>
+            }}>{t}</Pulsable>
           ))}
         </div>
 
@@ -473,6 +476,7 @@ function SaldoDialogo({ fila, cancela, listo }: {
 function RolDialogo({ fila, cancela, listo }: {
   fila: FilaUsuario; cancela: () => void; listo: (m: string) => void
 }) {
+  useEscape(true, cancela)
   return (
     <div onClick={cancela} style={{
       position: 'fixed', inset: 0, zIndex: 95, background: 'rgba(8,8,10,.82)',

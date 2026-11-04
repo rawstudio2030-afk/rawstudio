@@ -4,6 +4,7 @@
 // en vivo se leen como ciertos, y eso ya causo confusion real.
 import { useNavigate } from 'react-router-dom'
 import { COLOR, FUENTE } from '../lib/diseño'
+import { Pulsable } from '../components/Pulsable'
 
 
 export default function Pantalla() {
@@ -15,7 +16,7 @@ export default function Pantalla() {
       display: 'flex', flexDirection: 'column',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span onClick={() => nav(-1)} style={{ font: `400 26px/1 ${FUENTE.ui}`, color: COLOR.textoSuave, cursor: 'pointer' }}>‹</span>
+        <Pulsable al={() => nav(-1)} rotulo="Volver" style={{ font: `400 26px/1 ${FUENTE.ui}`, color: COLOR.textoSuave, cursor: 'pointer' }}>‹</Pulsable>
         <span style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', color: COLOR.dinero }}>
           Mensajes
         </span>

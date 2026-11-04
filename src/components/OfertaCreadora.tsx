@@ -12,6 +12,7 @@ import {
   nivelesDe, suscribirse, miSuscripcion, cancelarSuscripcion,
   crearEncargo, postsDe, type Nivel, type Post,
 } from '../lib/canales'
+import { Pulsable } from './Pulsable'
 
 export default function OfertaCreadora({ creadora, handle }: {
   creadora: string; handle: string
@@ -71,14 +72,14 @@ export default function OfertaCreadora({ creadora, handle }: {
                   No se renovará. Conservas el acceso hasta esa fecha.
                 </div>
               ) : (
-                <div onClick={async () => {
+                <Pulsable al={async () => {
                   const m = await cancelarSuscripcion(creadora)
                   if (m) setError(m); else { setAviso('No se renovará.'); cargar() }
                 }} style={{ marginTop: 8, font: `400 12px/1.45 ${FUENTE.ui}`,
                   color: COLOR.textoApagado, cursor: 'pointer',
                   textDecoration: 'underline', textUnderlineOffset: 3 }}>
                   No renovar
-                </div>
+                </Pulsable>
               )}
             </div>
           ) : (
@@ -95,19 +96,20 @@ export default function OfertaCreadora({ creadora, handle }: {
                       color: COLOR.textoTenue }}>{t.descripcion}</div>
                   )}
                   {!mio && (
-                    <div onClick={async () => {
+                    <Pulsable al={async () => {
                       if (!sesion) return nav('/entrar')
                       const r = await suscribirse(t.id)
                       if ('error' in r) { setError(r.error!); return }
                       setError(''); setAviso('Listo, ya estás suscrita.'); cargar()
                     }} style={{
+                      boxSizing: 'border-box', width: '100%',
                       marginTop: 13, textAlign: 'center', padding: 14, cursor: 'pointer',
                       background: COLOR.acento, color: COLOR.fondo,
                       font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6,
                       textTransform: 'uppercase',
                     }}>
                       {sesion ? 'Suscribirme 30 días' : 'Entra para suscribirte'}
-                    </div>
+                    </Pulsable>
                   )}
                 </div>
               ))}
@@ -144,7 +146,7 @@ export default function OfertaCreadora({ creadora, handle }: {
                 dinero queda retenido hasta que entregue.
               </div>
               <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
-                <span onClick={async () => {
+                <Pulsable al={async () => {
                   const n = parseInt(oferta || '0', 10)
                   if (!desc.trim() || n <= 0) return
                   const r = await crearEncargo(creadora, desc.trim(), n)
@@ -153,15 +155,16 @@ export default function OfertaCreadora({ creadora, handle }: {
                   nav('/estudio/encargos')
                 }} style={{ flex: 1, textAlign: 'center', padding: 13, cursor: 'pointer',
                   background: COLOR.acento, color: COLOR.fondo, font: `700 10px/1 ${FUENTE.ui}`,
-                  letterSpacing: 1.6, textTransform: 'uppercase' }}>Enviar propuesta</span>
-                <span onClick={() => setEncargando(false)} style={{ flex: 1, textAlign: 'center',
+                  letterSpacing: 1.6, textTransform: 'uppercase' }}>Enviar propuesta</Pulsable>
+                <Pulsable al={() => setEncargando(false)} style={{ flex: 1, textAlign: 'center',
                   padding: 13, cursor: 'pointer', border: `1px solid ${LINEA.fuerte}`,
                   color: COLOR.textoSuave, font: `700 10px/1 ${FUENTE.ui}`,
-                  letterSpacing: 1.6, textTransform: 'uppercase' }}>Cancelar</span>
+                  letterSpacing: 1.6, textTransform: 'uppercase' }}>Cancelar</Pulsable>
               </div>
             </div>
           ) : (
-            <div onClick={() => setEncargando(true)} style={{
+            <Pulsable al={() => setEncargando(true)} style={{
+              boxSizing: 'border-box', width: '100%', textAlign: 'left',
               marginTop: 12, padding: '15px 16px', cursor: 'pointer',
               border: `1px solid ${LINEA.tenue}`,
             }}>
@@ -170,7 +173,7 @@ export default function OfertaCreadora({ creadora, handle }: {
                 color: COLOR.textoTenue }}>
                 Le dices qué quieres y cuánto ofreces. Ella acepta o propone otro precio.
               </div>
-            </div>
+            </Pulsable>
           )}
         </div>
       )}

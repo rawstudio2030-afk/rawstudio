@@ -12,6 +12,7 @@ import { ATAJOS_PERFIL, visiblesPara } from '../lib/rutas'
 import { miTelefono, guardarTelefono, limpiarTelefono } from '../lib/contacto'
 import Telefono, { valorValido, pistaDe } from '../components/Telefono'
 import { COLOR, FUENTE } from '../lib/diseño'
+import { Pulsable, Enlace } from '../components/Pulsable'
 
 
 const etiqueta: React.CSSProperties = {
@@ -146,7 +147,7 @@ export default function Perfil() {
       width: '100%', maxWidth: 680, margin: '0 auto',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 26 }}>
-        <span onClick={() => nav(-1)} style={{ font: `400 26px/1 ${FUENTE.ui}`, color: COLOR.textoSuave, cursor: 'pointer' }}>‹</span>
+        <Pulsable al={() => nav(-1)} rotulo="Volver" style={{ font: `400 26px/1 ${FUENTE.ui}`, color: COLOR.textoSuave, cursor: 'pointer' }}>‹</Pulsable>
         <span style={{ ...etiqueta, color: COLOR.dinero }}>Mi perfil</span>
         <span style={{ width: 14 }} />
       </div>
@@ -156,8 +157,9 @@ export default function Perfil() {
         nota="Es lo único que ve quien entra a tu página. Tu nombre legal no aparece en ninguna pantalla.">
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <div
-            onClick={() => archivo.current?.click()}
+          <Pulsable
+            al={() => archivo.current?.click()}
+            rotulo={foto ? 'Cambiar foto de perfil' : 'Subir foto de perfil'}
             style={{
               width: 82, height: 82, borderRadius: '50%', flex: '0 0 auto', cursor: 'pointer',
               border: `2px solid ${COLOR.acento}`, overflow: 'hidden',
@@ -165,15 +167,15 @@ export default function Perfil() {
               display: 'grid', placeItems: 'center',
             }}>
             {!foto && <span style={{ ...etiqueta, color: COLOR.textoApagado }}>Foto</span>}
-          </div>
+          </Pulsable>
           <div style={{ minWidth: 0 }}>
-            <div onClick={() => archivo.current?.click()} style={{
+            <Pulsable al={() => archivo.current?.click()} style={{
               display: 'inline-block', border: '1px solid rgba(255,255,255,.16)', color: COLOR.textoSuave,
               padding: '10px 13px', font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6,
               textTransform: 'uppercase', cursor: 'pointer',
             }}>
               {subiendo ? 'Subiendo…' : foto ? 'Cambiar foto' : 'Subir foto'}
-            </div>
+            </Pulsable>
             <div style={{ font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 8 }}>
               JPG, PNG o WebP · máximo 2 MB
             </div>
@@ -216,11 +218,11 @@ export default function Perfil() {
         {/* Va en esta seccion y no abajo con los botones: es la vista previa de
             lo que se acaba de editar, no una accion de cuenta. */}
         {perfil && (
-          <span onClick={() => nav(`/creator/${perfil.handle}`)} style={{
+          <Enlace a={`/creator/${perfil.handle}`} style={{
             alignSelf: 'flex-start', cursor: 'pointer',
             font: `400 12px/1 ${FUENTE.mono}`, color: COLOR.textoTenue,
             textDecoration: 'underline', textUnderlineOffset: 5,
-          }}>Ver cómo se ve &#8594;</span>
+          }}>Ver cómo se ve &#8594;</Enlace>
         )}
       </Seccion>
 
@@ -251,9 +253,11 @@ export default function Perfil() {
       <Seccion titulo="Publicar"
         nota="Lo que decide si puedes subir contenido y quién puede verlo.">
 
-        <div
-          onClick={() => setCreadora(c => !c)}
+        <Pulsable
+          al={() => setCreadora(c => !c)}
+          activado={creadora}
           style={{
+            boxSizing: 'border-box', width: '100%', textAlign: 'left',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14,
             padding: '16px 15px', cursor: 'pointer',
             border: `1px ${creadora ? 'solid' : 'dashed'} rgba(200,255,61,${creadora ? .5 : .3})`,
@@ -282,7 +286,7 @@ export default function Perfil() {
               background: creadora ? COLOR.fondo : COLOR.textoApagado, transition: 'left .18s',
             }} />
           </div>
-        </div>
+        </Pulsable>
 
         {/* Marcar la casilla no basta para publicar, y callarselo dejaria a la
             persona esperando a que pase algo que no va a pasar sola. */}
@@ -293,11 +297,12 @@ export default function Perfil() {
           }}>
             Ya puedes entrar al estudio y subir, pero <b style={{ color: COLOR.texto }}>
             nada se publica</b> hasta que verifiquemos tu identidad y tu edad.
-            <div onClick={() => nav('/verificar')} style={{
+            <Enlace a="/verificar" style={{
+              display: 'block', boxSizing: 'border-box', width: '100%',
               marginTop: 11, textAlign: 'center', padding: '12px 0', cursor: 'pointer',
               background: COLOR.admin, color: COLOR.fondo,
               font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
-            }}>Verificar mi identidad</div>
+            }}>Verificar mi identidad</Enlace>
           </div>
         )}
 
@@ -313,7 +318,7 @@ export default function Perfil() {
         <Seccion titulo="Atajos">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
             {atajos.map(a => (
-              <div key={a.path} onClick={() => nav(a.path)} style={{
+              <Enlace key={a.path} a={a.path} style={{
                 display: 'flex', alignItems: 'center', gap: 13, padding: '15px 13px',
                 cursor: 'pointer', border: '1px solid rgba(255,255,255,.09)',
               }}>
@@ -322,7 +327,7 @@ export default function Perfil() {
                 </span>
                 <span style={{ flex: 1, font: `500 16px/1.3 ${FUENTE.ui}`, color: COLOR.texto }}>{a.titulo}</span>
                 <span style={{ color: COLOR.textoApagado }}>›</span>
-              </div>
+              </Enlace>
             ))}
           </div>
         </Seccion>
@@ -334,12 +339,12 @@ export default function Perfil() {
             pegado a el. En un telefono eso es una equivocacion de dedo que se
             lleva por delante lo que estabas escribiendo. Aqui va al final, en
             su propia seccion y sin peso de boton principal. */}
-        <span onClick={async () => { await salir(); nav('/entrar', { replace: true }) }} style={{
+        <Pulsable al={async () => { await salir(); nav('/entrar', { replace: true }) }} style={{
           alignSelf: 'flex-start', cursor: 'pointer',
           border: '1px solid rgba(255,43,209,.45)', color: COLOR.acento,
           padding: '13px 20px', font: `700 10px/1 ${FUENTE.ui}`,
           letterSpacing: 1.6, textTransform: 'uppercase',
-        }}>Cerrar sesión</span>
+        }}>Cerrar sesión</Pulsable>
       </Seccion>
 
       {/* ---------- Guardar ----------
@@ -356,7 +361,8 @@ export default function Perfil() {
               font: `400 12px/1.45 ${FUENTE.ui}`, color: COLOR.acento, marginBottom: 10,
             }}>{detalle}</div>
           )}
-          <div onClick={guardar} style={{
+          <Pulsable al={guardar} activo={puedeGuardar} style={{
+            boxSizing: 'border-box', width: '100%',
             background: puedeGuardar ? COLOR.acento : COLOR.superficieAlta,
             color: puedeGuardar ? COLOR.fondo : COLOR.textoApagado,
             textAlign: 'center', padding: 17,
@@ -367,7 +373,7 @@ export default function Perfil() {
             {estado === 'guardando' ? 'Guardando…'
               : estado === 'guardado' ? '✓ Guardado'
               : 'Guardar cambios'}
-          </div>
+          </Pulsable>
           </div>
         </div>
       )}
@@ -427,11 +433,11 @@ function Aviso({ texto, accion }: { texto: string; accion?: { texto: string; al:
     }}>
       {texto}
       {accion && (
-        <span onClick={accion.al} style={{
+        <Pulsable al={accion.al} style={{
           background: COLOR.acento, color: COLOR.fondo, padding: '15px 26px',
           font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
           fontStyle: 'normal', cursor: 'pointer',
-        }}>{accion.texto}</span>
+        }}>{accion.texto}</Pulsable>
       )}
     </div>
   )

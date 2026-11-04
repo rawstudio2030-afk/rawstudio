@@ -14,6 +14,7 @@
  */
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Enlace } from '../components/Pulsable'
 import { useSesion } from '../lib/sesion'
 import Wordmark from '../components/Wordmark'
 import Portada from '../components/Portada'
@@ -145,26 +146,26 @@ export default function Portal() {
             </p>
 
             <div style={{ width: '100%', maxWidth: 380, display: 'grid', gap: 10, marginTop: 22 }}>
-              <span onClick={() => nav('/registro')} style={{
+              <Enlace a="/registro" style={{
                 textAlign: 'center', padding: 19, cursor: 'pointer',
                 background: COLOR.acento, color: COLOR.fondo,
                 font: `700 13px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
                 boxShadow: '0 0 34px rgba(255,43,209,.42)',
-              }}>Crear mi cuenta</span>
-              <span onClick={() => nav('/acceso')} style={{
+              }}>Crear mi cuenta</Enlace>
+              <Enlace a="/acceso" style={{
                 textAlign: 'center', padding: 18, cursor: 'pointer',
                 border: `1px solid ${LINEA.fuerte}`, color: COLOR.textoSuave,
                 font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
-              }}>Ya tengo cuenta</span>
+              }}>Ya tengo cuenta</Enlace>
             </div>
 
             {/* La intro mandaba sola al age gate. Sin ese pase automatico hace
                 falta una salida explicita para quien solo viene a mirar. */}
-            <span onClick={() => nav('/age')} style={{
+            <Enlace a="/age" style={{
               marginTop: 17, cursor: 'pointer',
               font: `400 12px/1 ${FUENTE.mono}`, color: COLOR.textoTenue,
               textDecoration: 'underline', textUnderlineOffset: 5,
-            }}>Solo vengo a ver &#8594;</span>
+            }}>Solo vengo a ver &#8594;</Enlace>
 
             <div style={{
               marginTop: 22, font: `400 9px/1 ${FUENTE.mono}`,

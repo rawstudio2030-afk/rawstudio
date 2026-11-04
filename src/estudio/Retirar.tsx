@@ -20,6 +20,7 @@ import {
 import { usd, aCentavos } from '../lib/dinero'
 import { Marco, Boton, Campo, Etiqueta, Aviso, Vacio } from './piezas'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
+import { Pulsable } from '../components/Pulsable'
 
 export default function Retirar() {
   const nav = useNavigate()
@@ -158,11 +159,12 @@ function Puerta({ texto, boton, al, color }: {
   return (
     <div style={{ marginTop: 18, padding: '16px 16px', border: `1px solid ${color}` }}>
       <div style={{ font: `400 13px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>{texto}</div>
-      <div onClick={al} style={{
+      <Pulsable al={al} style={{
+        boxSizing: 'border-box', width: '100%',
         marginTop: 13, textAlign: 'center', padding: '12px 0', cursor: 'pointer',
         background: color, color: COLOR.fondo,
         font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
-      }}>{boton}</div>
+      }}>{boton}</Pulsable>
     </div>
   )
 }

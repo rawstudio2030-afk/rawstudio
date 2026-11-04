@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import Wordmark from '../components/Wordmark'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
+import { Pulsable } from '../components/Pulsable'
 
 
 export default function NuevaClave() {
@@ -94,11 +95,11 @@ export default function NuevaClave() {
                 placeholder="contraseña nueva" value={clave}
                 onChange={e => { setClave(e.target.value); if (estado === 'error') setEstado('listo') }}
                 style={campo(estado === 'error')} />
-              <span onClick={() => setVer(v => !v)} style={{
+              <Pulsable al={() => setVer(v => !v)} activado={ver} style={{
                 position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)',
                 font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
                 color: COLOR.textoTenue, cursor: 'pointer', padding: 6,
-              }}>{ver ? 'Ocultar' : 'Ver'}</span>
+              }}>{ver ? 'Ocultar' : 'Ver'}</Pulsable>
             </div>
 
             <input
@@ -123,14 +124,14 @@ export default function NuevaClave() {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {estado === 'hecho' ? (
-          <div onClick={() => nav('/clip', { replace: true })} style={boton(true)}>Entrar</div>
+          <Pulsable al={() => nav('/clip', { replace: true })} style={boton(true)}>Entrar</Pulsable>
         ) : haySesion === false ? (
-          <div onClick={() => { sessionStorage.removeItem('rawstudio.recuperando'); nav('/acceso', { replace: true }) }}
-            style={boton(true)}>Pedir otro enlace</div>
+          <Pulsable al={() => { sessionStorage.removeItem('rawstudio.recuperando'); nav('/acceso', { replace: true }) }}
+            style={boton(true)}>Pedir otro enlace</Pulsable>
         ) : (
-          <div onClick={guardar} style={boton(puede)}>
+          <Pulsable al={guardar} activo={puede} style={boton(puede)}>
             {estado === 'guardando' ? 'Guardando…' : 'Guardar contraseña'}
-          </div>
+          </Pulsable>
         )}
       </div>
     </div>

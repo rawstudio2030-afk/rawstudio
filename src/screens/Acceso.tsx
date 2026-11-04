@@ -7,13 +7,14 @@
 // Interlineado 1 y no .9 como el deck: en español los titulares llevan
 // mayusculas acentuadas (CONTRASEÑA) y con el interlineado apretado el acento
 // queda tapado por la linea de arriba.
-import { useEffect, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import Wordmark from '../components/Wordmark'
 import { supabase } from '../lib/supabase'
 import { VERSION_LEGAL } from '../content/legal'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
+import { Pulsable, Enlace } from '../components/Pulsable'
 
 
 export type Modo = 'registro' | 'acceso'
@@ -55,24 +56,44 @@ function mensajeUtil(raw: string, modo: Modo): string {
   return raw
 }
 
+/* Una casilla de verdad, no un div que la imita.
+ *
+ * Aqui se consiente el tratamiento de datos biometricos y la aceptacion de los
+ * terminos: es la parte del sitio donde menos se puede improvisar. Un <div>
+ * con una palomita dibujada no recibe foco, no responde a Espacio y un lector
+ * de pantalla no dice si esta marcada o no — o sea que no hay forma de dar el
+ * consentimiento sin raton, ni de saber que se dio.
+ *
+ * El <input> nativo lo trae todo. Se le quita la apariencia del sistema con
+ * `.casilla` —en CSS, porque dibujar la palomita necesita ::after— y se le
+ * pone al lado una <label> ligada por id: asi tocar el texto tambien marca,
+ * que es el area grande que tenia el div.
+ *
+ * Los enlaces que van DENTRO del texto frenan la burbuja (ver mas abajo), o
+ * leer los terminos marcaria la casilla de paso. */
 function Casilla({ marcada, onCambio, obligatoria, children }: {
   marcada: boolean; onCambio: (v: boolean) => void
   obligatoria?: boolean; children: React.ReactNode
 }) {
+  const id = useId()
   return (
-    <div onClick={() => onCambio(!marcada)}
-      style={{ display: 'flex', gap: 11, alignItems: 'flex-start', cursor: 'pointer' }}>
-      <span style={{
-        width: 20, height: 20, flex: '0 0 auto', marginTop: 1,
-        border: `1.5px solid ${marcada ? COLOR.dinero : 'rgba(255,255,255,.28)'}`,
-        background: marcada ? COLOR.dinero : 'transparent',
-        display: 'grid', placeItems: 'center',
-        font: `700 12px/1 ${FUENTE.ui}`, color: COLOR.fondo,
-      }}>{marcada ? '✓' : ''}</span>
-      <span style={{ font: `400 12px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
+    <div style={{ display: 'flex', gap: 11, alignItems: 'flex-start' }}>
+      <input
+        type="checkbox" id={id} className="casilla"
+        checked={marcada} onChange={e => onCambio(e.target.checked)}
+        required={obligatoria}
+        style={{
+          width: 20, height: 20, flex: '0 0 auto', marginTop: 1,
+          border: `1.5px solid ${marcada ? COLOR.dinero : 'rgba(255,255,255,.28)'}`,
+          background: marcada ? COLOR.dinero : 'transparent',
+          color: COLOR.fondo, cursor: 'pointer',
+        }} />
+      <label htmlFor={id} style={{
+        font: `400 12px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave, cursor: 'pointer',
+      }}>
         {children}
         {obligatoria && <span style={{ color: COLOR.acento }}> *</span>}
-      </span>
+      </label>
     </div>
   )
 }
@@ -263,15 +284,16 @@ export default function Acceso({ modo }: { modo: Modo }) {
                 onKeyDown={e => { if (e.key === 'Enter') enviar() }}
                 style={{ ...campo, paddingRight: 62 }}
               />
-              <span
-                onClick={() => setVerClave(v => !v)}
+              <Pulsable
+                al={() => setVerClave(v => !v)}
+                activado={verClave}
                 style={{
                   position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)',
                   font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
                   color: COLOR.textoTenue, cursor: 'pointer', padding: 6,
                 }}>
                 {verClave ? 'Ocultar' : 'Ver'}
-              </span>
+              </Pulsable>
             </div>
 
             {modo === 'registro' && !claveOk && clave.length > 0 && (
@@ -284,11 +306,11 @@ export default function Acceso({ modo }: { modo: Modo }) {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 4 }}>
                 <Casilla marcada={aceptaLegal} onCambio={setAceptaLegal} obligatoria>
                   He leído y acepto los{' '}
-                  <a onClick={e => { e.stopPropagation(); nav('/terminos') }}
-                     style={{ color: COLOR.dinero, textDecoration: 'underline', cursor: 'pointer' }}>términos</a>
+                  <Enlace a="/terminos" al={e => e.stopPropagation()}
+                     style={{ color: COLOR.dinero, textDecoration: 'underline', cursor: 'pointer' }}>términos</Enlace>
                   {' '}y el{' '}
-                  <a onClick={e => { e.stopPropagation(); nav('/privacidad') }}
-                     style={{ color: COLOR.dinero, textDecoration: 'underline', cursor: 'pointer' }}>aviso de privacidad</a>.
+                  <Enlace a="/privacidad" al={e => e.stopPropagation()}
+                     style={{ color: COLOR.dinero, textDecoration: 'underline', cursor: 'pointer' }}>aviso de privacidad</Enlace>.
                 </Casilla>
                 <Casilla marcada={aceptaBio} onCambio={setAceptaBio} obligatoria>
                   Autorizo el tratamiento de mis <b>datos biométricos faciales</b> y de mi
@@ -312,13 +334,15 @@ export default function Acceso({ modo }: { modo: Modo }) {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {aviso ? (
-          <div onClick={() => { setEstado('listo'); nav('/entrar') }} style={{
+          <Pulsable al={() => { setEstado('listo'); nav('/entrar') }} style={{
+            boxSizing: 'border-box', width: '100%',
             border: '1px solid rgba(255,255,255,.16)', color: COLOR.textoSuave, textAlign: 'center',
             padding: 18, font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', cursor: 'pointer',
-          }}>Volver</div>
+          }}>Volver</Pulsable>
         ) : (
           <>
-            <div onClick={enviar} style={{
+            <Pulsable al={enviar} activo={listo} style={{
+              boxSizing: 'border-box', width: '100%',
               background: listo ? COLOR.acento : COLOR.superficieAlta,
               color: listo ? COLOR.fondo : COLOR.textoApagado,
               textAlign: 'center', padding: 19,
@@ -327,32 +351,34 @@ export default function Acceso({ modo }: { modo: Modo }) {
               cursor: listo ? 'pointer' : 'default',
             }}>
               {estado === 'enviando' ? 'Un momento…' : t.boton}
-            </div>
+            </Pulsable>
 
             {conGoogle && (
-              <div onClick={entrarGoogle} style={{
+              <Pulsable al={entrarGoogle} style={{
+                boxSizing: 'border-box', width: '100%',
                 background: COLOR.texto, color: COLOR.fondo, textAlign: 'center', padding: 17,
                 font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase', cursor: 'pointer',
               }}>
                 Continuar con Google
-              </div>
+              </Pulsable>
             )}
 
-            <div onClick={() => nav(t.rutaAlterna)} style={{
+            <Enlace a={t.rutaAlterna} style={{
+              display: 'block', boxSizing: 'border-box', width: '100%',
               border: '1px solid rgba(255,255,255,.16)', color: COLOR.textoSuave, textAlign: 'center',
               padding: 18, font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', cursor: 'pointer',
-            }}>{t.alterno}</div>
+            }}>{t.alterno}</Enlace>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginTop: 4, paddingRight: 58 }}>
-              <span onClick={ligaAlCorreo} style={{
+              <Pulsable al={ligaAlCorreo} style={{
                 font: `400 12px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue,
                 textDecoration: 'underline', cursor: 'pointer',
-              }}>Entrar con liga</span>
+              }}>Entrar con liga</Pulsable>
               {modo === 'acceso' && (
-                <span onClick={olvide} style={{
+                <Pulsable al={olvide} style={{
                   font: `400 12px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue,
                   textDecoration: 'underline', cursor: 'pointer', textAlign: 'right',
-                }}>Olvidé mi clave</span>
+                }}>Olvidé mi clave</Pulsable>
               )}
             </div>
           </>

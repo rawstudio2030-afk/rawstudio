@@ -14,7 +14,9 @@ import { usePapel } from '../components/Navegacion'
 import { altaCreadora, subirExpediente, publicarPara, fijarAvatar } from '../lib/admin'
 import Wordmark from '../components/Wordmark'
 import Telefono, { valorValido, pistaDe } from '../components/Telefono'
+import { aCentavos, usd } from '../lib/dinero'
 import { COLOR, TINTE, FUENTE } from '../lib/diseño'
+import { Pulsable, Enlace } from '../components/Pulsable'
 
 
 const etiqueta: React.CSSProperties = {
@@ -54,7 +56,10 @@ export default function AltaCreadora() {
   const [titulo, setTitulo] = useState('')
   const [video, setVideo] = useState<File | null>(null)
   const [portada, setPortada] = useState<File | null>(null)
-  const [precio, setPrecio] = useState(240)
+  // Dolares como texto, no centavos: el campo lo lee y lo escribe una persona.
+  // Se convierte con aCentavos() al publicar, que es lo que espera la base.
+  const [precio, setPrecio] = useState('2.40')
+  const centavos = aCentavos(precio)   // null si el texto no se entiende
   const [publicados, setPublicados] = useState(0)
   const [subiendo, setSubiendo] = useState('')
 
@@ -99,9 +104,10 @@ export default function AltaCreadora() {
 
   const publicar = async () => {
     if (!creadora || !video || !titulo.trim() || ocupado) return
+    if (centavos === null) return   // texto invalido: no publicar a $0 por un dedazo
     setOcupado(true); setError(''); setSubiendo('Preparando…')
     const r = await publicarPara(
-      { creadora: creadora.id, titulo, video, portada, precio, visibilidad: 'pago' },
+      { creadora: creadora.id, titulo, video, portada, precio: centavos, visibilidad: 'pago' },
       // Un video de 17 MB puede tardar varios minutos. Sin porcentaje no hay
       // forma de distinguir una subida lenta de una atorada.
       (etapa, fraccion) => setSubiendo(
@@ -124,7 +130,7 @@ export default function AltaCreadora() {
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Wordmark ancho={110} glow={12} />
-        <span onClick={() => nav('/admin')} style={{ font: `400 26px/1 ${FUENTE.ui}`, color: COLOR.textoSuave, cursor: 'pointer' }}>×</span>
+        <Enlace a="/admin" rotulo="Cerrar" style={{ font: `400 26px/1 ${FUENTE.ui}`, color: COLOR.textoSuave, cursor: 'pointer' }}>×</Enlace>
       </div>
 
       <div>
@@ -232,20 +238,35 @@ export default function AltaCreadora() {
           <Archivo t="Portada" f={portada} onElegir={setPortada}
             acepta="image/*" nota="Lo único que se ve sin pagar. Si no pones, se genera una." />
 
-          <Etiquetado t="Precio">
-            <input type="number" value={precio} min={0} step={20}
-              onChange={e => setPrecio(Math.max(0, parseInt(e.target.value || '0', 10)))}
-              style={{ ...campo, fontFamily: FUENTE.mono }} />
+          <Etiquetado t="Precio" pista={centavos === null ? 'No se entiende ese importe' : `Se cobra ${usd(centavos)} · tú recibes ${usd(Math.round(centavos * 0.8))}`}>
+            <div style={{ position: 'relative' }}>
+              <span style={{
+                position: 'absolute', left: 15, top: '50%', transform: 'translateY(-50%)',
+                font: `400 16px/1 ${FUENTE.mono}`, color: COLOR.dinero, pointerEvents: 'none',
+              }}>$</span>
+              <input value={precio} onChange={e => setPrecio(e.target.value)}
+                inputMode="decimal" placeholder="2.40" maxLength={9}
+                style={{
+                  ...campo, fontFamily: FUENTE.mono, paddingLeft: 30,
+                  borderColor: centavos === null ? COLOR.dinero : 'rgba(255,255,255,.14)',
+                }} />
+              <span style={{
+                position: 'absolute', right: 15, top: '50%', transform: 'translateY(-50%)',
+                font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
+                color: COLOR.textoTenue, pointerEvents: 'none',
+              }}>USD</span>
+            </div>
           </Etiquetado>
 
           <Boton texto={subiendo || (ocupado ? 'Publicando…' : 'Publicar clip')}
-            activo={!!video && !!titulo.trim() && !ocupado} al={publicar} />
+            activo={!!video && !!titulo.trim() && centavos !== null && !ocupado} al={publicar} />
 
-          <div onClick={() => nav(`/creator/${creadora.handle}`)} style={{
+          <Enlace a={`/creator/${creadora.handle}`} style={{
+            display: 'block', boxSizing: 'border-box', width: '100%',
             border: '1px solid rgba(255,255,255,.16)', color: COLOR.textoSuave, textAlign: 'center',
             padding: 16, font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2,
             textTransform: 'uppercase', cursor: 'pointer',
-          }}>Ver su perfil</div>
+          }}>Ver su perfil</Enlace>
         </>
       )}
     </div>
@@ -299,13 +320,14 @@ function Archivo({ t, f, onElegir, acepta, nota }: {
 
 function Boton({ texto, activo, al }: { texto: string; activo: boolean; al: () => void }) {
   return (
-    <div onClick={() => { if (activo) al() }} style={{
+    <Pulsable al={al} activo={activo} style={{
+      boxSizing: 'border-box', width: '100%',
       background: activo ? COLOR.acento : COLOR.superficieAlta, color: activo ? COLOR.fondo : COLOR.textoApagado,
       textAlign: 'center', padding: 18, marginTop: 4,
       font: `700 13px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
       boxShadow: activo ? '0 0 34px rgba(255,43,209,.42)' : 'none',
       cursor: activo ? 'pointer' : 'default',
-    }}>{texto}</div>
+    }}>{texto}</Pulsable>
   )
 }
 
@@ -319,11 +341,11 @@ function Centro({ texto, accion }: { texto: string; accion?: { texto: string; al
     }}>
       {texto}
       {accion && (
-        <span onClick={accion.al} style={{
+        <Pulsable al={accion.al} style={{
           background: COLOR.acento, color: COLOR.fondo, padding: '15px 26px',
           font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
           fontStyle: 'normal', cursor: 'pointer',
-        }}>{accion.texto}</span>
+        }}>{accion.texto}</Pulsable>
       )}
     </div>
   )

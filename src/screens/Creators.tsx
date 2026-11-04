@@ -3,13 +3,13 @@
 // otras ocho: Anton para titulares, Space Grotesk para cuerpo y botones,
 // Space Mono para etiquetas, Instrument Serif italica para las bajadas.
 import { useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
 import wordmark from '../assets/wordmark.png'
 import {
   SECCIONES, FAQ, NO_PROMETEMOS, ICONS,
   PINK, LIME, CYAN, INK, PAPER, MUTED, DIM, LINE,
 } from '../content/creators'
 import { TINTE, FUENTE } from '../lib/diseño'
+import { Pulsable, Enlace } from '../components/Pulsable'
 
 
 const etiqueta = (color: string): React.CSSProperties => ({
@@ -26,7 +26,6 @@ const titular: React.CSSProperties = {
 }
 
 export default function Creators() {
-  const nav = useNavigate()
   const scroller = useRef<HTMLDivElement>(null)
 
   // Las anclas nativas (#seccion) chocarian con HashRouter, que ya usa el hash
@@ -112,15 +111,17 @@ export default function Creators() {
             <span style={{ color: PAPER }}>Lo que subes sigue siendo tuyo</span>, y si alguien lo filtra, nosotros lo perseguimos.
           </div>
 
-          <div onClick={() => nav('/upload')} style={{
+          <Enlace a="/upload" style={{
+            display: 'block', boxSizing: 'border-box', width: '100%',
             background: PINK, color: INK, textAlign: 'center', padding: 19,
             font: `700 13px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
             boxShadow: '0 0 34px rgba(255,43,209,.42)', cursor: 'pointer', marginBottom: 10,
-          }}>Crear mi cuenta</div>
-          <div onClick={() => saltar('proteccion')} style={{
+          }}>Crear mi cuenta</Enlace>
+          <Pulsable al={() => saltar('proteccion')} style={{
+            boxSizing: 'border-box', width: '100%',
             border: `1px solid ${CYAN}`, color: CYAN, textAlign: 'center', padding: 18,
             font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', cursor: 'pointer',
-          }}>Cómo te protegemos</div>
+          }}>Cómo te protegemos</Pulsable>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 1, background: LINE, marginTop: 34 }}>
             {[['80%', 'Para ti'], ['7 días', 'Entre pagos'], ['0', 'Exclusividad']].map(([n, t]) => (
@@ -206,11 +207,12 @@ export default function Creators() {
           }}>
             Lo tuyo <span style={{ color: PINK }}>se queda contigo.</span>
           </div>
-          <div onClick={() => nav('/upload')} style={{
+          <Enlace a="/upload" style={{
+            display: 'block', boxSizing: 'border-box', width: '100%',
             background: PINK, color: '#fff', textAlign: 'center', padding: 18,
             font: `700 13px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
             boxShadow: `5px 5px 0 ${LIME}`, cursor: 'pointer',
-          }}>Crear mi cuenta</div>
+          }}>Crear mi cuenta</Enlace>
           <div style={{ marginTop: 20, font: `400 12px/1.45 ${FUENTE.mono}`, color: DIM }}>
             Verificación de edad obligatoria. Sólo mayores de 18 años.
           </div>

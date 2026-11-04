@@ -17,6 +17,7 @@ import { usePapel } from '../components/Navegacion'
 import { elegirModo, type Modo as TipoModo } from '../lib/modo'
 import Wordmark from '../components/Wordmark'
 import { COLOR, FUENTE } from '../lib/diseño'
+import { Pulsable } from '../components/Pulsable'
 
 export default function Modo() {
   const nav = useNavigate()
@@ -98,7 +99,8 @@ function Puerta({ color, titulo, que, nota, al }: {
   color: string; titulo: string; que: string; nota?: string; al: () => void
 }) {
   return (
-    <div onClick={al} style={{
+    <Pulsable al={al} style={{
+      boxSizing: 'border-box', width: '100%', textAlign: 'left',
       padding: '20px 20px', cursor: 'pointer',
       border: `1.5px solid ${color}`, background: COLOR.fondo,
       display: 'flex', alignItems: 'center', gap: 16,
@@ -117,6 +119,6 @@ function Puerta({ color, titulo, que, nota, al }: {
         )}
       </div>
       <span style={{ font: `700 19px/1 ${FUENTE.ui}`, color }}>&#8594;</span>
-    </div>
+    </Pulsable>
   )
 }

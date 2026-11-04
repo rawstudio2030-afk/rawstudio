@@ -14,6 +14,7 @@ import {
   Tabla, Paginador, Boton, Campo, Selector, Etiquetado,
   fechaHora, type Columna,
 } from './piezas'
+import { Pulsable } from '../components/Pulsable'
 
 const POR_PAGINA = 50
 
@@ -101,7 +102,7 @@ export default function Bitacora() {
         const abierto_ = abierto === e.id
         const txt = JSON.stringify(e.detalle)
         return (
-          <span onClick={ev => { ev.stopPropagation(); setAbierto(abierto_ ? null : e.id) }}
+          <Pulsable al={() => setAbierto(abierto_ ? null : e.id)} activado={abierto_}
             style={{
               font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue,
               cursor: 'pointer',
@@ -111,7 +112,7 @@ export default function Bitacora() {
               overflow: 'hidden', textOverflow: 'ellipsis', verticalAlign: 'top',
             }}>
             {abierto_ ? JSON.stringify(e.detalle, null, 2) : txt}
-          </span>
+          </Pulsable>
         )
       } },
   ]

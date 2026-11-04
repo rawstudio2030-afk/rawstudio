@@ -10,6 +10,7 @@
  */
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { usd } from '../lib/dinero'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 import {
   clipsAdmin, borrarClipAdmin, restaurarClip, destacar,
@@ -22,6 +23,7 @@ import {
   Tabla, Boton, Campo, Confirmar, Etiquetado, Insignia,
   desde, type Columna,
 } from './piezas'
+import { Pulsable } from '../components/Pulsable'
 
 type Filtro = 'todos' | 'destacados' | 'borrados' | 'plataforma' | 'subir' | 'masiva'
 
@@ -102,7 +104,7 @@ export default function Contenido() {
     ) },
     { clave: 'precio', titulo: 'Precio', numerica: true, ancho: 90,
       pinta: c => <span style={{ color: c.price_coins ? COLOR.dinero : COLOR.textoApagado }}>
-        {c.price_coins || 'gratis'}</span> },
+        {c.price_coins ? usd(c.price_coins) : 'gratis'}</span> },
     { clave: 'fecha', titulo: 'Subido', ancho: 130,
       pinta: c => <span style={{ color: COLOR.textoSuave }}>{desde(c.created_at)}</span> },
     { clave: 'acciones', titulo: '', pinta: c => (
@@ -171,7 +173,7 @@ export default function Contenido() {
           // separa a la derecha y lleva el color de accion.
           const accion = p.v === 'subir' || p.v === 'masiva'
           return (
-            <div key={p.v} onClick={() => setFiltro(p.v)} style={{
+            <Pulsable key={p.v} al={() => setFiltro(p.v)} activado={!accion && filtro === p.v} style={{
               padding: '9px 15px', cursor: 'pointer',
               font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
               marginLeft: p.v === 'subir' ? 'auto' : undefined,
@@ -185,7 +187,7 @@ export default function Contenido() {
                 ? `1px solid ${COLOR.acento}`
                 : `2px solid ${filtro === p.v ? COLOR.admin : 'transparent'}`,
               marginBottom: accion ? 6 : undefined,
-            }}>{accion ? `+ ${p.t}` : p.t}</div>
+            }}>{accion ? `+ ${p.t}` : p.t}</Pulsable>
           )
         })}
       </div>

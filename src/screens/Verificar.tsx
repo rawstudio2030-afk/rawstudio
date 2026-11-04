@@ -10,6 +10,7 @@ import { useSesion } from '../lib/sesion'
 import { supabase } from '../lib/supabase'
 import Wordmark from '../components/Wordmark'
 import { COLOR, LINEA, TINTE, FUENTE } from '../lib/diseño'
+import { Pulsable, Enlace } from '../components/Pulsable'
 
 
 const SERVICIO = import.meta.env.VITE_VERIFICACION_URL as string | undefined
@@ -139,7 +140,7 @@ export default function Verificar() {
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Wordmark ancho={116} glow={14} />
-        <span onClick={() => nav('/estudio')} style={{ font: `400 26px/1 ${FUENTE.ui}`, color: COLOR.textoSuave, cursor: 'pointer' }}>×</span>
+        <Enlace a="/estudio" rotulo="Cerrar" style={{ font: `400 26px/1 ${FUENTE.ui}`, color: COLOR.textoSuave, cursor: 'pointer' }}>×</Enlace>
       </div>
 
       <div>
@@ -216,7 +217,8 @@ export default function Verificar() {
         <div style={{ font: `400 13px/1.45 ${FUENTE.ui}`, color: COLOR.acento }}>{detalle}</div>
       )}
 
-      <div onClick={enviar} style={{
+      <Pulsable al={enviar} activo={puede} style={{
+        boxSizing: 'border-box', width: '100%',
         marginTop: 'auto', background: puede ? COLOR.acento : COLOR.superficieAlta,
         color: puede ? COLOR.fondo : COLOR.textoApagado, textAlign: 'center', padding: 19,
         font: `700 13px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
@@ -224,7 +226,7 @@ export default function Verificar() {
         cursor: puede ? 'pointer' : 'default',
       }}>
         {estado === 'enviando' ? 'Verificando…' : 'Enviar para verificar'}
-      </div>
+      </Pulsable>
     </div>
   )
 }
@@ -236,7 +238,8 @@ function Foto({ etiqueta: et, nota, archivo, refInput, camara, onElegir }: {
 }) {
   return (
     <>
-      <div onClick={() => refInput.current?.click()} style={{
+      <Pulsable al={() => refInput.current?.click()} style={{
+        boxSizing: 'border-box', width: '100%', textAlign: 'left',
         display: 'flex', alignItems: 'center', gap: 13, cursor: 'pointer',
         border: `1px ${archivo ? 'solid' : 'dashed'} rgba(255,255,255,${archivo ? '.2' : '.16'})`,
         background: archivo ? TINTE.dinero : 'transparent', padding: 14,
@@ -252,7 +255,7 @@ function Foto({ etiqueta: et, nota, archivo, refInput, camara, onElegir }: {
           </div>
           <div style={{ font: `400 12px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 6 }}>{nota}</div>
         </div>
-      </div>
+      </Pulsable>
       {/* capture abre la camara directo en movil, que es donde se hace esto */}
       <input ref={refInput} type="file" accept="image/*" capture={camara}
         style={{ display: 'none' }}
@@ -287,11 +290,11 @@ function Centro({ titulo, texto, accion }: {
         color: COLOR.textoSuave, maxWidth: 330,
       }}>{texto}</div>
       {accion && (
-        <span onClick={accion.al} style={{
+        <Pulsable al={accion.al} style={{
           background: COLOR.acento, color: COLOR.fondo, padding: '15px 26px',
           font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
           cursor: 'pointer',
-        }}>{accion.texto}</span>
+        }}>{accion.texto}</Pulsable>
       )}
     </div>
   )

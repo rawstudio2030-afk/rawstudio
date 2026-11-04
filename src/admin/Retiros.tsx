@@ -18,6 +18,7 @@ import {
   Tabla, Boton, Campo, Confirmar, Etiquetado, Paginador,
   desde, type Columna,
 } from './piezas'
+import { Pulsable } from '../components/Pulsable'
 
 const POR_PAGINA = 30
 const pesos = (c: number | null) => c == null ? '—'
@@ -173,12 +174,12 @@ export default function Retiros() {
 
       <div style={{ display: 'flex', borderBottom: `1px solid ${LINEA.tenue}`, marginBottom: 16 }}>
         {PESTANAS.map(p => (
-          <div key={p.v} onClick={() => { setEstado(p.v); setPagina(0) }} style={{
+          <Pulsable key={p.v} al={() => { setEstado(p.v); setPagina(0) }} activado={estado === p.v} style={{
             padding: '9px 15px', cursor: 'pointer',
             font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
             color: estado === p.v ? COLOR.admin : COLOR.textoTenue,
             borderBottom: `2px solid ${estado === p.v ? COLOR.admin : 'transparent'}`,
-          }}>{p.t}</div>
+          }}>{p.t}</Pulsable>
         ))}
       </div>
 

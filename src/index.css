@@ -41,6 +41,50 @@ body {
   user-select: none;
 }
 
+/* ---------- Lo que se pulsa ----------
+ *
+ * La pareja de `components/Pulsable.tsx`, donde está explicado el porqué. Un
+ * <button> y un <a> traen apariencia propia del navegador —fondo gris, borde,
+ * su tipografía, el subrayado azul— y aquí se les quita entera, para que
+ * puedan quedar idénticos al <span> que reemplazan.
+ *
+ * El `style` en línea de cada llamada le gana a esta clase (un atributo pesa
+ * más que un selector), así que esto solo rellena lo que nadie declaró. */
+.pulsable {
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* El anillo de foco, en el cian que los tokens ya reservaban para esto
+ * (COLOR.admin). Mismo grosor y separación que el del acordeón, dos reglas más
+ * abajo: el foco se ve igual en todo el sitio.
+ *
+ * `:focus-visible` y no `:focus`: el navegador lo enciende cuando se llegó con
+ * teclado y lo calla cuando se llegó con un clic, que es cuando el anillo
+ * estorba y la gente lo termina quitando con outline:none — y se lleva por
+ * delante al teclado. */
+.pulsable:focus-visible {
+  outline: 2px solid #00E5FF;
+  outline-offset: 3px;
+}
+
+/* Un botón deshabilitado deja de anunciarse como pulsable. El puntero lo dice
+ * también, porque varios lo heredan de su `style` en línea. */
+.pulsable:disabled {
+  cursor: default;
+}
+
 /* Acordeon de la pagina para creadoras. Va en CSS y no en estilos inline
    porque details[open] es un selector de estado: no se puede expresar inline. */
 details > summary { list-style: none }
@@ -225,3 +269,38 @@ details[open] > summary > .faq-signo {
 /* El selector de país del teléfono lleva el <select> encima e invisible, así
    que el navegador no puede dibujarle el foco. Se le pinta a la caja. */
 .pais-caja:focus-within { outline: 2px solid #00E5FF; outline-offset: 2px }
+
+/* ---------- Casilla de consentimiento ----------
+ *
+ * Es un <input type="checkbox"> de verdad —ver `Casilla` en screens/Acceso—,
+ * así que el teclado, el estado marcado y el anuncio del lector de pantalla
+ * vienen de fábrica. Aquí solo se le quita la apariencia del sistema y se le
+ * dibuja encima la que ya tenía el sitio.
+ *
+ * Va en CSS y no en el `style` en línea porque la palomita es un ::after y el
+ * foco un :focus-visible: ninguno de los dos cabe en un atributo. El tamaño,
+ * el borde y el fondo sí van en línea, con los tokens, como el resto. */
+.casilla {
+  -webkit-appearance: none;
+  appearance: none;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  border-radius: 0;
+  font: 700 12px/1 'Space Grotesk', system-ui, sans-serif;
+}
+.casilla:checked::after {
+  content: '✓';
+  color: inherit;
+}
+.casilla:focus-visible {
+  outline: 2px solid #00E5FF;
+  outline-offset: 3px;
+}
+
+/* El renglón de tabla del panel, que no puede ser un <button> y lleva el foco
+   puesto a mano con `tecladoComoBoton`. Mismo anillo que todo lo demás. */
+[role="button"]:focus-visible {
+  outline: 2px solid #00E5FF;
+  outline-offset: -2px;
+}

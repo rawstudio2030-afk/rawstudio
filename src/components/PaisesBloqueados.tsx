@@ -6,6 +6,7 @@
 // falla seguido, y una creadora confiaria en algo que no la protege.
 import { useState } from 'react'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
+import { Pulsable } from './Pulsable'
 
 
 // Los mas relevantes para el publico de la plataforma, mas un campo libre.
@@ -38,13 +39,13 @@ export default function PaisesBloqueados({
         {FRECUENTES.map(([c, n]) => {
           const on = valor.includes(c)
           return (
-            <span key={c} onClick={() => alternar(c)} style={{
+            <Pulsable key={c} al={() => alternar(c)} activado={on} style={{
               padding: '9px 11px', cursor: 'pointer',
               font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
               background: on ? COLOR.admin : 'transparent',
               color: on ? COLOR.fondo : COLOR.textoSuave,
               border: `1px solid ${on ? COLOR.admin : LINEA.media}`,
-            }}>{n}</span>
+            }}>{n}</Pulsable>
           )
         })}
       </div>
@@ -60,21 +61,21 @@ export default function PaisesBloqueados({
             border: '1px solid rgba(255,255,255,.14)', color: COLOR.texto,
             font: `400 13px/1 ${FUENTE.mono}`, padding: '11px', outline: 'none',
           }} />
-        <span onClick={agregarOtro} style={{
+        <Pulsable al={agregarOtro} style={{
           padding: '11px 14px', border: '1px solid rgba(255,255,255,.16)',
           color: COLOR.textoSuave, font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
           textTransform: 'uppercase', cursor: 'pointer',
-        }}>Agregar</span>
+        }}>Agregar</Pulsable>
       </div>
 
       {valor.filter(c => !FRECUENTES.some(([f]) => f === c)).length > 0 && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
           {valor.filter(c => !FRECUENTES.some(([f]) => f === c)).map(c => (
-            <span key={c} onClick={() => alternar(c)} style={{
+            <Pulsable key={c} al={() => alternar(c)} rotulo={`Quitar ${c}`} style={{
               padding: '8px 10px', cursor: 'pointer',
               font: `700 10px/1 ${FUENTE.mono}`, letterSpacing: 1.2,
               background: COLOR.admin, color: COLOR.fondo,
-            }}>{c} ×</span>
+            }}>{c} ×</Pulsable>
           ))}
         </div>
       )}

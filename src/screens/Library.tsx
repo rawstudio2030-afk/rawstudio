@@ -2,16 +2,15 @@
 // Reescrita con datos reales: lo que aparece aqui son compras que existen en la
 // base, no el mock del deck.
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import { misCompras, type Comprado } from '../lib/monedero'
 import { urlPortada } from '../lib/clips'
 import { COLOR, FUENTE } from '../lib/diseño'
 import { usd } from '../lib/dinero'
+import { Enlace } from '../components/Pulsable'
 
 
 export default function Library() {
-  const nav = useNavigate()
   const { sesion, cargando } = useSesion()
   const [compras, setCompras] = useState<Comprado[] | null>(null)
 
@@ -43,20 +42,24 @@ export default function Library() {
           <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19, color: COLOR.textoSuave }}>
             Todavía no has desbloqueado nada.
           </div>
-          <div onClick={() => nav('/clip')} style={{
+          <Enlace a="/clip" style={{
             marginTop: 18, display: 'inline-block', background: COLOR.acento, color: COLOR.fondo,
             padding: '14px 22px', font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6,
             textTransform: 'uppercase', cursor: 'pointer',
-          }}>Explorar clips</div>
+          }}>Explorar clips</Enlace>
         </div>
       ) : (
         compras.map(c => {
           const p = urlPortada(c.clips?.cover_path ?? null)
+          // Un clip borrado no lleva a ningun lado, asi que su fila deja de ser
+          // un enlace: antes seguia pareciendo pulsable y no hacia nada.
+          const Fila = c.clips
+            ? ({ children }: { children: React.ReactNode }) =>
+                <Enlace a={`/clip/${c.clips!.id}`} style={filaCompra}>{children}</Enlace>
+            : ({ children }: { children: React.ReactNode }) =>
+                <div style={{ ...filaCompra, cursor: 'default' }}>{children}</div>
           return (
-            <div key={c.id} onClick={() => c.clips && nav(`/clip/${c.clips.id}`)} style={{
-              display: 'flex', gap: 13, padding: '13px 0', cursor: 'pointer',
-              borderBottom: '1px solid rgba(255,255,255,.09)',
-            }}>
+            <Fila key={c.id}>
               <div style={{
                 width: 62, height: 82, flex: '0 0 auto',
                 background: p ? `center/cover url(${p})` : `repeating-linear-gradient(130deg,${COLOR.superficieAlta} 0 8px,${COLOR.superficie} 8px 16px)`,
@@ -76,13 +79,18 @@ export default function Library() {
                   </span>
                 </div>
               </div>
-            </div>
+            </Fila>
           )
         })
       )}
     </div>
   )
 }
+
+const filaCompra = {
+  display: 'flex', gap: 13, padding: '13px 0', cursor: 'pointer',
+  borderBottom: '1px solid rgba(255,255,255,.09)',
+} as const
 
 function Centro({ texto }: { texto: string }) {
   return (

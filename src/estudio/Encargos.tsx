@@ -18,6 +18,7 @@ import {
 import { clipsDe } from '../lib/clips'
 import { Marco, Boton, Campo, Etiqueta, Aviso, Vacio } from './piezas'
 import { usd } from '../lib/dinero'
+import { Pulsable } from '../components/Pulsable'
 
 export default function Encargos() {
   const [lista, setLista] = useState<Encargo[]>([])
@@ -48,7 +49,8 @@ export default function Encargos() {
           {lista.map(e => {
             const s = ESTADO_ENCARGO[e.estado] ?? { t: e.estado, c: COLOR.textoTenue }
             return (
-              <div key={e.id} onClick={() => setAbierto(e)} style={{
+              <Pulsable key={e.id} al={() => setAbierto(e)} style={{
+                boxSizing: 'border-box', width: '100%', textAlign: 'left',
                 padding: '14px 15px', border: `1px solid ${LINEA.tenue}`, cursor: 'pointer',
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
@@ -64,7 +66,7 @@ export default function Encargos() {
                 <div style={{ marginTop: 7, font: `400 16px/1 ${FUENTE.mono}`, color: COLOR.dinero }}>
                   {usd(e.coins)}
                 </div>
-              </div>
+              </Pulsable>
             )
           })}
         </div>
@@ -99,8 +101,8 @@ function Detalle({ e, cierra, recarga }: {
 
   return (
     <Marco titulo="Encargo" volverA="/estudio/encargos">
-      <div onClick={cierra} style={{ marginBottom: 14, cursor: 'pointer',
-        font: `400 12px/1 ${FUENTE.ui}`, color: COLOR.textoTenue }}>‹ Todos los encargos</div>
+      <Pulsable al={cierra} style={{ marginBottom: 14, cursor: 'pointer',
+        font: `400 12px/1 ${FUENTE.ui}`, color: COLOR.textoTenue }}>‹ Todos los encargos</Pulsable>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span style={{ font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
@@ -186,11 +188,12 @@ function Detalle({ e, cierra, recarga }: {
               ) : (
                 <div style={{ display: 'grid', gap: 8 }}>
                   {clips.map(c => (
-                    <div key={c.id} onClick={() => entregarEncargo(e.id, c.id).then(tras)}
-                      style={{ padding: '12px 14px', border: `1px solid ${LINEA.tenue}`,
+                    <Pulsable key={c.id} al={() => entregarEncargo(e.id, c.id).then(tras)}
+                      style={{ boxSizing: 'border-box', width: '100%', textAlign: 'left',
+                        padding: '12px 14px', border: `1px solid ${LINEA.tenue}`,
                         cursor: 'pointer', font: `400 13px/1.3 ${FUENTE.ui}` }}>
                       {c.title}
-                    </div>
+                    </Pulsable>
                   ))}
                 </div>
               )}

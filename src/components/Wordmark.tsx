@@ -6,6 +6,7 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import wordmark from '../assets/wordmark.png'
+import { Pulsable } from './Pulsable'
 
 // La proporcion real de la tinta del logo. El alto se deriva del ancho para no
 // deformarlo; en español el titular tiene acentos y el logo no, pero la regla
@@ -34,23 +35,29 @@ export default function Wordmark({
     nav(destino)
   }
 
+  const pinta = {
+    position: 'relative' as const,
+    width: ancho,
+    height: Math.round(ancho / RATIO),
+    transform: 'rotate(-2deg)',
+    filter: `drop-shadow(0 0 ${glow}px rgba(255,43,209,.6))`,
+    cursor: inerte ? 'default' : 'pointer',
+    margin: centrado ? '0 auto' : undefined,
+    flex: '0 0 auto',
+  }
+
+  const marca = <img src={wordmark} alt="RAWstudio"
+    style={{ width: '100%', height: 'auto', display: 'block' }} />
+
+  // Inerte es la intro y la puerta de edad: ahi la marca no lleva a ningun
+  // lado a proposito, asi que es una imagen y nada mas. Antes llevaba
+  // `role="link"` puesto a mano sobre un div, que lo anunciaba como enlace
+  // sin darle ni foco ni Enter: lo peor de las dos opciones.
+  if (inerte) return <div style={pinta}>{marca}</div>
+
   return (
-    <div
-      onClick={ir}
-      role={inerte ? undefined : 'link'}
-      aria-label={inerte ? undefined : 'Ir al inicio'}
-      style={{
-        position: 'relative',
-        width: ancho,
-        height: Math.round(ancho / RATIO),
-        transform: 'rotate(-2deg)',
-        filter: `drop-shadow(0 0 ${glow}px rgba(255,43,209,.6))`,
-        cursor: inerte ? 'default' : 'pointer',
-        margin: centrado ? '0 auto' : undefined,
-        flex: '0 0 auto',
-      }}>
-      <img src={wordmark} alt="RAWstudio"
-        style={{ width: '100%', height: 'auto', display: 'block' }} />
-    </div>
+    <Pulsable al={ir} rotulo="Ir al inicio" style={pinta}>
+      {marca}
+    </Pulsable>
   )
 }

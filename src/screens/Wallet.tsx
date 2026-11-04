@@ -21,6 +21,8 @@ import {
 } from '../lib/monedero'
 import { usd } from '../lib/dinero'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
+import { Pulsable } from '../components/Pulsable'
+import { Enlace } from '../components/Pulsable'
 
 /* Se piden mas de los que caben en pantalla porque de aqui salen tambien los
    totales. Si algun dia hay mas de quinientos movimientos, los totales habra
@@ -59,7 +61,7 @@ export default function Dinero() {
       width: '100%', maxWidth: 680, margin: '0 auto',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 26 }}>
-        <span onClick={() => nav(-1)} style={{ font: `400 26px/1 ${FUENTE.ui}`, color: COLOR.textoSuave, cursor: 'pointer' }}>‹</span>
+        <Pulsable al={() => nav(-1)} rotulo="Volver" style={{ font: `400 26px/1 ${FUENTE.ui}`, color: COLOR.textoSuave, cursor: 'pointer' }}>‹</Pulsable>
         <span style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', color: COLOR.dinero }}>
           Dinero
         </span>
@@ -94,20 +96,20 @@ export default function Dinero() {
       </div>
 
       {/* ---------- Lo que todavía no se puede ---------- */}
-      <Pendiente creadora={esCreadora} nav={nav} />
+      <Pendiente creadora={esCreadora} />
 
       {/* ---------- Movimientos ---------- */}
       {esCreadora && (
         <div style={{ display: 'flex', gap: 7, marginTop: 26 }}>
           {([['todo', 'Todo'], ['gane', 'Lo que gané'], ['gaste', 'Lo que gasté']] as [Pestana, string][])
             .map(([v, txt]) => (
-            <span key={v} onClick={() => setPestana(v)} style={{
+            <Pulsable key={v} al={() => setPestana(v)} activado={pestana === v} style={{
               padding: '9px 13px', cursor: 'pointer',
               font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
               background: pestana === v ? COLOR.dinero : 'transparent',
               color: pestana === v ? COLOR.fondo : COLOR.textoSuave,
               border: `1px solid ${pestana === v ? COLOR.dinero : LINEA.media}`,
-            }}>{txt}</span>
+            }}>{txt}</Pulsable>
           ))}
         </div>
       )}
@@ -166,11 +168,12 @@ function Cifra({ rotulo, valor, color }: { rotulo: string; valor: number; color:
  *  con este giro— y decirlo es mas util que un boton que no hace nada.
  *  Retirar SI existe ya: la pantalla comprueba identidad, cuenta bancaria,
  *  minimo y disponible, y dice cual falta. */
-function Pendiente({ creadora, nav }: { creadora: boolean; nav: (r: string) => void }) {
+function Pendiente({ creadora }: { creadora: boolean }) {
   return (
     <>
       {creadora && (
-        <div onClick={() => nav('/estudio/retirar')} style={{
+        <Enlace a="/estudio/retirar" style={{
+          boxSizing: 'border-box', width: '100%',
           marginTop: 18, padding: '16px 18px', cursor: 'pointer',
           border: `1px solid ${COLOR.dinero}`, background: 'rgba(200,255,61,.06)',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
@@ -183,7 +186,7 @@ function Pendiente({ creadora, nav }: { creadora: boolean; nav: (r: string) => v
             </div>
           </div>
           <span style={{ font: `700 16px/1 ${FUENTE.ui}`, color: COLOR.dinero }}>&#8594;</span>
-        </div>
+        </Enlace>
       )}
 
       <div style={{ marginTop: 12, padding: '14px 16px', border: `1px dashed ${LINEA.marcada}` }}>

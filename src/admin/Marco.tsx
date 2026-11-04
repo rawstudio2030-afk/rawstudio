@@ -11,6 +11,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 import { elegirModo } from '../lib/modo'
 import { ANCHO_MINIMO } from './piezas'
+import { Pulsable, Enlace } from '../components/Pulsable'
 
 export type Modulo = {
   clave: string; titulo: string; n: string
@@ -57,7 +58,8 @@ export function Marco({ children, titulo, resumen }: {
         position: 'sticky', top: 0, height: '100vh',
         display: 'flex', flexDirection: 'column',
       }}>
-        <div onClick={() => nav('/clip')} style={{
+        <Enlace a="/clip" style={{
+          display: 'block', boxSizing: 'border-box', width: '100%',
           padding: '20px 18px 16px', cursor: 'pointer',
           borderBottom: `1px solid ${LINEA.tenue}`,
         }}>
@@ -69,16 +71,18 @@ export function Marco({ children, titulo, resumen }: {
             marginTop: 5, font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.6,
             textTransform: 'uppercase', color: COLOR.admin,
           }}>Administración</div>
-        </div>
+        </Enlace>
 
         <div style={{ flex: 1, overflowY: 'auto', padding: '10px 0' }}>
           {MODULOS.map(m => {
             const aqui = m.clave === actual.clave
             return (
-              <div key={m.clave}
-                onClick={() => m.listo && nav(`/admin/${m.clave}`)}
-                title={m.listo ? undefined : 'Todavía no construido'}
+              <Pulsable key={m.clave}
+                al={() => nav(`/admin/${m.clave}`)}
+                activo={m.listo}
+                titulo={m.listo ? undefined : 'Todavía no construido'}
                 style={{
+                  boxSizing: 'border-box', width: '100%', textAlign: 'left',
                   display: 'flex', alignItems: 'center', gap: 10,
                   padding: '9px 18px',
                   cursor: m.listo ? 'pointer' : 'not-allowed',
@@ -94,7 +98,7 @@ export function Marco({ children, titulo, resumen }: {
                   font: `${aqui ? 700 : 400} 12px/1 ${FUENTE.ui}`,
                   color: aqui ? COLOR.texto : COLOR.textoSuave,
                 }}>{m.titulo}</span>
-              </div>
+              </Pulsable>
             )
           })}
         </div>
@@ -102,10 +106,11 @@ export function Marco({ children, titulo, resumen }: {
         {/* El cambiador de vuelta. Ademas de navegar, deja apuntado el
             sombrero: si no, al recargar el porton volveria a aparecer o la
             siguiente entrada caeria en el panel sin haberlo pedido. */}
-        <div onClick={() => { elegirModo('app'); nav('/clip') }} style={{
+        <Enlace a="/clip" al={() => elegirModo('app')} style={{
+          display: 'block', boxSizing: 'border-box', width: '100%',
           padding: '14px 18px', borderTop: `1px solid ${LINEA.tenue}`,
           cursor: 'pointer', font: `400 10px/1 ${FUENTE.ui}`, color: COLOR.textoTenue,
-        }}>‹ Volver a la aplicación</div>
+        }}>‹ Volver a la aplicación</Enlace>
       </nav>
 
       {/* ---- Area de trabajo ---- */}

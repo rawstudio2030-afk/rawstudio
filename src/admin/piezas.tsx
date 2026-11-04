@@ -5,8 +5,10 @@
  * asi que necesita sus propios componentes en vez de estirar los de la app.
  * Comparte los tokens de diseño, no el diseño.
  */
-import { useEffect, useState, type ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
+import { Pulsable } from '../components/Pulsable'
+import { useEscape, tecladoComoBoton } from '../lib/teclado'
 
 export const ANCHO_MINIMO = 1280
 
@@ -32,6 +34,21 @@ export function Boton({ children, al, tono = 'normal', activo = true, chico }: {
       borderRadius: 0, whiteSpace: 'nowrap',
     }}>{children}</button>
   )
+}
+
+/** El rotulo de una columna. Es un boton cuando la columna se puede ordenar y
+ *  texto cuando no: asi el teclado solo se detiene en las que hacen algo. */
+function Encabezado({ ordenable, al, alinea, children }: {
+  ordenable: boolean; al: () => void; alinea: 'left' | 'right'; children: ReactNode
+}) {
+  const pinta = {
+    display: 'block', width: '100%', boxSizing: 'border-box' as const,
+    textAlign: alinea, padding: '9px 12px',
+    font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
+    textTransform: 'uppercase' as const, color: 'inherit',
+  }
+  if (!ordenable) return <div style={pinta}>{children}</div>
+  return <Pulsable al={al} style={{ ...pinta, cursor: 'pointer' }}>{children}</Pulsable>
 }
 
 /* ---------- Campos ---------- */
@@ -109,11 +126,7 @@ export function Confirmar({ titulo, cuerpo, etiqueta, tono = 'peligro',
   const [motivo, setMotivo] = useState('')
   const [ocupado, setOcupado] = useState(false)
 
-  useEffect(() => {
-    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') cancela() }
-    window.addEventListener('keydown', esc)
-    return () => window.removeEventListener('keydown', esc)
-  }, [cancela])
+  useEscape(true, cancela)
 
   const listo = !ocupado && (!exigeMotivo || motivo.trim().length > 0)
 
@@ -192,23 +205,26 @@ export function Tabla<T>({ columnas, filas, clave, orden, descendente, ordenar,
           <tr>
             {columnas.map(c => (
               <th key={c.clave}
-                onClick={() => c.ordenable && ordenar?.(c.clave)}
+                aria-sort={orden === c.clave ? (descendente ? 'descending' : 'ascending') : undefined}
                 style={{
                   position: 'sticky', top: 0, zIndex: 1,
                   background: COLOR.superficieAlta,
                   textAlign: c.numerica ? 'right' : 'left',
-                  padding: '9px 12px', width: c.ancho,
-                  font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
-                  textTransform: 'uppercase',
+                  padding: 0, width: c.ancho,
                   color: orden === c.clave ? COLOR.admin : COLOR.textoTenue,
                   borderBottom: `1px solid ${LINEA.suave}`,
-                  cursor: c.ordenable ? 'pointer' : 'default',
                   userSelect: 'none', whiteSpace: 'nowrap',
                 }}>
-                {c.titulo}
-                {orden === c.clave && (
-                  <span style={{ marginLeft: 5 }}>{descendente ? '▾' : '▴'}</span>
-                )}
+                {/* El boton va DENTRO del <th> y no en su lugar: una celda de
+                    cabecera no se puede cambiar por otro elemento sin romper la
+                    tabla, pero si puede contener uno. */}
+                <Encabezado ordenable={!!c.ordenable} al={() => ordenar?.(c.clave)}
+                  alinea={c.numerica ? 'right' : 'left'}>
+                  {c.titulo}
+                  {orden === c.clave && (
+                    <span style={{ marginLeft: 5 }}>{descendente ? '▾' : '▴'}</span>
+                  )}
+                </Encabezado>
               </th>
             ))}
           </tr>
@@ -217,7 +233,9 @@ export function Tabla<T>({ columnas, filas, clave, orden, descendente, ordenar,
           {filas.map(f => {
             const k = clave(f)
             return (
-              <tr key={k} onClick={() => alElegir?.(f)} style={{
+              <tr key={k}
+                {...(alElegir ? tecladoComoBoton(() => alElegir(f)) : {})}
+                style={{
                 background: elegida === k ? 'rgba(0,229,255,.06)' : 'transparent',
                 cursor: alElegir ? 'pointer' : 'default',
               }}>

@@ -8,6 +8,8 @@ import {
 import { urlPortada, urlVideoFirmada } from '../lib/clips'
 import { Boton, Confirmar, Paginador, Insignia, fecha, desde } from './piezas'
 import { usd } from '../lib/dinero'
+import { Pulsable } from '../components/Pulsable'
+import { useEscape } from '../lib/teclado'
 
 const POR_PAGINA = 24
 
@@ -72,7 +74,7 @@ export default function Moderacion() {
       {/* ---- Pestañas ---- */}
       <div style={{ display: 'flex', borderBottom: `1px solid ${LINEA.tenue}`, marginBottom: 18 }}>
         {PESTANAS.map(p => (
-          <div key={p.v} onClick={() => { setEstado(p.v); setPagina(0) }} style={{
+          <Pulsable key={p.v} al={() => { setEstado(p.v); setPagina(0) }} activado={estado === p.v} style={{
             padding: '9px 15px', cursor: 'pointer',
             font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
             color: estado === p.v ? COLOR.admin : COLOR.textoTenue,
@@ -82,7 +84,7 @@ export default function Moderacion() {
             <span style={{ marginLeft: 7, font: `400 10px/1 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
               {conteo[p.v] ?? 0}
             </span>
-          </div>
+          </Pulsable>
         ))}
       </div>
 
@@ -119,7 +121,8 @@ function Tarjeta({ clip, al }: { clip: ClipEnCola; al: () => void }) {
   const portada = urlPortada(clip.cover_path)
   const alerta = clip.reportes >= 3
   return (
-    <div onClick={al} style={{
+    <Pulsable al={al} style={{
+      display: 'block', boxSizing: 'border-box', width: '100%', textAlign: 'left',
       border: `1px solid ${clip.reportes > 0 ? '#FF4444' : LINEA.tenue}`,
       cursor: 'pointer', background: COLOR.superficie,
     }}>
@@ -157,7 +160,7 @@ function Tarjeta({ clip, al }: { clip: ClipEnCola; al: () => void }) {
           {desde(clip.created_at)} · {usd(clip.precio)}
         </div>
       </div>
-    </div>
+    </Pulsable>
   )
 }
 
@@ -169,6 +172,7 @@ function Revisor({ clip, cierra, listo }: {
   const [url, setUrl] = useState<string | null>(null)
   const [fallo, setFallo] = useState('')
   const [dialogo, setDialogo] = useState<'rechazar' | 'retirar' | 'banear' | null>(null)
+  useEscape(true, cierra)
 
   useEffect(() => {
     let vivo = true

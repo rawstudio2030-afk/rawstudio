@@ -17,6 +17,7 @@ import { COLOR, FUENTE } from '../lib/diseño'
 import Reportar from '../components/Reportar'
 import OfertaCreadora from '../components/OfertaCreadora'
 import { usd } from '../lib/dinero'
+import { Pulsable, Enlace } from '../components/Pulsable'
 
 
 export default function CreatorProfile() {
@@ -73,12 +74,12 @@ export default function CreatorProfile() {
         background: `repeating-linear-gradient(130deg,${COLOR.superficieAlta} 0 10px,${COLOR.superficie} 10px 20px)`,
       }}>
         <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg,rgba(8,8,10,.2) 0%,${COLOR.fondo} 100%)` }} />
-        <span onClick={() => nav(-1)} style={{
+        <Pulsable al={() => nav(-1)} rotulo="Volver" style={{
           position: 'absolute', top: 18, left: 16, width: 38, height: 38,
           borderRadius: '50%', border: '1px solid rgba(255,255,255,.22)',
           display: 'grid', placeItems: 'center', font: `400 19px/1 ${FUENTE.ui}`,
           color: COLOR.texto, cursor: 'pointer', background: 'rgba(8,8,10,.5)',
-        }}>‹</span>
+        }}>‹</Pulsable>
       </div>
 
       <div style={{ padding: '0 22px 40px', marginTop: -46 }}>
@@ -119,11 +120,12 @@ export default function CreatorProfile() {
         )}
 
         {esMio && (
-          <div onClick={() => nav('/perfil')} style={{
+          <Enlace a="/perfil" style={{
+            display: 'block', boxSizing: 'border-box', width: '100%',
             marginTop: 24, border: '1px solid rgba(255,255,255,.16)', color: COLOR.textoSuave,
             textAlign: 'center', padding: 17, font: `700 12px/1 ${FUENTE.ui}`,
             letterSpacing: 2.2, textTransform: 'uppercase', cursor: 'pointer',
-          }}>Editar mi perfil</div>
+          }}>Editar mi perfil</Enlace>
         )}
 
         <div style={{ marginTop: 28 }}>
@@ -136,11 +138,11 @@ export default function CreatorProfile() {
                 {esMio ? 'Cuando publiques, tus clips aparecen aquí.' : 'Esta creadora aún no publica nada.'}
               </div>
               {esMio && (
-                <div onClick={() => nav('/upload')} style={{
+                <Enlace a="/upload" style={{
                   marginTop: 16, display: 'inline-block', background: COLOR.acento, color: COLOR.fondo,
                   padding: '14px 22px', font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6,
                   textTransform: 'uppercase', cursor: 'pointer',
-                }}>Publicar el primero</div>
+                }}>Publicar el primero</Enlace>
               )}
             </div>
           ) : (
@@ -152,8 +154,8 @@ export default function CreatorProfile() {
                 {clips.map(c => {
                   const p = portadaDe(c.id, urlPortada(c.cover_path))
                   return (
-                    <div key={c.id} onClick={() => nav(`/clip/${c.id}`)} style={{
-                      aspectRatio: '3/4', position: 'relative', cursor: 'pointer',
+                    <Enlace key={c.id} a={`/clip/${c.id}`} style={{
+                      display: 'block', aspectRatio: '3/4', position: 'relative', cursor: 'pointer',
                       background: `center/cover url(${p})`,
                     }}>
                       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,transparent 45%,rgba(8,8,10,.9) 100%)' }} />
@@ -169,7 +171,7 @@ export default function CreatorProfile() {
                           {c.visibility === 'gratis' ? 'gratis' : c.visibility === 'suscriptores' ? 'suscriptores' : `${usd(c.price_coins)}`}
                         </div>
                       </div>
-                    </div>
+                    </Enlace>
                   )
                 })}
               </div>
@@ -197,11 +199,11 @@ function Centro({ texto, accion }: { texto: string; accion?: { texto: string; al
     }}>
       {texto}
       {accion && (
-        <span onClick={accion.al} style={{
+        <Pulsable al={accion.al} style={{
           background: COLOR.acento, color: COLOR.fondo, padding: '15px 26px',
           font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
           fontStyle: 'normal', cursor: 'pointer',
-        }}>{accion.texto}</span>
+        }}>{accion.texto}</Pulsable>
       )}
     </div>
   )

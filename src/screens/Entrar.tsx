@@ -8,6 +8,7 @@ import { useSesion } from '../lib/sesion'
 import Wordmark from '../components/Wordmark'
 import Portada from '../components/Portada'
 import { COLOR, TINTE, FUENTE } from '../lib/diseño'
+import { Enlace } from '../components/Pulsable'
 
 
 export default function Entrar() {
@@ -45,9 +46,10 @@ export default function Entrar() {
             es el momento en que alguien decide de que lado de la plataforma
             esta: quien viene a publicar no deberia tener que registrarse como
             comprador primero para descubrir que puede cobrar. */}
-        <div
-          onClick={() => nav('/creadoras')}
+        <Enlace
+          a="/creadoras"
           style={{
+            display: 'block', boxSizing: 'border-box', width: '100%',
             marginTop: 6, padding: '18px 16px', cursor: 'pointer',
             border: '1.5px dashed rgba(200,255,61,.45)',
             background: TINTE.dinero,
@@ -64,28 +66,30 @@ export default function Entrar() {
             </span>
             <span style={{ font: `700 13px/1 ${FUENTE.ui}`, color: COLOR.dinero }}>&#8594;</span>
           </div>
-        </div>
+        </Enlace>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <div
-          onClick={() => nav('/registro')}
+        <Enlace
+          a="/registro"
           style={{
+            display: 'block', boxSizing: 'border-box', width: '100%',
             background: COLOR.acento, color: COLOR.fondo, textAlign: 'center', padding: 19,
             font: `700 13px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
             boxShadow: '0 0 34px rgba(255,43,209,.42)', cursor: 'pointer',
           }}>
           Crear mi cuenta
-        </div>
-        <div
-          onClick={() => nav('/acceso')}
+        </Enlace>
+        <Enlace
+          a="/acceso"
           style={{
+            display: 'block', boxSizing: 'border-box', width: '100%',
             border: '1px solid rgba(255,255,255,.16)', color: COLOR.textoSuave,
             textAlign: 'center', padding: 18,
             font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', cursor: 'pointer',
           }}>
           Ya tengo cuenta
-        </div>
+        </Enlace>
       </div>
 
       <Portada />

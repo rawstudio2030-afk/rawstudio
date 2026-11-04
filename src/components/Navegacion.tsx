@@ -4,6 +4,7 @@
 // 15 pantallas a cualquiera, incluidas las de entrada y la de administracion.
 import { useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { Enlace } from './Pulsable'
 import { useSesion } from '../lib/sesion'
 import { soyAdmin } from '../lib/admin'
 import type { Destino } from '../lib/rutas'
@@ -74,7 +75,6 @@ export function GuardiaRutas() {
 const resalte = (d: { soloAdmin?: boolean }) => d.soloAdmin ? COLOR.admin : COLOR.acento
 
 export function BarraInferior() {
-  const nav = useNavigate()
   const aqui = useLocation().pathname
   const { papel, esAdmin } = usePapel()
 
@@ -104,12 +104,11 @@ export function BarraInferior() {
       {destinos.map(d => {
         const activo = aqui === d.path || aqui.startsWith(d.path + '/')
         return (
-          <div key={d.path} onClick={() => {
+          <Enlace key={d.path} a={d.path} al={() => {
             // Tocar la barra tambien deja apuntado el sombrero. Sin esto, quien
             // entro al panel y volvio por aqui seguiria aterrizando en el panel
             // la proxima vez, sin haberlo vuelto a pedir.
             elegirModo(d.soloAdmin ? 'panel' : 'app')
-            nav(d.path)
           }} style={{
             flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
             gap: 5, padding: '11px 4px 13px', cursor: 'pointer',
@@ -121,7 +120,7 @@ export function BarraInferior() {
             <span style={{
               font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
             }}>{d.titulo}</span>
-          </div>
+          </Enlace>
         )
       })}
     </nav>
@@ -168,7 +167,6 @@ export function HuecoBarra() {
  *  hueco, y en las pantallas donde no sale —la entrada, el panel— no lo pide.
  */
 export function BarraLateral() {
-  const nav = useNavigate()
   const aqui = useLocation().pathname
   const { papel, esAdmin } = usePapel()
 
@@ -194,29 +192,29 @@ export function BarraLateral() {
       borderRight: `1px solid ${LINEA.tenue}`,
       flexDirection: 'column', overflowY: 'auto',
     }}>
-      <div onClick={() => nav('/clip')} style={{
-        padding: '20px 18px 16px', cursor: 'pointer',
+      <Enlace a="/clip" style={{
+        display: 'block', padding: '20px 18px 16px', cursor: 'pointer',
         font: `400 19px/1 ${FUENTE.display}`, textTransform: 'uppercase',
         letterSpacing: 0.5, color: COLOR.texto,
-      }}>RAWstudio</div>
+      }}>RAWstudio</Enlace>
 
       <div style={{ padding: '4px 0 10px' }}>
-        {principales.map(d => <Renglon key={d.path} d={d} aqui={aqui} nav={nav} />)}
+        {principales.map(d => <Renglon key={d.path} d={d} aqui={aqui} />)}
       </div>
 
       {estudio.length > 0 && (
         <>
           {/* El rotulo es el enlace al estudio completo: ahi siguen estando las
               descripciones y el estado de cada canal, que en el riel no caben. */}
-          <div onClick={() => nav('/estudio')} style={{
-            padding: '14px 18px 8px', cursor: 'pointer',
+          <Enlace a="/estudio" style={{
+            display: 'block', padding: '14px 18px 8px', cursor: 'pointer',
             borderTop: `1px solid ${LINEA.tenue}`, marginTop: 4,
             font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 2.2,
             textTransform: 'uppercase',
             color: aqui.startsWith('/estudio') ? COLOR.dinero : COLOR.textoTenue,
-          }}>Estudio</div>
+          }}>Estudio</Enlace>
           <div style={{ paddingBottom: 10 }}>
-            {estudio.map(d => <Renglon key={d.path} d={d} aqui={aqui} nav={nav} tono={COLOR.dinero} />)}
+            {estudio.map(d => <Renglon key={d.path} d={d} aqui={aqui} tono={COLOR.dinero} />)}
           </div>
         </>
       )}
@@ -225,7 +223,7 @@ export function BarraLateral() {
 
       {panel && (
         <div style={{ borderTop: `1px solid ${LINEA.tenue}`, padding: '8px 0 14px' }}>
-          <Renglon d={panel} aqui={aqui} nav={nav} tono={COLOR.admin} />
+          <Renglon d={panel} aqui={aqui} tono={COLOR.admin} />
         </div>
       )}
     </nav>
@@ -234,12 +232,12 @@ export function BarraLateral() {
 
 const ANCHO_RIEL = 228
 
-function Renglon({ d, aqui, nav, tono = COLOR.acento }: {
-  d: Destino; aqui: string; nav: (p: string) => void; tono?: string
+function Renglon({ d, aqui, tono = COLOR.acento }: {
+  d: Destino; aqui: string; tono?: string
 }) {
   const activo = aqui === d.path || aqui.startsWith(d.path + '/')
   return (
-    <div onClick={() => { elegirModo(d.soloAdmin ? 'panel' : 'app'); nav(d.path) }} style={{
+    <Enlace a={d.path} al={() => elegirModo(d.soloAdmin ? 'panel' : 'app')} style={{
       display: 'flex', alignItems: 'center', gap: 12, padding: '10px 18px',
       cursor: 'pointer',
       background: activo ? 'rgba(255,255,255,.04)' : 'transparent',
@@ -249,6 +247,6 @@ function Renglon({ d, aqui, nav, tono = COLOR.acento }: {
       <span style={{ width: 16, textAlign: 'center', fontSize: 13,
         color: activo ? tono : COLOR.textoApagado }}>{d.icono}</span>
       <span style={{ font: `${activo ? 600 : 400} 13px/1 ${FUENTE.ui}` }}>{d.titulo}</span>
-    </div>
+    </Enlace>
   )
 }

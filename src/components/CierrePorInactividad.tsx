@@ -7,6 +7,7 @@ import {
   marcarActividad, ultimaActividad, limpiarActividad, hayVideoReproduciendo,
 } from '../lib/inactividad'
 import { COLOR, VELO, FUENTE } from '../lib/diseño'
+import { Pulsable } from './Pulsable'
 
 
 const LIMITE_MS = MINUTOS_LIMITE * 60_000
@@ -94,23 +95,23 @@ export default function CierrePorInactividad() {
         <span style={{ color: COLOR.dinero }}> {restan} segundos</span>.
       </div>
 
-      <div onClick={seguir} style={{
+      <Pulsable al={seguir} style={{
         marginTop: 8, background: COLOR.acento, color: COLOR.fondo,
         padding: '18px 34px', font: `700 13px/1 ${FUENTE.ui}`,
         letterSpacing: 2.2, textTransform: 'uppercase', cursor: 'pointer',
         boxShadow: '0 0 34px rgba(255,43,209,.42)',
       }}>
         Sigo aquí
-      </div>
+      </Pulsable>
 
-      <div onClick={async () => { limpiarActividad(); await salir(); nav('/entrar', { replace: true }) }}
+      <Pulsable al={async () => { limpiarActividad(); await salir(); nav('/entrar', { replace: true }) }}
         style={{
           border: '1px solid rgba(255,255,255,.16)', color: COLOR.textoSuave,
           padding: '15px 28px', font: `700 12px/1 ${FUENTE.ui}`,
           letterSpacing: 2.2, textTransform: 'uppercase', cursor: 'pointer',
         }}>
         Cerrar ahora
-      </div>
+      </Pulsable>
     </div>
   )
 }

@@ -4,6 +4,7 @@ import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 import { useSesion } from '../lib/sesion'
 import { postsDe, guardarPost, borrarPost, type Post } from '../lib/canales'
 import { Marco, Boton, Campo, Etiqueta, Aviso, Vacio } from './piezas'
+import { Pulsable } from '../components/Pulsable'
 
 export default function Blog() {
   const { sesion } = useSesion()
@@ -35,7 +36,8 @@ export default function Blog() {
         <Etiqueta texto="Texto" />
         <Campo valor={cuerpo} cambia={setCuerpo} filas={12} marcador="Escribe aquí" />
 
-        <div onClick={() => setSoloSubs(!soloSubs)} style={{
+        <Pulsable al={() => setSoloSubs(!soloSubs)} activado={soloSubs} style={{
+          boxSizing: 'border-box', width: '100%', textAlign: 'left',
           marginTop: 16, padding: '12px 14px', cursor: 'pointer',
           border: `1px solid ${soloSubs ? COLOR.acento : LINEA.tenue}`,
           background: soloSubs ? 'rgba(255,43,209,.06)' : 'transparent',
@@ -49,7 +51,7 @@ export default function Blog() {
               ? 'Quien no esté suscrita ve el título y las primeras líneas, nada más.'
               : 'Lo puede leer cualquiera. Toca para hacerlo de suscriptoras.'}
           </div>
-        </div>
+        </Pulsable>
 
         <div style={{ display: 'flex', gap: 10, marginTop: 18, flexWrap: 'wrap' }}>
           <Boton tono="primario" activo={!!titulo.trim() && !!cuerpo.trim()} al={async () => {
@@ -82,7 +84,8 @@ export default function Blog() {
       ) : (
         <div style={{ display: 'grid', gap: 10, marginBottom: 20 }}>
           {lista.map(p => (
-            <div key={p.id} onClick={() => abrir(p)} style={{
+            <Pulsable key={p.id} al={() => abrir(p)} style={{
+              boxSizing: 'border-box', width: '100%', textAlign: 'left',
               padding: '14px 15px', border: `1px solid ${LINEA.tenue}`, cursor: 'pointer',
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
@@ -99,7 +102,7 @@ export default function Blog() {
                 display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                 {p.cuerpo}
               </div>
-            </div>
+            </Pulsable>
           ))}
         </div>
       )}

@@ -16,6 +16,7 @@ import {
   Boton, Campo, AreaTexto, Selector, Etiquetado, Confirmar, Insignia,
   Tabla, fechaHora, type Columna,
 } from './piezas'
+import { Pulsable } from '../components/Pulsable'
 
 export default function Comunicacion() {
   const [canal, setCanal] = useState<Canal>('mensaje')
@@ -84,14 +85,14 @@ export default function Comunicacion() {
     <>
       <div style={{ display: 'flex', borderBottom: `1px solid ${LINEA.tenue}`, marginBottom: 18 }}>
         {(['redactar', 'historial', 'redes_sociales'] as const).map(p => (
-          <div key={p} onClick={() => setPestana(p)} style={{
+          <Pulsable key={p} al={() => setPestana(p)} activado={pestana === p} style={{
             padding: '9px 15px', cursor: 'pointer',
             font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
             color: pestana === p ? COLOR.admin : COLOR.textoTenue,
             borderBottom: `2px solid ${pestana === p ? COLOR.admin : 'transparent'}`,
           }}>
             {p === 'redactar' ? 'Redactar' : p === 'historial' ? `Historial (${historial.length})` : 'Redes Sociales'}
-          </div>
+          </Pulsable>
         ))}
       </div>
 
@@ -227,14 +228,14 @@ export default function Comunicacion() {
             ) : lista.map(p => (
               <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 8,
                 padding: '9px 0', borderBottom: `1px solid ${LINEA.tenue}` }}>
-                <div onClick={() => {
+                <Pulsable al={() => {
                   setCanal(p.canal); setAsunto(p.asunto ?? ''); setCuerpo(p.cuerpo)
-                }} style={{ flex: 1, cursor: 'pointer' }}>
+                }} style={{ flex: 1, textAlign: 'left', cursor: 'pointer' }}>
                   <div style={{ font: `400 12px/1.3 ${FUENTE.ui}`, color: COLOR.texto }}>{p.nombre}</div>
                   <div style={{ font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
                     {p.canal}
                   </div>
-                </div>
+                </Pulsable>
                 <Boton chico tono="peligro"
                   al={async () => { await borrarPlantilla(p.id); await recargar() }}>×</Boton>
               </div>

@@ -5,6 +5,7 @@ import { misNiveles, crearNivel, borrarNivel, type Nivel } from '../lib/canales'
 import { aCentavos } from '../lib/dinero'
 import { Marco, Boton, Campo, Etiqueta, Aviso, Vacio } from './piezas'
 import { usd } from '../lib/dinero'
+import { Pulsable } from '../components/Pulsable'
 
 export default function Niveles() {
   const [lista, setLista] = useState<Nivel[]>([])
@@ -50,10 +51,10 @@ export default function Niveles() {
               <div style={{ font: `400 19px/1 ${FUENTE.mono}`, color: COLOR.dinero }}>
                 {usd(t.precio_coins)}
               </div>
-              <span onClick={async () => {
+              <Pulsable rotulo="Borrar este nivel" al={async () => {
                 const m = await borrarNivel(t.id); if (m) setError(m); else cargar()
               }} style={{ font: `400 19px/1 ${FUENTE.ui}`, color: COLOR.textoApagado,
-                cursor: 'pointer', padding: '0 4px' }}>×</span>
+                cursor: 'pointer', padding: '0 4px' }}>×</Pulsable>
             </div>
           ))}
         </div>

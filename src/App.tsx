@@ -34,6 +34,7 @@ import { SIN_PUERTA_DE_EDAD, EXIGE_SESION, RUTAS_ENTRADA } from './lib/rutas'
 import { modoElegido } from './lib/modo'
 import { edadConfirmada } from './lib/edad'
 import { COLOR } from './lib/diseño'
+import { Pulsable } from './components/Pulsable'
 
 export const SCREENS = [
   { path: '/',          n: '00', title: 'Portada',        el: <Portal /> },
@@ -106,8 +107,9 @@ function IndiceDesarrollo() {
             {SCREENS.map(s => {
               const act = s.path === here
               return (
-                <div key={s.path} onClick={e => { e.stopPropagation(); go(s.path) }}
+                <Pulsable key={s.path} al={() => go(s.path)}
                   style={{
+                    boxSizing: 'border-box', width: '100%', textAlign: 'left',
                     display: 'flex', alignItems: 'center', gap: 12,
                     padding: '11px 12px', cursor: 'pointer',
                     background: act ? 'rgba(255,43,209,.14)' : 'transparent',
@@ -122,7 +124,7 @@ function IndiceDesarrollo() {
                     font: "500 13px/1 'Space Grotesk', system-ui, sans-serif",
                     color: act ? '#fff' : COLOR.textoSuave,
                   }}>{s.title}</span>
-                </div>
+                </Pulsable>
               )
             })}
           </div>

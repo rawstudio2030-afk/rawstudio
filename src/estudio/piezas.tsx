@@ -4,13 +4,12 @@
  * escritorio, con tablas densas. Estas son de celular, que es donde las
  * creadoras usan la aplicacion. */
 import type { ReactNode } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
+import { Pulsable, Enlace } from '../components/Pulsable'
 
 export function Marco({ titulo, children, volverA = '/estudio' }: {
   titulo: string; children: ReactNode; volverA?: string
 }) {
-  const nav = useNavigate()
   return (
     <div style={{
       minHeight: '100%', boxSizing: 'border-box', padding: '54px 22px 90px',
@@ -18,9 +17,9 @@ export function Marco({ titulo, children, volverA = '/estudio' }: {
     }}>
       <div style={{ display: 'flex', alignItems: 'center',
         justifyContent: 'space-between', marginBottom: 22 }}>
-        <span onClick={() => nav(volverA)} style={{
+        <Enlace a={volverA} rotulo="Volver" style={{
           font: `400 26px/1 ${FUENTE.ui}`, color: COLOR.textoSuave, cursor: 'pointer',
-        }}>‹</span>
+        }}>‹</Enlace>
         <span style={{
           font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2,
           textTransform: 'uppercase', color: COLOR.dinero,
@@ -38,14 +37,14 @@ export function Boton({ children, al, activo = true, tono = 'normal' }: {
 }) {
   const color = tono === 'primario' ? COLOR.acento : tono === 'peligro' ? '#FF4444' : null
   return (
-    <span onClick={() => activo && al()} style={{
+    <Pulsable al={al} activo={activo} style={{
       display: 'inline-block', textAlign: 'center', padding: '13px 22px',
       cursor: activo ? 'pointer' : 'not-allowed', opacity: activo ? 1 : .4,
       background: tono === 'primario' && activo ? COLOR.acento : 'transparent',
       border: `1px solid ${color ?? LINEA.fuerte}`,
       color: tono === 'primario' && activo ? COLOR.fondo : (color ?? COLOR.textoSuave),
       font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
-    }}>{children}</span>
+    }}>{children}</Pulsable>
   )
 }
 

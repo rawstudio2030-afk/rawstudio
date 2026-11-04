@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom'
 import Wordmark from '../components/Wordmark'
 import { PRIVACIDAD, TERMINOS, VERSION_LEGAL, PENDIENTES_ABOGADO, type Seccion } from '../content/legal'
 import { COLOR, TINTE, FUENTE } from '../lib/diseño'
+import { Pulsable } from '../components/Pulsable'
 
 
 export function Privacidad() {
@@ -33,7 +34,7 @@ function Documento({ titulo, secciones }: { titulo: string[]; secciones: Seccion
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 26 }}>
         <Wordmark ancho={110} glow={12} />
-        <span onClick={() => nav(-1)} style={{ font: `400 26px/1 ${FUENTE.ui}`, color: COLOR.textoSuave, cursor: 'pointer' }}>×</span>
+        <Pulsable al={() => nav(-1)} rotulo="Volver" style={{ font: `400 26px/1 ${FUENTE.ui}`, color: COLOR.textoSuave, cursor: 'pointer' }}>×</Pulsable>
       </div>
 
       <div style={{ fontFamily: FUENTE.display, fontSize: 38, lineHeight: 1, textTransform: 'uppercase' }}>

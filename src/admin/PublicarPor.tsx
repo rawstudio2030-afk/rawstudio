@@ -18,6 +18,7 @@ import {
 import { urlAvatar } from '../lib/perfiles'
 import { aCentavos } from '../lib/dinero'
 import { Boton, Campo, Etiquetado, Insignia, Selector, desde } from './piezas'
+import { Pulsable } from '../components/Pulsable'
 
 export default function PublicarPor() {
   const [texto, setTexto] = useState('')
@@ -71,7 +72,8 @@ export default function PublicarPor() {
       ) : (
         <div style={{ display: 'grid', gap: 9 }}>
           {lista.map(c => (
-            <div key={c.id} onClick={() => c.verificada && setElegida(c)} style={{
+            <Pulsable key={c.id} al={() => setElegida(c)} activo={c.verificada} style={{
+              boxSizing: 'border-box', width: '100%', textAlign: 'left',
               display: 'flex', alignItems: 'center', gap: 13, padding: '13px 15px',
               border: `1px solid ${LINEA.tenue}`, background: COLOR.superficie,
               cursor: c.verificada ? 'pointer' : 'not-allowed',
@@ -94,7 +96,7 @@ export default function PublicarPor() {
                 ? <Insignia texto="Puede publicar" color={COLOR.dinero} />
                 : <Insignia texto={c.tiene_documentos ? 'Sin verificar' : 'Faltan documentos'}
                     color="#FFB020" />}
-            </div>
+            </Pulsable>
           ))}
         </div>
       )}
@@ -180,8 +182,8 @@ function Formulario({ c, vuelve }: { c: CreadoraGestionable; vuelve: () => void 
   return (
     <>
       <div style={{ display: 'flex', alignItems: 'center', gap: 13, marginBottom: 20 }}>
-        <span onClick={vuelve} style={{ cursor: 'pointer', font: `400 22px/1 ${FUENTE.ui}`,
-          color: COLOR.textoSuave }}>‹</span>
+        <Pulsable al={vuelve} rotulo="Volver" style={{ cursor: 'pointer', font: `400 22px/1 ${FUENTE.ui}`,
+          color: COLOR.textoSuave }}>‹</Pulsable>
         <div style={{
           width: 38, height: 38, borderRadius: '50%',
           border: `1px solid ${LINEA.suave}`,
@@ -276,9 +278,10 @@ function Formulario({ c, vuelve }: { c: CreadoraGestionable; vuelve: () => void 
                   {f.estado === 'subiendo' && <Insignia texto="subiendo" color={COLOR.admin} />}
                   {f.estado === 'error'    && <Insignia texto="falló" color="#FF4444" />}
                   {f.estado === 'espera' && !ocupado && (
-                    <span onClick={() => setFila(x => x.filter((_, j) => j !== i))}
+                    <Pulsable rotulo="Quitar esta fila"
+                      al={() => setFila(x => x.filter((_, j) => j !== i))}
                       style={{ cursor: 'pointer', color: COLOR.textoApagado,
-                        font: `400 16px/1 ${FUENTE.ui}`, padding: '0 3px' }}>×</span>
+                        font: `400 16px/1 ${FUENTE.ui}`, padding: '0 3px' }}>×</Pulsable>
                   )}
                 </div>
               ))}

@@ -9,19 +9,17 @@
  * de quien se registra.
  */
 import type { ReactNode } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { COLOR, LINEA, TINTE, FUENTE } from '../lib/diseño'
 import Icono from './Iconos'
 import { Regla, Marco } from './Hervor'
 import { Vineta, useEnPantalla } from './Vinetas'
+import { Enlace } from './Pulsable'
 import { FondoOpArt } from './OpArt'
 import {
   REDES, QUE_ES, FORMAS_DE_GANAR, SEGURIDAD, VALORES, PASOS, PREGUNTAS,
 } from '../content/portada'
 
 export default function Portada() {
-  const nav = useNavigate()
-
   return (
     <div style={{ marginTop: 56 }}>
       <Seccion rotulo="What is RAWstudio?">
@@ -66,7 +64,7 @@ export default function Portada() {
         </div>
       </div>
 
-      <Botones nav={nav} />
+      <Botones />
 
       {/* ---------- Site features ---------- */}
       <Seccion rotulo="Site features">
@@ -150,7 +148,7 @@ export default function Portada() {
 
       {/* ---------- Pie ---------- */}
       <div style={{ marginTop: 48, paddingTop: 30, borderTop: `1px solid ${LINEA.suave}` }}>
-        <Botones nav={nav} />
+        <Botones />
 
         {(REDES.x || REDES.tiktok) && (
           <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 26 }}>
@@ -168,10 +166,10 @@ export default function Portada() {
               segundo # dentro romperia la navegacion. */}
           {[['Privacy', '/privacidad'], ['Terms of Service', '/terminos'],
             ['CCPA', '/privacidad']].map(([t, r]) => (
-            <span key={t} onClick={() => nav(r)} style={{
+            <Enlace key={t} a={r} style={{
               font: `400 12px/1 ${FUENTE.ui}`, color: COLOR.textoTenue, cursor: 'pointer',
               textDecoration: 'underline', textUnderlineOffset: 4,
-            }}>{t}</span>
+            }}>{t}</Enlace>
           ))}
         </div>
 
@@ -243,20 +241,20 @@ function Sub({ children, estilo }: { children: ReactNode; estilo?: React.CSSProp
   )
 }
 
-function Botones({ nav }: { nav: (r: string) => void }) {
+function Botones() {
   return (
     <div style={{ display: 'grid', gap: 10 }}>
-      <span onClick={() => nav('/registro')} style={{
+      <Enlace a="/registro" style={{
         textAlign: 'center', padding: 18, cursor: 'pointer',
         background: COLOR.acento, color: COLOR.fondo,
         font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
         boxShadow: `0 0 30px ${TINTE.acentoBorde}`,
-      }}>Crear mi cuenta</span>
-      <span onClick={() => nav('/acceso')} style={{
+      }}>Crear mi cuenta</Enlace>
+      <Enlace a="/acceso" style={{
         textAlign: 'center', padding: 18, cursor: 'pointer',
         border: `1px solid ${LINEA.fuerte}`, color: COLOR.textoSuave,
         font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
-      }}>Ya tengo una cuenta</span>
+      }}>Ya tengo una cuenta</Enlace>
     </div>
   )
 }

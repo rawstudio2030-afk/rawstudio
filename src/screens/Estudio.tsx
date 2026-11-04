@@ -10,6 +10,7 @@ import { useSesion } from '../lib/sesion'
 import { resumen, canales, type Canal, type ResumenEstudio } from '../lib/estudio'
 import { usd } from '../lib/dinero'
 import { COLOR, FUENTE } from '../lib/diseño'
+import { Pulsable, Enlace } from '../components/Pulsable'
 
 
 const COLOR_ESTADO: Record<Canal['estado'], string> = {
@@ -52,7 +53,7 @@ export default function Estudio() {
       background: COLOR.fondo, color: COLOR.texto, fontFamily: FUENTE.ui,
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 22 }}>
-        <span onClick={() => nav('/perfil')} style={{ font: `400 26px/1 ${FUENTE.ui}`, color: COLOR.textoSuave, cursor: 'pointer' }}>‹</span>
+        <Enlace a="/perfil" rotulo="Volver" style={{ font: `400 26px/1 ${FUENTE.ui}`, color: COLOR.textoSuave, cursor: 'pointer' }}>‹</Enlace>
         <span style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', color: COLOR.dinero }}>
           Estudio
         </span>
@@ -70,7 +71,8 @@ export default function Estudio() {
           creadora llena el formulario de subida y hasta el final se topa con un
           rechazo que no explica nada. Mejor decirselo al entrar. */}
       {!perfil.identidad_verificada && (
-        <div onClick={() => nav('/verificar')} style={{
+        <Enlace a="/verificar" style={{
+          display: 'block', boxSizing: 'border-box', width: '100%',
           border: `1.5px solid ${COLOR.acento}`, background: 'rgba(255,43,209,.08)',
           padding: '18px 16px', marginBottom: 22, cursor: 'pointer',
         }}>
@@ -86,11 +88,12 @@ export default function Estudio() {
             </span>
             <span style={{ font: `700 13px/1 ${FUENTE.ui}`, color: COLOR.acento }}>&#8594;</span>
           </div>
-        </div>
+        </Enlace>
       )}
 
       {/* ganancias acumuladas */}
-      <div onClick={() => nav('/wallet')} style={{
+      <Enlace a="/wallet" style={{
+        boxSizing: 'border-box', width: '100%',
         border: '1px solid rgba(255,255,255,.12)', padding: '18px 16px',
         marginBottom: 24, cursor: 'pointer',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -108,15 +111,17 @@ export default function Estudio() {
           </div>
         </div>
         <span style={{ color: COLOR.textoApagado }}>›</span>
-      </div>
+      </Enlace>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
         {lista.map(c => {
           const activo = c.estado !== 'en_obra'
           return (
-            <div key={c.clave}
-              onClick={() => { if (activo && c.ruta) nav(c.ruta) }}
+            <Pulsable key={c.clave}
+              al={() => { if (c.ruta) nav(c.ruta) }}
+              activo={activo && !!c.ruta}
               style={{
+                boxSizing: 'border-box', width: '100%', textAlign: 'left',
                 display: 'flex', alignItems: 'flex-start', gap: 14, padding: '17px 14px',
                 border: '1px solid rgba(255,255,255,.09)',
                 cursor: activo ? 'pointer' : 'default',
@@ -146,7 +151,7 @@ export default function Estudio() {
                 )}
               </div>
               {activo && <span style={{ color: COLOR.textoApagado, marginTop: 2 }}>›</span>}
-            </div>
+            </Pulsable>
           )
         })}
       </div>
@@ -164,11 +169,11 @@ function Centro({ texto, accion }: { texto: string; accion?: { texto: string; al
     }}>
       {texto}
       {accion && (
-        <span onClick={accion.al} style={{
+        <Pulsable al={accion.al} style={{
           background: COLOR.acento, color: COLOR.fondo, padding: '15px 26px',
           font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
           fontStyle: 'normal', cursor: 'pointer',
-        }}>{accion.texto}</span>
+        }}>{accion.texto}</Pulsable>
       )}
     </div>
   )

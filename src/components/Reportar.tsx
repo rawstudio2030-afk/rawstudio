@@ -12,6 +12,8 @@ import { useState } from 'react'
 import { useSesion } from '../lib/sesion'
 import { reportar, MOTIVOS, type MotivoReporte } from '../lib/admin'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
+import { Pulsable } from './Pulsable'
+import { useEscape } from '../lib/teclado'
 
 export default function Reportar({ clip, perfil, etiqueta = 'Reportar' }: {
   clip?: string; perfil?: string; etiqueta?: string
@@ -22,6 +24,8 @@ export default function Reportar({ clip, perfil, etiqueta = 'Reportar' }: {
   const [texto, setTexto] = useState('')
   const [estado, setEstado] = useState<'' | 'enviando' | 'listo' | 'repetido'>('')
   const [error, setError] = useState('')
+
+  useEscape(abierto, () => setAbierto(false))
 
   if (!sesion) return null
 
@@ -35,17 +39,18 @@ export default function Reportar({ clip, perfil, etiqueta = 'Reportar' }: {
 
   return (
     <>
-      <span onClick={() => setAbierto(true)} style={{
+      <Pulsable al={() => setAbierto(true)} style={{
         font: `400 10px/1 ${FUENTE.ui}`, color: COLOR.textoApagado,
         cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 3,
-      }}>{etiqueta}</span>
+      }}>{etiqueta}</Pulsable>
 
       {abierto && (
         <div onClick={() => setAbierto(false)} style={{
           position: 'fixed', inset: 0, zIndex: 95, background: 'rgba(8,8,10,.88)',
           display: 'grid', placeItems: 'center', padding: 20,
         }}>
-          <div onClick={e => e.stopPropagation()} style={{
+          <div role="dialog" aria-modal aria-label={etiqueta}
+            onClick={e => e.stopPropagation()} style={{
             width: 400, maxWidth: '100%', maxHeight: '86vh', overflowY: 'auto',
             background: COLOR.superficie, border: `1px solid ${LINEA.fuerte}`, padding: 24,
           }}>
@@ -61,11 +66,12 @@ export default function Reportar({ clip, perfil, etiqueta = 'Reportar' }: {
                     ? 'Tu reporte anterior sigue en la fila. No hace falta mandarlo otra vez.'
                     : 'Lo va a revisar una persona. Si el motivo es grave, se revisa con prioridad.'}
                 </div>
-                <div onClick={() => { setAbierto(false); setEstado(''); setMotivo(''); setTexto('') }}
-                  style={{ marginTop: 20, textAlign: 'center', padding: '12px 0',
+                <Pulsable al={() => { setAbierto(false); setEstado(''); setMotivo(''); setTexto('') }}
+                  style={{ boxSizing: 'border-box', width: '100%',
+                    marginTop: 20, textAlign: 'center', padding: '12px 0',
                     border: `1px solid ${LINEA.fuerte}`, cursor: 'pointer',
                     font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6,
-                    textTransform: 'uppercase', color: COLOR.textoSuave }}>Cerrar</div>
+                    textTransform: 'uppercase', color: COLOR.textoSuave }}>Cerrar</Pulsable>
               </>
             ) : (
               <>
@@ -79,7 +85,8 @@ export default function Reportar({ clip, perfil, etiqueta = 'Reportar' }: {
 
                 <div style={{ marginTop: 18, display: 'grid', gap: 6 }}>
                   {MOTIVOS.map(m => (
-                    <div key={m.v} onClick={() => setMotivo(m.v)} style={{
+                    <Pulsable key={m.v} al={() => setMotivo(m.v)} activado={motivo === m.v} style={{
+                      boxSizing: 'border-box', width: '100%', textAlign: 'left',
                       padding: '10px 12px', cursor: 'pointer',
                       border: `1px solid ${motivo === m.v ? COLOR.acento : LINEA.tenue}`,
                       background: motivo === m.v ? 'rgba(255,43,209,.06)' : 'transparent',
@@ -90,7 +97,7 @@ export default function Reportar({ clip, perfil, etiqueta = 'Reportar' }: {
                         <div style={{ marginTop: 5, font: `400 10px/1.45 ${FUENTE.ui}`,
                           color: COLOR.textoTenue }}>{m.ayuda}</div>
                       )}
-                    </div>
+                    </Pulsable>
                   ))}
                 </div>
 
@@ -110,12 +117,12 @@ export default function Reportar({ clip, perfil, etiqueta = 'Reportar' }: {
                 )}
 
                 <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
-                  <div onClick={() => setAbierto(false)} style={{
+                  <Pulsable al={() => setAbierto(false)} style={{
                     flex: 1, textAlign: 'center', padding: '13px 0', cursor: 'pointer',
                     border: `1px solid ${LINEA.fuerte}`, font: `700 10px/1 ${FUENTE.ui}`,
                     letterSpacing: 1.6, textTransform: 'uppercase', color: COLOR.textoSuave,
-                  }}>Cancelar</div>
-                  <div onClick={enviar} style={{
+                  }}>Cancelar</Pulsable>
+                  <Pulsable al={enviar} activo={!!motivo && estado !== 'enviando'} style={{
                     flex: 1, textAlign: 'center', padding: '13px 0',
                     cursor: motivo && estado !== 'enviando' ? 'pointer' : 'not-allowed',
                     background: motivo ? COLOR.acento : 'transparent',
@@ -123,7 +130,7 @@ export default function Reportar({ clip, perfil, etiqueta = 'Reportar' }: {
                     color: motivo ? COLOR.fondo : COLOR.textoApagado,
                     font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6,
                     textTransform: 'uppercase', opacity: estado === 'enviando' ? .6 : 1,
-                  }}>{estado === 'enviando' ? 'Enviando…' : 'Enviar reporte'}</div>
+                  }}>{estado === 'enviando' ? 'Enviando…' : 'Enviar reporte'}</Pulsable>
                 </div>
               </>
             )}

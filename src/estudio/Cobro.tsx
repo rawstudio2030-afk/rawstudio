@@ -17,6 +17,7 @@ import {
 } from '../lib/retiro'
 import { Marco, Boton, Campo, Etiqueta, Aviso } from './piezas'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
+import { Pulsable } from '../components/Pulsable'
 
 export default function Cobro() {
   const nav = useNavigate()
@@ -117,13 +118,14 @@ export default function Cobro() {
           <Etiqueta texto="Régimen fiscal" />
           <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
             {(Object.keys(NOMBRE_REGIMEN) as Regimen[]).map(r => (
-              <div key={r} onClick={() => setRegimen(r)} style={{
+              <Pulsable key={r} al={() => setRegimen(r)} activado={regimen === r} style={{
+                boxSizing: 'border-box', width: '100%', textAlign: 'left',
                 padding: '13px 14px', cursor: 'pointer',
                 border: `1px solid ${regimen === r ? COLOR.dinero : LINEA.tenue}`,
                 background: regimen === r ? 'rgba(200,255,61,.07)' : 'transparent',
                 color: regimen === r ? COLOR.texto : COLOR.textoSuave,
                 font: `${regimen === r ? 600 : 400} 14px/1.35 ${FUENTE.ui}`,
-              }}>{NOMBRE_REGIMEN[r]}</div>
+              }}>{NOMBRE_REGIMEN[r]}</Pulsable>
             ))}
           </div>
           <p style={nota}>

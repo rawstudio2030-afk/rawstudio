@@ -16,6 +16,7 @@ import Reportar from '../components/Reportar'
 import MarcaDeAgua from '../components/MarcaDeAgua'
 import { COLOR, LINEA, VELO, TINTE, FUENTE } from '../lib/diseño'
 import { usd } from '../lib/dinero'
+import { Pulsable, Enlace } from '../components/Pulsable'
 
 
 export default function ClipDetail() {
@@ -135,17 +136,17 @@ export default function ClipDetail() {
             </div>
           </>
         )}
-        <span onClick={() => nav(-1)} style={{
+        <Pulsable al={() => nav(-1)} rotulo="Volver" style={{
           position: 'absolute', top: 16, left: 16, width: 38, height: 38, borderRadius: '50%',
           border: '1px solid rgba(255,255,255,.22)', background: VELO.ligero,
           display: 'grid', placeItems: 'center', font: `400 19px/1 ${FUENTE.ui}`,
           color: COLOR.texto, cursor: 'pointer', zIndex: 2,
-        }}>‹</span>
+        }}>‹</Pulsable>
       </div>
 
       {/* autora */}
       {autora && (
-        <div onClick={() => nav(`/creator/${autora.handle}`)} style={{
+        <Enlace a={`/creator/${autora.handle}`} style={{
           display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px',
           borderBottom: '1px solid rgba(255,255,255,.09)', cursor: 'pointer',
         }}>
@@ -162,7 +163,7 @@ export default function ClipDetail() {
             <div style={{ font: `400 12px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue }}>@{autora.handle}</div>
           </div>
           <span style={{ color: COLOR.textoApagado }}>›</span>
-        </div>
+        </Enlace>
       )}
 
       <div style={{ padding: '20px 20px 40px' }}>
@@ -190,7 +191,7 @@ export default function ClipDetail() {
             <div style={{ marginTop: 10, font: `400 13px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
               Decidió que dejara de estar disponible. Te devolvemos lo que pagaste.
             </div>
-            <div onClick={async () => {
+            <Pulsable al={async () => {
               if (!id) return
               const r = await reclamarReembolso(id)
               if ('error' in r) { setErrorCompra(r.error!); return }
@@ -199,7 +200,7 @@ export default function ClipDetail() {
               marginTop: 14, textAlign: 'center', padding: 16, cursor: 'pointer',
               background: COLOR.dinero, color: COLOR.fondo,
               font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
-            }}>Recuperar mis {usd(devolucion)}</div>
+            }}>Recuperar mis {usd(devolucion)}</Pulsable>
           </div>
         )}
         {bloqueo?.motivo === 'geobloqueo' ? (
@@ -247,11 +248,10 @@ export default function ClipDetail() {
                       quien viene a mirar. Ahora lleva a la puerta, y en el
                       magenta de las llamadas a la accion en vez del gris de
                       lo deshabilitado, porque SI se puede tocar. */}
-                  <div onClick={
-                    !sesion ? () => nav('/entrar')
-                    : alcanza ? desbloquear
-                    : undefined
-                  } style={{
+                  <Pulsable
+                    al={!sesion ? () => nav('/entrar') : desbloquear}
+                    activo={!sesion || alcanza}
+                    style={{
                     marginTop: 16,
                     background: !sesion ? COLOR.acento : alcanza ? COLOR.dinero : COLOR.superficieAlta,
                     color: !sesion || alcanza ? COLOR.fondo : COLOR.textoApagado,
@@ -265,28 +265,30 @@ export default function ClipDetail() {
                       : !sesion ? 'Entra para desbloquear'
                       : alcanza ? 'Desbloquear este clip'
                       : `Te faltan ${usd(falta)}`}
-                  </div>
+                  </Pulsable>
                   {sesion && (
-                    <div onClick={() => nav('/wallet')} style={{
+                    <Enlace a="/wallet" style={{
+                      display: 'block',
                       font: `400 10px/1.6 ${FUENTE.mono}`, color: COLOR.textoTenue, marginTop: 10,
                       textAlign: 'center', cursor: 'pointer', textDecoration: 'underline',
                     }}>
                       Tu saldo: {coins ?? '…'} coins
-                    </div>
+                    </Enlace>
                   )}
                   {/* Renta: mas barata y por tiempo. Se ofrece DEBAJO de la
                       compra porque la compra es lo que le deja mas a la
                       creadora; quien no quiera pagarla ya encuentra esto. */}
                   {clip.renta_coins != null && clip.renta_horas != null && sesion && (
-                    <div onClick={rentando ? undefined : rentar} style={{
-                      marginTop: 10, textAlign: 'center', padding: 14,
+                    <Pulsable al={rentar} activo={!rentando} style={{
+                      marginTop: 10, textAlign: 'center', padding: 14, width: '100%',
+                      boxSizing: 'border-box',
                       border: `1px solid ${LINEA.fuerte}`, cursor: 'pointer',
                       font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6,
                       textTransform: 'uppercase', color: COLOR.textoSuave,
                     }}>
                       {rentando ? 'Rentando…'
                         : `O réntalo ${clip.renta_horas} h por ${usd(clip.renta_coins)}`}
-                    </div>
+                    </Pulsable>
                   )}
                   {errorCompra && (
                     <div style={{ font: `400 12px/1.45 ${FUENTE.ui}`, color: COLOR.acento, marginTop: 10, textAlign: 'center' }}>
@@ -326,11 +328,11 @@ function Centro({ texto, accion }: { texto: string; accion?: { texto: string; al
     }}>
       {texto}
       {accion && (
-        <span onClick={accion.al} style={{
+        <Pulsable al={accion.al} style={{
           background: COLOR.acento, color: COLOR.fondo, padding: '15px 26px',
           font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
           fontStyle: 'normal', cursor: 'pointer',
-        }}>{accion.texto}</span>
+        }}>{accion.texto}</Pulsable>
       )}
     </div>
   )

@@ -17,6 +17,7 @@ import {
   Boton, Confirmar, Paginador, Selector, Etiquetado, Insignia,
   fechaHora, desde,
 } from './piezas'
+import { Pulsable } from '../components/Pulsable'
 
 const POR_PAGINA = 30
 
@@ -58,7 +59,7 @@ export default function Reportes() {
     <>
       <div style={{ display: 'flex', borderBottom: `1px solid ${LINEA.tenue}`, marginBottom: 16 }}>
         {PESTANAS.map(p => (
-          <div key={p.v} onClick={() => { setEstado(p.v); setPagina(0) }} style={{
+          <Pulsable key={p.v} al={() => { setEstado(p.v); setPagina(0) }} activado={estado === p.v} style={{
             padding: '9px 15px', cursor: 'pointer',
             font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
             color: estado === p.v ? COLOR.admin : COLOR.textoTenue,
@@ -69,7 +70,7 @@ export default function Reportes() {
               color: p.v === 'nuevo' && conteo.nuevo ? '#FF4444' : COLOR.textoApagado }}>
               {conteo[p.v] ?? 0}
             </span>
-          </div>
+          </Pulsable>
         ))}
       </div>
 

@@ -9,8 +9,10 @@ import { useSesion } from '../lib/sesion'
 import { clipsPublicados, urlPortada, type ClipConAutora } from '../lib/clips'
 import { urlAvatar, creadoras, type FichaCreadora } from '../lib/perfiles'
 import { portadaDe } from '../lib/portadas'
+import { usd } from '../lib/dinero'
 import TarjetaClip from '../components/TarjetaClip'
 import Wordmark from '../components/Wordmark'
+import { Pulsable, Enlace } from '../components/Pulsable'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 
 
@@ -54,13 +56,13 @@ export default function Explorar() {
         <div style={{ display: 'flex', gap: 7, marginBottom: 18 }}>
           {([['todo', 'Todo'], ['pago', 'De pago'], ['gratis', 'Gratis'],
              ['creadoras', 'Creadoras']] as [Filtro, string][]).map(([v, t]) => (
-            <span key={v} onClick={() => setFiltro(v)} style={{
+            <Pulsable key={v} al={() => setFiltro(v)} activado={filtro === v} style={{
               padding: '9px 13px', cursor: 'pointer',
               font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
               background: filtro === v ? COLOR.acento : 'transparent',
               color: filtro === v ? COLOR.fondo : COLOR.textoSuave,
               border: `1px solid ${filtro === v ? COLOR.acento : LINEA.media}`,
-            }}>{t}</span>
+            }}>{t}</Pulsable>
           ))}
         </div>
       </div>
@@ -84,7 +86,7 @@ export default function Explorar() {
           ) : (
             <div style={{ display: 'grid', gap: 9 }}>
               {gente.map(g => (
-                <div key={g.id} onClick={() => nav(`/creator/${g.handle}`)} style={{
+                <Enlace key={g.id} a={`/creator/${g.handle}`} style={{
                   display: 'flex', gap: 12, alignItems: 'center', cursor: 'pointer',
                   padding: '12px 13px', border: `1px solid ${LINEA.tenue}`,
                 }}>
@@ -116,7 +118,7 @@ export default function Explorar() {
                       }}>{g.bio}</div>
                     )}
                   </div>
-                </div>
+                </Enlace>
               ))}
             </div>
           )
@@ -144,7 +146,7 @@ export default function Explorar() {
               return (
                 <div key={c.id}>
                   <TarjetaClip portada={p} tira={urlPortada(c.preview_path ?? null)}
-                    alTocar={() => nav(`/clip/${c.id}`)}>
+                    a={`/clip/${c.id}`}>
                     <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,transparent 40%,rgba(8,8,10,.92) 100%)' }} />
                     {c.es_demo && (
                       <span style={{
@@ -159,7 +161,7 @@ export default function Explorar() {
                       padding: '4px 6px', font: `700 9px/1 ${FUENTE.ui}`,
                       letterSpacing: 1.2, textTransform: 'uppercase',
                     }}>
-                      {gratis ? 'Gratis' : c.visibility === 'suscriptores' ? 'Subs' : `${c.price_coins}`}
+                      {gratis ? 'Gratis' : c.visibility === 'suscriptores' ? 'Subs' : usd(c.price_coins)}
                     </span>
                     <div style={{ position: 'absolute', left: 9, right: 9, bottom: 9 }}>
                       <div style={{ font: `500 12px/1.3 ${FUENTE.ui}` }}>{c.title}</div>
@@ -196,11 +198,11 @@ function Vacio({ texto, accion }: { texto: string; accion?: { texto: string; al:
     }}>
       <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19, color: COLOR.textoSuave }}>{texto}</div>
       {accion && (
-        <div onClick={accion.al} style={{
+        <Pulsable al={accion.al} style={{
           marginTop: 18, display: 'inline-block', background: COLOR.acento, color: COLOR.fondo,
           padding: '14px 22px', font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6,
           textTransform: 'uppercase', cursor: 'pointer',
-        }}>{accion.texto}</div>
+        }}>{accion.texto}</Pulsable>
       )}
     </div>
   )

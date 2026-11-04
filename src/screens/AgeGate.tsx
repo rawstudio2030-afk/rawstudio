@@ -9,6 +9,7 @@ import { supabase } from '../lib/supabase'
 import Wordmark from '../components/Wordmark'
 import cortina from '../assets/cortina.jpg'
 import { COLOR, FUENTE } from '../lib/diseño'
+import { Pulsable, Enlace } from '../components/Pulsable'
 
 export default function AgeGate() {
   const nav = useNavigate()
@@ -80,12 +81,12 @@ export default function AgeGate() {
         </div>
       </div>
       <div style={{display: "flex", flexDirection: "column", gap: "10px"}}>
-        <div style={{background: COLOR.acento, color: COLOR.fondo, textAlign: "center", padding: "19px", font: "700 13px/1 'Space Grotesk'", letterSpacing: "2.2px", textTransform: "uppercase", boxShadow: "0 0 34px rgba(255,43,209,.42)", cursor: "pointer"}} onClick={confirmarEdad}>
+        <Pulsable style={{boxSizing: "border-box", width: "100%", background: COLOR.acento, color: COLOR.fondo, textAlign: "center", padding: "19px", font: "700 13px/1 'Space Grotesk'", letterSpacing: "2.2px", textTransform: "uppercase", boxShadow: "0 0 34px rgba(255,43,209,.42)", cursor: "pointer"}} al={confirmarEdad}>
           I'm 18 or older
-        </div>
-        <div style={{border: "1px solid rgba(255,255,255,.16)", color: COLOR.textoSuave, textAlign: "center", padding: "18px", font: "700 12px/1 'Space Grotesk'", letterSpacing: "2.2px", textTransform: "uppercase", cursor: "pointer"}} onClick={() => nav('/')}>
+        </Pulsable>
+        <Enlace a="/" style={{display: "block", boxSizing: "border-box", width: "100%", border: "1px solid rgba(255,255,255,.16)", color: COLOR.textoSuave, textAlign: "center", padding: "18px", font: "700 12px/1 'Space Grotesk'", letterSpacing: "2.2px", textTransform: "uppercase", cursor: "pointer"}}>
           Not yet — show me out
-        </div>
+        </Enlace>
         <div style={{font: "400 10px/1.45 'Space Mono',monospace", color: COLOR.textoApagado, textAlign: "center", padding: "8px 6px 0"}}>
           ID check may be requested before your first payout. We store a hash, not your face.
         </div>
