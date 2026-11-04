@@ -411,3 +411,9 @@ s3_secret_key = "env(S3_SECRET_KEY)"
 # declarative_schema_path = "./database"
 # JSON string passed through to pg-delta SQL formatting.
 # format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":80,\"commaStyle\":\"trailing\"}"
+
+# `avisar-purga` la llama un cron de GitHub Actions, no una persona con
+# sesion, asi que no hay JWT que verificar. Se protege sola con el secreto
+# CRON_SECRET que exige en la cabecera `x-cron-secret`; sin el responde 401.
+[functions.avisar-purga]
+verify_jwt = false

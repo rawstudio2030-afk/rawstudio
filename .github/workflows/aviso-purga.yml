@@ -1,0 +1,58 @@
+# Aviso semanal de archivos que esperan purga.
+#
+# El panel ya lleva un contador, pero solo lo ve quien abre el panel — y el
+# caso que motivo todo esto fue justamente que nadie lo abrio en treinta y
+# siete dias. Esto hace que el aviso salga a buscar a la persona.
+#
+# Semanal y no diario a proposito: el plazo de purga es de treinta dias, asi
+# que un archivo vencido por unos dias no es una urgencia. Un correo que llega
+# todos los dias deja de leerse, y entonces volvemos al punto de partida.
+#
+# La funcion de borde no manda nada cuando no hay nada vencido, que sera casi
+# todas las semanas. El silencio es el caso normal.
+
+name: Aviso de purga
+
+on:
+  schedule:
+    # Lunes a las 15:00 UTC. Ciudad de Mexico no cambia de hora desde 2022,
+    # asi que son siempre las 9:00 de la mañana alli.
+    - cron: '0 15 * * 1'
+  # Para probarlo sin esperar al lunes: pestaña Actions -> Aviso de purga ->
+  # Run workflow. Es seguro: si no hay nada vencido, no manda correo.
+  workflow_dispatch:
+
+jobs:
+  avisar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pedir el aviso
+        env:
+          # Solo este secreto vive en GitHub. No es la llave de servicio: es
+          # una cadena al azar que unicamente sirve para decir «manda el aviso
+          # de purga». La llave que puede todo se queda en Supabase.
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "Falta el secreto CRON_SECRET en el repositorio."
+            echo "Settings -> Secrets and variables -> Actions -> New repository secret"
+            exit 1
+          fi
+
+          # La URL del proyecto es publica: viaja dentro del bundle del sitio.
+          # No es un secreto y por eso esta escrita aqui.
+          respuesta=$(curl --silent --show-error --fail-with-body \
+            --max-time 120 \
+            --header "x-cron-secret: $CRON_SECRET" \
+            --header "Content-Type: application/json" \
+            --request POST \
+            "https://ggyubhyobobizugeknen.supabase.co/functions/v1/avisar-purga")
+
+          echo "$respuesta"
+
+          # Un fallo de envio no debe pasar desapercibido: si Resend rechaza,
+          # el trabajo se pone en rojo y GitHub avisa.
+          echo "$respuesta" | grep -q '"ok":true' || {
+            echo "El aviso no se pudo mandar."
+            exit 1
+          }
