@@ -7,9 +7,12 @@ export type Clip = {
   creator_id: string
   title: string
   description: string | null
-  storage_path: string | null
   cover_path: string | null
   preview_path: string | null
+  /** Si hay video. Reemplaza al viejo `storage_path`, que era la ruta dentro
+   *  del bucket privado y no hacia falta aqui: lo unico que se preguntaba era
+   *  si vale la pena pedir la URL firmada. */
+  tiene_video: boolean
   caduca_at: string | null
   caduca_modo: string
   duration_s: number | null
@@ -27,7 +30,26 @@ export type ClipConAutora = Clip & {
   profiles: { handle: string; display_name: string; avatar_path: string | null; verified: boolean } | null
 }
 
-const CON_AUTORA = '*, profiles!clips_creator_id_fkey(handle,display_name,avatar_path,verified)'
+/** Las columnas del catalogo, nombradas una por una.
+ *
+ *  Antes aqui habia un `*`. Dejo de servir el 4 de noviembre de 2026, cuando
+ *  `clips` paso a dar permiso por columna: un `select=*` pide TODAS, y en
+ *  cuanto una esta vedada Postgres responde 42501 y la consulta entera falla
+ *  —no devuelve el resto sin ella—. O sea que el `*` no solo publicaba las
+ *  notas de moderacion: hacia imposible dejar de publicarlas.
+ *
+ *  Si se agrega una columna aqui hay que agregarla tambien al `grant select`
+ *  de la migracion y al tipo `Clip`; esa tercera parte la comprueba el
+ *  compilador, porque nombrarlas le deja inferir el resultado. Igual que
+ *  `COLUMNAS_PUBLICAS` en `./supabase` para `profiles`. */
+/* Van en una sola linea y repetidas, sin concatenar ni interpolar, porque
+ * supabase-js saca el tipo del resultado LEYENDO la cadena: partirla con `+`
+ * o armarla con plantilla la convierte en `string` y el tipo se cae. Es feo a
+ * proposito; lo alternativo es un `as unknown as` que apaga la unica
+ * comprobacion que avisa si esta lista y el tipo `Clip` dejan de coincidir. */
+const COLUMNAS = 'id,creator_id,title,description,cover_path,preview_path,tiene_video,duration_s,visibility,price_coins,renta_horas,renta_coins,published,published_at,created_at,es_demo,caduca_at,caduca_modo' as const
+
+const CON_AUTORA = 'id,creator_id,title,description,cover_path,preview_path,tiene_video,duration_s,visibility,price_coins,renta_horas,renta_coins,published,published_at,created_at,es_demo,caduca_at,caduca_modo,profiles!clips_creator_id_fkey(handle,display_name,avatar_path,verified)' as const
 
 /** La portada que ve cualquiera: la de 32 px del bucket publico.
  *
@@ -102,21 +124,28 @@ export async function clipsPublicados(limite = 30): Promise<ClipConAutora[]> {
     .order('destacado_orden', { ascending: true, nullsFirst: false })
     .order('published_at', { ascending: false }).limit(limite)
   if (error) { console.warn('[clips] publicados:', error.message); return [] }
-  return (data ?? []) as ClipConAutora[]
+  // `as unknown as` solo por la cardinalidad del join: sin tipos generados de
+  // la base, supabase-js no sabe que clips_creator_id_fkey es muchos-a-uno y
+  // asume que `profiles` es un array. En ejecucion llega un objeto —o null—,
+  // que es lo que dice `ClipConAutora` y lo que usa toda la interfaz. Las
+  // COLUMNAS si quedan comprobadas: si una deja de coincidir con `Clip`, esto
+  // vuelve a fallar aqui.
+  return (data ?? []) as unknown as ClipConAutora[]
 }
 
 export async function clipPorId(id: string): Promise<ClipConAutora | null> {
   const { data, error } = await supabase.from('clips')
     .select(CON_AUTORA).eq('id', id).maybeSingle()
   if (error) { console.warn('[clips] por id:', error.message); return null }
-  return (data as ClipConAutora) ?? null
+  // Mismo motivo que arriba: la cardinalidad del join, no las columnas.
+  return (data as unknown as ClipConAutora) ?? null
 }
 
 /** Incluye borradores solo cuando quien consulta es la propia autora: de eso
  *  se encarga RLS, no este codigo. */
 export async function clipsDe(creatorId: string): Promise<Clip[]> {
   const { data, error } = await supabase.from('clips')
-    .select('*').eq('creator_id', creatorId)
+    .select(COLUMNAS).eq('creator_id', creatorId)
     .order('created_at', { ascending: false })
   if (error) { console.warn('[clips] de creadora:', error.message); return [] }
   return (data ?? []) as Clip[]

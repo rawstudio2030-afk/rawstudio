@@ -42,7 +42,7 @@ export default function ClipDetail() {
       const c = id ? await clipPorId(id) : (await clipsPublicados(1))[0] ?? null
       if (!vivo) return
       setClip(c); setCargando(false)
-      if (c?.storage_path && sesion) {
+      if (c?.tiene_video && sesion) {
         const a = await urlVideoFirmada(c.id)
         if (!vivo) return
         if ('url' in a) { setVideo(a.url); setBloqueo(null) }
