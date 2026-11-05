@@ -427,3 +427,9 @@ verify_jwt = false
 # proteccion que las otras dos: la llama un cron con `x-cron-secret`.
 [functions.avisar-creadora]
 verify_jwt = false
+
+# `avisar-verificacion` avisa a administracion de que alguien mando su INE y
+# su selfie a revision manual. La llaman un disparador de la base (pg_net) y
+# el cron; misma proteccion que las otras tres.
+[functions.avisar-verificacion]
+verify_jwt = false

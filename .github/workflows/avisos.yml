@@ -1,43 +1,33 @@
-# Los dos avisos de un retiro: el que va a administracion y el que va a ella.
+# Los avisos que no pueden esperar a que alguien abra el panel.
 #
-# Las dos mitades de la misma conversacion viven en el mismo trabajo. Aprobar
-# un retiro y contarselo a quien lo pidio no son dos tareas, son una; dos
-# tareas programadas separadas invitaban a que una se desactivara sin que
-# nadie lo notara, y la que se queda callada siempre es la que mira hacia
-# fuera.
+# Son tres y van en el MISMO trabajo a proposito: tres tareas programadas
+# separadas invitaban a que una se desactivara sin que nadie lo notara, y la
+# que se queda callada siempre acaba siendo la que mira hacia fuera.
 #
-# Hermana de aviso-purga.yml, con otro ritmo. La purga va semanal porque el
-# plazo es de treinta dias y no corre prisa. Un retiro es una persona
-# esperando dinero suyo, asi que esto corre cada dos horas.
-#
-# De cada solicitud se avisa UNA vez: la funcion marca `avisado_at` cuando
-# Resend acepta el correo. Asi doce ejecuciones al dia no son doce correos.
-#
-# AVISO SOBRE LA FIABILIDAD DE ESTO: las tareas programadas de GitHub Actions
-# se retrasan cuando hay carga, y se desactivan solas si el repositorio pasa
-# 60 dias sin actividad. Para avisos de dinero eso es mejorable: la version
-# buena es un disparador en la propia base de datos (pg_net sobre el insert
-# en `solicitudes_retiro`), que avisa en segundos y no depende de GitHub. Se
-# hizo asi primero porque reusa entero lo que ya funciona y no necesita
-# configurar nada mas. El contador del panel sigue siendo la red de seguridad.
+# EL CAMINO PRINCIPAL YA NO ES ESTE. Desde el 5 de noviembre de 2026 los tres
+# avisos salen en segundos, por disparadores de la propia base de datos sobre
+# pg_net (ver 20261109000000_avisar_al_instante.sql y
+# 20261110000000_aviso_verificacion.sql). Esto se queda como RED DE SEGURIDAD:
+# si la boveda se queda sin el secreto o pg_net falla, el aviso sale con
+# retraso en vez de no salir. Los dos caminos no se duplican porque
+# `avisado_at` y `avisada_estado` impiden el segundo envio.
 
-name: Avisos de retiro
+name: Avisos automáticos
 
 on:
   schedule:
     # Cada dos horas. El minuto 7 y no el 0 a proposito: a las horas en punto
     # se amontonan las tareas de todo GitHub y los retrasos son peores.
     - cron: '7 */2 * * *'
-  # Para probarlo sin esperar: pestaña Actions -> Avisos de retiro -> Run
-  # workflow. Es seguro: si no hay nada nuevo, ninguno de los dos pasos manda
-  # correo.
+  # Para probarlo sin esperar: pestaña Actions -> Avisos automáticos -> Run
+  # workflow. Es seguro: si no hay nada nuevo, ningun paso manda correo.
   workflow_dispatch:
 
 jobs:
   avisar:
     runs-on: ubuntu-latest
     steps:
-      - name: Pedir el aviso
+      - name: Avisar de retiros pedidos
         env:
           # El mismo secreto que usa el aviso de purga. No es la llave de
           # servicio: es una cadena al azar que solo sirve para decir «manda
@@ -97,5 +87,35 @@ jobs:
 
           echo "$respuesta" | grep -q '"ok":true' || {
             echo "No pude avisar a la creadora."
+            exit 1
+          }
+
+      # Tercer aviso, y el unico que no va de dinero: alguien mando su INE y
+      # su selfie y espera a que una persona lo mire. Hasta que se resuelva
+      # NO PUEDE SUBIR NADA, porque publicar exige la identidad verificada.
+      #
+      # `if: always()` por la misma razon que arriba: un fallo en los avisos
+      # de retiro no puede dejar una verificacion sin avisar.
+      - name: Avisar de identidades por revisar
+        if: always()
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "Falta el secreto CRON_SECRET en el repositorio."
+            exit 1
+          fi
+
+          respuesta=$(curl --silent --show-error --fail-with-body \
+            --max-time 120 \
+            --header "x-cron-secret: $CRON_SECRET" \
+            --header "Content-Type: application/json" \
+            --request POST \
+            "https://ggyubhyobobizugeknen.supabase.co/functions/v1/avisar-verificacion")
+
+          echo "$respuesta"
+
+          echo "$respuesta" | grep -q '"ok":true' || {
+            echo "No pude avisar de las verificaciones."
             exit 1
           }
