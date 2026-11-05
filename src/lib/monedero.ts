@@ -62,9 +62,36 @@ export async function saldo(): Promise<Lectura<number>> {
   return leido((data as number) ?? 0)
 }
 
+/** MIS movimientos. El filtro por `user_id` no es decorativo: la politica de
+ *  `coin_ledger` dice «user_id = auth.uid() OR es_admin()», asi que sin el
+ *  filtro un administrador recibia el libro ENTERO en su monedero personal.
+ *
+ *  Como se vio: en la pantalla de Dinero de la cuenta de administracion
+ *  aparecian tres ajustes de 100 dolares de @scarlettcum047 y uno de 2 de
+ *  @lumen, mezclados con los dos propios, como si fueran movimientos suyos.
+ *
+ *  Y lo peor no era la lista, era `totales()`, que suma sobre ella. Hoy no se
+ *  notaba porque todo lo ajeno eran `ajuste_admin`, que `caraDe()` manda a
+ *  'cuenta' y no se cuenta en ningun total. Pero en cuanto una creadora venda
+ *  un clip, el «Ganado» del monedero personal de quien administra incluiria la
+ *  venta de ella; y sus retiros, el «Retirado». Numeros de otra persona
+ *  presentados como propios.
+ *
+ *  El panel sigue viendo todo —para eso esta `admin_finanzas`—; lo que no debe
+ *  es colarse en el monedero personal. Que `saldo()` nunca tuvo este problema
+ *  lo hacia mas confuso: es una funcion de la base que usa auth.uid(), asi que
+ *  el saldo era correcto mientras la lista que supuestamente lo explicaba no
+ *  lo era. */
 export async function movimientos(limite = 50): Promise<Lectura<Movimiento[]>> {
+  const { data: s } = await supabase.auth.getSession()
+  const yo = s.session?.user.id
+  // Sin sesion no hay movimientos que mostrar, y pedirlos sin filtro seria
+  // volver al fallo de arriba por la puerta de atras.
+  if (!yo) return leido([])
+
   const { data, error } = await supabase.from('coin_ledger')
-    .select('*').order('created_at', { ascending: false }).limit(limite)
+    .select('*').eq('user_id', yo)
+    .order('created_at', { ascending: false }).limit(limite)
   if (error) return noSePudo([], error)
   return leido((data ?? []) as Movimiento[])
 }
