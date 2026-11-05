@@ -23,6 +23,7 @@ import { usd } from '../lib/dinero'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 import { Pulsable } from '../components/Pulsable'
 import { Enlace } from '../components/Pulsable'
+import Centro from '../components/Centro'
 
 /* Se piden mas de los que caben en pantalla porque de aqui salen tambien los
    totales. Si algun dia hay mas de quinientos movimientos, los totales habra
@@ -221,15 +222,5 @@ function Pendiente({ creadora }: { creadora: boolean }) {
         </div>
       </div>
     </>
-  )
-}
-
-function Centro({ texto }: { texto: string }) {
-  return (
-    <div style={{
-      minHeight: '100%', boxSizing: 'border-box', padding: '64px 26px',
-      background: COLOR.fondo, color: COLOR.textoSuave, fontFamily: FUENTE.serif, fontStyle: 'italic',
-      fontSize: 19, display: 'flex', alignItems: 'center', justifyContent: 'center',
-    }}>{texto}</div>
   )
 }

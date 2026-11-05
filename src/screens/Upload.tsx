@@ -13,6 +13,7 @@ import { COLOR, LINEA, TINTE, FUENTE } from '../lib/diseño'
 import MisClips from '../components/MisClips'
 import { usd } from '../lib/dinero'
 import { Pulsable, Enlace } from '../components/Pulsable'
+import Centro from '../components/Centro'
 
 
 const etiqueta: React.CSSProperties = {
@@ -96,7 +97,16 @@ export default function Upload() {
       accion={{ texto: 'Ir a mi perfil', al: () => nav('/perfil') }}
     />
   )
-  if (perfil.suspended_at) return <Centro texto="Tu cuenta está suspendida. Escríbenos si crees que es un error." />
+  // MisClips estaba DENTRO del componente local, asi que se pintaba en los
+  // cuatro estados: tambien debajo de «Cargando…» y de «Necesitas entrar para
+  // publicar», donde no hay sesion y por tanto no hay clips que listar. Se
+  // queda solo aqui, que es el unico caso donde quien mira SI tiene clips y le
+  // sirve verlos: su cuenta esta suspendida y quiere saber que pasa con ellos.
+  if (perfil.suspended_at) return (
+    <Centro texto="Tu cuenta está suspendida. Escríbenos si crees que es un error.">
+      <MisClips />
+    </Centro>
+  )
   // Se bloquea ANTES del formulario. La politica de la base ya lo impide, pero
   // dejar llenar todo para rechazar al final seria cruel: se sube el video, se
   // espera, y hasta entonces el error.
@@ -446,26 +456,5 @@ function Paso({ t, al }: { t: string; al: () => void }) {
       border: '1px solid rgba(255,255,255,.18)', color: COLOR.texto,
       font: `400 19px/1 ${FUENTE.ui}`, cursor: 'pointer',
     }}>{t}</Pulsable>
-  )
-}
-
-function Centro({ texto, accion }: { texto: string; accion?: { texto: string; al: () => void } }) {
-  return (
-    <div style={{
-      minHeight: '100%', boxSizing: 'border-box', padding: '64px 26px',
-      background: COLOR.fondo, color: COLOR.textoSuave, fontFamily: FUENTE.serif, fontStyle: 'italic',
-      fontSize: 19, display: 'flex', flexDirection: 'column',
-      alignItems: 'center', justifyContent: 'center', gap: 20, textAlign: 'center',
-    }}>
-      {texto}
-      {accion && (
-        <Pulsable al={accion.al} style={{
-          background: COLOR.acento, color: COLOR.fondo, padding: '15px 26px',
-          font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
-          fontStyle: 'normal', cursor: 'pointer',
-        }}>{accion.texto}</Pulsable>
-      )}
-      <MisClips />
-    </div>
   )
 }

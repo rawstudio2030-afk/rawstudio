@@ -17,6 +17,7 @@ import MarcaDeAgua from '../components/MarcaDeAgua'
 import { COLOR, LINEA, VELO, TINTE, FUENTE } from '../lib/diseño'
 import { usd } from '../lib/dinero'
 import { Pulsable, Enlace } from '../components/Pulsable'
+import Centro from '../components/Centro'
 
 
 export default function ClipDetail() {
@@ -338,26 +339,6 @@ export default function ClipDetail() {
           <Reportar clip={id} etiqueta="Reportar este clip" />
         </div>
       </div>
-    </div>
-  )
-}
-
-function Centro({ texto, accion }: { texto: string; accion?: { texto: string; al: () => void } }) {
-  return (
-    <div style={{
-      minHeight: '100%', boxSizing: 'border-box', padding: '64px 26px',
-      background: COLOR.fondo, color: COLOR.textoSuave, fontFamily: FUENTE.serif, fontStyle: 'italic',
-      fontSize: 19, display: 'flex', flexDirection: 'column',
-      alignItems: 'center', justifyContent: 'center', gap: 20, textAlign: 'center',
-    }}>
-      {texto}
-      {accion && (
-        <Pulsable al={accion.al} style={{
-          background: COLOR.acento, color: COLOR.fondo, padding: '15px 26px',
-          font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
-          fontStyle: 'normal', cursor: 'pointer',
-        }}>{accion.texto}</Pulsable>
-      )}
     </div>
   )
 }

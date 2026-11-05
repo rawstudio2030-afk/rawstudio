@@ -24,6 +24,7 @@ import { resumen, canales, type Canal, type ResumenEstudio } from '../lib/estudi
 import { usd } from '../lib/dinero'
 import { COLOR, FUENTE } from '../lib/diseño'
 import { Pulsable, Enlace } from '../components/Pulsable'
+import Centro from '../components/Centro'
 
 
 const COLOR_ESTADO: Record<Canal['estado'], string> = {
@@ -200,25 +201,5 @@ function Lista({ canales, nav }: { canales: Canal[]; nav: (r: string) => void })
           )
         })}
       </div>
-  )
-}
-
-function Centro({ texto, accion }: { texto: string; accion?: { texto: string; al: () => void } }) {
-  return (
-    <div style={{
-      minHeight: '100%', boxSizing: 'border-box', padding: '64px 26px',
-      background: COLOR.fondo, color: COLOR.textoSuave, fontFamily: FUENTE.serif, fontStyle: 'italic',
-      fontSize: 19, display: 'flex', flexDirection: 'column',
-      alignItems: 'center', justifyContent: 'center', gap: 20, textAlign: 'center',
-    }}>
-      {texto}
-      {accion && (
-        <Pulsable al={accion.al} style={{
-          background: COLOR.acento, color: COLOR.fondo, padding: '15px 26px',
-          font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
-          fontStyle: 'normal', cursor: 'pointer',
-        }}>{accion.texto}</Pulsable>
-      )}
-    </div>
   )
 }

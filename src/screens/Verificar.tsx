@@ -12,6 +12,7 @@ import { supabase } from '../lib/supabase'
 import Wordmark from '../components/Wordmark'
 import { COLOR, LINEA, TINTE, FUENTE } from '../lib/diseño'
 import { Pulsable, Enlace } from '../components/Pulsable'
+import Centro from '../components/Centro'
 
 
 const SERVICIO = import.meta.env.VITE_VERIFICACION_URL as string | undefined
@@ -50,7 +51,8 @@ export default function Verificar() {
   if (cargando) return <Centro texto="Cargando…" />
   if (!sesion) return <Centro texto="Necesitas entrar." accion={{ texto: 'Entrar', al: () => nav('/acceso') }} />
   if (perfil?.identidad_verificada) return (
-    <Centro texto="Tu identidad ya está verificada." accion={{ texto: 'Ir al estudio', al: () => nav('/estudio') }} />
+    <Centro encendido texto="Tu identidad ya está verificada."
+      accion={{ texto: 'Ir al estudio', al: () => nav('/estudio') }} />
   )
 
   const edad = edadDe(nacimiento)
@@ -125,6 +127,10 @@ export default function Verificar() {
 
   if (estado === 'ok' || estado === 'revision') return (
     <Centro
+      // El unico sitio del producto donde el simbolo se enciende hoy: la
+      // identidad quedo verificada. Si el cotejo no fue concluyente sigue
+      // apagado, porque todavia no hay nada que celebrar.
+      encendido={estado === 'ok'}
       titulo={estado === 'ok' ? ['Listo,', 'ya', 'quedó.'] : ['Lo estamos', 'revisando', 'a mano.']}
       texto={estado === 'ok'
         ? 'Tu identidad quedó verificada. Ya puedes publicar y cobrar.'
@@ -267,36 +273,4 @@ function Foto({ etiqueta: et, nota, archivo, refInput, camara, onElegir }: {
 
 const etiquetaBase: React.CSSProperties = {
   font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
-}
-
-function Centro({ titulo, texto, accion }: {
-  titulo?: string[]; texto: string; accion?: { texto: string; al: () => void }
-}) {
-  return (
-    <div style={{
-      minHeight: '100%', boxSizing: 'border-box', padding: '64px 26px',
-      background: COLOR.fondo, display: 'flex', flexDirection: 'column',
-      alignItems: 'center', justifyContent: 'center', gap: 20, textAlign: 'center',
-    }}>
-      {titulo && (
-        <div style={{
-          fontFamily: FUENTE.display, fontSize: 38, lineHeight: 1,
-          textTransform: 'uppercase', color: COLOR.texto,
-        }}>
-          {titulo[0]}<br />{titulo[1]}<br /><span style={{ color: COLOR.dinero }}>{titulo[2]}</span>
-        </div>
-      )}
-      <div style={{
-        fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19, lineHeight: 1.45,
-        color: COLOR.textoSuave, maxWidth: 330,
-      }}>{texto}</div>
-      {accion && (
-        <Pulsable al={accion.al} style={{
-          background: COLOR.acento, color: COLOR.fondo, padding: '15px 26px',
-          font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
-          cursor: 'pointer',
-        }}>{accion.texto}</Pulsable>
-      )}
-    </div>
-  )
 }

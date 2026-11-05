@@ -8,6 +8,7 @@ import { urlPortada } from '../lib/clips'
 import { COLOR, FUENTE } from '../lib/diseño'
 import { usd } from '../lib/dinero'
 import { Pulsable, Enlace } from '../components/Pulsable'
+import Centro from '../components/Centro'
 
 
 export default function Library() {
@@ -113,13 +114,3 @@ const filaCompra = {
   display: 'flex', gap: 13, padding: '13px 0', cursor: 'pointer',
   borderBottom: '1px solid rgba(255,255,255,.09)',
 } as const
-
-function Centro({ texto }: { texto: string }) {
-  return (
-    <div style={{
-      minHeight: '100%', boxSizing: 'border-box', padding: '64px 26px',
-      background: COLOR.fondo, color: COLOR.textoSuave, fontFamily: FUENTE.serif, fontStyle: 'italic',
-      fontSize: 19, display: 'flex', alignItems: 'center', justifyContent: 'center',
-    }}>{texto}</div>
-  )
-}
