@@ -1,4 +1,10 @@
-# Aviso de que alguien pidio un retiro.
+# Los dos avisos de un retiro: el que va a administracion y el que va a ella.
+#
+# Las dos mitades de la misma conversacion viven en el mismo trabajo. Aprobar
+# un retiro y contarselo a quien lo pidio no son dos tareas, son una; dos
+# tareas programadas separadas invitaban a que una se desactivara sin que
+# nadie lo notara, y la que se queda callada siempre es la que mira hacia
+# fuera.
 #
 # Hermana de aviso-purga.yml, con otro ritmo. La purga va semanal porque el
 # plazo es de treinta dias y no corre prisa. Un retiro es una persona
@@ -15,15 +21,16 @@
 # hizo asi primero porque reusa entero lo que ya funciona y no necesita
 # configurar nada mas. El contador del panel sigue siendo la red de seguridad.
 
-name: Aviso de retiro
+name: Avisos de retiro
 
 on:
   schedule:
     # Cada dos horas. El minuto 7 y no el 0 a proposito: a las horas en punto
     # se amontonan las tareas de todo GitHub y los retrasos son peores.
     - cron: '7 */2 * * *'
-  # Para probarlo sin esperar: pestaña Actions -> Aviso de retiro -> Run
-  # workflow. Es seguro: si no hay solicitudes nuevas, no manda correo.
+  # Para probarlo sin esperar: pestaña Actions -> Avisos de retiro -> Run
+  # workflow. Es seguro: si no hay nada nuevo, ninguno de los dos pasos manda
+  # correo.
   workflow_dispatch:
 
 jobs:
@@ -58,5 +65,37 @@ jobs:
           # la purga: al otro lado hay alguien esperando que le paguen.
           echo "$respuesta" | grep -q '"ok":true' || {
             echo "El aviso no se pudo mandar."
+            exit 1
+          }
+
+      # El otro lado de la misma conversacion, y en el mismo trabajo a
+      # proposito: aprobar un retiro y contarselo a quien lo pidio son dos
+      # mitades de un mismo acto, y separarlas en dos tareas programadas
+      # invitaba a que una se desactivara sin que nadie lo notara.
+      #
+      # `if: always()` para que un fallo avisando a administracion no deje a
+      # la creadora sin su correo. El trabajo queda en rojo si falla
+      # cualquiera de los dos.
+      - name: Avisar a la creadora
+        if: always()
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "Falta el secreto CRON_SECRET en el repositorio."
+            exit 1
+          fi
+
+          respuesta=$(curl --silent --show-error --fail-with-body \
+            --max-time 120 \
+            --header "x-cron-secret: $CRON_SECRET" \
+            --header "Content-Type: application/json" \
+            --request POST \
+            "https://ggyubhyobobizugeknen.supabase.co/functions/v1/avisar-creadora")
+
+          echo "$respuesta"
+
+          echo "$respuesta" | grep -q '"ok":true' || {
+            echo "No pude avisar a la creadora."
             exit 1
           }

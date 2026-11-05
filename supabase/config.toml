@@ -422,3 +422,8 @@ verify_jwt = false
 # Mismo secreto, misma proteccion.
 [functions.avisar-retiro]
 verify_jwt = false
+
+# `avisar-creadora` manda el correo HACIA ella, no hacia administracion. Misma
+# proteccion que las otras dos: la llama un cron con `x-cron-secret`.
+[functions.avisar-creadora]
+verify_jwt = false
