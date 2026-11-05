@@ -417,3 +417,8 @@ s3_secret_key = "env(S3_SECRET_KEY)"
 # CRON_SECRET que exige en la cabecera `x-cron-secret`; sin el responde 401.
 [functions.avisar-purga]
 verify_jwt = false
+
+# `avisar-retiro` igual que la anterior: la llama un cron, no una persona.
+# Mismo secreto, misma proteccion.
+[functions.avisar-retiro]
+verify_jwt = false
