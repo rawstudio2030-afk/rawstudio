@@ -4,9 +4,49 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#08080A" />
-    <meta name="description" content="RAWstudio — a marketplace for video you have to pay to see. Prototipo navegable." />
+    <!-- En español, como el sitio. Decia «a marketplace for video you have to
+         pay to see. Prototipo navegable.» — medio en ingles, y llamandose a si
+         mismo prototipo en lo primero que lee un buscador y una vista previa. -->
+    <meta name="description" content="Video que se paga para ver. Creadoras mexicanas cobran directo, sin intermediarios. Solo mayores de 18." />
     <title>RAWstudio</title>
-    <link rel="icon" type="image/svg+xml" href="/rawstudio/favicon.svg" />
+
+    <!-- ESTO ESTABA ROTO: el href era /rawstudio/favicon.svg, que da 404 en el
+         dominio propio. El sitio llevaba sin icono desde que se movio a
+         rawstudio.biz; el archivo siempre estuvo en la raiz. -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- La vista previa de un enlace. No habia NINGUNA: cada enlace compartido
+         a WhatsApp, a X o a una biografia de TikTok salia en blanco.
+
+         La imagen es la marca sobre su fondo y NADA MAS, a proposito: esa
+         imagen la pinta WhatsApp en una conversacion sin que nadie la pida y
+         delante de quien pase por ahi. Una plataforma de contenido adulto que
+         mete su contenido en la vista previa se gana que marquen el enlace, y
+         de paso expone a quien lo comparte.
+
+         Las URL van absolutas porque las vistas previas las resuelve un
+         servidor ajeno, que no sabe de que pagina salieron. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="RAWstudio" />
+    <meta property="og:locale" content="es_MX" />
+    <meta property="og:url" content="https://rawstudio.biz/" />
+    <meta property="og:title" content="RAWstudio" />
+    <meta property="og:description" content="Video que se paga para ver. Creadoras mexicanas cobran directo, sin intermediarios. Solo mayores de 18." />
+    <meta property="og:image" content="https://rawstudio.biz/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="RAWstudio" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="RAWstudio" />
+    <meta name="twitter:description" content="Video que se paga para ver. Creadoras mexicanas cobran directo, sin intermediarios. Solo mayores de 18." />
+    <meta name="twitter:image" content="https://rawstudio.biz/og.png" />
+
+    <!-- Sitio para mayores de edad, declarado donde lo leen los buscadores y
+         los filtros de familia. No sustituye a la puerta de edad: la acompaña. -->
+    <meta name="rating" content="adult" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
