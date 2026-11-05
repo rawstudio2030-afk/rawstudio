@@ -318,9 +318,17 @@ export default function Perfil() {
         )}
       </Seccion>
 
-      {/* ---------- Atajos ---------- */}
+      {/* ---------- Atajos ----------
+          Queda uno, y solo para quien todavia no publica. La lista llego a
+          tener cuatro entradas y tres eran copias de la barra de abajo —subir,
+          biblioteca, dinero—, asi que «Yo» funcionaba como pasillo en vez de
+          como pantalla. Dinero subio a la barra, que era lo unico que de
+          verdad no tenia otro camino para una compradora.
+
+          «Quiero publicar» no es un atajo a una pantalla que ya tiene: es la
+          puerta a un papel que aun no tiene. Por eso se queda. */}
       {atajos.length > 0 && (
-        <Seccion titulo="Atajos">
+        <Seccion titulo="Y además">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
             {atajos.map(a => (
               <Enlace key={a.path} a={a.path} style={{

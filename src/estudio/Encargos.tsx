@@ -1,8 +1,22 @@
-/* Contenido a la medida.
+/* Contenido a la medida — y, desde el 5 de noviembre de 2026, el contenido de
+ * la pestaña MENSAJES.
  *
  * La misma pantalla sirve a las dos partes: quien encarga y quien produce. El
  * flujo es identico y las acciones cambian segun de que lado estes, asi que
  * duplicarla solo garantizaria que las dos copias se separen con el tiempo.
+ *
+ * ---------- Por que esto es Mensajes ----------
+ *
+ * Un encargo ES una conversacion: alguien pide algo, se negocia el precio, se
+ * acepta, se entrega. Estaba clasificado como «un canal de ingreso» y vivia en
+ * una entrada de menu del estudio, al lado de «define tu nivel de
+ * suscripcion», que es poner un precio una vez.
+ *
+ * Y al mismo tiempo la pestaña Mensajes de la barra era una pantalla vacia que
+ * decia «esto llega cuando lo construyamos». O sea que habia una conversacion
+ * real enterrada en un menu de configuracion, y un destino de primera clase
+ * sin nada dentro. Ahora los encargos son lo que Mensajes contiene, y el chat
+ * libre —cuando exista— se suma aqui.
  *
  * EL DINERO QUEDA RETENIDO al pagar y se libera al entregar. Sin eso, cobrar y
  * no entregar seria trivial.
@@ -21,6 +35,8 @@ import { usd } from '../lib/dinero'
 import { Pulsable } from '../components/Pulsable'
 
 export default function Encargos() {
+  const { perfil } = useSesion()
+  const esCreadora = !!perfil?.is_creator
   const [lista, setLista] = useState<Encargo[]>([])
   const [abierto, setAbierto] = useState<Encargo | null>(null)
   const [cargando, setCargando] = useState(true)
@@ -36,14 +52,21 @@ export default function Encargos() {
   if (abierto) return <Detalle e={abierto} cierra={() => setAbierto(null)} recarga={cargar} />
 
   return (
-    <Marco titulo="Contenido a la medida">
+    <Marco titulo="Mensajes" volverA="/clip">
       <div style={{ font: `400 13px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave, marginBottom: 20 }}>
-        Alguien te pide algo concreto y propone un precio. Negocias, aceptas, te paga —
-        y <b style={{ color: COLOR.texto }}>el dinero se queda retenido hasta que entregues</b>.
+        {esCreadora ? (
+          <>Alguien te pide algo concreto y propone un precio. Negocias, aceptas, te paga —
+          y <b style={{ color: COLOR.texto }}>el dinero se queda retenido hasta que entregues</b>.</>
+        ) : (
+          <>Pides algo concreto a una creadora y propones un precio. Negocian, aceptas, pagas —
+          y <b style={{ color: COLOR.texto }}>tu dinero se queda retenido hasta que te entreguen</b>.</>
+        )}
       </div>
 
       {cargando ? null : lista.length === 0 ? (
-        <Vacio texto="Nadie te ha encargado nada todavía." />
+        <Vacio texto={esCreadora
+          ? 'Nadie te ha encargado nada todavía.'
+          : 'Todavía no le has pedido nada a nadie.'} />
       ) : (
         <div style={{ display: 'grid', gap: 10 }}>
           {lista.map(e => {
@@ -71,6 +94,18 @@ export default function Encargos() {
           })}
         </div>
       )}
+
+      {/* Lo que todavia NO es Mensajes. Este aviso vivia en Chat.tsx, que era
+          la pantalla entera; se conserva porque una pestaña llamada «Mensajes»
+          sin mas invita a esperar una conversacion libre que aun no existe. */}
+      <div style={{ marginTop: 26, padding: '14px 16px',
+        border: `1px dashed ${LINEA.marcada}` }}>
+        <div style={{ font: `400 12px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
+          <b style={{ color: COLOR.texto }}>La conversación libre</b>, con
+          propinas y contenido de pago dentro del mensaje, todavía no existe.
+          Por ahora Mensajes son los encargos.
+        </div>
+      </div>
     </Marco>
   )
 }
@@ -100,7 +135,7 @@ function Detalle({ e, cierra, recarga }: {
   const negociando = e.estado === 'propuesta' || e.estado === 'negociando'
 
   return (
-    <Marco titulo="Encargo" volverA="/estudio/encargos">
+    <Marco titulo="Encargo" volverA="/chat">
       <Pulsable al={cierra} style={{ marginBottom: 14, cursor: 'pointer',
         font: `400 12px/1 ${FUENTE.ui}`, color: COLOR.textoTenue }}>‹ Todos los encargos</Pulsable>
 

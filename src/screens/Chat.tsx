@@ -1,37 +1,22 @@
-// Pantalla en espera de su tabla.
-// Antes mostraba el mock del deck con una creadora inventada ("Mira Vanta") y
-// clips que no existen. Se quito: datos falsos pero realistas dentro de una app
-// en vivo se leen como ciertos, y eso ya causo confusion real.
-import { useNavigate } from 'react-router-dom'
-import { COLOR, FUENTE } from '../lib/diseño'
-import { Pulsable } from '../components/Pulsable'
-
-
-export default function Pantalla() {
-  const nav = useNavigate()
-  return (
-    <div style={{
-      minHeight: '100%', boxSizing: 'border-box', padding: '54px 24px 40px',
-      background: COLOR.fondo, color: COLOR.texto, fontFamily: FUENTE.ui,
-      display: 'flex', flexDirection: 'column',
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Pulsable al={() => nav(-1)} rotulo="Volver" style={{ font: `400 26px/1 ${FUENTE.ui}`, color: COLOR.textoSuave, cursor: 'pointer' }}>‹</Pulsable>
-        <span style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', color: COLOR.dinero }}>
-          Mensajes
-        </span>
-        <span style={{ width: 14 }} />
-      </div>
-
-      <div style={{
-        flex: 1, display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center', gap: 18, textAlign: 'center',
-      }}>
-        <div style={{ width: 64, height: 3, background: COLOR.acento }} />
-        <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19, lineHeight: 1.45, color: COLOR.textoSuave, maxWidth: 320 }}>
-          Los mensajes con propinas llegan cuando construyamos esa parte. Por ahora no hay conversaciones reales.
-        </div>
-      </div>
-    </div>
-  )
-}
+/* Pantalla 08 — Mensajes.
+ *
+ * Era una pantalla vacia de 37 lineas que decia «los mensajes con propinas
+ * llegan cuando construyamos esa parte». Y al mismo tiempo los ENCARGOS —que
+ * son literalmente una conversacion: alguien pide algo, se negocia el precio,
+ * se acepta, se entrega— vivian enterrados en una entrada de menu del estudio,
+ * al lado de «define tu nivel de suscripcion», que es poner un precio una vez.
+ *
+ * O sea que habia una conversacion real escondida en un menu de configuracion
+ * y un destino de primera clase sin nada dentro. Esto los junta: Mensajes es
+ * ahora los encargos, y el chat libre se suma aqui cuando exista.
+ *
+ * La implementacion sigue en src/estudio/Encargos.tsx y no se movio de
+ * archivo a proposito: mover 240 lineas de sitio en el mismo commit que cambia
+ * la navegacion haria ilegible el diff de las dos cosas. Lo que cambio es
+ * quien la monta y como se titula.
+ *
+ * `/estudio/encargos` sigue existiendo y redirige aqui, igual que `/earnings`
+ * redirige a `/wallet`: esa ruta estuvo meses en los menus y puede seguir viva
+ * en un enlace o en el historial de alguien.
+ */
+export { default } from '../estudio/Encargos'

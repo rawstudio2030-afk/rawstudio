@@ -74,6 +74,26 @@ export function GuardiaRutas() {
  *  privilegiado», y la puerta tiene que verse como lo que abre. */
 const resalte = (d: { soloAdmin?: boolean }) => d.soloAdmin ? COLOR.admin : COLOR.acento
 
+/** El rotulo se encoge segun cuantos destinos haya, porque todos van a
+ *  `flex: 1` y el ancho de cada uno sale de dividir la pantalla.
+ *
+ *  MEDIDO, no estimado, con el tipo real a 360 px de ancho —el telefono chico
+ *  que todavia se usa—:
+ *
+ *    5 destinos a 9px/1.2    «BIBLIOTECA» mide 69 px y hay 64
+ *    5 destinos a 8.5px/0.8  todo cabe
+ *    6 destinos a 8px/0.5    «BIBLIOTECA» mide 56 px y hay 54
+ *    6 destinos a 7.5px/0.3  todo cabe
+ *
+ *  O sea que el caso de cinco ya estaba roto antes de que Dinero subiera a la
+ *  barra: una compradora en un telefono de 360 px veia «BIBLIOTECA» partida o
+ *  recortada. No se habia notado porque nadie midio. */
+function rotuloPara(cuantos: number): { px: number; esp: number } {
+  if (cuantos >= 6) return { px: 7.5, esp: 0.3 }
+  if (cuantos === 5) return { px: 8.5, esp: 0.8 }
+  return { px: 9, esp: 1.2 }
+}
+
 export function BarraInferior() {
   const aqui = useLocation().pathname
   const { papel, esAdmin } = usePapel()
@@ -89,6 +109,7 @@ export function BarraInferior() {
   if (RUTAS_PANEL.some(r => aqui.startsWith(r))) return null
 
   const destinos = visiblesPara(BARRA, papel, esAdmin)
+  const rotulo = rotuloPara(destinos.length)
 
   return (
     /* `display: flex` va en la hoja de estilos y NO aqui: un estilo en linea
@@ -118,7 +139,11 @@ export function BarraInferior() {
           }}>
             <span style={{ fontSize: 16, lineHeight: 1 }}>{d.icono}</span>
             <span style={{
-              font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
+              font: `700 ${rotulo.px}px/1 ${FUENTE.ui}`, letterSpacing: rotulo.esp,
+              textTransform: 'uppercase',
+              // Sin esto un rotulo que no quepa parte en dos lineas y cambia
+              // la ALTURA de la barra entera, que es peor que recortarse.
+              whiteSpace: 'nowrap',
             }}>{d.titulo}</span>
           </Enlace>
         )

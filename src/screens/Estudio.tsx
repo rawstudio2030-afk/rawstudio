@@ -1,9 +1,22 @@
 // Pantalla 15 — Estudio de creadora
 //
 // El estudio solo ofrecia "publicar un clip", aunque la plataforma promete
-// siete formas de ganar. Aqui estan las siete, cada una diciendo si ya se puede
-// usar: mostrar lo que falta es mas util que esconderlo, porque una creadora
-// que no encuentra un canal asume que no existe.
+// varias formas de ganar. Aqui estan, cada una diciendo si ya se puede usar:
+// mostrar lo que falta es mas util que esconderlo, porque una creadora que no
+// encuentra un canal asume que no existe.
+//
+// ---------- Pero no todas son lo mismo ----------
+//
+// La lista trataba igual «subir un clip», que se hace mil veces, y «define tu
+// nivel de suscripcion», que se hace una. Esa mezcla es lo que hacia que el
+// estudio pareciera un panel de configuracion en vez de un sitio de trabajo:
+// cada vez que entrabas a publicar, pasabas por encima de ajustes que ya
+// habias dejado resueltos hacia meses.
+//
+// Ahora van en dos grupos —`hacer` y `ajustar`, ver src/lib/estudio.ts— y el
+// segundo va despues y en voz mas baja. Y dentro de `ajustar`, la cuenta para
+// cobrar solo aparece MIENTRAS NO EXISTA: lo que ya esta hecho se esconde, lo
+// que falta y bloquea dinero se queda a la vista.
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
@@ -46,6 +59,8 @@ export default function Estudio() {
   if (!r) return <Centro texto="Cargando…" />
 
   const lista = canales(r)
+  const hacer = lista.filter(c => c.grupo === 'hacer')
+  const ajustar = lista.filter(c => c.grupo === 'ajustar')
 
   return (
     <div style={{
@@ -60,8 +75,12 @@ export default function Estudio() {
         <span style={{ width: 14 }} />
       </div>
 
+      {/* El numero salio del titular a proposito: decia «seis formas» y la
+          lista ya no tiene seis, porque dos eran la misma cosa contada dos
+          veces. Un numero en un titular es una promesa que hay que mantener
+          sincronizada con un array, y se desincroniza siempre. */}
       <div style={{ fontFamily: FUENTE.display, fontSize: 38, lineHeight: 1, textTransform: 'uppercase', marginBottom: 8 }}>
-        Seis formas<br /><span style={{ color: COLOR.dinero }}>de ganar</span>
+        Formas<br /><span style={{ color: COLOR.dinero }}>de ganar</span>
       </div>
       <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19, lineHeight: 1.3, color: COLOR.textoSuave, marginBottom: 24 }}>
         No tienes que usarlas todas. Empieza por una y ve sumando.
@@ -113,8 +132,31 @@ export default function Estudio() {
         <span style={{ color: COLOR.textoApagado }}>›</span>
       </Enlace>
 
+      <Lista canales={hacer} nav={nav} />
+
+      {ajustar.length > 0 && (
+        <>
+          {/* El rotulo y el espacio son todo lo que separa «lo que haces» de
+              «lo que configuraste una vez». No hace falta esconderlo detras de
+              un toque: basta con que no compita. */}
+          <div style={{
+            font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2,
+            textTransform: 'uppercase', color: COLOR.textoTenue,
+            margin: '30px 0 12px',
+          }}>
+            Ajustes de tu estudio
+          </div>
+          <Lista canales={ajustar} nav={nav} />
+        </>
+      )}
+    </div>
+  )
+}
+
+function Lista({ canales, nav }: { canales: Canal[]; nav: (r: string) => void }) {
+  return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-        {lista.map(c => {
+        {canales.map(c => {
           const activo = c.estado !== 'en_obra'
           return (
             <Pulsable key={c.clave}
@@ -155,7 +197,6 @@ export default function Estudio() {
           )
         })}
       </div>
-    </div>
   )
 }
 

@@ -26,7 +26,7 @@ import PerfilPropio from './screens/Perfil'
  * cualquiera que entre a la portada desde el telefono. */
 const Admin = lazy(() => import('./screens/Admin'))
 import Niveles from './estudio/Niveles'
-import Encargos from './estudio/Encargos'
+import EncargosRedirige from './estudio/EncargosRedirige'
 import Blog from './estudio/Blog'
 import Cobro from './estudio/Cobro'
 import Retirar from './estudio/Retirar'
@@ -61,14 +61,14 @@ export const SCREENS = [
   { path: '/terminos',  n: '19', title: 'Términos',        el: <Terminos /> },
   { path: '/alta-creadora', n: '20', title: 'Alta de creadora', el: <AltaCreadora /> },
   { path: '/estudio/niveles',  n: '21', title: 'Suscripción mensual', el: <Niveles /> },
-  { path: '/estudio/encargos', n: '22', title: 'Contenido a la medida', el: <Encargos /> },
+  { path: '/estudio/encargos', n: '22', title: 'Contenido a la medida', el: <EncargosRedirige /> },
   { path: '/estudio/blog',     n: '23', title: 'Blog', el: <Blog /> },
   { path: '/estudio/cobro',    n: '24', title: 'Cuenta para cobrar', el: <Cobro /> },
   { path: '/estudio/retirar',  n: '25', title: 'Retirar', el: <Retirar /> },
   { path: '/upload',    n: '05', title: 'Upload',         el: <Upload /> },
   { path: '/earnings',  n: '06', title: 'Earnings',       el: <Earnings /> },
   { path: '/library',   n: '07', title: 'Library',        el: <Library /> },
-  { path: '/chat',      n: '08', title: 'Chat',           el: <Chat /> },
+  { path: '/chat',      n: '08', title: 'Mensajes',       el: <Chat /> },
   { path: '/creadoras', n: '09', title: 'Para creadoras', el: <Creators /> },
   { path: '/entrar',    n: '10', title: 'La puerta',      el: <Entrar /> },
   { path: '/registro',  n: '11', title: 'Crear cuenta',   el: <Acceso modo="registro" /> },
