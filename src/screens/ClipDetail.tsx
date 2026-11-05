@@ -29,6 +29,10 @@ export default function ClipDetail() {
   // compartido lo entiende como que se borro. No se dice por un fallo de red.
   const [fallo, setFallo] = useState<string | null>(null)
   const [video, setVideo] = useState<string | null>(null)
+  // La portada nitida que firma `ver-clip` para quien ya tiene acceso. Null
+  // mientras no haya acceso, o si no se pudo firmar: entonces se usa la
+  // publica de 160 px, que es una imagen peor y no un error.
+  const [portadaNitida, setPortadaNitida] = useState<string | null>(null)
   const [bloqueo, setBloqueo] = useState<{ motivo?: string; pais?: string } | null>(null)
   const [coins, setCoins] = useState<number | null>(null)
   const [comprando, setComprando] = useState(false)
@@ -49,7 +53,7 @@ export default function ClipDetail() {
       if (c?.tiene_video && sesion) {
         const a = await urlVideoFirmada(c.id)
         if (!vivo) return
-        if ('url' in a) { setVideo(a.url); setBloqueo(null) }
+        if ('url' in a) { setVideo(a.url); setPortadaNitida(a.portada); setBloqueo(null) }
         else setBloqueo({ motivo: a.motivo, pais: a.pais })
       }
     }
@@ -73,7 +77,7 @@ export default function ClipDetail() {
     // hasta ahora la funcion de borde la estaba negando.
     setCoins(r.saldo ?? null)
     const a = await urlVideoFirmada(clip.id)
-    if ('url' in a) setVideo(a.url)
+    if ('url' in a) { setVideo(a.url); setPortadaNitida(a.portada) }
   }
 
   // Tras comprar se vuelve a pedir la URL firmada: la politica de storage ya
@@ -85,7 +89,7 @@ export default function ClipDetail() {
     if (!r.ok) { setErrorCompra(r.error ?? 'No se pudo completar'); setComprando(false); return }
     setCoins(r.saldo ?? null)
     const a = await urlVideoFirmada(clip.id)
-    if ('url' in a) setVideo(a.url)
+    if ('url' in a) { setVideo(a.url); setPortadaNitida(a.portada) }
     setComprando(false)
   }
 
@@ -107,6 +111,11 @@ export default function ClipDetail() {
 
   const autora = clip.profiles
   const portada = urlPortada(clip.cover_path)
+  // El poster del reproductor: la nitida si la funcion de borde la entrego, y
+  // si no la publica de 160 px. Antes era siempre la de 160 px estirada a 300
+  // px de alto, o sea que quien pagaba veia la misma miniatura borrosa del
+  // catalogo mientras la de 720 px dormia en el bucket privado.
+  const poster = portadaNitida ?? portada
   const foto = urlAvatar(autora?.avatar_path ?? null)
   const mio = sesion?.user.id === clip.creator_id
   // Su propia creadora no necesita marca: no tiene a quien delatar.
@@ -122,7 +131,7 @@ export default function ClipDetail() {
         {desbloqueado ? (
           <>
             <video src={video!} controls playsInline
-              poster={portada ?? undefined}
+              poster={poster ?? undefined}
               style={{ width: '100%', height: '100%', objectFit: 'cover', background: '#000' }} />
             {/* El identificador de quien mira, encima del video. Se usa el
                 handle y no el correo: señala la cuenta sin exponer un dato de

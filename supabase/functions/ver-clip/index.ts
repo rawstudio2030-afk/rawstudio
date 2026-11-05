@@ -90,12 +90,46 @@ Deno.serve(async (req) => {
   // 3 · Recién ahora se emite la URL, y de vida corta: si se filtrara, expira
   //     antes de servir de mucho.
   const { data: fila, error: e2 } = await comoUsuario
-    .from('clips').select('storage_path').eq('id', clip).single()
+    .from('clips').select('storage_path,cover_path').eq('id', clip).single()
   if (e2 || !fila?.storage_path) return responder({ error: 'Ese clip no tiene archivo' }, 404)
 
   const { data: firmada, error: e3 } = await comoUsuario
     .storage.from('clips').createSignedUrl(fila.storage_path, 900)   // 15 min
   if (e3) return responder({ error: e3.message }, 500)
 
-  return responder({ url: firmada.signedUrl, expira_en: 900, pais })
+  // 4 · Y la portada NÍTIDA, que es lo único que se firma con la llave de
+  //     servicio en toda esta función.
+  //
+  // POR QUE HACE FALTA LA LLAVE DE SERVICIO AQUI
+  // `clip-covers-full` no tiene política de lectura para quien compra, y eso
+  // es deliberado: si la tuviera, el navegador podría firmar la portada por su
+  // cuenta y se saltaría el geobloqueo, que no se puede decidir ahí. Así que
+  // la decisión se toma aquí —acceso y país, los dos pasos de arriba— y solo
+  // después se firma.
+  //
+  // EL LIMITE, ESCRITO PARA QUE NO SE AMPLIE SIN DARSE CUENTA
+  // Esta llave firma UNA cosa: la portada del clip que los pasos 1 y 2 ya
+  // autorizaron, con `cover_path` leído con el token de quien llama, no con la
+  // llave. Nada más debe pasar por `conServicio`: todo lo demás tiene que
+  // seguir sujeto a las políticas, que es lo que hace que un fallo aquí sea un
+  // fallo de una imagen y no un agujero.
+  let portada: string | null = null
+  if (fila.cover_path) {
+    try {
+      const conServicio = createClient(
+        Deno.env.get('SUPABASE_URL')!,
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+      )
+      const { data: p } = await conServicio
+        .storage.from('clip-covers-full').createSignedUrl(fila.cover_path, 900)
+      portada = p?.signedUrl ?? null
+    } catch {
+      // Si falla, se devuelve null y arriba se cae a la portada pública de
+      // 160 px: una imagen peor, no un error. Que no se vea la nítida no es
+      // razón para negarle el video a quien ya pagó.
+      portada = null
+    }
+  }
+
+  return responder({ url: firmada.signedUrl, portada, expira_en: 900, pais })
 })

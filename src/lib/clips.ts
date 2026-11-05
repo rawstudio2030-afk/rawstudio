@@ -62,13 +62,19 @@ export function urlPortada(path: string | null): string | null {
   return supabase.storage.from('clip-covers').getPublicUrl(path).data.publicUrl
 }
 
-/** La portada nitida, firmada y de vida corta. Solo la abre su autora o un
- *  admin: el bucket privado no tiene politica de lectura para nadie mas.
+/** La portada nitida, firmada y de vida corta, PEDIDA DESDE EL NAVEGADOR.
  *
- *  A quien PAGA todavia no se le entrega por aqui, y es a proposito: el
- *  geobloqueo no se puede decidir en el navegador —la base no sabe de que pais
- *  llega la peticion— asi que cuando se haga ira por la funcion de borde
- *  `ver-clip`, igual que el video. Ver `urlVideoFirmada`. */
+ *  Por aqui solo la abre su autora o un admin: el bucket privado no tiene
+ *  politica de lectura para nadie mas, y eso es deliberado. Si la tuviera, el
+ *  navegador de quien compra podria firmarla por su cuenta y se saltaria el
+ *  geobloqueo, que no se puede decidir aqui —la base no sabe de que pais llega
+ *  la peticion—.
+ *
+ *  A QUIEN PAGA se le entrega por otro camino: `urlVideoFirmada` la devuelve
+ *  ya firmada junto con el video, porque la funcion de borde `ver-clip` ve la
+ *  IP real y decide acceso y pais antes de que exista una URL. Esta funcion
+ *  sigue existiendo para las pantallas de la autora y de administracion, que
+ *  no pasan por ahi. */
 /* Tampoco devuelve Lectura, y aqui si es por poca cosa: si falla, arriba se
  * cae a la portada borrosa de siempre. Nadie se queda sin saber nada ni ve
  * una afirmacion falsa — ve una imagen peor. */
@@ -83,7 +89,10 @@ export async function urlPortadaNitida(
 }
 
 export type Acceso =
-  | { url: string; pais: string | null }
+  /** `portada` es la NÍTIDA, firmada por la función de borde. Puede venir
+   *  null —clip sin portada, o un fallo al firmarla— y entonces arriba se usa
+   *  la pública de 160 px: una imagen peor, nunca un error. */
+  | { url: string; portada: string | null; pais: string | null }
   | { error: string; motivo?: 'sin_acceso' | 'geobloqueo'; pais?: string }
 
 /** Pide la URL del video a la funcion de borde, no directo a Storage.
@@ -108,7 +117,7 @@ export async function urlVideoFirmada(clipId: string): Promise<Acceso> {
     })
     const j = await r.json()
     if (!r.ok) return { error: j.error ?? 'No se pudo abrir el clip', motivo: j.motivo, pais: j.pais }
-    return { url: j.url, pais: j.pais ?? null }
+    return { url: j.url, portada: j.portada ?? null, pais: j.pais ?? null }
   } catch {
     return { error: 'No pudimos contactar el servidor. Revisa tu conexión.' }
   }
