@@ -439,3 +439,9 @@ verify_jwt = false
 # disparador de la base y el cron, con el mismo `x-cron-secret`.
 [functions.borrar-verificacion]
 verify_jwt = false
+
+# `avisar-verificada` manda el correo HACIA ella —que llegaron sus documentos,
+# que se aprobo, o por que se rechazo—. La llama el disparador de la base con
+# `x-cron-secret`, igual que sus hermanas, y por eso no lleva JWT.
+[functions.avisar-verificada]
+verify_jwt = false
