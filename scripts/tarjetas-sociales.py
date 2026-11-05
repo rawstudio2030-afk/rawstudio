@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Las imagenes que ve quien recibe un enlace, y los iconos de la app.
+"""Las imagenes de marca que se pintan FUERA de la aplicacion.
+
+La vista previa de un enlace, los iconos del telefono, y el logo que mete
+Gmail en el correo de recuperacion. Tres sitios donde la marca la dibuja un
+programa ajeno a partir de un archivo, no el CSS del sitio.
 
 ---------- Por que existia el hueco ----------
 
@@ -49,6 +53,11 @@ FONDO = (8, 8, 10)
 SUPERFICIE = (17, 17, 22)
 ACENTO = (255, 43, 209)
 DINERO = (200, 255, 61)
+
+# El correo no usa COLOR.fondo sino el suyo, un punto mas claro. Se copia de
+# supabase/templates/recuperar.html y no se unifica: cambiar el fondo de un
+# correo ya enviado es imposible, asi que esa plantilla congela sus colores.
+FONDO_CORREO = (11, 11, 14)
 
 
 def rayado(tam, color_a, color_b, paso=20, grosor=10):
@@ -143,6 +152,34 @@ def simbolo(lado):
     return img.resize((lado, lado), Image.LANCZOS)
 
 
+def logo_correo():
+    """El logo que pinta Gmail en el correo de recuperacion.
+
+    Era un JPEG de 376x133 con el fondo incrustado, y un JPEG de un
+    resplandor sobre negro es el peor caso posible para ese formato: el
+    degradado se parte en bloques y quedan manchas cuadradas alrededor de las
+    letras. Se veia a simple vista.
+
+    Va en PNG y con el fondo del correo incrustado igual que antes. No
+    transparente: la plantilla la ven clientes viejos, y un PNG con alfa
+    sobre un fondo que algunos pintan blanco deja el logo ilegible. Mejor
+    incrustar el fondo exacto de la plantilla.
+
+    Se dibuja a 2x de como se muestra (188x66), que es lo que piden las
+    pantallas densas."""
+    logo = Image.open(ORIGEN).convert('RGBA')
+    ancho = 330
+    logo = logo.resize((ancho, round(ancho * logo.height / logo.width)), Image.LANCZOS)
+
+    W, H = 376, 132
+    fondo = Image.new('RGBA', (W, H), FONDO_CORREO + (255,))
+    x, y = (W - logo.width) // 2, (H - logo.height) // 2
+    halo, m = con_resplandor(logo, ACENTO, 14, 1.8)
+    fondo.alpha_composite(halo, (x - m, y - m))
+    fondo.alpha_composite(logo, (x, y))
+    return fondo.convert('RGB')
+
+
 def main():
     SALIDA.mkdir(exist_ok=True)
 
@@ -158,6 +195,17 @@ def main():
         simbolo(lado).save(SALIDA / nombre, optimize=True)
         print(f"  {nombre:<22} {lado}x{lado}  "
               f"{(SALIDA / nombre).stat().st_size // 1024} KB")
+
+    (SALIDA / 'correo').mkdir(exist_ok=True)
+    # Paleta de 128 colores con difuminado: un PNG de 24 bits de un degradado
+    # pesa 50 KB y con paleta pesa 20, y a este tamaño no se distingue uno de
+    # otro —comprobado comparando las dos imagenes, no suponiendolo—.
+    c = logo_correo().quantize(colors=128, method=Image.MEDIANCUT,
+                               dither=Image.FLOYDSTEINBERG)
+    c.save(SALIDA / 'correo' / 'logo.png', optimize=True)
+    print(f"  correo/logo.png        {c.width}x{c.height}  "
+          f"{(SALIDA / 'correo' / 'logo.png').stat().st_size // 1024} KB"
+          f"   (antes: logo.jpg, 376x133, con artefactos)")
 
 
 if __name__ == '__main__':
