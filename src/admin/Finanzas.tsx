@@ -10,6 +10,7 @@
  * significaria nada.
  */
 import { useCallback, useEffect, useState } from 'react'
+import { cuantos, palabra } from '../lib/plural'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 import {
   finanzas, dineroReal, serieFinanzas, rankingCreadoras,
@@ -117,7 +118,7 @@ export default function Finanzas() {
           pie={bruto ? `${Math.round(comision / bruto * 100)}% del bruto` : undefined} />
         <Cifra t="Pagado a creadoras" v={`${usd(paraEllas)}`} c={COLOR.texto} />
         <Cifra t="Operaciones" v={String(ops)} c={COLOR.texto}
-          pie={ventas ? `${ventas.operaciones} clips vendidos` : undefined} />
+          pie={ventas ? `${cuantos(ventas.operaciones, 'clip')} ${palabra(ventas.operaciones, 'vendido')}` : undefined} />
       </div>
 
       {/* ---- Gráfica ---- */}
@@ -140,9 +141,9 @@ export default function Finanzas() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1,
           background: LINEA.tenue, border: `1px solid ${LINEA.tenue}` }}>
           <Cifra t="Entrado" v={pesos(real.entrado_mxn)} c={COLOR.dinero}
-            pie={`${real.ordenes_pagadas} órdenes pagadas`} />
+            pie={`${cuantos(real.ordenes_pagadas, 'orden', 'órdenes')} ${palabra(real.ordenes_pagadas, 'pagada')}`} />
           <Cifra t="Pendiente de cobro" v={pesos(real.pendiente_mxn)} c="#FFB020"
-            pie={`${real.ordenes_pendientes} órdenes`} />
+            pie={cuantos(real.ordenes_pendientes, 'orden', 'órdenes')} />
           <Cifra t="Dispersado a creadoras" v={pesos(real.dispersado_mxn)} c={COLOR.texto} />
           <Cifra t="Retenido (ISR + IVA)" v={pesos(real.isr_mxn + real.iva_ret_mxn)} c={COLOR.admin}
             pie="Se entera al SAT" />
@@ -237,7 +238,7 @@ function Grafica({ serie }: { serie: PuntoSerie[] }) {
             <rect key={p.dia} x={i * paso + 1} y={al - h}
               width={Math.max(1, paso - 3)} height={h}
               fill={p.coins ? COLOR.dinero : LINEA.tenue}>
-              <title>{`${p.dia}: ${usd(p.coins)} en ${p.operaciones} operaciones`}</title>
+              <title>{`${p.dia}: ${usd(p.coins)} en ${cuantos(p.operaciones, 'operación', 'operaciones')}`}</title>
             </rect>
           )
         })}

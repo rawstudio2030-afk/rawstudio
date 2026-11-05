@@ -14,6 +14,7 @@
  * un disparador en la base—, asi que equivocarse aqui no se nota despues.
  */
 import { useCallback, useEffect, useState } from 'react'
+import { cuantos, palabra } from '../lib/plural'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 import {
   creadorasGestionables, agruparExpedientes, agruparExpedientesDeTabla,
@@ -145,7 +146,7 @@ export default function ExpedientesMasivos() {
               }}
               style={{ font: `400 12px/1 ${FUENTE.ui}`, color: COLOR.textoSuave }} />
             <div style={{ marginTop: 6, font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
-              {sueltos.size ? `${sueltos.size} archivos listos` : 'ninguno todavía'}
+              {sueltos.size ? `${cuantos(sueltos.size, 'archivo')} ${palabra(sueltos.size, 'listo')}` : 'ninguno todavía'}
             </div>
           </div>
           <div>

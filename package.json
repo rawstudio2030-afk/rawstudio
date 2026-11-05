@@ -6,9 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "oxlint && node scripts/dinero-crudo.mjs",
+    "_comentario_typecheck": "tsc -b es el unico que comprueba de verdad. `tsc --noEmit -p tsconfig.json` NO: tsconfig.json es un archivo de solucion con files:[] y referencias, asi que -p sobre el no mira ningun archivo y pasa limpio con errores delante. Y -b es incremental: si acaba de correr, puede dar limpio por la marca de tiempo; para estar seguro, tsc -b --force.",
+    "typecheck": "tsc -b",
+    "lint": "oxlint && node scripts/dinero-crudo.mjs && node scripts/plural-crudo.mjs",
     "preview": "vite preview",
-    "lint:dinero": "node scripts/dinero-crudo.mjs"
+    "lint:dinero": "node scripts/dinero-crudo.mjs",
+    "lint:plural": "node scripts/plural-crudo.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.3",

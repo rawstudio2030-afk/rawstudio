@@ -16,6 +16,7 @@
  * regla general de la UIT.
  */
 import { useId } from 'react'
+import { cuantos, palabra } from '../lib/plural'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 
 export type Pais = {
@@ -128,7 +129,7 @@ export function pista(pais: string, nacional: string): string {
     ? 'Escribe el número con su código de país, sin el +.'
     : 'Sin el código de país: eso lo pone el selector.'
   if (p?.largo && n.length !== p.largo) {
-    return `En ${p.n} son ${p.largo} dígitos; llevas ${n.length}.`
+    return `En ${p.n} ${palabra(p.largo, 'es', 'son')} ${cuantos(p.largo, 'dígito')}; llevas ${n.length}.`
   }
   if (!telefonoValido(pais, nacional)) return 'Ese número no tiene largo de teléfono.'
   return juntar(pais, nacional)

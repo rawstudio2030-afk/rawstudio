@@ -5,6 +5,7 @@
 // en el contenido debe ser adulto comprobado, y esa es la parte que la ley no
 // perdona.
 import { useRef, useState } from 'react'
+import { cuantos } from '../lib/plural'
 import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import { supabase } from '../lib/supabase'
@@ -183,7 +184,7 @@ export default function Verificar() {
         <span style={{ font: `400 10px/1.45 ${FUENTE.mono}`, color: nacimiento && !edadOk ? COLOR.acento : COLOR.textoApagado }}>
           {!nacimiento ? 'Debe coincidir con tu identificación.'
             : !edadOk ? 'Necesitas 18 años o más para publicar.'
-            : `${edad} años.`}
+            : `${cuantos(edad, 'año')}.`}
         </span>
       </div>
 

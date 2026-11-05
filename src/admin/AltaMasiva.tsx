@@ -9,6 +9,7 @@
  * pantalla y no a mitad del alta numero treinta y siete.
  */
 import { useState } from 'react'
+import { cuantos, palabra } from '../lib/plural'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 import {
   leerCSV, validarAlta, handlesExistentes, altaConDocumentos, type FilaAlta,
@@ -93,7 +94,7 @@ export default function AltaMasiva() {
             onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) cargarTabla(f) }}
             style={{ font: `400 12px/1 ${FUENTE.ui}`, color: COLOR.textoSuave }} />
           <div style={{ marginTop: 8, font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
-            {filas.length ? `${filas.length} filas leídas` : 'CSV separado por comas'}
+            {filas.length ? `${cuantos(filas.length, 'fila')} ${palabra(filas.length, 'leída')}` : 'CSV separado por comas'}
           </div>
         </div>
 
@@ -111,7 +112,7 @@ export default function AltaMasiva() {
             }}
             style={{ font: `400 12px/1 ${FUENTE.ui}`, color: COLOR.textoSuave }} />
           <div style={{ marginTop: 8, font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
-            {archivos.size ? `${archivos.size} archivos listos` : 'Selecciónalos todos de golpe'}
+            {archivos.size ? `${cuantos(archivos.size, 'archivo')} ${palabra(archivos.size, 'listo')}` : 'Selecciónalos todos de golpe'}
           </div>
         </div>
       </div>

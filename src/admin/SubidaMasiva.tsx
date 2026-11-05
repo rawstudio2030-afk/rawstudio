@@ -9,6 +9,7 @@
  * otras seria prometer una subida que despues falla.
  */
 import { useCallback, useEffect, useState } from 'react'
+import { cuantos, palabra } from '../lib/plural'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 import {
   creadorasGestionables, agruparVideos, aplicarCatalogo, publicarPara, leerCSV,
@@ -50,7 +51,7 @@ export default function SubidaMasiva() {
       }
       const r = aplicarCatalogo(lote, filas)
       setLote(r.lote); setError('')
-      setAviso(`${r.emparejados} de ${filas.length} filas del catálogo se aplicaron.` +
+      setAviso(`${r.emparejados} de ${cuantos(filas.length, 'fila')} del catálogo se ${palabra(filas.length, 'aplicó', 'aplicaron')}.` +
         (r.huerfanos.length
           ? ` No encontré estos archivos: ${r.huerfanos.slice(0, 4).join(', ')}` +
             (r.huerfanos.length > 4 ? ` y ${r.huerfanos.length - 4} más.` : '')
@@ -119,7 +120,7 @@ export default function SubidaMasiva() {
             style={{ font: `400 12px/1 ${FUENTE.ui}`, color: COLOR.textoSuave }} />
           <div style={{ marginTop: 8, font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
             {lote.length
-              ? `${lote.length} videos en ${carpetas.length} carpetas`
+              ? `${cuantos(lote.length, 'video')} en ${cuantos(carpetas.length, 'carpeta')}`
               : 'mp4, mov, webm o m4v'}
           </div>
         </div>

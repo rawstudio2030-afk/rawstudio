@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { cuantos, palabra } from './plural'
 
 /** Los seis canales de ingreso de la plataforma, con su estado real.
  *
@@ -90,7 +91,7 @@ export function canales(r: ResumenEstudio): Canal[] {
       clave: 'clips', titulo: 'Videos de pago', icono: '▶', ruta: '/upload',
       grupo: 'hacer',
       descripcion: r.clipsPublicados > 0
-        ? `${r.clipsPublicados} publicados de ${r.clips}`
+        ? `${r.clipsPublicados} ${palabra(r.clipsPublicados, 'publicado')} de ${r.clips}`
         : 'Cobra por desbloquear cada video',
       estado: 'listo',
       nota: 'Al subir eliges tambien si se puede rentar por 48 o 72 horas',
@@ -99,21 +100,21 @@ export function canales(r: ResumenEstudio): Canal[] {
       clave: 'encargos', titulo: 'Mensajes y encargos', icono: '✉', ruta: '/chat',
       grupo: 'hacer',
       descripcion: r.encargosAbiertos > 0
-        ? `${r.encargosAbiertos} ${r.encargosAbiertos === 1 ? 'solicitud abierta' : 'solicitudes abiertas'}`
+        ? `${cuantos(r.encargosAbiertos, 'solicitud', 'solicitudes')} ${palabra(r.encargosAbiertos, 'abierta')}`
         : 'Las fans piden algo y negocian el precio contigo',
       estado: 'listo',
     },
     {
       clave: 'blog', titulo: 'Blog', icono: '✍︎', ruta: '/estudio/blog',
       grupo: 'hacer',
-      descripcion: r.posts > 0 ? `${r.posts} entrada(s)` : 'Texto para tus suscriptoras',
+      descripcion: r.posts > 0 ? cuantos(r.posts, 'entrada') : 'Texto para tus suscriptoras',
       estado: 'listo',
     },
     {
       clave: 'niveles', titulo: 'Suscripción mensual', icono: '★', ruta: '/estudio/niveles',
       grupo: 'ajustar',
       descripcion: r.niveles > 0
-        ? `${r.niveles} ${r.niveles === 1 ? 'nivel activo' : 'niveles activos'}`
+        ? `${cuantos(r.niveles, 'nivel', 'niveles')} ${palabra(r.niveles, 'activo')}`
         : 'Pon un precio al mes y cobra fijo',
       estado: r.niveles > 0 ? 'listo' : 'sin_configurar',
       nota: r.niveles === 0 ? 'Sin un nivel, nadie puede suscribirse' : undefined,

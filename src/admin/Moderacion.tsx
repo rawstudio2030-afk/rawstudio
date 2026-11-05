@@ -1,5 +1,6 @@
 /* Modulo 2: cola de moderacion. */
 import { useCallback, useEffect, useState } from 'react'
+import { cuantos } from '../lib/plural'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 import {
   colaModeracion, conteoModeracion, moderar, banderaModeracion, leerBandera,
@@ -222,7 +223,7 @@ function Revisor({ clip, cierra, listo }: {
               clip.estado === 'aprobado' ? COLOR.dinero
                 : clip.estado === 'pendiente' ? '#FFB020' : '#FF4444'} />
             {clip.reportes > 0 && (
-              <Insignia texto={`${clip.reportes} reportes`} color="#FF4444" />
+              <Insignia texto={cuantos(clip.reportes, 'reporte')} color="#FF4444" />
             )}
             {!clip.creadora_verificada && <Insignia texto="Sin verificar" color="#FFB020" />}
           </div>

@@ -9,6 +9,7 @@
  * piden con una liga firmada de cinco minutos cada vez que se abre la ficha.
  */
 import { useCallback, useEffect, useState } from 'react'
+import { cuantos } from '../lib/plural'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 import {
   listarVerificaciones, conteoVerificaciones, resolverVerificacion, urlDocumento,
@@ -170,7 +171,7 @@ function Ficha({ v, cierra, listo }: {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 1, marginTop: 16,
           background: LINEA.tenue, border: `1px solid ${LINEA.tenue}` }}>
           <Dato t="Nacimiento" v={v.fecha_nacimiento ? fecha(v.fecha_nacimiento) : '—'} />
-          <Dato t="Edad declarada" v={v.edad != null ? `${v.edad} años` : '—'}
+          <Dato t="Edad declarada" v={v.edad != null ? cuantos(v.edad, 'año') : '—'}
             c={v.edad != null && v.edad < 18 ? '#FF4444' : COLOR.texto} />
           <Dato t="Parecido facial"
             v={v.similitud != null ? `${Math.round(Number(v.similitud) * 100)}%` : 'no medido'}
