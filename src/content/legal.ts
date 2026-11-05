@@ -6,11 +6,10 @@
  *  Los datos entre corchetes son marcadores que deben sustituirse por los
  *  reales antes de operar con publico.
  */
-export const VERSION_LEGAL = 'v1.0'
+export const VERSION_LEGAL = 'v1.1'
 
 export const PENDIENTES_ABOGADO = [
   'Razón social, domicilio fiscal y correos de contacto',
-  'Porcentaje de comisión y política de dispersión',
   'Qué pasa con una compra permanente si la creadora retira el contenido',
   'Régimen fiscal y esquema de retenciones',
   'Ciudad y estado para la jurisdicción',
@@ -113,8 +112,19 @@ export const TERMINOS: Seccion[] = [
     'Debes ser titular de los derechos del contenido o contar con autorización expresa.',
     'Debes emitir comprobante fiscal por los ingresos, o aceptar las retenciones aplicables.',
     'No debes solicitar ni aceptar pagos fuera de la plataforma para eludir comisiones.',
-    'RAWstudio retiene el [__]% de cada transacción. La dispersión se hace por SPEI a la cuenta registrada.',
+    'RAWstudio retiene el 20% de cada venta, renta, propina y desbloqueo. La dispersión se hace por SPEI a la cuenta registrada.',
   ]},
+  { titulo: 'Retiros: cómo y cuándo te pagamos', cuerpo: [
+    'Para retirar necesitas tres cosas: identidad verificada, una cuenta bancaria registrada a tu nombre, y un saldo disponible de al menos 5.00 USD. El mínimo existe porque cada transferencia SPEI cuesta una comisión fija.',
+    'Disponible significa tu saldo menos lo que ya solicitaste y sigue sin resolverse, para impedir que el mismo dinero se comprometa dos veces.',
+    'Una vez aprobado tu retiro, la transferencia se envía en un plazo máximo de 48 horas hábiles. Se cuentan días hábiles: un retiro aprobado un viernes se paga el martes a más tardar.',
+    'La conversión de dólares a pesos se aplica al tipo de cambio vigente el día en que se aprueba el retiro, no el día en que se solicita. El importe aprobado, el tipo de cambio aplicado, las retenciones y el neto se te comunican por correo.',
+    'De ese importe se retienen el ISR y el IVA que la ley obliga a retener a las plataformas tecnológicas. El porcentaje depende del régimen fiscal que declares al registrar tu cuenta de cobro; si no declaras ninguno, se aplica la tasa máxima. Esas retenciones no las conserva RAWstudio: se enteran al SAT a tu nombre y cuentan como impuesto pagado por ti.',
+    'Al pagarte se te entrega la referencia del SPEI. Si transcurridas 48 horas desde esa referencia el abono no aparece en tu banco, escríbenos y lo rastreamos.',
+    'Podemos retener un retiro mientras investigamos una reclamación de derechos, un requerimiento de autoridad o un indicio de fraude, y te diremos el motivo. Fuera de esos casos, no retenemos pagos.',
+    'Un retiro rechazado no descuenta tu saldo y se te comunica el motivo.',
+  ]},
+
   { titulo: 'Si algo tuyo aparece sin tu permiso', cuerpo: [
     'Escribe a [legal@rawstudio.biz] identificando el contenido, acreditando tu identidad y tu titularidad o afectación.',
     'Las denuncias por contenido íntimo no consentido o por presunta participación de menores se atienden con carácter prioritario, con retiro preventivo dentro de las [24] horas siguientes mientras se resuelve el caso.',

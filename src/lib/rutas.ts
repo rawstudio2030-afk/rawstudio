@@ -48,6 +48,11 @@ export const EXIGE_SESION = [
 export const SIN_PUERTA_DE_EDAD = [
   '/', '/intro', '/age', '/entrar', '/registro', '/acceso', '/nueva-clave',
   '/privacidad', '/terminos', '/creadoras', '/modo',
+  // Contacto y preguntas van aqui por la misma razon que los legales, y con
+  // un motivo extra: a contacto tiene que poder escribir alguien SIN cuenta
+  // cuya imagen aparece sin su permiso. Una pagina de contacto detras de una
+  // puerta de mayoria de edad no sirve para lo que existe.
+  '/contacto', '/preguntas',
 ]
 
 export type Destino = {

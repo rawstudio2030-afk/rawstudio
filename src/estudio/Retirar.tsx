@@ -20,7 +20,7 @@ import {
 import { usd, aCentavos } from '../lib/dinero'
 import { Marco, Boton, Campo, Etiqueta, Aviso, Vacio } from './piezas'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
-import { Pulsable } from '../components/Pulsable'
+import { Pulsable, Enlace } from '../components/Pulsable'
 
 export default function Retirar() {
   const nav = useNavigate()
@@ -63,7 +63,9 @@ export default function Retirar() {
     const m = await pedirRetiro(centavos)
     setEnviando(false)
     if (m) { setError(m); return }
-    setCantidad(''); setBien('Solicitud enviada. Te avisamos en cuanto se resuelva.')
+    // El plazo va en el mensaje y no solo en los terminos: el momento en que
+    // alguien quiere saber cuanto tarda un pago es justo despues de pedirlo.
+    setCantidad(''); setBien('Solicitud enviada. Te avisamos por correo en cuanto se resuelva, y el pago sale en un máximo de 48 horas hábiles desde que se aprueba.')
     await cargar()
   }
 
@@ -107,6 +109,16 @@ export default function Retirar() {
               : cantidad && !pasaMinimo ? `El mínimo son ${usd(info.minimo)}.`
               : cantidad && !cabe ? `Solo tienes ${usd(info.disponible)} disponibles.`
               : 'Se te transfiere en pesos al tipo de cambio del día, con las retenciones ya calculadas.'}
+          </p>
+
+          {/* Las retenciones son la causa numero uno de «me llegó menos de lo
+              que pedí», y esa frase de arriba las menciona sin explicarlas.
+              El enlace lleva a donde si estan explicadas, con las cifras. */}
+          <p style={{ ...nota, marginTop: 6 }}>
+            <Enlace a="/preguntas" style={{
+              color: COLOR.textoTenue, cursor: 'pointer',
+              textDecoration: 'underline', textUnderlineOffset: 3,
+            }}>¿Cuánto tarda y cuánto se retiene?</Enlace>
           </p>
 
           <Aviso texto={error} />

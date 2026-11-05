@@ -164,8 +164,12 @@ export default function Portada() {
           {/* CCPA apunta al aviso de privacidad, donde vive esa seccion. No
               lleva ancla porque el router usa el hash para las rutas: un
               segundo # dentro romperia la navegacion. */}
-          {[['Privacy', '/privacidad'], ['Terms of Service', '/terminos'],
-            ['CCPA', '/privacidad']].map(([t, r]) => (
+          {/* En español, como el resto del sitio. Decian «Privacy», «Terms of
+              Service» y «CCPA» —una ley de California— en una plataforma que
+              opera en Mexico y habla de usted en español a todo el mundo.
+              «CCPA» ademas apuntaba al mismo sitio que «Privacy». */}
+          {[['Contacto', '/contacto'], ['Preguntas frecuentes', '/preguntas'],
+            ['Privacidad', '/privacidad'], ['Términos', '/terminos']].map(([t, r]) => (
             <Enlace key={t} a={r} style={{
               font: `400 12px/1 ${FUENTE.ui}`, color: COLOR.textoTenue, cursor: 'pointer',
               textDecoration: 'underline', textUnderlineOffset: 4,
