@@ -35,3 +35,8 @@ node_modules
 .muestras-portadas/
 .portadas-originales/
 .portadas-elegidas/
+
+# El CRON_SECRET, cuando se deja en un archivo para que scripts/muestra-aviso.mjs
+# lo lea. Por archivo y no como argumento: un secreto en la linea de comandos
+# queda en el historial del shell y se ve en `ps` mientras corre.
+.cron-secret
