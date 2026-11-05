@@ -433,3 +433,9 @@ verify_jwt = false
 # el cron; misma proteccion que las otras tres.
 [functions.avisar-verificacion]
 verify_jwt = false
+
+# `borrar-verificacion` es la unica que BORRA en vez de avisar: quita del
+# almacen las fotos de identidad cuyo plazo se cumplio. La llaman un
+# disparador de la base y el cron, con el mismo `x-cron-secret`.
+[functions.borrar-verificacion]
+verify_jwt = false

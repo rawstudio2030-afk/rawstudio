@@ -617,6 +617,7 @@ export type Verificacion = {
   edad: number | null; fecha_nacimiento: string | null
   ine_path: string | null; selfie_path: string | null
   borrar_despues_de: string | null
+  imagenes_borradas_at: string | null
   revisada_por: string | null; revisada_at: string | null; nota_revision: string | null
   created_at: string
   identidad_verificada: boolean; intentos: number

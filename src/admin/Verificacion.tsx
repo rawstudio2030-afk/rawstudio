@@ -135,6 +135,13 @@ function Ficha({ v, cierra, listo }: {
   const [dialogo, setDialogo] = useState<'aprobar' | 'rechazar' | null>(null)
   useEscape(true, cierra)
 
+  // Un hueco que dice «Sin archivo» se lee como «nunca subio nada», que es lo
+  // contrario de lo que paso: subio su INE y la borramos, que es la promesa
+  // cumpliendose.
+  const borradas = v.imagenes_borradas_at
+    ? `Se borró el ${fecha(v.imagenes_borradas_at)}, al cumplirse el plazo.`
+    : 'Sin archivo'
+
   useEffect(() => {
     let vivo = true
     if (v.ine_path) urlDocumento('verificacion', v.ine_path).then(u => vivo && setIne(u))
@@ -164,8 +171,8 @@ function Ficha({ v, cierra, listo }: {
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 18 }}>
-          <Documento titulo="Identificación" url={ine} />
-          <Documento titulo="Selfie" url={selfie} />
+          <Documento titulo="Identificación" url={ine} vacio={borradas} />
+          <Documento titulo="Selfie" url={selfie} vacio={borradas} />
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 1, marginTop: 16,
@@ -189,9 +196,21 @@ function Ficha({ v, cierra, listo }: {
 
         <div style={{ marginTop: 14, font: `400 10px/1.6 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
           Solicitó {fechaHora(v.created_at)}<br />
-          {v.borrar_despues_de
-            ? <>Las imágenes se borran el {fecha(v.borrar_despues_de)}</>
-            : <>Sin fecha de borrado registrada</>}
+          {/* Esto decia «se borran el <fecha>» SIEMPRE, en futuro, incluso en
+              una ficha de hace dos meses cuyas imágenes seguían enteras. Era
+              verdad a medias en un sitio donde importa que sea entera: hasta
+              noviembre de 2026 no había nada que las borrara. Ahora hay tres
+              frases porque hay tres situaciones distintas. */}
+          {v.imagenes_borradas_at
+            ? <>Las imágenes se borraron el {fecha(v.imagenes_borradas_at)}</>
+            : v.borrar_despues_de
+              ? new Date(v.borrar_despues_de) <= new Date()
+                ? <span style={{ color: '#FFB020' }}>
+                    Las imágenes debían borrarse el {fecha(v.borrar_despues_de)} y
+                    siguen aquí. Se borran solas en la siguiente pasada.
+                  </span>
+                : <>Las imágenes se borran el {fecha(v.borrar_despues_de)}</>
+              : <>Sin fecha de borrado registrada</>}
           {v.revisada_at && <><br />Revisada {fechaHora(v.revisada_at)}
             {v.nota_revision && <> — {v.nota_revision}</>}</>}
         </div>
@@ -228,7 +247,9 @@ function Ficha({ v, cierra, listo }: {
   )
 }
 
-function Documento({ titulo, url }: { titulo: string; url: string | null }) {
+function Documento({ titulo, url, vacio = 'Sin archivo' }: {
+  titulo: string; url: string | null; vacio?: string
+}) {
   return (
     <div>
       <div style={{ font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
@@ -239,8 +260,9 @@ function Documento({ titulo, url }: { titulo: string; url: string | null }) {
       }}>
         {url
           ? <img src={url} alt={titulo} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-          : <span style={{ font: `400 10px/1 ${FUENTE.ui}`, color: COLOR.textoApagado }}>
-              Sin archivo
+          : <span style={{ font: `400 10px/1.5 ${FUENTE.ui}`, color: COLOR.textoApagado,
+              textAlign: 'center', padding: '0 14px' }}>
+              {vacio}
             </span>}
       </div>
     </div>

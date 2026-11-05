@@ -1,8 +1,15 @@
-# Los avisos que no pueden esperar a que alguien abra el panel.
+# Lo que tiene que pasar aunque nadie abra el panel.
 #
-# Son tres y van en el MISMO trabajo a proposito: tres tareas programadas
-# separadas invitaban a que una se desactivara sin que nadie lo notara, y la
-# que se queda callada siempre acaba siendo la que mira hacia fuera.
+# Tres avisos y un borrado, en el MISMO trabajo a proposito: cuatro tareas
+# programadas separadas invitaban a que una se desactivara sin que nadie lo
+# notara, y la que se queda callada siempre acaba siendo la que mira hacia
+# fuera.
+#
+# El cuarto paso no avisa de nada: borra del almacen las fotos de identidad
+# cuyo plazo de conservacion ya vencio. Va aqui y no en un archivo propio por
+# lo mismo, y porque es el que mas caro sale si se apaga en silencio: seguir
+# guardando datos biometricos pasado el plazo que prometimos no se nota desde
+# ninguna pantalla.
 #
 # EL CAMINO PRINCIPAL YA NO ES ESTE. Desde el 5 de noviembre de 2026 los tres
 # avisos salen en segundos, por disparadores de la propia base de datos sobre
@@ -12,19 +19,20 @@
 # retraso en vez de no salir. Los dos caminos no se duplican porque
 # `avisado_at` y `avisada_estado` impiden el segundo envio.
 
-name: Avisos automáticos
+name: Tareas automáticas
 
 on:
   schedule:
     # Cada dos horas. El minuto 7 y no el 0 a proposito: a las horas en punto
     # se amontonan las tareas de todo GitHub y los retrasos son peores.
     - cron: '7 */2 * * *'
-  # Para probarlo sin esperar: pestaña Actions -> Avisos automáticos -> Run
-  # workflow. Es seguro: si no hay nada nuevo, ningun paso manda correo.
+  # Para probarlo sin esperar: pestaña Actions -> Tareas automáticas -> Run
+  # workflow. Es seguro: si no hay nada nuevo, ningun paso manda correo ni
+  # borra nada.
   workflow_dispatch:
 
 jobs:
-  avisar:
+  tareas:
     runs-on: ubuntu-latest
     steps:
       - name: Avisar de retiros pedidos
@@ -117,5 +125,37 @@ jobs:
 
           echo "$respuesta" | grep -q '"ok":true' || {
             echo "No pude avisar de las verificaciones."
+            exit 1
+          }
+
+      # Y el que no avisa: borrar de verdad las fotos de identidad cuyo plazo
+      # ya vencio. Hasta noviembre de 2026 la promesa de «las borramos al
+      # terminar» no la cumplia nadie y seguian todas en el bucket.
+      #
+      # El camino rapido es el disparador sobre `verificaciones`, que borra en
+      # segundos al resolver. Este paso recoge lo otro: las que cumplen los
+      # treinta dias sin que nadie las haya mirado, que no las dispara ningun
+      # cambio porque justamente no pasa nada.
+      - name: Borrar fotos de identidad vencidas
+        if: always()
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "Falta el secreto CRON_SECRET en el repositorio."
+            exit 1
+          fi
+
+          respuesta=$(curl --silent --show-error --fail-with-body \
+            --max-time 120 \
+            --header "x-cron-secret: $CRON_SECRET" \
+            --header "Content-Type: application/json" \
+            --request POST \
+            "https://ggyubhyobobizugeknen.supabase.co/functions/v1/borrar-verificacion")
+
+          echo "$respuesta"
+
+          echo "$respuesta" | grep -q '"ok":true' || {
+            echo "No pude borrar las fotos vencidas."
             exit 1
           }
