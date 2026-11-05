@@ -92,12 +92,17 @@ export default function CreatorProfile() {
         background: `repeating-linear-gradient(130deg,${COLOR.superficieAlta} 0 10px,${COLOR.superficie} 10px 20px)`,
       }}>
         <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg,rgba(8,8,10,.2) 0%,${COLOR.fondo} 100%)` }} />
-        <Pulsable al={() => nav(-1)} rotulo="Volver" style={{
-          position: 'absolute', top: 18, left: 16, width: 38, height: 38,
-          borderRadius: '50%', border: '1px solid rgba(255,255,255,.22)',
-          display: 'grid', placeItems: 'center', font: `400 19px/1 ${FUENTE.ui}`,
-          color: COLOR.texto, cursor: 'pointer', background: 'rgba(8,8,10,.5)',
-        }}>‹</Pulsable>
+        {/* Sin handle en la ruta esta pantalla es la pestaña «Yo», no una
+            pantalla a la que se entro desde otra: un boton de volver ahi manda
+            a donde estuvieras antes, que no es «atras» de nada. */}
+        {handle && (
+          <Pulsable al={() => nav(-1)} rotulo="Volver" style={{
+            position: 'absolute', top: 18, left: 16, width: 38, height: 38,
+            borderRadius: '50%', border: '1px solid rgba(255,255,255,.22)',
+            display: 'grid', placeItems: 'center', font: `400 19px/1 ${FUENTE.ui}`,
+            color: COLOR.texto, cursor: 'pointer', background: 'rgba(8,8,10,.5)',
+          }}>‹</Pulsable>
+        )}
       </div>
 
       <div style={{ padding: '0 22px 40px', marginTop: -46 }}>
@@ -137,13 +142,24 @@ export default function CreatorProfile() {
           </div>
         )}
 
+        {/* La puerta a los ajustes. Decia «Editar mi perfil» cuando esta
+            pantalla solo se visitaba desde el formulario para ver como se ve;
+            ahora es la pestaña «Yo» y es el camino de ida, no de vuelta.
+            Dice lo que hay detras: nombre, foto, contacto, cuenta.
+
+            Y NO cuelga de la imagen del perfil, aunque sea el gesto que uno
+            espera de otras paginas: tocar la foto aqui ya abre el selector de
+            archivos para cambiarla, que es lo que tocar una foto deberia
+            hacer. Dos significados en el mismo sitio es peor que un boton
+            que se lee. */}
         {esMio && (
           <Enlace a="/perfil" style={{
-            display: 'block', boxSizing: 'border-box', width: '100%',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9,
+            boxSizing: 'border-box', width: '100%',
             marginTop: 24, border: '1px solid rgba(255,255,255,.16)', color: COLOR.textoSuave,
             textAlign: 'center', padding: 17, font: `700 12px/1 ${FUENTE.ui}`,
             letterSpacing: 2.2, textTransform: 'uppercase', cursor: 'pointer',
-          }}>Editar mi perfil</Enlace>
+          }}><span style={{ fontSize: 15, letterSpacing: 0 }}>⚙</span>Ajustes de cuenta</Enlace>
         )}
 
         <div style={{ marginTop: 28 }}>
@@ -154,10 +170,13 @@ export default function CreatorProfile() {
               </div>
               <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 16, color: COLOR.textoTenue, marginTop: 10 }}>
                 {falloClips ? 'No significa que no haya publicado nada.'
-                  : esMio ? 'Cuando publiques, tus clips aparecen aquí.'
+                  : esMio && perfil.is_creator ? 'Cuando publiques, tus clips aparecen aquí.'
+                  // Quien todavia no publica no necesita que le digan que sus
+                  // clips apareceran aqui: necesita saber que puede publicar.
+                  : esMio ? 'Si algún día publicas, tus clips aparecen aquí.'
                   : 'Esta creadora aún no publica nada.'}
               </div>
-              {esMio && (
+              {esMio && perfil.is_creator && (
                 <Enlace a="/upload" style={{
                   marginTop: 16, display: 'inline-block', background: COLOR.acento, color: COLOR.fondo,
                   padding: '14px 22px', font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6,
@@ -201,9 +220,14 @@ export default function CreatorProfile() {
 
         <OfertaCreadora creadora={perfil.id} handle={perfil.handle} />
 
-        <div style={{ marginTop: 24, textAlign: 'center' }}>
-          <Reportar perfil={perfil.id} etiqueta="Reportar este perfil" />
-        </div>
+        {/* Reportarse a una misma no tiene sentido y manda ruido a
+            moderacion. Se podia hacer desde el dia uno por «ver como se ve»;
+            ahora que esta pantalla es una pestaña, se podria hacer a diario. */}
+        {!esMio && (
+          <div style={{ marginTop: 24, textAlign: 'center' }}>
+            <Reportar perfil={perfil.id} etiqueta="Reportar este perfil" />
+          </div>
+        )}
       </div>
     </div>
   )

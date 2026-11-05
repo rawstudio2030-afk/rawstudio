@@ -52,7 +52,13 @@ export const SCREENS = [
   { path: '/clip',      n: '02', title: 'Explorar',       el: <Explorar /> },
   { path: '/wallet',    n: '03', title: 'Wallet',         el: <Wallet /> },
   { path: '/creator',   n: '04', title: 'Creator',        el: <CreatorProfile /> },
-  { path: '/perfil',    n: '13', title: 'Mi perfil',      el: <PerfilPropio /> },
+  /* `/yo` es la MISMA pantalla sin handle, que ya mostraba el perfil propio
+     —era el «ver como se ve» del formulario—. Tiene ruta propia y no se
+     reusa `/creator` a secas porque la barra marca el destino activo con
+     `startsWith(path + '/')`: con la pestaña apuntando a `/creator`, mirar
+     el perfil de otra creadora encenderia «Yo». */
+  { path: '/yo',        n: '04b', title: 'Yo',             el: <CreatorProfile /> },
+  { path: '/perfil',    n: '13', title: 'Ajustes de cuenta', el: <PerfilPropio /> },
   { path: '/admin',     n: '14', title: 'Administración', el: <Admin /> },
   { path: '/estudio',   n: '15', title: 'Estudio',        el: <Estudio /> },
   { path: '/nueva-clave', n: '16', title: 'Contraseña nueva', el: <NuevaClave /> },

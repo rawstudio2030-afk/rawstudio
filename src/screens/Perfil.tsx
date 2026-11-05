@@ -1,4 +1,14 @@
-// Pantalla 13 — Mi perfil
+// Pantalla 13 — Ajustes de cuenta
+//
+// Se llamaba «Mi perfil» y era la pestaña «Yo» de la barra. Pero no es un
+// perfil: es un formulario de ajustes —nombre, foto, contacto, si publicas,
+// paises bloqueados, cerrar sesion—. Omar lo dijo asi: cuando abres una cuenta
+// en cualquier sitio, la posibilidad de cambiarte el nombre no te sigue por
+// toda la aplicacion.
+//
+// Ahora la pestaña «Yo» es `/yo`, que muestra el perfil de verdad —foto,
+// nombre, @handle, bio, tus clips—, y desde ahi un boton «Ajustes de cuenta»
+// trae aqui. El nombre de esta pantalla dice lo que es.
 // Edicion del propio perfil. Es la pieza que le da dueño a todo lo demas:
 // sin un perfil real, ningun clip, compra ni mensaje tiene a quien colgarse.
 import { useEffect, useRef, useState } from 'react'
@@ -153,7 +163,7 @@ export default function Perfil() {
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 26 }}>
         <Pulsable al={() => nav(-1)} rotulo="Volver" style={{ font: `400 26px/1 ${FUENTE.ui}`, color: COLOR.textoSuave, cursor: 'pointer' }}>‹</Pulsable>
-        <span style={{ ...etiqueta, color: COLOR.dinero }}>Mi perfil</span>
+        <span style={{ ...etiqueta, color: COLOR.dinero }}>Ajustes de cuenta</span>
         <span style={{ width: 14 }} />
       </div>
 

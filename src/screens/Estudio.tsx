@@ -67,12 +67,15 @@ export default function Estudio() {
       minHeight: '100%', boxSizing: 'border-box', padding: '54px 20px 40px',
       background: COLOR.fondo, color: COLOR.texto, fontFamily: FUENTE.ui,
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 22 }}>
-        <Enlace a="/perfil" rotulo="Volver" style={{ font: `400 26px/1 ${FUENTE.ui}`, color: COLOR.textoSuave, cursor: 'pointer' }}>‹</Enlace>
+      {/* Sin flecha de volver: el estudio es un destino de la barra, no una
+          pantalla a la que se entra desde otra. La flecha apuntaba a /perfil,
+          de cuando el estudio vivia dentro de «Yo» —y ahora /perfil son los
+          ajustes de cuenta, asi que «volver» llevaba a un formulario que no
+          tiene nada que ver. */}
+      <div style={{ marginBottom: 22 }}>
         <span style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', color: COLOR.dinero }}>
           Estudio
         </span>
-        <span style={{ width: 14 }} />
       </div>
 
       {/* El numero salio del titular a proposito: decia «seis formas» y la

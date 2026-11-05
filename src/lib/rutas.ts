@@ -32,7 +32,7 @@ export const REDIRIGE_SI_HAY_SESION = ['/entrar', '/registro', '/acceso']
 export const RUTAS_PANEL = ['/admin', '/alta-creadora']
 
 export const EXIGE_SESION = [
-  '/library', '/chat', '/perfil', '/upload', '/earnings', '/admin', '/wallet',
+  '/library', '/chat', '/perfil', '/yo', '/upload', '/earnings', '/admin', '/wallet',
   '/estudio', '/estudio/niveles', '/estudio/encargos', '/estudio/blog',
   '/estudio/cobro', '/estudio/retirar',
 ]
@@ -84,7 +84,13 @@ export const BARRA: Destino[] = [
   { path: '/creadoras', titulo: 'Publicar',   icono: '✦', papeles: ['visitante'] },
   { path: '/chat',      titulo: 'Mensajes',   icono: '✉', papeles: ['usuaria', 'creadora'] },
   { path: '/wallet',    titulo: 'Dinero',     icono: '$', papeles: ['usuaria', 'creadora'] },
-  { path: '/perfil',    titulo: 'Yo',         icono: '●', papeles: ['usuaria', 'creadora'] },
+  /* «Yo» muestra el perfil, no los ajustes. Apuntaba a /perfil, que es un
+     formulario: nombre, foto, contacto, cerrar sesion. Una pestaña que se
+     llama «Yo» y abre un formulario convierte el destino en un pasillo, y
+     deja los ajustes de una vez al mismo nivel que lo que se usa a diario.
+     Ahora abre /yo —foto, nombre, @handle, bio, tus clips— y los ajustes
+     cuelgan de un boton de ahi dentro. */
+  { path: '/yo',        titulo: 'Yo',         icono: '●', papeles: ['usuaria', 'creadora'] },
   { path: '/entrar',    titulo: 'Entrar',     icono: '→', papeles: ['visitante'] },
   /* La puerta al panel va al final y es el cambiador de ida. El de vuelta es
      «Volver a la aplicacion» en la barra lateral del panel. Antes esto era un
