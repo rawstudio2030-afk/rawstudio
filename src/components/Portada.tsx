@@ -22,7 +22,7 @@ import {
 export default function Portada() {
   return (
     <div style={{ marginTop: 56 }}>
-      <Seccion rotulo="What is RAWstudio?">
+      <Seccion rotulo="¿Qué es RAWstudio?">
         <Titular>
           Tu contenido.<br />
           <span style={{ color: COLOR.acento }}>Tu precio.</span><br />
@@ -66,8 +66,8 @@ export default function Portada() {
 
       <Botones />
 
-      {/* ---------- Site features ---------- */}
-      <Seccion rotulo="Site features">
+      {/* ---------- Lo que hay aqui ---------- */}
+      <Seccion rotulo="Lo que hay aquí">
         <Sub>Formas de ganar</Sub>
         <div style={{ display: 'grid', gap: 1, background: LINEA.tenue,
           border: `1px solid ${LINEA.tenue}`, marginTop: 14 }}>
@@ -120,13 +120,13 @@ export default function Portada() {
         </p>
       </div>
 
-      {/* ---------- How to get started ---------- */}
-      <Seccion rotulo="How to get started">
+      {/* ---------- Como empezar ---------- */}
+      <Seccion rotulo="Cómo empezar">
         <Pasos />
       </Seccion>
 
       {/* ---------- FAQ ---------- */}
-      <Seccion rotulo="FAQ">
+      <Seccion rotulo="Preguntas frecuentes">
         <div style={{ marginTop: 6 }}>
           {PREGUNTAS.map((f, i) => (
             <details key={i} style={{ borderBottom: `1px solid ${LINEA.tenue}` }}>
@@ -216,8 +216,8 @@ function Seccion({ rotulo, children }: { rotulo: string; children: ReactNode }) 
   return (
     <div style={{ marginTop: 44 }}>
       <div style={{
-        font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2,
-        textTransform: 'uppercase', color: COLOR.textoTenue, marginBottom: 4,
+        font: `700 10px/1.4 ${FUENTE.ui}`, letterSpacing: 2.2,
+        textTransform: 'uppercase', color: COLOR.textoTenue, marginBottom: 0,
       }}>{rotulo}</div>
       <div style={{ margin: '12px 0 20px' }}><Regla ancho={48} /></div>
       {children}
