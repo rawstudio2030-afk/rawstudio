@@ -34,3 +34,4 @@ node_modules
 !.env.example
 .muestras-portadas/
 .portadas-originales/
+.portadas-elegidas/
