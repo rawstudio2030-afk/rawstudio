@@ -17,7 +17,11 @@
  *   - en iPhone, donde no existe pantalla completa de elemento y solo queda el
  *     reproductor nativo del sistema (`webkitEnterFullscreen`).
  * Una grabacion de pantalla de cualquiera de las dos no llevaria el nombre de
- * quien mira. `VENTANAS_SIN_MARCA` las permite o las esconde cuando hay marca.
+ * quien mira. `VENTANAS_SIN_MARCA` las permite o las esconde cuando hay marca;
+ * hoy estan ESCONDIDAS: con marca no hay boton de PiP ni se llama a
+ * `webkitEnterFullscreen`. Sin marca (la autora viendo lo suyo) se ofrecen si el
+ * navegador las tiene. La pantalla completa de elemento sigue en los dos casos,
+ * porque lleva la marca y la barra dentro.
  *
  * ---------- Lo que NO hace ----------
  *
@@ -34,7 +38,7 @@ import { COLOR, FUENTE } from '../lib/diseño'
 
 /** `true`: PiP y el reproductor nativo de iPhone se ofrecen aunque haya marca de
  *  agua (esas dos vias no la llevan). `false`: con marca, se esconden. */
-const VENTANAS_SIN_MARCA = true
+const VENTANAS_SIN_MARCA = false
 
 const VELOCIDADES = [0.5, 0.75, 1, 1.25, 1.5, 2]
 const CLAVE_VELOCIDAD = 'rawstudio.velocidad'
