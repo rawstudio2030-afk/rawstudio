@@ -30,9 +30,89 @@
 
 ## Respuestas activas
 
+### Respuesta a [id: 20261106-04] — Ronda 4/10 · Recortar la Portada duplicada bajo el hero
+- **fecha:** 2026-11-06 14:35 (America/Mexico_City)
+- **estado:** lista-para-claude
+- **responde a:** Asignación del coordinador. Sergio pidió el recorte («vamos con el recorte de la portada duplicada debajo del hero»).
+- **ronda:** 4 de 10 · **tope:** 1 hora · **tarea:** quitar la segunda página que se pega bajo el hero y en `/entrar`
+- **checklist afectados (NO marques pass tú):** §2.1 y §2.2 ya son `pass` **inmutables** — no los rompas (el primer paint sigue siendo solo el hero; contacto, privacidad y FAQ siguen saliendo solo con un click). §6.4 idioma puede mejorar al desaparecer «Join us» y «All rights reserved» del recorrido visible; el coordinador lo verifica. No toques §4, §3 ni §6.1.
+
+#### Estado de la ronda 3 (hecha)
+Producto verificado por el coordinador: marca en ventanas [`1a1536f`](https://github.com/rawstudio2030-afk/rawstudio/commit/1a1536f76b9f3724788a72247f9b2b1e3ba3b152) y comentarios/reseñas [`fb594f1`](https://github.com/rawstudio2030-afk/rawstudio/commit/fb594f1817891010d730b088f2536c1e87bcfc1a), migración aplicada (`65eefbf`). En una ficha real anónima (2026-11-06 ~13:00 hora de México) se vieron «Comentarios», «Entra para comentar» y «Todavía no hay comentarios.» Escritura y calificación con cuenta que ya desbloqueó el clip aún no se probaron: §4 queda `partial`. No reabras esa tarea.
+
+#### Qué hay hoy (revisado por el coordinador en `65eefbf`)
+El hero ya cuenta la historia («Graba. Ponle precio. Cobra.» / «El 80% de cada dólar es tuyo.» / «Crear mi cuenta» / «Ya tengo cuenta»). Al bajar se pega casi otra página completa, y eso se siente redundante.
+
+- `src/screens/Portal.tsx`: «Sobre nosotros» monta el `Portada` completo (lazy) dentro de `#sobre-nosotros`. Cualquier sección abierta (`alguna`) también monta `Cintillo` (otra franja de «80% para ti»). «Cómo funciona» (`ComoFunciona`) y «Precios» (`FormasDeGanar`) sí aportan y **se quedan**.
+- `src/components/Portada.tsx` trae, en este orden: «¿Qué es RAWstudio?» + `QUE_ES` + titular «Tu contenido. Tu precio. Tu decisión.»; banda del 80%; `Botones` («Crear mi cuenta» / «Ya tengo una cuenta»); Seguridad + `VALORES` (títulos en inglés); bloque «Join us» + «Un sitio nuevo, desde acá.» y dos párrafos sobre creadoras latinas; enlace a `/preguntas`; pie con otro par de `Botones`, redes y «© 2026 RAWstudio · All rights reserved».
+- `src/screens/Entrar.tsx`: debajo de la puerta (título, bajada, gancho «¿Vas a publicar tú?», «Crear mi cuenta», «Ya tengo cuenta») vuelve a montar el mismo `<Portada />` lazy. Es la misma segunda página, otra vez.
+- `src/content/portada.ts`: `QUE_ES` ya tiene las dos frases que hacen falta («qué es» y «nació en México…»). No inventes copy de marketing nuevo.
+
+#### Decisión de UI (coordinador — no preguntar a Sergio)
+
+**1. Landing (`Portal.tsx`) — «Sobre nosotros» pasa a un bloque corto**
+- Deja de montar el `Portada` completo.
+- Al tocar «Sobre nosotros» monta un bloque corto con `id="sobre-nosotros"` (el ancla del scroll se queda) que incluya solo:
+  1. El rótulo «¿Qué es RAWstudio?» y los dos párrafos de `QUE_ES` (reúsalos; no reescribas).
+  2. Los dos párrafos que hoy viven bajo «Join us» en `Portada.tsx` (creadoras latinas, amateurs e independientes; «somos pocas todavía…»). Sin el rótulo inglés «Join us». Puedes conservar el titular en español «Un sitio nuevo, desde acá.»
+  3. El enlace existente a `/preguntas` («Ver las preguntas frecuentes →»).
+  4. Un pie corto con los cuatro enlaces que ya están en español: Contacto, Preguntas frecuentes, Privacidad, Términos. Crédito `© 2026 RAWstudio` (sin «All rights reserved»).
+- **No incluyas:** la banda del 80%, `Botones` («Crear mi cuenta» / «Ya tengo una cuenta»), la grilla de Seguridad, `VALORES`, el segundo par de botones del pie, redes.
+- No hace falta el titular «Tu contenido. Tu precio. Tu decisión.»: el hero ya dice eso.
+- El bloque sigue siendo `React.lazy` + `Suspense` y solo se pide al click, igual que hoy. Puedes extraer un componente nuevo chico (p. ej. `src/components/SobreNosotros.tsx`) o recortar lo que monta Portal; no conviertas `Portada.tsx` en este bloque *y* lo sigas importando desde Entrar.
+- Tipografía, tokens de `diseño.ts`, `Enlace`/`Pulsable`, modo marca. Todo en español. No inventes una ruta `/sobre`.
+
+**2. `Entrar.tsx` — solo la puerta**
+- Quita el `lazy` de `Portada` y el `<div>` que lo monta al final.
+- Déjalo como está: título «Elige cómo entras.», bajada, gancho de publicar hacia `/creadoras`, «Crear mi cuenta», «Ya tengo cuenta».
+- Añade un solo enlace de texto a `/preguntas` (p. ej. «Preguntas frecuentes →»), con `Enlace`. No pegues otra página abajo ni crees una ruta nueva.
+
+**3. Cintillo — no se monta en la landing**
+- En `Portal.tsx`, deja de montar `<Cintillo />` cuando `alguna` es verdadero (el hero ya dice el 80% y «sin exclusividad»). Si `alguna` queda sin uso, límpiala.
+- No borres `src/components/Cintillo.tsx` en esta ronda (aunque nadie lo importe, anótalo en el reporte).
+
+**4. No tocar**
+- El hero (copy, botones, opciones, iris, primer paint).
+- «Cómo funciona» y «Precios» (contenido y comportamiento, salvo que al abrirlos ya no salga el Cintillo).
+- Reproductor, comentarios/reseñas, fichas, age gate, Wordmark, páginas `/privacidad` `/terminos` `/contacto` `/preguntas` (el contenido legal no se reescribe), Telegram, Admin, Supabase, copy 20%/SPEI/18+ del hero y del gancho de Entrar, `CLAUDE.md`.
+- Si `Portada.tsx` queda sin importadores, no lo borres en esta ronda; anótalo.
+
+#### Archivos concretos a tocar (esperados)
+- `src/screens/Portal.tsx` (dejar de montar `Portada` y `Cintillo`; montar el bloque corto lazy).
+- `src/screens/Entrar.tsx` (quitar `Portada`; añadir enlace a `/preguntas`).
+- Un componente nuevo chico para el bloque corto, si lo extraes.
+- `src/components/Portada.tsx` y `src/components/Cintillo.tsx` no se borran.
+- `src/content/portada.ts` solo si reexportas `QUE_ES` sin cambiar el texto.
+
+#### Criterios de aceptación (verificables)
+1. Primer paint de `/#/` igual que en la ronda 1: en `#root` no están «¿Qué es RAWstudio?», «Join us», «Precios y formas de ganar» / «Formas de ganar», «80% para ti» del Cintillo, `#como-funciona`, `#precios`, `#sobre-nosotros`, «Privacidad», «Términos», «Contacto». Sí están el wordmark, el titular, el 80% del hero, «Crear mi cuenta», «Ver cómo funciona», las opciones, «Ya tengo cuenta», «Solo vengo a ver» y 18+. Sin petición de `Portada`, `Cintillo` ni `SeccionesNeon`.
+2. «Ver cómo funciona» / «Cómo funciona» abre `#como-funciona` y **no** monta Cintillo ni el bloque de Sobre nosotros.
+3. «Precios» abre `#precios` y **no** monta Cintillo.
+4. «Sobre nosotros» abre `#sobre-nosotros` con `QUE_ES`, el origen (párrafos de creadoras latinas, sin «Join us»), el enlace a `/preguntas` y el pie de cuatro enlaces. **No** aparecen la banda «De cada dólar que te pagan, ochenta centavos son tuyos», ni «Crear mi cuenta» / «Ya tengo una cuenta» debajo del hero, ni Seguridad, ni los títulos en inglés de `VALORES`, ni «Join us», ni «All rights reserved».
+5. `/#/entrar` ya no pinta `Portada`: no salen «¿Qué es RAWstudio?», la banda del 80%, «Join us» ni `VALORES`. Siguen el título, la bajada, el gancho de publicar y los dos botones. Hay un enlace a `/preguntas`.
+6. `npm run typecheck` (o `tsc -b`), lint y `npm run build` sin errores. El paquete principal no debe crecer; si baja un poco al no arrastrar `Portada` desde Entrar, mejor.
+
+#### Cómo demostrar (obligatorio en el reporte de `bridge-query.md`)
+- SHA completo y mensaje del commit.
+- Diff resumido por archivo.
+- Primer paint y cada click (escritorio y 390×844), como en la ronda 1: qué hay y qué no hay en el DOM.
+- `/#/entrar` antes/después: que ya no se pide ni se pinta `Portada`.
+- Salida de typecheck, lint y build (tamaño del paquete).
+- Lo que no pudiste verificar, dicho sin rodeos.
+
+#### Límites anti-bucle
+Máx 10 rondas por tarea; solo iterar si mejora el checklist; parar tras 2 rondas seguidas sin mejora; tope 1 hora. Si algo no cabe, súbelo hecho a medias pero honesto y anótalo.
+
+#### Siguiente paso para Claude Code
+1. `git pull` (el último cambio remoto solo toca los archivos del puente).
+2. Implementa, un commit de producto (`fix: landing — recortar portada duplicada bajo el hero`) y `git push origin main`.
+3. Marca `bridge-query.md` `[id: 20261106-04]` como `respondida` con SHA, diff resumido y verificación. **No** marques `CHECKLIST.md` como pass: eso lo hace el coordinador.
+
+---
+
 ### Respuesta a [id: 20261106-03] — Ronda 3/10 · Marca en ventanas + comentarios y reseñas
 - **fecha:** 2026-11-06 11:10 (America/Mexico_City)
-- **estado:** lista-para-claude
+- **estado:** hecha — producto `1a1536f` + `fb594f1`, verificada por el coordinador 2026-11-06 ~13:00 (lectura anónima en ficha real)
 - **responde a:** Asignación del coordinador. Sergio aprobó cerrar la fuga de marca y seguir con comentarios («vamos con eso»).
 - **ronda:** 3 de 10 · **tope:** 1 hora · **tarea:** §3 (ajuste de seguridad) + §4 de `CHECKLIST.md`
 - **checklist afectados (NO marques pass tú):** §4 Reseñas/comentarios `not_started` → el coordinador lo verifica en código. §3 PiP queda `pass` con la nota de que con marca se esconde. Los `pass` de §2 y §3 son inmutables: no los rompas.

@@ -2,8 +2,8 @@
 
 Fuente de verdad para el coordinador y Claude Code.  
 **Repo:** https://github.com/rawstudio2030-afk/rawstudio · **Sitio:** https://rawstudio.biz  
-**Rama / HEAD al abrir ronda 3:** `main` @ `1b9f73c` (asignación ronda 3 ~11:10 America/Mexico_City, 2026-11-06)  
-**Código de producto de la landing:** [`4e15d81`](https://github.com/rawstudio2030-afk/rawstudio/commit/4e15d81c7155d446fa52d941678fb5cfe3a6e018) verificado. **Reproductor:** [`24a0a78`](https://github.com/rawstudio2030-afk/rawstudio/commit/24a0a7844ec194090af20dbbb65bcbab4dadc78b) verificado.  
+**Rama / HEAD al abrir ronda 4:** `main` @ `65eefbf` (asignación ronda 4 ~14:35 America/Mexico_City, 2026-11-06)  
+**Código de producto de la landing:** [`4e15d81`](https://github.com/rawstudio2030-afk/rawstudio/commit/4e15d81c7155d446fa52d941678fb5cfe3a6e018) verificado. **Reproductor:** [`24a0a78`](https://github.com/rawstudio2030-afk/rawstudio/commit/24a0a7844ec194090af20dbbb65bcbab4dadc78b) verificado. **Comentarios:** [`fb594f1`](https://github.com/rawstudio2030-afk/rawstudio/commit/fb594f1817891010d730b088f2536c1e87bcfc1a) + migración aplicada (`65eefbf`).  
 **Leyenda:** `pass` | `partial` | `fail` | `not_started`  
 Ítems en `pass` son **inmutables** salvo regresión documentada.
 
@@ -15,7 +15,8 @@ Fuente de verdad para el coordinador y Claude Code.
 |-------|-------|--------|------------------------------|-------|
 | Recortar landing al hero (eager loading §2.1–2.2) | **1 / 10** | **Hecha y verificada** (`4e15d81`) | 2026-11-06 ~08:22 | §2.1 y §2.2 → `pass`. |
 | Reproductor: cromo propio + velocidad (+ PiP explícito) | **2 / 10** | **Hecha y verificada** (`24a0a78`) | 2026-11-06 ~10:20 | Velocidad y UX tipo YouTube → `pass`; PiP → `pass` con nota. Calidad auto y captions fuera. |
-| Marca en ventanas (`VENTANAS_SIN_MARCA=false`) + comentarios y reseñas (§4) | **1 / 10** (ronda 3 global) | **Asignada** — esperando código | 2026-11-06 ~11:10 | Ver `bridge-response.md` id `20261106-03`. Tope 1 h. |
+| Marca en ventanas (`VENTANAS_SIN_MARCA=false`) + comentarios y reseñas (§4) | **3 / 10** | **Hecha** (código + lectura anónima en ficha real) | 2026-11-06 ~11:10 | §4 → `partial` hasta probar escribir/calificar con clip desbloqueado. |
+| Recortar Portada duplicada bajo el hero y en `/entrar` | **4 / 10** | **Asignada** — esperando código | 2026-11-06 ~14:35 | Ver `bridge-response.md` id `20261106-04`. Tope 1 h. |
 
 ---
 
@@ -24,12 +25,12 @@ Fuente de verdad para el coordinador y Claude Code.
 | Estado | Cantidad |
 |--------|----------|
 | pass | 13 |
-| partial | 8 |
+| partial | 9 |
 | fail | 2 |
-| not_started | 4 |
+| not_started | 3 |
 | **Total ítems** | **27** |
 
-_(Ronda 1: §2.1 `fail`→`pass`, §2.2 `partial`→`pass`. Ronda 2 verificada: velocidad y UX tipo YouTube `fail`→`pass`, PiP `partial`→`pass`. Antes 10/9/4/4. Fails que quedan: §6.1 legales y §7.5 CLAUDE.md.)_
+_(Ronda 1 y 2 verificadas. Ronda 3: §4 `not_started`→`partial`. Fails que quedan: §6.1 legales y §7.5 CLAUDE.md. Not started que quedan: calidad auto, captions, Telegram.)_
 
 ---
 
@@ -94,12 +95,13 @@ Ubicación: `src/components/Reproductor.tsx` usado desde `src/screens/ClipDetail
 ---
 
 ## 4. Reseñas / comentarios en videos
-- **Estado:** `not_started` — **en ronda 3** (`20261106-03`). Hoy no hay tabla, RPC ni UI. Pasa solo tras verificar código.
+- **Estado:** `partial`
+- **Evidencia:** Producto [`fb594f1`](https://github.com/rawstudio2030-afk/rawstudio/commit/fb594f1817891010d730b088f2536c1e87bcfc1a) + migración aplicada (docs [`65eefbf`](https://github.com/rawstudio2030-afk/rawstudio/commit/65eefbf290d1e37600de9b19f9d4ff68150b27e2)). Verificado en vivo 2026-11-06 ~13:00 America/Mexico_City en ficha anónima: cabecera «Comentarios», «Entra para comentar», «Todavía no hay comentarios.» Sin promedio ni estrellas (correcto sin sesión). Escritura y calificación con una cuenta que ya desbloqueó el clip: aún no verificadas.
 
 ---
 
 ## 5. Consultas pagadas vía Telegram
-- **Estado:** `not_started` — fuera de ronda 2.
+- **Estado:** `not_started` — fuera de la ronda 4.
 
 ---
 
@@ -124,7 +126,7 @@ Ubicación: `src/components/Reproductor.tsx` usado desde `src/screens/ClipDetail
 ### 7.1 Archivos puente — `pass` ✅ inmutable
 ### 7.2 Checklist documentada — `pass` ✅ inmutable
 ### 7.3 Límites anti-bucle documentados — `pass` ✅ inmutable
-### 7.4 Diario de decisiones — `partial` (actualizado con ronda 2 verificada y ronda 3 abierta)
+### 7.4 Diario de decisiones — `partial` (actualizado con ronda 3 verificada en parte y ronda 4 abierta)
 ### 7.5 CLAUDE.md — `fail` (aún no existe)
 
 ---
@@ -160,11 +162,22 @@ React 19 · Vite 8 · HashRouter · Supabase · GitHub Pages · comisión 20% / 
 2. Borrado blando por autora, dueña o admin. Calificación 1–5 opcional, una por persona y clip, promedio y cantidad si hay ≥1.
 3. RLS + RPC `security definer`. Sin moderación, notificaciones ni hilos.
 
-### Qué debe decidir Sergio (solo negocio/contenido — no bloquea ronda 3)
+### Ronda 3 — verificada en parte (2026-11-06 ~13:00)
+1. Código de `1a1536f` y `fb594f1` en `origin/main`; migración de comentarios aplicada.
+2. Lectura anónima en ficha real: vacía + «Entra para comentar». §4 → `partial`. Escritura/calificación pendientes de prueba con clip desbloqueado.
+
+### Ronda 4 (2026-11-06 ~14:35) — recortar Portada duplicada
+1. **Por qué:** Sergio vio el hero y, debajo, casi otra página completa. Es `Portada` montada en «Sobre nosotros» y otra vez en `/entrar`, más `Cintillo` en cada sección.
+2. **Qué:** «Sobre nosotros» pasa a un bloque corto (qué es + origen + enlace a preguntas + pie de cuatro enlaces). `/entrar` se queda en la puerta más un enlace a preguntas. No montar `Cintillo` en la landing.
+3. **Qué no:** hero, «Cómo funcionar», «Precios», reproductor, comentarios, Telegram, textos legales, borrar `Portada.tsx` ni `Cintillo.tsx`.
+4. Este commit de docs no implementa el recorte; Claude Code debe seguir `bridge-response.md` `[id: 20261106-04]`.
+5. Ítems ya `pass` permanecen inmutables (§2.1 y §2.2 incluidos).
+
+### Qué debe decidir Sergio (solo negocio/contenido — no bloquea ronda 4)
 - Datos legales definitivos / política retiro de compra permanente / jurisdicción / plazo verificación.
 - Home del logo con sesión (portada vs catálogo).
 - Alcance/precio consultas Telegram.
 - Lanzar vs esperar abogado.
 - Más adelante: si se invierte en transcodificar varias calidades (HLS / renditions) para poder hacer calidad automática de verdad.
 
-**Para la ronda 3: no hay decisión de negocio pendiente.**
+**Para la ronda 4: no hay decisión de negocio pendiente.**

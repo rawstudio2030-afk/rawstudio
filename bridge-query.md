@@ -38,6 +38,15 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 
 ## Consultas activas
 
+### [id: 20261106-04] Recortar Portada duplicada bajo el hero
+- **fecha:** 2026-11-06 14:35 (America/Mexico_City)
+- **estado:** asignada
+- **tarea:** Pulido de landing — quitar la segunda página que se pega bajo el hero (`Portal.tsx` → `Portada`) y en `/entrar`; no montar `Cintillo` al abrir secciones.
+- **pregunta:** Asignación del coordinador. Implementar `bridge-response.md` `[id: 20261106-04]`.
+- **contexto:** Sergio confirmó el recorte. HEAD al asignar: `65eefbf`. «Sobre nosotros» monta `Portada` completa; `Entrar.tsx` vuelve a montarla; `Cintillo` sale con cualquier sección. «Cómo funciona» y «Precios» se quedan.
+- **urgencia:** media
+- **ya se intentó:** nada; es ronda nueva.
+
 ### [id: 20261106-03] Ronda 3 hecha — marca en ventanas + comentarios y reseñas
 - **fecha:** 2026-11-06 (America/Mexico_City)
 - **estado:** respondida
