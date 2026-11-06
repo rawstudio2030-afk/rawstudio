@@ -561,3 +561,32 @@ details[open] > summary > .faq-signo {
   outline: 2px solid #00E5FF;
   outline-offset: -2px;
 }
+
+/* ---------- Reproductor ----------
+ *
+ * La barra de progreso y el volumen son <input type=range>: accesibles y con
+ * teclado de serie. El pseudo-elemento de la pista no se puede estilar en
+ * linea, asi que va aqui. `--p` es el porcentaje lleno, lo pone el componente.
+ * Alto tactil de 44 px; la pista dibujada es de 4. */
+.rp-rango {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 44px; margin: 0; background: transparent; cursor: pointer;
+}
+.rp-rango::-webkit-slider-runnable-track {
+  height: 4px; border-radius: 2px;
+  background: linear-gradient(to right, #FF2BD1 var(--p, 0%), rgba(255,255,255,.28) var(--p, 0%));
+}
+.rp-rango::-moz-range-track { height: 4px; border-radius: 2px; background: rgba(255,255,255,.28) }
+.rp-rango::-moz-range-progress { height: 4px; border-radius: 2px; background: #FF2BD1 }
+.rp-rango::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 14px; height: 14px; margin-top: -5px;
+  border-radius: 50%; background: #fff; border: 0;
+  box-shadow: 0 0 8px rgba(255,43,209,.8);
+}
+.rp-rango::-moz-range-thumb {
+  width: 14px; height: 14px; border-radius: 50%; background: #fff; border: 0;
+  box-shadow: 0 0 8px rgba(255,43,209,.8);
+}
+.rp-rango:focus-visible { outline: 2px solid #00E5FF; outline-offset: 2px; border-radius: 4px }
+.rp-volumen { display: none; width: 84px; flex: 0 0 auto }
+@media (min-width: 600px) { .rp-volumen { display: block } }

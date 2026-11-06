@@ -13,7 +13,7 @@ import { clipPorId, urlPortada, urlVideoFirmada, clipsPublicados, type ClipConAu
 import { comprarClip, saldo } from '../lib/monedero'
 import { rentarClip, reembolsoDisponible, reclamarReembolso } from '../lib/canales'
 import Reportar from '../components/Reportar'
-import MarcaDeAgua from '../components/MarcaDeAgua'
+import Reproductor from '../components/Reproductor'
 import { COLOR, VELO, TINTE, FUENTE, RADIO } from '../lib/diseño'
 import { usd } from '../lib/dinero'
 import { Pulsable, Enlace } from '../components/Pulsable'
@@ -161,13 +161,11 @@ export default function ClipDetail() {
       }}>
         {desbloqueado ? (
           <>
-            <video src={video!} controls playsInline
-              poster={poster ?? undefined}
-              style={{ width: '100%', height: '100%', objectFit: 'cover', background: '#000' }} />
-            {/* El identificador de quien mira, encima del video. Se usa el
-                handle y no el correo: señala la cuenta sin exponer un dato de
-                contacto en una grabacion que podria acabar circulando. */}
-            {marca && <MarcaDeAgua texto={marca} />}
+            {/* El identificador de quien mira (`marca`) va encima del video, dentro
+                del reproductor para que siga puesto en pantalla completa. Se usa
+                el handle y no el correo: señala la cuenta sin exponer un dato
+                de contacto en una grabacion que podria acabar circulando. */}
+            <Reproductor src={video!} poster={poster} marca={marca} />
           </>
         ) : (
           <>
