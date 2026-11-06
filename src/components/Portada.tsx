@@ -14,9 +14,7 @@ import Icono from './Iconos'
 import { Regla, Marco } from './Hervor'
 import { Enlace } from './Pulsable'
 import { FondoOpArt } from './OpArt'
-import {
-  REDES, QUE_ES, SEGURIDAD, VALORES, PREGUNTAS,
-} from '../content/portada'
+import { REDES, QUE_ES, SEGURIDAD, VALORES } from '../content/portada'
 
 export default function Portada() {
   return (
@@ -111,25 +109,19 @@ export default function Portada() {
         </p>
       </div>
 
-      {/* ---------- FAQ ---------- */}
+      {/* ---------- Preguntas ----------
+          Las preguntas y sus respuestas viven en /preguntas. Antes se
+          duplicaban aqui y habia dos textos que mantener al dia. */}
       <Seccion rotulo="Preguntas frecuentes">
-        <div style={{ marginTop: 6 }}>
-          {PREGUNTAS.map((f, i) => (
-            <details key={i} style={{ borderBottom: `1px solid ${LINEA.tenue}` }}>
-              <summary style={{
-                display: 'flex', gap: 12, alignItems: 'flex-start', cursor: 'pointer',
-                padding: '18px 2px', font: `500 16px/1.3 ${FUENTE.ui}`, color: COLOR.texto,
-              }}>
-                <span className="faq-signo">+</span>
-                <span>{f.q}</span>
-              </summary>
-              <div style={{ padding: '0 2px 20px 33px', color: COLOR.textoSuave,
-                font: `400 16px/1.6 ${FUENTE.ui}` }}>
-                {f.a.map((p, j) => <p key={j} style={{ margin: j ? '11px 0 0' : 0 }}>{p}</p>)}
-              </div>
-            </details>
-          ))}
-        </div>
+        <p style={{ margin: '6px 0 0', font: `400 16px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
+          Cuánto se cobra, cómo se retira, qué pasa con tu contenido y cómo se
+          verifica a cada persona: todo está en una sola página.
+        </p>
+        <Enlace a="/preguntas" style={{
+          display: 'inline-block', marginTop: 16, cursor: 'pointer',
+          font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
+          color: COLOR.acento, textDecoration: 'underline', textUnderlineOffset: 5,
+        }}>Ver las preguntas frecuentes &#8594;</Enlace>
       </Seccion>
 
       {/* ---------- Pie ---------- */}

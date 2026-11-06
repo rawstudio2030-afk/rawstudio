@@ -2,14 +2,17 @@
 // Aparece despues del age gate y antes de pedir cualquier dato: separa
 // "vengo a ver" de "vengo a publicar", que son los dos negocios distintos que
 // conviven en RAWstudio.
-import { useEffect } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import PaginaMiami from '../components/PaginaMiami'
-import Portada from '../components/Portada'
 import { COLOR, FUENTE } from '../lib/diseño'
 import { Enlace } from '../components/Pulsable'
 
+
+// Va debajo de la puerta: se pide aparte para que no engorde el paquete que
+// baja todo el sitio (Portal.tsx la difiere igual).
+const Portada = lazy(() => import('../components/Portada'))
 
 export default function Entrar() {
   const nav = useNavigate()
@@ -70,7 +73,7 @@ export default function Entrar() {
       {/* La portada informativa va debajo, a todo el ancho y sobre fondo
           solido: es texto largo y no debe pelear con la escena. */}
       <div style={{ margin: '34px -22px -40px', padding: '0 22px 44px', background: COLOR.fondo }}>
-        <Portada />
+        <Suspense fallback={null}><Portada /></Suspense>
       </div>
     </PaginaMiami>
   )

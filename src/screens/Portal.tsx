@@ -5,45 +5,52 @@
  * fuera se topaba con una puerta antes de saber a que puerta estaba tocando.
  *
  * Ahora es una portada de verdad —lo que hace el sitio, cuanto se queda una,
- * como se empieza— y la intro no se pierde: el video sigue ahi, recortado
- * dentro del iris del ojo. La espiral magenta que ya conocian es la pupila.
+ * como se empieza— y la intro no se pierde: el ojo sigue ahi, con la espiral
+ * magenta de siempre como pupila.
+ *
+ * PRIMER PAINT = SOLO EL HERO: wordmark, titular, subtitulo, «Crear mi cuenta»
+ * y los enlaces. Cintillo, «Como funciona», «Precios» y «Sobre nosotros» (que
+ * trae el pie) son modulos que se piden con React.lazy cuando quien visita
+ * pulsa la opcion; hasta entonces no estan en el DOM ni se descargan. El video
+ * de la intro ya no se carga aqui. Las preguntas frecuentes y los textos
+ * legales viven en sus rutas (/preguntas, /contacto, /privacidad, /terminos).
  *
  * El aire es el mismo del video: blanco y negro de alto contraste, un solo
  * color acido, trazo de linoleo y fondo de op art que se retuerce. Nada de
  * esto es imagen: son curvas que se redibujan once veces por segundo.
  */
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Enlace } from '../components/Pulsable'
 import { useSesion } from '../lib/sesion'
 import Wordmark from '../components/Wordmark'
-import Portada from '../components/Portada'
-import { FiltrosHervor, Borde } from '../components/Hervor'
+import { FiltrosHervor } from '../components/Hervor'
 import { Ojo, RecorteIris, OJO } from '../components/OpArt'
 import FondoMiami from '../components/FondoMiami'
 import Insignia18 from '../components/Insignia18'
-import { ComoFunciona, FormasDeGanar } from '../components/SeccionesNeon'
 import { Pulsable } from '../components/Pulsable'
 import { COLOR, FUENTE } from '../lib/diseño'
-import launchVideo from '../assets/launch.mp4'
 
-/** Segundo del video donde ya se ve la espiral. */
-const DESDE = 1.8
+/* Lo que NO es el hero. Cada import() es un chunk aparte que el navegador pide
+ * cuando React intenta pintar el componente, o sea al primer click. */
+const Cintillo = lazy(() => import('../components/Cintillo'))
+const ComoFunciona = lazy(() =>
+  import('../components/SeccionesNeon').then(m => ({ default: m.ComoFunciona })))
+const FormasDeGanar = lazy(() =>
+  import('../components/SeccionesNeon').then(m => ({ default: m.FormasDeGanar })))
+const Portada = lazy(() => import('../components/Portada'))
 
-const CINTILLO = [
-  '80% para ti', 'sin exclusividad', 'pagos por SPEI',
-  'marca de agua con tu nombre', 'bloqueo por país', 'fecha de retiro',
-]
+type Seccion = 'como' | 'precios' | 'sobre'
 
 /** Las opciones de debajo de los botones. «Creadores» ya tiene su pagina; las
- *  demas son secciones de esta misma portada, que se alcanzan con scroll.
- *  No son enlaces `#...` porque el sitio usa HashRouter: un enlace asi cambia
- *  la ruta en vez de bajar a la seccion. */
-const OPCIONES: { t: string; id?: string; a?: string }[] = [
-  { t: 'Cómo funciona', id: 'como-funciona' },
-  { t: 'Precios', id: 'precios' },
+ *  demas abren, bajo el hero, la seccion que nombran. No son enlaces `#...`
+ *  porque el sitio usa HashRouter: un enlace asi cambia la ruta en vez de
+ *  bajar a la seccion. */
+const OPCIONES: { t: string; s?: Seccion; id?: string; a?: string }[] = [
+  { t: 'Cómo funciona', s: 'como', id: 'como-funciona' },
+  { t: 'Precios', s: 'precios', id: 'precios' },
   { t: 'Creadores', a: '/creadoras' },
-  { t: 'Sobre nosotros', id: 'sobre-nosotros' },
+  { t: 'Sobre nosotros', s: 'sobre', id: 'sobre-nosotros' },
 ]
 
 function irA(id: string) {
@@ -65,8 +72,30 @@ function useAncha() {
   return ancha
 }
 
+/** Avisa cuando lo que lo rodea ya se pinto. Va dentro del mismo Suspense que
+ *  la seccion perezosa: solo se monta cuando el chunk llego, que es cuando el
+ *  ancla existe y se puede bajar a ella. */
+function AlMontar({ listo }: { listo: () => void }) {
+  // Una sola vez, al montarse: si dependiera de `listo` (una funcion nueva en
+  // cada render de Portal) volveria a bajar cada vez que se abre otra seccion.
+  const ref = useRef(listo)
+  useEffect(() => { ref.current() }, [])
+  return null
+}
+
 export default function Portal() {
   const ancha = useAncha()
+  const [abiertas, setAbiertas] = useState<Record<Seccion, boolean>>({
+    como: false, precios: false, sobre: false,
+  })
+  const alguna = abiertas.como || abiertas.precios || abiertas.sobre
+
+  /** Pide una seccion. Si ya esta montada, solo baja; si no, la monta y baja
+   *  cuando llega su chunk (`AlMontar`). */
+  const pedir = (s: Seccion, id: string) => {
+    if (abiertas[s]) irA(id)
+    else setAbiertas(a => ({ ...a, [s]: true }))
+  }
   const nav = useNavigate()
   const { sesion, perfil, cargando } = useSesion()
 
@@ -94,52 +123,24 @@ export default function Portal() {
         <div className="miami-escena" aria-hidden>
           <div className="miami-luna">
             <div className="portal-ojo-caja">
-              {/* El video va dentro del iris y el dibujo encima: comparten centro
-                  por construccion, asi que nunca se descuadran. */}
+              {/* La pupila va dentro del iris y el dibujo encima: comparten
+                  centro por construccion, asi que nunca se descuadran. */}
               <div style={{
                 position: 'relative', width: '100%',
                 aspectRatio: `${OJO.ancho} / ${OJO.alto}`,
               }}>
-                {/* El recorte va en el contenedor y el acercamiento en el video.
-                    Al reves no funciona: clip-path se aplica ANTES de la
-                    transformacion, asi que escalar el video escalaba tambien su
-                    recorte y el iris crecia en vez de acercarse.
-                    El video se agranda porque su ojo esta al centro y encogido; a
-                    tamaño natural cabia el ojo entero dentro del iris y se veia
-                    un ojo diminuto dentro de otro. */}
                 <div className="ojo-recorte" style={{
                   position: 'absolute', left: '50%', top: '50%',
                   transform: 'translate(-50%,-50%)',
                   width: `${OJO.iris * 2 / OJO.ancho * 100}%`, aspectRatio: '1',
                   overflow: 'hidden',
                 }}>
-                  <video
-                    src={launchVideo} autoPlay muted playsInline
-                    // El video dura 4 s y el primer segundo y cuarto es el ojo
-                    // todavia cerrado: dentro del iris eso se ve como un hueco
-                    // negro, no como un parpadeo. Se arranca y se repite desde
-                    // que la espiral ya esta ahi.
-                    //
-                    // Sin `loop` a proposito: con loop el salto lo hace el
-                    // navegador al cuadro cero y se alcanza a ver el negro. Con
-                    // `ended` el salto lo damos nosotros al segundo que
-                    // queremos.
-                    //
-                    // Si el navegador bloquea la reproduccion automatica, queda
-                    // congelado en ese mismo segundo. La espiral no gira, pero
-                    // el ojo tiene iris; con el cuadro cero se quedaria hueco.
-                    onLoadedMetadata={e => { e.currentTarget.currentTime = DESDE }}
-                    onEnded={e => {
-                      e.currentTarget.currentTime = DESDE
-                      void e.currentTarget.play().catch(() => {})
-                    }}
-                    style={{
-                      width: '100%', height: '100%', objectFit: 'cover',
-                      // Un poco de acercamiento nada mas. A 2.1 se entraba al
-                      // centro de la espiral, que es casi todo negro, y el iris
-                      // se veia vacio.
-                      transform: 'scale(1.15)', display: 'block',
-                    }} />
+                  {/* La espiral magenta de la intro, sin video: un gradiente
+                      no pesa nada y el iris no se queda hueco. */}
+                  <div style={{
+                    width: '100%', height: '100%', display: 'block',
+                    background: 'radial-gradient(circle at 50% 50%, #FF4FE0 0 13%, #B3189A 14% 30%, #1A0314 31% 62%, #FF2BD1 63% 68%, #0B0008 69%)',
+                  }} />
                 </div>
                 <Ojo />
               </div>
@@ -164,7 +165,7 @@ export default function Portal() {
 
           <div className="miami-botones">
             <Enlace a="/registro" className="miami-boton miami-boton-magenta">Crear mi cuenta</Enlace>
-            <Pulsable al={() => irA('como-funciona')} className="miami-boton miami-boton-cian">
+            <Pulsable al={() => pedir('como', 'como-funciona')} className="miami-boton miami-boton-cian">
               <svg aria-hidden width="18" height="18" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round">
                 <path d="M7 5v14l11.5-7Z" />
@@ -179,7 +180,7 @@ export default function Portal() {
           <nav className="miami-opciones" aria-label="Secciones">
             {OPCIONES.map(o => o.a
               ? <Enlace key={o.t} a={o.a} className="miami-opcion">{o.t}</Enlace>
-              : <Pulsable key={o.t} al={() => irA(o.id!)} className="miami-opcion">{o.t}</Pulsable>)}
+              : <Pulsable key={o.t} al={() => pedir(o.s!, o.id!)} className="miami-opcion">{o.t}</Pulsable>)}
           </nav>
 
           {/* Quien ya tiene cuenta, y quien solo viene a mirar: son los dos
@@ -193,52 +194,38 @@ export default function Portal() {
         <div className="miami-18"><Insignia18 /></div>
       </section>
 
-      <Cintillo />
+      {/* ---------- bajo el hero: solo si se pide ----------
+          Nada de esto existe en el DOM hasta el primer click, y cada bloque es
+          su propio chunk. `AlMontar` baja a la seccion cuando por fin esta. */}
+      {alguna && (
+        <Suspense fallback={null}><Cintillo /></Suspense>
+      )}
 
-      {/* Lo que el hero promete —«ver como funciona», «precios»— esta aqui
-          mismo debajo, en el mismo estilo. */}
-      <ComoFunciona />
-      <FormasDeGanar />
+      {abiertas.como && (
+        <Suspense fallback={null}>
+          <ComoFunciona />
+          <AlMontar listo={() => irA('como-funciona')} />
+        </Suspense>
+      )}
 
-      {/* ---------- el resto ---------- */}
-      {/* En pantalla ancha el texto se iba a mas de mil pixeles de linea y no
-          se podia leer: el ojo pierde el renglon al regresar. El resto de la
-          app es de celular y ahi esto no se nota; la portada es la unica que
-          ve gente de fuera, muchas veces desde una computadora. */}
-      <div style={{ padding: '0 26px 44px', maxWidth: 620, margin: '0 auto' }}>
-        <Portada />
-      </div>
-    </div>
-  )
-}
+      {abiertas.precios && (
+        <Suspense fallback={null}>
+          <FormasDeGanar />
+          <AlMontar listo={() => irA('precios')} />
+        </Suspense>
+      )}
 
-/* ---------- cintillo ---------- */
-
-/** Franja que corre. El texto va DOS veces en el markup y se desplaza justo la
- *  mitad: al terminar, la segunda copia esta donde arrancó la primera y el
- *  salto no se ve. Con una sola copia se veria el hueco al reiniciar. */
-function Cintillo() {
-  const items = [...CINTILLO, ...CINTILLO]
-  return (
-    <div style={{ position: 'relative', background: COLOR.acento, color: COLOR.fondo }}>
-      <Borde lado="arriba" color={COLOR.fondo} grosor={2.6} semilla={5} />
-      <div className="cintillo" style={{ overflow: 'hidden', padding: '13px 0' }}>
-        <div style={{
-          display: 'flex', width: 'max-content',
-          animation: 'cintillo 26s linear infinite',
-        }}>
-          {items.concat(items).map((t, i) => (
-            <span key={i} style={{
-              font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2,
-              textTransform: 'uppercase', whiteSpace: 'nowrap', padding: '0 15px',
-              display: 'inline-flex', alignItems: 'center', gap: 15,
-            }}>
-              {t}<b style={{ fontSize: 13 }}>&#9670;</b>
-            </span>
-          ))}
+      {/* «Sobre nosotros» trae el resto: que es, seguridad, valores y el pie.
+          En pantalla ancha el texto se iba a mas de mil pixeles de linea y no
+          se podia leer: el ojo pierde el renglon al regresar. */}
+      {abiertas.sobre && (
+        <div style={{ padding: '0 26px 44px', maxWidth: 620, margin: '0 auto' }}>
+          <Suspense fallback={null}>
+            <Portada />
+            <AlMontar listo={() => irA('sobre-nosotros')} />
+          </Suspense>
         </div>
-      </div>
-      <Borde lado="abajo" color={COLOR.fondo} grosor={2.6} semilla={91} />
+      )}
     </div>
   )
 }
