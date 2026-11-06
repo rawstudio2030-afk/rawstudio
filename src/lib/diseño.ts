@@ -135,6 +135,10 @@ export const DEGRADADO = {
   suelo: 'linear-gradient(180deg, rgba(106,20,88,.55) 0%, rgba(26,11,46,.85) 40%, #08080A 100%)',
   /** Filete que va de magenta a cian. */
   hilo: 'linear-gradient(90deg, #FF2BD1, #00E5FF)',
+  /** Capa de color para las portadas del catalogo (van con `mix-blend-mode:
+   *  soft-light`). La portada publica es de 32 px a proposito, asi que no se
+   *  puede embellecer la imagen: se le da el tono de la casa. */
+  duotono: 'linear-gradient(135deg, rgba(255,43,209,.7), rgba(0,229,255,.6))',
 } as const
 
 /** Paleta de la escena (edificios, ventanas, palmeras). Solo para ilustracion:

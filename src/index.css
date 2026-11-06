@@ -346,7 +346,10 @@ details[open] > summary > .faq-signo {
    gigantes: el telefono estirado. */
 .rejilla-clips {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  /* `minmax(0, 1fr)` y no `1fr`: un `1fr` a secas no baja del ancho minimo de
+     su contenido, y con un @handle largo la segunda columna se salia de la
+     pantalla. */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 11px;
 }
 @media (min-width: 1024px) {

@@ -14,10 +14,12 @@ import { comprarClip, saldo } from '../lib/monedero'
 import { rentarClip, reembolsoDisponible, reclamarReembolso } from '../lib/canales'
 import Reportar from '../components/Reportar'
 import MarcaDeAgua from '../components/MarcaDeAgua'
-import { COLOR, LINEA, VELO, TINTE, FUENTE } from '../lib/diseño'
+import { COLOR, VELO, TINTE, FUENTE, RADIO } from '../lib/diseño'
 import { usd } from '../lib/dinero'
 import { Pulsable, Enlace } from '../components/Pulsable'
 import Centro from '../components/Centro'
+import Icono from '../components/Iconos'
+import Wordmark from '../components/Wordmark'
 
 
 export default function ClipDetail() {
@@ -125,10 +127,38 @@ export default function ClipDetail() {
   // compras, video llegara tambien a quien pago, sin cambiar nada aqui.
   const desbloqueado = !!video
 
+  const dur = clip.duration_s && clip.duration_s > 0
+    ? `${Math.floor(clip.duration_s / 60)}:${String(Math.round(clip.duration_s % 60)).padStart(2, '0')}`
+    : null
+
+  /* MODO CONSUMO (DESIGN-BRIEF.md): aqui se viene a ver, no a que lo
+   * seduzcan. Fondo plano, tipografia de interfaz sin titulares en Anton,
+   * cero animacion, y el neon solo donde se actua: el precio en lima y el
+   * boton de comprar en magenta. */
+  const boton = {
+    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxSizing: 'border-box',
+    width: '100%', minHeight: 54, padding: '0 18px', borderRadius: RADIO.neon,
+    font: `700 14px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
+  } as const
+
   return (
     <div style={{ minHeight: '100%', background: COLOR.fondo, color: COLOR.texto, fontFamily: FUENTE.ui }}>
-      {/* marco */}
-      <div style={{ position: 'relative', height: 300, background: COLOR.superficie }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 14px 0' }}>
+        <Pulsable al={() => nav(-1)} rotulo="Volver" style={{
+          width: 44, height: 44, borderRadius: '50%', display: 'grid', placeItems: 'center',
+          border: '1px solid rgba(255,255,255,.22)', background: VELO.ligero,
+          color: COLOR.texto, cursor: 'pointer',
+        }}><span aria-hidden style={{ font: `400 22px/1 ${FUENTE.ui}` }}>&#8249;</span></Pulsable>
+        <Wordmark ancho={104} glow={5} />
+        <span aria-hidden style={{ width: 44 }} />
+      </div>
+
+      {/* El reproductor */}
+      <div style={{
+        position: 'relative', margin: '14px 14px 0', aspectRatio: '4 / 3', maxHeight: '62vh',
+        borderRadius: RADIO.neon, overflow: 'hidden', background: COLOR.superficie,
+        border: '1px solid rgba(255,255,255,.12)',
+      }}>
         {desbloqueado ? (
           <>
             <video src={video!} controls playsInline
@@ -149,69 +179,67 @@ export default function ClipDetail() {
             }} />
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(8,8,10,.35) 0%,rgba(8,8,10,.92) 100%)' }} />
             <div style={{
-              position: 'absolute', top: 16, right: 16,
-              border: `1px solid ${bloqueo?.motivo === 'geobloqueo' ? COLOR.admin : COLOR.dinero}`,
-              color: bloqueo?.motivo === 'geobloqueo' ? COLOR.admin : COLOR.dinero,
-              padding: '7px 10px',
-              font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
+              position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', alignContent: 'center', gap: 10,
+              color: bloqueo?.motivo === 'geobloqueo' ? COLOR.admin : COLOR.texto,
             }}>
-              {bloqueo?.motivo === 'geobloqueo' ? 'No disponible aquí' : 'Bloqueado'}
+              <span aria-hidden style={{ display: 'grid' }}><Icono nombre="candado" tam={34} /></span>
+              <span style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase' }}>
+                {bloqueo?.motivo === 'geobloqueo' ? 'No disponible aquí' : 'Bloqueado'}
+              </span>
             </div>
           </>
         )}
-        <Pulsable al={() => nav(-1)} rotulo="Volver" style={{
-          position: 'absolute', top: 16, left: 16, width: 38, height: 38, borderRadius: '50%',
-          border: '1px solid rgba(255,255,255,.22)', background: VELO.ligero,
-          display: 'grid', placeItems: 'center', font: `400 19px/1 ${FUENTE.ui}`,
-          color: COLOR.texto, cursor: 'pointer', zIndex: 2,
-        }}>‹</Pulsable>
       </div>
 
-      {/* autora */}
-      {autora && (
-        <Enlace a={`/creator/${autora.handle}`} style={{
-          display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px',
-          borderBottom: '1px solid rgba(255,255,255,.09)', cursor: 'pointer',
-        }}>
-          <div style={{
-            width: 44, height: 44, borderRadius: '50%', flex: '0 0 auto',
-            border: `1px solid ${COLOR.acento}`,
-            background: foto ? `center/cover url(${foto})` : `repeating-linear-gradient(130deg,${COLOR.superficieAlta} 0 6px,${COLOR.superficie} 6px 12px)`,
-          }} />
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ font: `700 16px/1.3 ${FUENTE.ui}`, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 6 }}>
-              {autora.display_name}
-              {autora.verified && <span style={{ color: COLOR.admin, fontSize: 13 }}>&#10038;</span>}
-            </div>
-            <div style={{ font: `400 12px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue }}>@{autora.handle}</div>
-          </div>
-          <span style={{ color: COLOR.textoApagado }}>›</span>
-        </Enlace>
-      )}
+      <div style={{ padding: '20px 18px 40px' }}>
+        <h1 style={{ margin: 0, font: `700 26px/1.15 ${FUENTE.ui}` }}>{clip.title}</h1>
 
-      <div style={{ padding: '20px 20px 40px' }}>
-        <div style={{ fontFamily: FUENTE.display, fontSize: 32, lineHeight: 1, textTransform: 'uppercase' }}>
-          {clip.title}
-        </div>
-
-        {clip.description && (
-          <div style={{ fontFamily: FUENTE.ui, fontSize: 19, lineHeight: 1.45, color: COLOR.textoSuave, marginTop: 12 }}>
-            {clip.description}
-          </div>
-        )}
-
-        <div style={{ font: `400 10px/1.6 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 14 }}>
+        <div style={{ font: `400 12px/1.6 ${FUENTE.mono}`, color: COLOR.textoTenue, marginTop: 8 }}>
+          {dur && <>{dur} &middot; </>}
           publicado {clip.published_at ? new Date(clip.published_at).toLocaleDateString('es-MX') : '—'}
           {!clip.published && ' · borrador'}
         </div>
 
+        {clip.description && (
+          <div style={{ font: `400 16px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave, marginTop: 14 }}>
+            {clip.description}
+          </div>
+        )}
+
+        {/* autora */}
+        {autora && (
+          <Enlace a={`/creator/${autora.handle}`} style={{
+            display: 'flex', alignItems: 'center', gap: 12, padding: '16px 0', marginTop: 18,
+            borderTop: '1px solid rgba(255,255,255,.1)', borderBottom: '1px solid rgba(255,255,255,.1)',
+            cursor: 'pointer',
+          }}>
+            <div style={{
+              width: 46, height: 46, borderRadius: '50%', flex: '0 0 auto',
+              border: `1.5px solid ${COLOR.acento}`,
+              background: foto ? `center/cover url(${foto})` : `repeating-linear-gradient(130deg,${COLOR.superficieAlta} 0 6px,${COLOR.superficie} 6px 12px)`,
+            }} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ font: `700 16px/1.3 ${FUENTE.ui}`, display: 'flex', alignItems: 'center', gap: 6 }}>
+                {autora.display_name}
+                {autora.verified && (
+                  <span role="img" aria-label="Verificada" style={{ color: COLOR.admin, display: 'grid' }}>
+                    <Icono nombre="verificada" tam={15} />
+                  </span>
+                )}
+              </div>
+              <div style={{ font: `400 12px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue }}>@{autora.handle}</div>
+            </div>
+            <span aria-hidden style={{ color: COLOR.textoTenue, font: `400 22px/1 ${FUENTE.ui}` }}>&#8250;</span>
+          </Enlace>
+        )}
+
         {devolucion > 0 && (
-          <div style={{ marginTop: 24, border: `1px solid ${COLOR.dinero}`, padding: 18 }}>
-            <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2,
+          <div style={{ marginTop: 22, border: `1.5px solid ${COLOR.dinero}`, borderRadius: RADIO.neon, padding: 18 }}>
+            <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 2,
               textTransform: 'uppercase', color: COLOR.dinero }}>
               La creadora retiró este clip
             </div>
-            <div style={{ marginTop: 10, font: `400 13px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
+            <div style={{ marginTop: 10, font: `400 14px/1.55 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
               Decidió que dejara de estar disponible. Te devolvemos lo que pagaste.
             </div>
             <Pulsable al={async () => {
@@ -222,82 +250,97 @@ export default function ClipDetail() {
               const s = await saldo()
               if (!s.fallo) setCoins(s.datos)
             }} style={{
-              marginTop: 14, textAlign: 'center', padding: 16, cursor: 'pointer',
+              ...boton, marginTop: 14, cursor: 'pointer',
               background: COLOR.dinero, color: COLOR.fondo,
-              font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
             }}>Recuperar mis {usd(devolucion)}</Pulsable>
           </div>
         )}
+
         {bloqueo?.motivo === 'geobloqueo' ? (
           <div style={{
-            marginTop: 24, padding: '18px 16px',
+            marginTop: 22, padding: '18px 16px', borderRadius: RADIO.neon,
             border: '1px solid rgba(0,229,255,.4)', background: 'rgba(0,229,255,.06)',
           }}>
-            <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', color: COLOR.admin }}>
+            <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase', color: COLOR.admin }}>
               No disponible en tu país
             </div>
-            <div style={{ fontFamily: FUENTE.ui, fontSize: 16, lineHeight: 1.45, color: COLOR.textoSuave, marginTop: 9 }}>
+            <div style={{ font: `400 16px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave, marginTop: 9 }}>
               Quien publicó este clip decidió no mostrarlo aquí. No es un error
               ni falta de pago: es su elección, y la respetamos.
             </div>
           </div>
         ) : mio ? (
           <div style={{
-            marginTop: 24, padding: '18px 16px', border: '1px dashed rgba(200,255,61,.4)',
-            background: TINTE.dinero,
+            marginTop: 22, padding: '18px 16px', borderRadius: RADIO.neon,
+            border: '1px dashed rgba(200,255,61,.4)', background: TINTE.dinero,
           }}>
-            <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', color: COLOR.dinero }}>
+            <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase', color: COLOR.dinero }}>
               Es tuyo
             </div>
-            <div style={{ fontFamily: FUENTE.ui, fontSize: 16, color: COLOR.textoSuave, marginTop: 9 }}>
+            <div style={{ font: `400 16px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave, marginTop: 9 }}>
               Lo ves completo porque lo publicaste tú.
             </div>
           </div>
         ) : clip.visibility === 'gratis' ? null : (
-          <div style={{ marginTop: 24, border: '1px solid rgba(255,255,255,.12)', padding: 18 }}>
-            <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', color: COLOR.textoTenue }}>
+          <div style={{
+            marginTop: 22, padding: 18, borderRadius: RADIO.neon,
+            border: '1px solid rgba(255,255,255,.14)', background: COLOR.superficie,
+          }}>
+            <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase', color: COLOR.textoSuave }}>
               {clip.visibility === 'pago' ? 'Desbloquear para siempre' : 'Solo suscriptores'}
             </div>
+
             {clip.visibility === 'pago' && (
-              <div style={{ fontFamily: FUENTE.display, fontSize: 32, lineHeight: 1, color: COLOR.dinero, marginTop: 10 }}>
-                {usd(clip.price_coins)}
+              <div style={{ display: 'flex', alignItems: 'stretch', marginTop: 14 }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase', color: '#FF5BDC' }}>Comprar</div>
+                  <div style={{ font: `700 30px/1 ${FUENTE.mono}`, color: COLOR.dinero, marginTop: 8 }}>{usd(clip.price_coins)}</div>
+                </div>
+                {clip.renta_coins != null && clip.renta_horas != null && (
+                  <div style={{ flex: 1, paddingLeft: 16, borderLeft: '1px solid rgba(255,255,255,.14)' }}>
+                    <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase', color: '#FF5BDC' }}>Rentar</div>
+                    <div style={{ font: `700 30px/1 ${FUENTE.mono}`, color: COLOR.dinero, marginTop: 8 }}>{usd(clip.renta_coins)}</div>
+                    <div style={{ font: `400 12px/1.3 ${FUENTE.ui}`, color: COLOR.textoTenue, marginTop: 6 }}>{clip.renta_horas} h para ver</div>
+                  </div>
+                )}
               </div>
             )}
+
             {clip.visibility === 'pago' ? (() => {
               const alcanza = coins !== null && coins >= clip.price_coins
               const falta = coins === null ? 0 : clip.price_coins - coins
+              const puede = !sesion || alcanza
               return (
                 <>
                   {/* Sin sesion el boton decia «entra para desbloquear» y no
                       hacia nada: el unico callejon sin salida del recorrido de
-                      quien viene a mirar. Ahora lleva a la puerta, y en el
-                      magenta de las llamadas a la accion en vez del gris de
-                      lo deshabilitado, porque SI se puede tocar. */}
+                      quien viene a mirar. Ahora lleva a la puerta, y es el
+                      mismo boton magenta de siempre, porque SI se puede
+                      tocar. */}
                   <Pulsable
                     al={!sesion ? () => nav('/entrar') : desbloquear}
-                    activo={!sesion || alcanza}
+                    activo={puede}
                     style={{
-                    marginTop: 16,
-                    background: !sesion ? COLOR.acento : alcanza ? COLOR.dinero : COLOR.superficieAlta,
-                    color: !sesion || alcanza ? COLOR.fondo : COLOR.textoApagado,
-                    textAlign: 'center', padding: 17,
-                    font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
-                    cursor: !sesion || alcanza ? 'pointer' : 'default',
-                    boxShadow: !sesion ? '0 0 30px rgba(255,43,209,.36)'
-                      : alcanza ? '0 0 30px rgba(200,255,61,.3)' : 'none',
-                  }}>
+                      ...boton, marginTop: 18,
+                      cursor: puede ? 'pointer' : 'default',
+                      color: puede ? '#FFF' : COLOR.textoApagado,
+                      background: puede
+                        ? 'linear-gradient(135deg, #FF2BD1, #9B2BE8)'
+                        : COLOR.superficieAlta,
+                      boxShadow: puede ? '0 0 18px rgba(255,43,209,.45)' : 'none',
+                    }}>
                     {comprando ? 'Desbloqueando…'
                       : !sesion ? 'Entra para desbloquear'
-                      : alcanza ? 'Desbloquear este clip'
+                      : alcanza ? <>Desbloquear este clip <span aria-hidden>&#8250;</span></>
                       : `Te faltan ${usd(falta)}`}
                   </Pulsable>
                   {sesion && (
                     <Enlace a="/wallet" style={{
                       display: 'block',
-                      font: `400 10px/1.6 ${FUENTE.mono}`, color: COLOR.textoTenue, marginTop: 10,
+                      font: `400 11px/1.6 ${FUENTE.mono}`, color: COLOR.textoTenue, marginTop: 10,
                       textAlign: 'center', cursor: 'pointer', textDecoration: 'underline',
                     }}>
-                      Tu saldo: {coins ?? '…'} coins
+                      Tu saldo: {coins !== null ? usd(coins) : '…'}
                     </Enlace>
                   )}
                   {/* Renta: mas barata y por tiempo. Se ofrece DEBAJO de la
@@ -305,18 +348,17 @@ export default function ClipDetail() {
                       creadora; quien no quiera pagarla ya encuentra esto. */}
                   {clip.renta_coins != null && clip.renta_horas != null && sesion && (
                     <Pulsable al={rentar} activo={!rentando} style={{
-                      marginTop: 10, textAlign: 'center', padding: 14, width: '100%',
-                      boxSizing: 'border-box',
-                      border: `1px solid ${LINEA.fuerte}`, cursor: 'pointer',
-                      font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6,
-                      textTransform: 'uppercase', color: COLOR.textoSuave,
+                      ...boton, marginTop: 10, cursor: 'pointer', color: '#FFF',
+                      border: '1.5px solid #FF4FE0', background: 'rgba(255,43,209,.08)',
+                      boxShadow: '0 0 10px rgba(255,43,209,.3)',
+                      font: `700 12px/1 ${FUENTE.ui}`,
                     }}>
                       {rentando ? 'Rentando…'
                         : `O réntalo ${clip.renta_horas} h por ${usd(clip.renta_coins)}`}
                     </Pulsable>
                   )}
                   {errorCompra && (
-                    <div style={{ font: `400 12px/1.45 ${FUENTE.ui}`, color: COLOR.acento, marginTop: 10, textAlign: 'center' }}>
+                    <div style={{ font: `400 13px/1.45 ${FUENTE.ui}`, color: COLOR.acento, marginTop: 10, textAlign: 'center' }}>
                       {errorCompra}
                     </div>
                   )}
@@ -324,8 +366,7 @@ export default function ClipDetail() {
               )
             })() : (
               <div style={{
-                marginTop: 16, background: COLOR.superficieAlta, color: COLOR.textoApagado, textAlign: 'center',
-                padding: 17, font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
+                ...boton, marginTop: 18, background: COLOR.superficieAlta, color: COLOR.textoApagado,
               }}>
                 Faltan las suscripciones
               </div>

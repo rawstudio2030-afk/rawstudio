@@ -13,10 +13,40 @@ import { usd } from '../lib/dinero'
 import TarjetaClip from '../components/TarjetaClip'
 import Wordmark from '../components/Wordmark'
 import { Pulsable, Enlace } from '../components/Pulsable'
-import { COLOR, LINEA, FUENTE } from '../lib/diseño'
-
+import Icono from '../components/Iconos'
+import { COLOR, FUENTE, RADIO, DEGRADADO } from '../lib/diseño'
 
 type Filtro = 'todo' | 'gratis' | 'pago' | 'creadoras'
+
+/* ---------- el marco de neon de cada clip ----------
+ *
+ * El color dice de un vistazo que es: magenta lo que se paga, cian lo de
+ * suscriptoras, lima lo gratis. Va en el marco y en la insignia; el precio y
+ * el resto del texto se quedan sobrios. */
+type Tono = 'm' | 'c' | 'l'
+const TONO: Record<Tono, { borde: string; rgb: string }> = {
+  m: { borde: '#FF4FE0', rgb: '255,43,209' },
+  c: { borde: '#19E6FF', rgb: '0,229,255' },
+  l: { borde: '#C8FF3D', rgb: '200,255,61' },
+}
+
+type Rotulo = { tono: Tono; texto: string; icono?: string }
+
+/** Que insignia lleva un clip. Un clip de pago se puede comprar y, si la
+ *  creadora lo permite, rentar: la insignia dice PAGO y, aparte, RENTA. */
+function insignias(c: ClipConAutora): Rotulo[] {
+  if (c.visibility === 'gratis') return [{ tono: 'l', texto: 'Gratis' }]
+  if (c.visibility === 'suscriptores') return [{ tono: 'c', texto: 'Suscriptores', icono: 'estrella' }]
+  const r: Rotulo[] = [{ tono: 'm', texto: 'Pago', icono: 'candado' }]
+  if (c.renta_coins != null && c.renta_horas != null) r.push({ tono: 'm', texto: `Renta ${c.renta_horas} h` })
+  return r
+}
+
+/** 125 s -> «2:05». */
+function duracion(s: number | null | undefined) {
+  if (!s || s <= 0) return null
+  return `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, '0')}`
+}
 
 export default function Explorar() {
   const nav = useNavigate()
@@ -62,19 +92,40 @@ export default function Explorar() {
     filtro === 'gratis' ? c.visibility === 'gratis' : c.visibility === 'pago')
 
   return (
-    <div style={{ minHeight: '100%', background: COLOR.fondo, color: COLOR.texto, fontFamily: FUENTE.ui }}>
+    <div style={{
+      minHeight: '100%', color: COLOR.texto, fontFamily: FUENTE.ui,
+      // Modo marca: un resplandor violeta arriba, que se apaga antes de la
+      // rejilla. Es el mismo cielo de la portada, no un fondo nuevo.
+      background: `radial-gradient(ellipse 90% 340px at 50% 0, rgba(123,60,255,.2), transparent 75%), ${COLOR.fondo}`,
+    }}>
       <div style={{ padding: '46px 18px 0' }}>
         <Wordmark ancho={116} glow={14} />
 
-        <div style={{ display: 'flex', gap: 7, marginBottom: 18 }}>
+        <div style={{ marginTop: 22 }}>
+          <h1 style={{
+            margin: 0, font: `700 14px/1 ${FUENTE.ui}`, letterSpacing: 6, textTransform: 'uppercase',
+          }}>Explorar</h1>
+          <div style={{ marginTop: 7, font: `400 12px/1.3 ${FUENTE.ui}`, letterSpacing: 1.6,
+            textTransform: 'uppercase', color: COLOR.textoSuave }}>
+            Descubre contenido exclusivo
+          </div>
+        </div>
+
+        {/* Los filtros son pestañas: la activa en magenta con su filete de
+            neon, no cuatro botones. Misma logica que antes. */}
+        <div role="group" aria-label="Filtrar" style={{
+          display: 'flex', gap: 4, margin: '10px -4px 16px',
+          borderBottom: '1px solid rgba(255,255,255,.12)', overflowX: 'auto',
+        }}>
           {([['todo', 'Todo'], ['pago', 'De pago'], ['gratis', 'Gratis'],
              ['creadoras', 'Creadoras']] as [Filtro, string][]).map(([v, t]) => (
             <Pulsable key={v} al={() => setFiltro(v)} activado={filtro === v} style={{
-              padding: '9px 13px', cursor: 'pointer',
-              font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
-              background: filtro === v ? COLOR.acento : 'transparent',
-              color: filtro === v ? COLOR.fondo : COLOR.textoSuave,
-              border: `1px solid ${filtro === v ? COLOR.acento : LINEA.media}`,
+              padding: '14px 11px', cursor: 'pointer', whiteSpace: 'nowrap', marginBottom: -1,
+              font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
+              color: filtro === v ? '#FF5BDC' : COLOR.textoSuave,
+              textShadow: filtro === v ? '0 0 12px rgba(255,43,209,.6)' : 'none',
+              borderBottom: `2px solid ${filtro === v ? COLOR.acento : 'transparent'}`,
+              boxShadow: filtro === v ? '0 6px 12px -8px rgba(255,43,209,.8)' : 'none',
             }}>{t}</Pulsable>
           ))}
         </div>
@@ -82,13 +133,19 @@ export default function Explorar() {
 
       {filtro === 'creadoras' && (
         <div style={{ padding: '0 18px 14px' }}>
-          <input value={busca} onChange={e => setBusca(e.target.value)}
-            placeholder="Buscar por nombre"
-            style={{
-              width: '100%', boxSizing: 'border-box', background: 'transparent',
-              color: COLOR.texto, border: `1px solid ${LINEA.suave}`, borderRadius: 0,
-              padding: '11px 13px', font: `400 13px/1 ${FUENTE.ui}`, outline: 'none',
-            }} />
+          <label style={{
+            display: 'flex', alignItems: 'center', gap: 10, boxSizing: 'border-box',
+            border: '1.5px solid rgba(255,255,255,.28)', borderRadius: RADIO.neon,
+            padding: '0 14px', background: 'rgba(8,8,10,.6)', color: COLOR.textoSuave,
+          }}>
+            <Icono nombre="lupa" tam={18} />
+            <input value={busca} onChange={e => setBusca(e.target.value)}
+              placeholder="Buscar por nombre" aria-label="Buscar por nombre"
+              style={{
+                flex: 1, minWidth: 0, background: 'transparent', color: COLOR.texto,
+                border: 0, padding: '14px 0', font: `400 16px/1 ${FUENTE.ui}`, outline: 'none',
+              }} />
+          </label>
         </div>
       )}
 
@@ -97,28 +154,31 @@ export default function Explorar() {
           gente.length === 0 ? (
             <Vacio texto={busca ? 'Nadie con ese nombre.' : 'Cargando…'} />
           ) : (
-            <div style={{ display: 'grid', gap: 9 }}>
+            <div style={{ display: 'grid', gap: 9, gridTemplateColumns: 'minmax(0, 1fr)' }}>
               {gente.map(g => (
                 <Enlace key={g.id} a={`/creator/${g.handle}`} style={{
                   display: 'flex', gap: 12, alignItems: 'center', cursor: 'pointer',
-                  padding: '12px 13px', border: `1px solid ${LINEA.tenue}`,
+                  padding: '12px 13px', borderRadius: RADIO.neon,
+                  border: `1.5px solid ${TONO.c.borde}`, background: 'rgba(0,229,255,.04)',
+                  boxShadow: `0 0 8px rgba(${TONO.c.rgb},.3), 0 0 20px rgba(${TONO.c.rgb},.12)`,
                 }}>
                   <div style={{
-                    width: 44, height: 44, borderRadius: '50%', flex: '0 0 auto',
-                    border: `1px solid ${LINEA.media}`,
+                    width: 46, height: 46, borderRadius: '50%', flex: '0 0 auto',
+                    border: `1.5px solid ${COLOR.acento}`,
                     background: g.avatar_path
                       ? `center/cover url(${urlAvatar(g.avatar_path)})`
                       : COLOR.superficieAlta,
                   }} />
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ font: `400 16px/1.3 ${FUENTE.ui}` }}>
+                    <div style={{ font: `700 16px/1.3 ${FUENTE.ui}`, display: 'flex', alignItems: 'center', gap: 6 }}>
                       {g.display_name}
                       {g.identidad_verificada && (
-                        <span style={{ marginLeft: 6, color: COLOR.dinero,
-                          font: `400 12px/1 ${FUENTE.ui}` }}>✓</span>
+                        <span role="img" aria-label="Identidad verificada" style={{ color: COLOR.admin, display: 'grid' }}>
+                          <Icono nombre="verificada" tam={15} />
+                        </span>
                       )}
                     </div>
-                    <div style={{ font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
+                    <div style={{ font: `400 11px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
                       @{g.handle}
                       {g.es_demo && (
                         <span style={{ color: COLOR.textoApagado }}> · demostración</span>
@@ -126,7 +186,7 @@ export default function Explorar() {
                     </div>
                     {g.bio && (
                       <div style={{
-                        marginTop: 4, font: `400 12px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave,
+                        marginTop: 4, font: `400 13px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave,
                         overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                       }}>{g.bio}</div>
                     )}
@@ -160,45 +220,84 @@ export default function Explorar() {
             {visibles.map(c => {
               const p = portadaDe(c.id, urlPortada(c.cover_path))
               const f = urlAvatar(c.profiles?.avatar_path ?? null)
-              const gratis = c.visibility === 'gratis'
+              const marca = insignias(c)
+              const t = TONO[marca[0].tono]
+              const dur = duracion(c.duration_s)
               return (
-                <div key={c.id}>
-                  <TarjetaClip portada={p} tira={urlPortada(c.preview_path ?? null)}
-                    a={`/clip/${c.id}`}>
-                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,transparent 40%,rgba(8,8,10,.92) 100%)' }} />
+                <article key={c.id} style={{
+                  padding: 6, borderRadius: RADIO.neon, boxSizing: 'border-box',
+                  border: `1.5px solid ${t.borde}`, background: `rgba(${t.rgb},.05)`,
+                  boxShadow: `0 0 8px rgba(${t.rgb},.4), 0 0 22px rgba(${t.rgb},.16)`,
+                }}>
+                  {/* El recorte redondeado va en el contenedor: la tarjeta
+                      lleva `overflow: hidden` y un radio en el mismo elemento
+                      que dibuja el fondo de la tira de fotogramas no recorta
+                      bien. */}
+                  <div style={{ borderRadius: 9, overflow: 'hidden' }}>
+                    <TarjetaClip portada={p} tira={urlPortada(c.preview_path ?? null)}
+                      a={`/clip/${c.id}`}>
+                      {/* La portada publica es de 32 px a proposito (censura),
+                          asi que no se puede embellecer la imagen: se le pone
+                          encima el duotono de la casa, y la mancha de color se
+                          lee como una decision y no como un defecto. */}
+                      <div aria-hidden style={{ position: 'absolute', inset: 0, background: DEGRADADO.duotono, mixBlendMode: 'soft-light' }} />
+                      <div aria-hidden style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(8,8,10,.1) 45%,rgba(8,8,10,.78) 100%)' }} />
+                      <div style={{ position: 'absolute', top: 7, left: 7, right: 7, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                        {marca.map(m => (
+                          <span key={m.texto} style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 4,
+                            background: m.icono ? TONO[m.tono].borde : 'rgba(8,8,10,.7)',
+                            color: m.icono || m.tono === 'l' ? COLOR.fondo : TONO[m.tono].borde,
+                            border: `1px solid ${TONO[m.tono].borde}`, borderRadius: 6, padding: '4px 6px',
+                            font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.1, textTransform: 'uppercase',
+                          }}>
+                            {m.icono && <Icono nombre={m.icono} tam={10} />}{m.texto}
+                          </span>
+                        ))}
+                      </div>
+                      {dur && (
+                        <span style={{
+                          position: 'absolute', right: 7, bottom: 7, display: 'inline-flex', alignItems: 'center', gap: 4,
+                          background: 'rgba(8,8,10,.72)', borderRadius: 6, padding: '4px 6px',
+                          font: `700 10px/1 ${FUENTE.mono}`, color: COLOR.texto,
+                        }}>{dur}<Icono nombre="play" tam={9} /></span>
+                      )}
+                    </TarjetaClip>
+                  </div>
+
+                  <div style={{ padding: '9px 4px 4px' }}>
+                    <div style={{
+                      font: `700 13px/1.3 ${FUENTE.ui}`, color: COLOR.texto,
+                      display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+                    }}>{c.title}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6, marginTop: 8 }}>
+                      {c.profiles ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+                          <div style={{
+                            width: 20, height: 20, borderRadius: '50%', flex: '0 0 auto',
+                            background: f ? `center/cover url(${f})` : COLOR.superficieAlta,
+                            border: `1px solid ${t.borde}`,
+                          }} />
+                          <span style={{
+                            font: `400 10px/1.3 ${FUENTE.mono}`, color: COLOR.textoSuave,
+                            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                          }}>@{c.profiles.handle}</span>
+                        </div>
+                      ) : <span />}
+                      {c.visibility === 'pago' && (
+                        <span style={{
+                          flex: '0 0 auto', border: `1px solid ${t.borde}`, borderRadius: 6, padding: '4px 7px',
+                          font: `700 12px/1 ${FUENTE.mono}`, color: COLOR.dinero,
+                          boxShadow: `0 0 8px rgba(${t.rgb},.35)`,
+                        }}>{usd(c.price_coins)}</span>
+                      )}
+                    </div>
                     {c.es_demo && (
-                      <span style={{
-                        position: 'absolute', top: 8, left: 8,
-                        background: COLOR.textoTenue, color: COLOR.fondo, padding: '4px 6px',
-                        font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
-                      }}>Demo</span>
+                      <div style={{ marginTop: 6, font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
+                        textTransform: 'uppercase', color: COLOR.textoTenue }}>Demostración</div>
                     )}
-                    <span style={{
-                      position: 'absolute', top: 8, right: 8,
-                      background: gratis ? COLOR.admin : COLOR.dinero, color: COLOR.fondo,
-                      padding: '4px 6px', font: `700 9px/1 ${FUENTE.ui}`,
-                      letterSpacing: 1.2, textTransform: 'uppercase',
-                    }}>
-                      {gratis ? 'Gratis' : c.visibility === 'suscriptores' ? 'Subs' : usd(c.price_coins)}
-                    </span>
-                    <div style={{ position: 'absolute', left: 9, right: 9, bottom: 9 }}>
-                      <div style={{ font: `500 12px/1.3 ${FUENTE.ui}` }}>{c.title}</div>
-                    </div>
-                  </TarjetaClip>
-                  {c.profiles && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 7 }}>
-                      <div style={{
-                        width: 18, height: 18, borderRadius: '50%', flex: '0 0 auto',
-                        background: f ? `center/cover url(${f})` : COLOR.superficieAlta,
-                        border: '1px solid rgba(255,255,255,.16)',
-                      }} />
-                      <span style={{
-                        font: `400 10px/1.3 ${FUENTE.mono}`, color: COLOR.textoTenue,
-                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                      }}>@{c.profiles.handle}</span>
-                    </div>
-                  )}
-                </div>
+                  </div>
+                </article>
               )
             })}
           </div>
@@ -211,15 +310,17 @@ export default function Explorar() {
 function Vacio({ texto, accion }: { texto: string; accion?: { texto: string; al: () => void } }) {
   return (
     <div style={{
-      padding: '60px 20px', textAlign: 'center',
-      border: '1px dashed rgba(255,255,255,.12)',
+      padding: '60px 20px', textAlign: 'center', borderRadius: RADIO.neon,
+      border: '1.5px dashed rgba(255,255,255,.2)',
     }}>
       <div style={{ fontFamily: FUENTE.ui, fontSize: 19, color: COLOR.textoSuave }}>{texto}</div>
       {accion && (
         <Pulsable al={accion.al} style={{
-          marginTop: 18, display: 'inline-block', background: COLOR.acento, color: COLOR.fondo,
-          padding: '14px 22px', font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6,
-          textTransform: 'uppercase', cursor: 'pointer',
+          marginTop: 18, display: 'inline-block', padding: '16px 24px', cursor: 'pointer',
+          borderRadius: RADIO.neon, border: '2px solid #FF4FE0', color: '#FFF',
+          background: 'linear-gradient(180deg, rgba(255,43,209,.26), rgba(255,43,209,.1))',
+          boxShadow: '0 0 10px rgba(255,43,209,.6), 0 0 28px rgba(255,43,209,.35), inset 0 0 16px rgba(255,43,209,.25)',
+          font: `500 13px/1 ${FUENTE.ui}`, letterSpacing: 2.6, textTransform: 'uppercase',
         }}>{accion.texto}</Pulsable>
       )}
     </div>

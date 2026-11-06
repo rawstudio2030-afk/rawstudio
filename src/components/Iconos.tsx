@@ -77,6 +77,17 @@ const TRAZOS: Record<string, string> = {
   corona: 'M3.5 8.5l4.5 4 4-6.5 4 6.5 4.5-4-1.6 10.5H5.1ZM5.5 21h13',
   /** Ganancia: barras que suben. */
   grafica: 'M4 20.5h16M6.5 20.5v-5M11.5 20.5v-8.5M16.5 20.5V9M5 9l5-3.8 3.2 2.9L19 3.5M15.8 3.5H19v3.2',
+
+  // ---- Catalogo y clip ----
+  /** Verificada: un octagono con palomita. UNO SOLO para todo el sitio: antes
+   *  habia un ✦ en el perfil y el clip, y un ✓ en Explorar y los ajustes. */
+  verificada: 'M8.6 2.8h6.8L21.2 8.6v6.8L15.4 21.2H8.6L2.8 15.4V8.6ZM8.4 12.3l2.5 2.5 4.8-5.1',
+  /** Candado: contenido de pago. */
+  candado: 'M6 10.5h12V20H6zM8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5',
+  /** Estrella: solo suscriptores. */
+  estrella: 'M12 3.2l2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.6 6.8 19.4l1-5.9L3.5 9.4l5.9-.8Z',
+  /** Lupa: buscar. */
+  lupa: 'M10.5 17a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13ZM15.3 15.3 20.5 20.5',
 }
 
 export type NombreIcono = keyof typeof TRAZOS
