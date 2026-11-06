@@ -445,3 +445,14 @@ verify_jwt = false
 # `x-cron-secret`, igual que sus hermanas, y por eso no lleva JWT.
 [functions.avisar-verificada]
 verify_jwt = false
+
+# `avisar-compra` manda dos correos por cada pago: el recibo a quien compro y
+# el aviso de venta a la creadora. La llaman los disparadores de purchases y
+# rentals con `x-cron-secret`, como sus hermanas, y por eso no lleva JWT.
+[functions.avisar-compra]
+verify_jwt = false
+
+# `avisar-bienvenida` manda el correo de bienvenida al crear la cuenta. La
+# llama el disparador de profiles con `x-cron-secret`.
+[functions.avisar-bienvenida]
+verify_jwt = false
