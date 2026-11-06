@@ -9,9 +9,10 @@
  * magenta de siempre como pupila.
  *
  * PRIMER PAINT = SOLO EL HERO: wordmark, titular, subtitulo, «Crear mi cuenta»
- * y los enlaces. Cintillo, «Como funciona», «Precios» y «Sobre nosotros» (que
- * trae el pie) son modulos que se piden con React.lazy cuando quien visita
- * pulsa la opcion; hasta entonces no estan en el DOM ni se descargan. El video
+ * y los enlaces. «Como funciona», «Precios» y «Sobre nosotros» (un bloque corto
+ * con los enlaces de ayuda) son modulos que se piden con React.lazy cuando quien
+ * visita pulsa la opcion; hasta entonces no estan en el DOM ni se descargan. El
+ * cintillo magenta ya no sale aqui: el hero dice el 80% y la exclusividad. El video
  * de la intro ya no se carga aqui. Las preguntas frecuentes y los textos
  * legales viven en sus rutas (/preguntas, /contacto, /privacidad, /terminos).
  *
@@ -33,12 +34,11 @@ import { COLOR, FUENTE } from '../lib/diseño'
 
 /* Lo que NO es el hero. Cada import() es un chunk aparte que el navegador pide
  * cuando React intenta pintar el componente, o sea al primer click. */
-const Cintillo = lazy(() => import('../components/Cintillo'))
 const ComoFunciona = lazy(() =>
   import('../components/SeccionesNeon').then(m => ({ default: m.ComoFunciona })))
 const FormasDeGanar = lazy(() =>
   import('../components/SeccionesNeon').then(m => ({ default: m.FormasDeGanar })))
-const Portada = lazy(() => import('../components/Portada'))
+const SobreNosotros = lazy(() => import('../components/SobreNosotros'))
 
 type Seccion = 'como' | 'precios' | 'sobre'
 
@@ -88,7 +88,6 @@ export default function Portal() {
   const [abiertas, setAbiertas] = useState<Record<Seccion, boolean>>({
     como: false, precios: false, sobre: false,
   })
-  const alguna = abiertas.como || abiertas.precios || abiertas.sobre
 
   /** Pide una seccion. Si ya esta montada, solo baja; si no, la monta y baja
    *  cuando llega su chunk (`AlMontar`). */
@@ -197,10 +196,6 @@ export default function Portal() {
       {/* ---------- bajo el hero: solo si se pide ----------
           Nada de esto existe en el DOM hasta el primer click, y cada bloque es
           su propio chunk. `AlMontar` baja a la seccion cuando por fin esta. */}
-      {alguna && (
-        <Suspense fallback={null}><Cintillo /></Suspense>
-      )}
-
       {abiertas.como && (
         <Suspense fallback={null}>
           <ComoFunciona />
@@ -215,13 +210,14 @@ export default function Portal() {
         </Suspense>
       )}
 
-      {/* «Sobre nosotros» trae el resto: que es, seguridad, valores y el pie.
-          En pantalla ancha el texto se iba a mas de mil pixeles de linea y no
-          se podia leer: el ojo pierde el renglon al regresar. */}
+      {/* «Sobre nosotros»: un bloque corto (que es, de donde sale y los enlaces
+          de ayuda), no la portada entera. En pantalla ancha el texto se iba a
+          mas de mil pixeles de linea y no se podia leer: el ojo pierde el
+          renglon al regresar. */}
       {abiertas.sobre && (
         <div style={{ padding: '0 26px 44px', maxWidth: 620, margin: '0 auto' }}>
           <Suspense fallback={null}>
-            <Portada />
+            <SobreNosotros />
             <AlMontar listo={() => irA('sobre-nosotros')} />
           </Suspense>
         </div>

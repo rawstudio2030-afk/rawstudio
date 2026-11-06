@@ -2,17 +2,13 @@
 // Aparece despues del age gate y antes de pedir cualquier dato: separa
 // "vengo a ver" de "vengo a publicar", que son los dos negocios distintos que
 // conviven en RAWstudio.
-import { lazy, Suspense, useEffect } from 'react'
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import PaginaMiami from '../components/PaginaMiami'
 import { COLOR, FUENTE } from '../lib/diseño'
 import { Enlace } from '../components/Pulsable'
 
-
-// Va debajo de la puerta: se pide aparte para que no engorde el paquete que
-// baja todo el sitio (Portal.tsx la difiere igual).
-const Portada = lazy(() => import('../components/Portada'))
 
 export default function Entrar() {
   const nav = useNavigate()
@@ -70,11 +66,14 @@ export default function Entrar() {
         <Enlace a="/acceso" className="miami-boton miami-boton-suave">Ya tengo cuenta</Enlace>
       </div>
 
-      {/* La portada informativa va debajo, a todo el ancho y sobre fondo
-          solido: es texto largo y no debe pelear con la escena. */}
-      <div style={{ margin: '34px -22px -40px', padding: '0 22px 44px', background: COLOR.fondo }}>
-        <Suspense fallback={null}><Portada /></Suspense>
-      </div>
+      {/* Antes aqui se volvia a montar la portada informativa entera, que es
+          la misma segunda pagina que ya sale bajo el hero. Ahora la puerta es
+          solo la puerta; las dudas se resuelven en las preguntas frecuentes. */}
+      <Enlace a="/preguntas" style={{
+        marginTop: 6, textAlign: 'center', cursor: 'pointer', padding: '14px 4px',
+        font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase',
+        color: COLOR.textoSuave, textDecoration: 'underline', textUnderlineOffset: 5,
+      }}>Preguntas frecuentes &#8594;</Enlace>
     </PaginaMiami>
   )
 }
