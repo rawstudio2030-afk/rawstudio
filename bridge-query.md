@@ -42,7 +42,7 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 - **fecha:** 2026-11-06 (America/Mexico_City)
 - **estado:** respondida
 - **tarea:** Reproductor de video — §3 de CHECKLIST.md (velocidad, UX tipo YouTube, PiP explícito)
-- **resultado:** HECHA y en `origin/main`. Commit de producto `24a7844ec194090af20dbbb65bcbab4dadc78b` (`fix: reproductor — controles propios y velocidad`), empujado como `b36cbaa..24a0a78`. Antes no estaba implementado en el working tree: se hizo en esta ronda.
+- **resultado:** HECHA y en `origin/main`. Commit de producto `24a0a7844ec194090af20dbbb65bcbab4dadc78b` (`fix: reproductor — controles propios y velocidad`), empujado como `b36cbaa..24a0a78`. Antes no estaba implementado en el working tree: se hizo en esta ronda.
 - **diff resumido:**
   - `src/components/Reproductor.tsx` (nuevo): `<video>` sin `controls`, con `playsInline`; barra propia con play/pausa, tiempo, progreso (`input range` con `aria-valuetext`), duración, volumen y silencio, menú de velocidad, PiP solo si `document.pictureInPictureEnabled` y pantalla completa. Todo es `Pulsable` de 44 px con `aria-label` en español. Botón central grande. Controles ocultos a los 2.5 s reproduciendo; reaparecen con puntero, toque, foco o tecla. Clic alterna play/pausa; doble toque izquierda/derecha −10/+10 s (el clic simple espera 280 ms para no pelear con el doble). Teclado con el reproductor enfocado: espacio o `k`, `j`/`l` ±10 s, flechas ±5 s, `m`, `f`.
   - Velocidad `0.5 · 0.75 · 1 · 1.25 · 1.5 · 2` sobre `playbackRate`, guardada en `localStorage` (`rawstudio.velocidad`) y reaplicada al cargar y al cambiar de `src`.
