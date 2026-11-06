@@ -85,9 +85,11 @@ export default function Niveles() {
           </div>
         </div>
       ) : (
-        <Boton tono="primario" al={() => setCreando(true)}>
-          {lista.length ? 'Otro nivel' : 'Crear mi primer nivel'}
-        </Boton>
+        <div style={{ marginTop: 16 }}>
+          <Boton tono="primario" al={() => setCreando(true)}>
+            {lista.length ? 'Otro nivel' : 'Crear mi primer nivel'}
+          </Boton>
+        </div>
       )}
     </Marco>
   )

@@ -9,21 +9,24 @@ import {
   miniaturaDeVideo, tiraDeVideo, cuadrosDeVideo, achicar,
   ANCHO_PUBLICO, type Cuadro,
 } from '../lib/miniatura'
-import { COLOR, LINEA, TINTE, FUENTE } from '../lib/diseño'
+import { COLOR, LINEA, FUENTE, RADIO } from '../lib/diseño'
+import Icono from '../components/Iconos'
 import MisClips from '../components/MisClips'
 import { usd } from '../lib/dinero'
 import { Pulsable, Enlace } from '../components/Pulsable'
 import Centro from '../components/Centro'
 
 
+/* Modo consumo: rotulos en `textoSuave` (eran textoTenue, 3.78:1, bajo AA) y
+   campos de `.campo-sobrio`, con foco en cian y sin halo. */
 const etiqueta: React.CSSProperties = {
-  font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', color: COLOR.textoTenue,
+  font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase', color: COLOR.textoSuave,
 }
 const campo: React.CSSProperties = {
-  width: '100%', boxSizing: 'border-box', background: COLOR.superficie,
-  border: '1px solid rgba(255,255,255,.14)', color: COLOR.texto,
-  font: `400 16px/1.3 ${FUENTE.ui}`, padding: '15px', outline: 'none',
+  width: '100%', boxSizing: 'border-box',
+  font: `400 16px/1.3 ${FUENTE.ui}`, padding: '15px',
 }
+const ayuda: React.CSSProperties = { font: `400 12px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave }
 
 const MODOS: { v: Visibilidad; t: string }[] = [
   { v: 'pago', t: 'Por clip' },
@@ -200,43 +203,47 @@ export default function Upload() {
 
   return (
     <div style={{
-      minHeight: '100%', boxSizing: 'border-box', padding: '54px 22px 40px',
+      minHeight: '100%', boxSizing: 'border-box', padding: '20px 18px 40px',
       background: COLOR.fondo, color: COLOR.texto, fontFamily: FUENTE.ui,
-      display: 'flex', flexDirection: 'column', gap: 20,
+      display: 'flex', flexDirection: 'column', gap: 18,
+      width: '100%', maxWidth: 680, margin: '0 auto',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Pulsable al={() => nav(-1)} rotulo="Volver" style={{ font: `400 26px/1 ${FUENTE.ui}`, color: COLOR.textoSuave, cursor: 'pointer' }}>‹</Pulsable>
-        <span style={{ ...etiqueta, color: COLOR.dinero }}>Nuevo clip</span>
-        <span style={{ width: 14 }} />
+        <Pulsable al={() => nav(-1)} rotulo="Volver" style={{
+          width: 44, height: 44, borderRadius: '50%', display: 'grid', placeItems: 'center',
+          border: '1px solid rgba(255,255,255,.22)', color: COLOR.texto, cursor: 'pointer',
+        }}><span aria-hidden style={{ font: `400 22px/1 ${FUENTE.ui}` }}>&#8249;</span></Pulsable>
+        <h1 style={{ ...etiqueta, margin: 0, color: COLOR.dinero }}>Nuevo clip</h1>
+        <span aria-hidden style={{ width: 44 }} />
       </div>
 
       {!perfil.identidad_verificada && (
-        <div style={{ padding: '13px 15px', border: `1px solid ${COLOR.admin}` }}>
-          <div style={{ font: `400 13px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
+        <div style={{ padding: '15px 16px', borderRadius: RADIO.neon, border: `1px solid ${COLOR.admin}` }}>
+          <div style={{ font: `400 14px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
             Puedes subir desde ahora. Tu clip queda guardado y{' '}
             <b style={{ color: COLOR.texto }}>se publica en cuanto verifiquemos tu
             identidad</b> — no tienes que volver a subirlo.
           </div>
-          <Enlace a="/verificar" style={{
-            display: 'block', boxSizing: 'border-box', width: '100%',
-            marginTop: 11, textAlign: 'center', padding: '12px 0', cursor: 'pointer',
-            background: COLOR.admin, color: COLOR.fondo,
-            font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
-          }}>Verificar mi identidad</Enlace>
+          <Enlace a="/verificar" className="boton-principal" style={{ marginTop: 14 }}>
+            Verificar mi identidad
+          </Enlace>
         </div>
       )}
 
       {/* video */}
       <Pulsable al={() => refVideo.current?.click()} style={{
         boxSizing: 'border-box', width: '100%',
-        padding: '26px 18px', textAlign: 'center', cursor: 'pointer',
-        border: `1.5px dashed ${video ? 'rgba(200,255,61,.5)' : LINEA.marcada}`,
-        background: video ? TINTE.dinero : 'transparent',
+        padding: '26px 18px', textAlign: 'center', cursor: 'pointer', borderRadius: RADIO.neon,
+        border: `1.5px dashed ${video ? 'rgba(200,255,61,.6)' : LINEA.marcada}`,
+        background: video ? 'rgba(200,255,61,.05)' : 'transparent',
       }}>
-        <div style={{ ...etiqueta, color: video ? COLOR.dinero : COLOR.textoTenue }}>
+        <span aria-hidden style={{ display: 'grid', placeItems: 'center', color: video ? COLOR.dinero : COLOR.textoSuave, marginBottom: 10 }}>
+          <Icono nombre="subir" tam={28} />
+        </span>
+        <div style={{ ...etiqueta, color: video ? COLOR.dinero : COLOR.textoSuave }}>
           {video ? 'Video listo' : 'Elegir video'}
         </div>
-        <div style={{ fontFamily: FUENTE.ui, fontSize: 16, color: COLOR.textoSuave, marginTop: 9, wordBreak: 'break-all' }}>
+        <div style={{ font: `400 16px/1.4 ${FUENTE.ui}`, color: COLOR.textoSuave, marginTop: 9, wordBreak: 'break-all' }}>
           {video ? `${video.name} · ${(video.size / 1048576).toFixed(1)} MB` : 'MP4, MOV o WebM · hasta 2 GB'}
         </div>
       </Pulsable>
@@ -244,10 +251,10 @@ export default function Upload() {
         onChange={e => { const f = e.target.files?.[0]; if (f) setVideo(f) }} />
 
       {/* portada */}
-      <div style={{ border: '1px solid rgba(255,255,255,.14)', padding: 13, display: 'flex', flexDirection: 'column', gap: 11 }}>
+      <div className="tarjeta-sobria" style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div>
           <div style={etiqueta}>Portada</div>
-          <div style={{ font: `400 12px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 6 }}>
+          <div style={{ ...ayuda, marginTop: 8 }}>
             {modo === 'gratis'
               ? 'Se ve completa: este clip es gratis.'
               : `Sin pagar se ve borrosa, a ${ANCHO_PUBLICO} px. La nítida se guarda en privado.`}
@@ -255,20 +262,16 @@ export default function Upload() {
         </div>
 
         {!video && (
-          <div style={{ font: `400 12px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
-            Elige el video y te enseño los cuadros.
-          </div>
+          <div style={ayuda}>Elige el video y te enseño los cuadros.</div>
         )}
         {video && sacando && (
-          <div style={{ font: `400 12px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
-            Sacando cuadros del video…
-          </div>
+          <div style={ayuda}>Sacando cuadros del video…</div>
         )}
 
         {/* Los cuadros a elegir. Antes la portada la decidia una constante —el
             10% del video— y nadie podia cambiarla. */}
         {cuadros.length > 0 && !portada && (
-          <div style={{ display: 'flex', gap: 7, overflowX: 'auto', paddingBottom: 2 }}>
+          <div style={{ display: 'flex', gap: 8, overflowX: 'auto', padding: '2px 2px 4px' }}>
             {cuadros.map((c, i) => (
               <Pulsable
                 key={c.vista}
@@ -276,14 +279,15 @@ export default function Upload() {
                 activado={elegido === i}
                 rotulo={`Usar el cuadro del segundo ${c.segundo.toFixed(1)}`}
                 style={{
-                  flex: '0 0 auto', width: 54, height: 72, padding: 0, cursor: 'pointer',
+                  flex: '0 0 auto', width: 58, height: 78, padding: 0, cursor: 'pointer', borderRadius: 8,
+                  overflow: 'hidden',
                   background: `center/cover url(${c.vista})`,
                   border: `2px solid ${elegido === i ? COLOR.dinero : 'transparent'}`,
                   outlineOffset: 3,
                 }}
               ><span style={{
-                display: 'block', marginTop: 54, background: 'rgba(8,8,10,.72)',
-                font: `400 9px/18px ${FUENTE.mono}`, color: COLOR.texto,
+                display: 'block', marginTop: 58, background: 'rgba(8,8,10,.78)',
+                font: `700 10px/18px ${FUENTE.mono}`, color: COLOR.texto,
               }}>{c.segundo.toFixed(1)}s</span></Pulsable>
             ))}
           </div>
@@ -292,20 +296,20 @@ export default function Upload() {
         {/* La suya, si la sube, gana sobre cualquier cuadro. */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
           {suya && <div style={{
-            width: 54, height: 72, flex: '0 0 auto',
+            width: 58, height: 78, flex: '0 0 auto', borderRadius: 8,
             background: `center/cover url(${suya})`,
             border: `2px solid ${COLOR.dinero}`,
           }} />}
           <Pulsable al={() => refPortada.current?.click()} style={{
-            flex: 1, textAlign: 'left', cursor: 'pointer',
-            font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
-            color: COLOR.textoSuave, border: `1px solid ${LINEA.media}`, padding: '12px 13px',
+            flex: 1, textAlign: 'left', cursor: 'pointer', minHeight: 48, display: 'flex', alignItems: 'center',
+            font: `700 12px/1.2 ${FUENTE.ui}`, letterSpacing: 1.3, textTransform: 'uppercase',
+            color: COLOR.textoSuave, border: `1px solid ${LINEA.fuerte}`, padding: '0 14px', borderRadius: 12,
           }}>{portada ? 'Cambiar mi imagen' : 'O subir mi propia imagen'}</Pulsable>
           {portada && (
             <Pulsable al={() => setPortada(null)} rotulo="Quitar mi imagen y volver a los cuadros" style={{
-              flex: '0 0 auto', padding: '12px 13px', cursor: 'pointer',
-              font: `400 15px/1 ${FUENTE.ui}`, color: COLOR.textoTenue,
-              border: `1px solid ${LINEA.media}`,
+              flex: '0 0 auto', width: 48, height: 48, display: 'grid', placeItems: 'center', cursor: 'pointer',
+              font: `400 20px/1 ${FUENTE.ui}`, color: COLOR.textoSuave, borderRadius: 12,
+              border: `1px solid ${LINEA.fuerte}`,
             }}>×</Pulsable>
           )}
         </div>
@@ -314,81 +318,85 @@ export default function Upload() {
         onChange={e => { const f = e.target.files?.[0]; if (f) setPortada(f) }} />
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <span style={etiqueta}>Título</span>
-        <input value={titulo} onChange={e => setTitulo(e.target.value)} maxLength={90}
-          placeholder="Cómo se llama este clip" style={campo} />
+        <label htmlFor="clip-titulo" style={etiqueta}>Título</label>
+        <input id="clip-titulo" value={titulo} onChange={e => setTitulo(e.target.value)} maxLength={90}
+          className="campo-sobrio" placeholder="Cómo se llama este clip" style={campo} />
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <span style={etiqueta}>Descripción</span>
-        <textarea value={desc} onChange={e => setDesc(e.target.value)} rows={3} maxLength={600}
+        <label htmlFor="clip-desc" style={etiqueta}>Descripción</label>
+        <textarea id="clip-desc" value={desc} onChange={e => setDesc(e.target.value)} rows={3} maxLength={600}
+          className="campo-sobrio"
           placeholder="Qué van a ver" style={{ ...campo, resize: 'vertical', fontFamily: FUENTE.ui }} />
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         <span style={etiqueta}>Cómo se vende</span>
-        <div style={{ display: 'flex', gap: 6 }}>
+        <div role="group" aria-label="Cómo se vende" style={{ display: 'flex', gap: 8 }}>
           {MODOS.map(m => (
             <Pulsable key={m.v} al={() => setModo(m.v)} activado={modo === m.v} style={{
-              flex: 1, textAlign: 'center', padding: '13px 6px', cursor: 'pointer',
-              font: `700 10px/1.3 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
+              flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center',
+              minHeight: 48, padding: '0 6px', cursor: 'pointer', borderRadius: 999,
+              font: `700 11px/1.2 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
               background: modo === m.v ? COLOR.dinero : 'transparent',
               color: modo === m.v ? COLOR.fondo : COLOR.textoSuave,
-              border: `1px solid ${modo === m.v ? COLOR.dinero : LINEA.media}`,
+              border: `1px solid ${modo === m.v ? COLOR.dinero : LINEA.fuerte}`,
             }}>{m.t}</Pulsable>
           ))}
         </div>
       </div>
 
       {modo === 'pago' && (
-        <div style={{ border: '1px solid rgba(255,255,255,.12)', padding: 16 }}>
+        <div className="tarjeta-sobria" style={{ padding: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14 }}>
             <span style={etiqueta}>Precio</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <Paso t="−" al={() => setPrecio(p => Math.max(0, p - 50))} />
-              <span style={{ fontFamily: FUENTE.display, fontSize: 32, lineHeight: 1, color: COLOR.dinero }}>{usd(precio)}</span>
+              <span style={{ font: `700 28px/1 ${FUENTE.mono}`, color: COLOR.dinero, minWidth: 92, textAlign: 'center' }}>{usd(precio)}</span>
               <Paso t="+" al={() => setPrecio(p => p + 50)} />
             </div>
           </div>
-          <div style={{ font: `400 12px/1.6 ${FUENTE.mono}`, color: COLOR.textoTenue, marginTop: 12, borderTop: '1px solid rgba(255,255,255,.09)', paddingTop: 12 }}>
+          <div style={{ ...ayuda, marginTop: 14, borderTop: '1px solid rgba(255,255,255,.1)', paddingTop: 14 }}>
             plataforma 20% · <span style={{ color: COLOR.texto }}>tú recibes {usd(gana)}</span>
           </div>
         </div>
       )}
 
       {modo === 'pago' && (
-        <div style={{ border: '1px solid rgba(255,255,255,.12)', padding: 16 }}>
+        <div className="tarjeta-sobria" style={{ padding: 16 }}>
           <Pulsable
             al={() => setRenta(v => !v)}
             activado={renta}
-            style={{ boxSizing: 'border-box', width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14, cursor: 'pointer' }}>
+            style={{ boxSizing: 'border-box', width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14, cursor: 'pointer', minHeight: 48 }}>
             <div>
-              <div style={{ ...etiqueta, color: renta ? COLOR.admin : COLOR.textoTenue }}>También en renta</div>
-              <div style={{ font: `400 12px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 6 }}>
+              <div style={{ ...etiqueta, color: renta ? COLOR.dinero : COLOR.textoSuave }}>También en renta</div>
+              <div style={{ ...ayuda, marginTop: 7 }}>
                 Acceso por tiempo, más barato que comprarlo
               </div>
             </div>
-            <div style={{
-              width: 46, height: 26, borderRadius: 13, flex: '0 0 auto',
-              background: renta ? COLOR.admin : COLOR.superficieAlta, position: 'relative', transition: 'background .18s',
+            <div aria-hidden style={{
+              width: 48, height: 28, borderRadius: 14, flex: '0 0 auto', boxSizing: 'border-box',
+              background: renta ? COLOR.dinero : COLOR.superficieAlta, position: 'relative', transition: 'background .18s',
+              border: renta ? 'none' : '1px solid rgba(255,255,255,.2)',
             }}>
               <div style={{
-                position: 'absolute', top: 3, left: renta ? 23 : 3, width: 20, height: 20,
-                borderRadius: '50%', background: renta ? COLOR.fondo : COLOR.textoApagado, transition: 'left .18s',
+                position: 'absolute', top: renta ? 4 : 3, left: renta ? 24 : 3, width: 20, height: 20,
+                borderRadius: '50%', background: renta ? COLOR.fondo : COLOR.textoSuave, transition: 'left .18s',
               }} />
             </div>
           </Pulsable>
 
           {renta && (
-            <div style={{ marginTop: 16, borderTop: '1px solid rgba(255,255,255,.09)', paddingTop: 16 }}>
-              <div style={{ display: 'flex', gap: 7, marginBottom: 14 }}>
+            <div style={{ marginTop: 16, borderTop: '1px solid rgba(255,255,255,.1)', paddingTop: 16 }}>
+              <div role="group" aria-label="Duración de la renta" style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
                 {([48, 72] as const).map(h => (
                   <Pulsable key={h} al={() => setRentaHoras(h)} activado={rentaHoras === h} style={{
-                    flex: 1, textAlign: 'center', padding: '12px 6px', cursor: 'pointer',
-                    font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
-                    background: rentaHoras === h ? COLOR.admin : 'transparent',
+                    flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center',
+                    minHeight: 48, padding: '0 6px', cursor: 'pointer', borderRadius: 999,
+                    font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
+                    background: rentaHoras === h ? COLOR.dinero : 'transparent',
                     color: rentaHoras === h ? COLOR.fondo : COLOR.textoSuave,
-                    border: `1px solid ${rentaHoras === h ? COLOR.admin : LINEA.media}`,
+                    border: `1px solid ${rentaHoras === h ? COLOR.dinero : LINEA.fuerte}`,
                   }}>{h} horas</Pulsable>
                 ))}
               </div>
@@ -396,12 +404,12 @@ export default function Upload() {
                 <span style={etiqueta}>Precio de renta</span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <Paso t="−" al={() => setRentaCoins(p => Math.max(0, p - 25))} />
-                  <span style={{ fontFamily: FUENTE.display, fontSize: 26, lineHeight: 1, color: COLOR.admin }}>{usd(rentaCoins)}</span>
+                  <span style={{ font: `700 24px/1 ${FUENTE.mono}`, color: COLOR.dinero, minWidth: 80, textAlign: 'center' }}>{usd(rentaCoins)}</span>
                   <Paso t="+" al={() => setRentaCoins(p => p + 25)} />
                 </div>
               </div>
               {rentaCoins >= precio && (
-                <div style={{ font: `400 10px/1.6 ${FUENTE.mono}`, color: COLOR.acento, marginTop: 12 }}>
+                <div style={{ ...ayuda, color: '#FF7BE6', marginTop: 12 }}>
                   Rentar cuesta igual o más que comprarlo. Nadie elegiría la renta.
                 </div>
               )}
@@ -411,38 +419,27 @@ export default function Upload() {
       )}
 
       {estado === 'error' && (
-        <div style={{ font: `400 13px/1.45 ${FUENTE.ui}`, color: COLOR.acento }}>{detalle}</div>
+        <div role="alert" style={{ font: `400 14px/1.45 ${FUENTE.ui}`, color: '#FF7BE6' }}>{detalle}</div>
       )}
 
       {estado === 'sin-portada' && (
-        <div style={{ border: `1px solid ${COLOR.admin}`, padding: '13px 15px' }}>
-          <div style={{ font: `400 13px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
+        <div style={{ borderRadius: RADIO.neon, border: `1px solid ${COLOR.admin}`, padding: '15px 16px' }}>
+          <div style={{ font: `400 14px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
             <b style={{ color: COLOR.texto }}>Tu clip se publicó</b> — el video está
             a salvo. Lo que no se pudo guardar fue la portada: se muestra con el
             patrón generado hasta que la pongas.
           </div>
-          <div style={{ font: `400 11px/1.6 ${FUENTE.mono}`, color: COLOR.textoTenue, marginTop: 8 }}>
-            {detalle}
-          </div>
+          <div style={{ ...ayuda, marginTop: 8 }}>{detalle}</div>
           {clipNuevo && (
-            <Enlace a={`/clip/${clipNuevo}`} style={{
-              display: 'block', boxSizing: 'border-box', width: '100%',
-              marginTop: 11, textAlign: 'center', padding: '12px 0', cursor: 'pointer',
-              background: COLOR.admin, color: COLOR.fondo,
-              font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
-            }}>Ver mi clip</Enlace>
+            <Enlace a={`/clip/${clipNuevo}`} className="boton-principal" style={{ marginTop: 14 }}>
+              Ver mi clip
+            </Enlace>
           )}
         </div>
       )}
 
-      <Pulsable al={publicar} activo={listo} style={{
-        boxSizing: 'border-box', width: '100%',
-        marginTop: 'auto', background: listo ? COLOR.acento : COLOR.superficieAlta,
-        color: listo ? COLOR.fondo : COLOR.textoApagado, textAlign: 'center', padding: 19,
-        font: `700 13px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
-        boxShadow: listo ? '0 0 34px rgba(255,43,209,.42)' : 'none',
-        cursor: listo ? 'pointer' : 'default',
-      }}>
+      <Pulsable al={publicar} activo={listo} className="boton-principal"
+        style={{ width: '100%', marginTop: 'auto' }}>
         {estado === 'subiendo' ? paso : 'Publicar'}
       </Pulsable>
     </div>
@@ -452,9 +449,9 @@ export default function Upload() {
 function Paso({ t, al }: { t: string; al: () => void }) {
   return (
     <Pulsable al={al} rotulo={t === '+' ? 'Subir' : 'Bajar'} style={{
-      width: 38, height: 38, display: 'grid', placeItems: 'center',
-      border: '1px solid rgba(255,255,255,.18)', color: COLOR.texto,
-      font: `400 19px/1 ${FUENTE.ui}`, cursor: 'pointer',
+      width: 44, height: 44, display: 'grid', placeItems: 'center', borderRadius: 12,
+      border: '1px solid rgba(255,255,255,.28)', color: COLOR.texto,
+      font: `400 22px/1 ${FUENTE.ui}`, cursor: 'pointer',
     }}>{t}</Pulsable>
   )
 }

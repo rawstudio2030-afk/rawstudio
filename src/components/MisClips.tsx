@@ -57,28 +57,26 @@ export default function MisClips() {
   return (
     <div>
       <div style={{
-        font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2,
-        textTransform: 'uppercase', color: COLOR.textoTenue, marginBottom: 12,
+        font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 2,
+        textTransform: 'uppercase', color: COLOR.textoSuave, marginBottom: 12,
       }}>Tus clips</div>
 
       {filas.map(f => {
         const e = TEXTO[f.estado] ?? { t: f.estado, c: COLOR.textoTenue, nota: '' }
         return (
-          <div key={f.id} style={{
-            padding: '11px 0', borderBottom: `1px solid ${LINEA.tenue}`,
-          }}>
+          <div key={f.id} className="tarjeta-sobria" style={{ padding: '14px 14px', marginBottom: 8 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
-              <span style={{ font: `400 13px/1.3 ${FUENTE.ui}`, color: COLOR.texto }}>
+              <span style={{ font: `700 14px/1.3 ${FUENTE.ui}`, color: COLOR.texto }}>
                 {f.title}
               </span>
               <span style={{
-                font: `700 9px/1.6 ${FUENTE.ui}`, letterSpacing: 1.2,
+                font: `700 10px/1.6 ${FUENTE.ui}`, letterSpacing: 1.1,
                 textTransform: 'uppercase', color: e.c, whiteSpace: 'nowrap',
               }}>{e.t}</span>
             </div>
             {(e.nota || f.motivo_rechazo) && (
               <div style={{
-                marginTop: 5, font: `400 10px/1.45 ${FUENTE.ui}`, color: COLOR.textoTenue,
+                marginTop: 6, font: `400 12px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave,
               }}>
                 {e.nota}
                 {f.motivo_rechazo && (
@@ -91,20 +89,19 @@ export default function MisClips() {
 
             {/* Caducidad: la creadora decide hasta cuando vive lo que subio. */}
             {abierto === f.id ? (
-              <div style={{ marginTop: 10, padding: '12px 13px',
-                border: `1px solid ${LINEA.suave}` }}>
-                <div style={{ font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.6,
-                  textTransform: 'uppercase', color: COLOR.textoTenue }}>
+              <div style={{ marginTop: 12, padding: '14px 14px', borderRadius: 12,
+                border: `1px solid ${LINEA.fuerte}`, background: COLOR.fondo }}>
+                <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.6,
+                  textTransform: 'uppercase', color: COLOR.textoSuave }}>
                   Retirar el
                 </div>
-                <input type="date" value={fecha}
+                <input type="date" value={fecha} className="campo-sobrio"
+                  aria-label="Fecha de retiro"
                   min={new Date(Date.now() + 86400000).toISOString().slice(0, 10)}
                   onChange={ev => setFecha(ev.target.value)}
                   style={{
-                    width: '100%', boxSizing: 'border-box', marginTop: 8,
-                    background: 'transparent', color: COLOR.texto, colorScheme: 'dark',
-                    border: `1px solid ${LINEA.suave}`, borderRadius: 0,
-                    padding: '11px 12px', font: `400 16px/1 ${FUENTE.ui}`, outline: 'none',
+                    width: '100%', boxSizing: 'border-box', marginTop: 8, colorScheme: 'dark',
+                    padding: '12px 13px', font: `400 16px/1 ${FUENTE.ui}`,
                   }} />
 
                 <Pulsable al={() => setModo(m =>
@@ -112,17 +109,17 @@ export default function MisClips() {
                   activado={modo === 'retiro_total'}
                   style={{
                     boxSizing: 'border-box', width: '100%', textAlign: 'left',
-                    marginTop: 10, padding: '11px 12px', cursor: 'pointer',
-                    border: `1px solid ${modo === 'retiro_total' ? '#FF4444' : LINEA.tenue}`,
+                    marginTop: 10, padding: '13px 14px', cursor: 'pointer', borderRadius: 12,
+                    border: `1px solid ${modo === 'retiro_total' ? '#FF4444' : LINEA.media}`,
                   }}>
-                  <div style={{ font: `400 13px/1.3 ${FUENTE.ui}`,
-                    color: modo === 'retiro_total' ? '#FF4444' : COLOR.textoSuave }}>
+                  <div style={{ font: `700 14px/1.3 ${FUENTE.ui}`,
+                    color: modo === 'retiro_total' ? '#FF4444' : COLOR.texto }}>
                     {modo === 'retiro_total'
                       ? 'Quitárselo también a quien lo compró'
                       : 'Dejar de venderlo'}
                   </div>
-                  <div style={{ marginTop: 5, font: `400 10px/1.45 ${FUENTE.ui}`,
-                    color: COLOR.textoTenue }}>
+                  <div style={{ marginTop: 6, font: `400 12px/1.5 ${FUENTE.ui}`,
+                    color: COLOR.textoSuave }}>
                     {modo === 'retiro_total'
                       ? 'Nadie podrá verlo, ni quien ya pagó por él. Tienen derecho a que se les devuelva su dinero.'
                       : 'Desaparece del catálogo y nadie más puede comprarlo. Quien ya lo compró lo conserva: eso fue lo que le vendiste.'}
@@ -135,16 +132,12 @@ export default function MisClips() {
                       fecha ? new Date(fecha + 'T23:59:59').toISOString() : null, modo)
                     if (m) { setError(m); return }
                     setError(''); setAbierto(null); recargar()
-                  }} style={{
-                    flex: 1, textAlign: 'center', padding: 11, cursor: 'pointer',
-                    background: COLOR.acento, color: COLOR.fondo,
-                    font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
-                    textTransform: 'uppercase',
-                  }}>{fecha ? 'Guardar' : 'Quitar la fecha'}</Pulsable>
+                  }} className="boton-principal" style={{ flex: 1, fontSize: 12 }}>{fecha ? 'Guardar' : 'Quitar la fecha'}</Pulsable>
                   <Pulsable al={() => { setAbierto(null); setError('') }} style={{
-                    flex: 1, textAlign: 'center', padding: 11, cursor: 'pointer',
+                    flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 52,
+                    borderRadius: 14, cursor: 'pointer',
                     border: `1px solid ${LINEA.fuerte}`, color: COLOR.textoSuave,
-                    font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
+                    font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
                     textTransform: 'uppercase',
                   }}>Cancelar</Pulsable>
                 </div>
@@ -160,9 +153,9 @@ export default function MisClips() {
                 setModo((f.caduca_modo as ModoCaducidad) ?? 'deja_de_venderse')
                 setError('')
               }} style={{
-                marginTop: 7, font: `400 10px/1.45 ${FUENTE.ui}`, cursor: 'pointer',
-                color: f.caduca_at ? '#FFB020' : COLOR.textoApagado,
-                textDecoration: 'underline', textUnderlineOffset: 3,
+                marginTop: 4, padding: '10px 0', font: `400 13px/1.45 ${FUENTE.ui}`, cursor: 'pointer',
+                color: f.caduca_at ? '#FFB020' : COLOR.textoSuave,
+                textDecoration: 'underline', textUnderlineOffset: 4,
               }}>
                 {f.caduca_at
                   ? `Se retira el ${new Date(f.caduca_at).toLocaleDateString('es-MX')}`

@@ -372,6 +372,9 @@ details[open] > summary > .faq-signo {
   background: rgba(255,255,255,.08); color: #6E6A72; box-shadow: none; cursor: default;
 }
 
+/* La tarjeta del modo sobrio: contorno tenue, esquina suave, sin luz. */
+.tarjeta-sobria { border: 1px solid rgba(255,255,255,.12); border-radius: 14px; background: #111116; box-sizing: border-box }
+
 /* ---------- «Como funciona» y «Formas de ganar» ----------
  *
  * Las tarjetas de neon van en estilo en linea (SeccionesNeon.tsx); aqui solo

@@ -111,11 +111,15 @@ export function canales(r: ResumenEstudio): Canal[] {
       estado: 'listo',
     },
     {
-      clave: 'niveles', titulo: 'Suscripción mensual', icono: 'ciclo', ruta: '/estudio/niveles',
+      // LA SUSCRIPCION NO SE RENUEVA SOLA: `suscribirse` cobra una vez y deja 30
+      // dias de acceso; al vencer hay que suscribirse otra vez. El texto lo
+      // dice asi, y el icono es la corona (el mismo de la portada) y no el
+      // ciclo de flechas, que prometia un cobro que se repite.
+      clave: 'niveles', titulo: 'Suscripción mensual', icono: 'corona', ruta: '/estudio/niveles',
       grupo: 'ajustar',
       descripcion: r.niveles > 0
         ? `${cuantos(r.niveles, 'nivel', 'niveles')} ${palabra(r.niveles, 'activo')}`
-        : 'Pon un precio al mes y cobra fijo',
+        : 'Pon un precio: quien se suscribe paga una vez y tiene 30 días',
       estado: r.niveles > 0 ? 'listo' : 'sin_configurar',
       nota: r.niveles === 0 ? 'Sin un nivel, nadie puede suscribirse' : undefined,
     },
