@@ -38,6 +38,15 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 
 ## Consultas activas
 
+### [id: 20261106-06] Avatares automáticos para creadoras sin foto
+- **fecha:** 2026-11-06 15:15 (America/Mexico_City)
+- **estado:** asignada
+- **tarea:** §9 de CHECKLIST.md — avatares de creadoras (frame no explícito del propio video si no hay foto; si no hay video, inicial o silueta).
+- **pregunta:** Asignación del coordinador. Implementar `bridge-response.md` `[id: 20261106-06]`. Si `20261106-04` o `20261106-05` no están hechas, termínalas primero (04, luego 05). No mezcles esta ronda con las otras en un solo commit.
+- **contexto:** Sergio pidió por voz el 2026-11-06 ~15:06 hora de México generar fotos de perfil automáticas. Snapshot ~15:09: 56 creadoras; 4 ya tienen foto (`@aria_cum`, `@nora_hot`, `@rawstudio2030`, `@yesenia96`); 51 sin foto con video publicado (candidatas a frame); 1 sin foto ni video (`@lumen`, avatar neutro). Las fotos viven en `profiles.avatar_path` y el bucket `avatars`. Ya existe `cuadrosDeVideo` en `src/lib/miniatura.ts`. No reutilizar la portada pública de ~32 px ni `clip-covers-full`. No inventar clasificador NSFW ni API nueva.
+- **urgencia:** media
+- **ya se intentó:** el fallback actual es círculo rayado o color sólido, no un balón.
+
 ### [id: 20261106-05] Página de consultas pagadas por Telegram
 - **fecha:** 2026-11-06 15:00 (America/Mexico_City)
 - **estado:** asignada

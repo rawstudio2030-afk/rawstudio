@@ -18,6 +18,7 @@ Fuente de verdad para el coordinador y Claude Code.
 | Marca en ventanas (`VENTANAS_SIN_MARCA=false`) + comentarios y reseñas (§4) | **3 / 10** | **Hecha** (código + lectura anónima en ficha real) | 2026-11-06 ~11:10 | §4 → `partial` hasta probar escribir/calificar con clip desbloqueado. |
 | Recortar Portada duplicada bajo el hero y en `/entrar` | **4 / 10** | **Asignada** — esperando código | 2026-11-06 ~14:35 | Ver `bridge-response.md` id `20261106-04`. Tope 1 h. |
 | Consultas pagadas por Telegram (página pública) | **5 / 10** | **Asignada** — esperando código | 2026-11-06 ~15:00 | Ver `bridge-response.md` id `20261106-05`. Después de la 4 si esta sigue pendiente. Tope 1 h. |
+| Avatares automáticos (frame o inicial/silueta) | **6 / 10** | **Asignada** — esperando código | 2026-11-06 ~15:15 | Ver `bridge-response.md` id `20261106-06`. Después de la 4 y la 5. Tope 1 h. |
 
 ---
 
@@ -28,10 +29,10 @@ Fuente de verdad para el coordinador y Claude Code.
 | pass | 13 |
 | partial | 9 |
 | fail | 2 |
-| not_started | 3 |
-| **Total ítems** | **27** |
+| not_started | 4 |
+| **Total ítems** | **28** |
 
-_(Ronda 1 y 2 verificadas. Ronda 3: §4 `not_started`→`partial`. Fails que quedan: §6.1 legales y §7.5 CLAUDE.md. Not started que quedan: calidad auto, captions, Telegram.)_
+_(Ronda 1 y 2 verificadas. Ronda 3: §4 `not_started`→`partial`. Fails que quedan: §6.1 legales y §7.5 CLAUDE.md. Not started que quedan: calidad auto, captions, Telegram, avatares.)_
 
 ---
 
@@ -127,7 +128,7 @@ Ubicación: `src/components/Reproductor.tsx` usado desde `src/screens/ClipDetail
 ### 7.1 Archivos puente — `pass` ✅ inmutable
 ### 7.2 Checklist documentada — `pass` ✅ inmutable
 ### 7.3 Límites anti-bucle documentados — `pass` ✅ inmutable
-### 7.4 Diario de decisiones — `partial` (actualizado con ronda 3 verificada en parte y ronda 4 abierta)
+### 7.4 Diario de decisiones — `partial` (actualizado con ronda 3 verificada en parte y rondas 4, 5 y 6 abiertas)
 ### 7.5 CLAUDE.md — `fail` (aún no existe)
 
 ---
@@ -136,6 +137,10 @@ Ubicación: `src/components/Reproductor.tsx` usado desde `src/screens/ClipDetail
 React 19 · Vite 8 · HashRouter · Supabase · GitHub Pages · comisión 20% / SPEI / 18+.
 
 ---
+
+
+## 9. Avatares de creadoras
+- **Estado:** `not_started` — **en ronda 6** (`20261106-06`). Hoy 4 creadoras tienen `avatar_path`; 51 sin foto tienen video publicado (candidatas a un frame); 1 (`@lumen`) no tiene video y vería un avatar neutro (inicial o silueta). El fallback actual es un círculo rayado o de color sólido, no un balón. Esta ronda cubre el componente unificado, la heurística sobre `cuadrosDeVideo`, la asignación solo si `avatar_path` es null (al publicar y/o con acción admin) y el fallback de inicial o silueta. No se pisan fotos existentes ni se usa la portada de 32 px.
 
 ## Decisiones
 
@@ -189,6 +194,15 @@ React 19 · Vite 8 · HashRouter · Supabase · GitHub Pages · comisión 20% / 
 3. **Qué no:** bot real, llamadas a DeepSeek, claves de API, username inventado, cobro del mensaje, reembolso si no contestan, botón de Telegram en la ficha, tocar `/chat` (encargos), legales, reproductor, comentarios, el recorte de la ronda 4.
 4. Precio: **20 pesos** por mensaje (Sergio corrigió 30 → 20). Checklist de privacidad mutua incluido. El usuario del bot sigue pendiente: el dueño lo va a crear (constante vacía hasta entonces).
 5. Este commit de docs no implementa la página; Claude Code debe seguir `bridge-response.md` `[id: 20261106-05]`.
+6. Ítems ya `pass` permanecen inmutables.
+
+
+### Ronda 6 (2026-11-06 ~15:15) — avatares automáticos para creadoras sin foto
+1. **Por qué:** Sergio pidió por voz generar fotos de perfil automáticas: frame no explícito del propio video si no hay foto; si no hay video, silueta o inicial (no un ícono tipo balón).
+2. **Qué:** componente `Avatar` unificado; extraer cuadros con `src/lib/miniatura.ts` y una heurística (cuadros tempranos, exposición razonable, no casi uniformes); subir al bucket `avatars` y escribir `avatar_path` solo si es null, al publicar y con una acción admin de backfill; fallback de inicial (o silueta) para quien no tenga video.
+3. **Qué no:** pisar las 4 fotos que ya existen, usar `cover_path` de ~32 px ni `clip-covers-full` ni `perfiles/pp_big-*`, inventar un clasificador NSFW o una API nueva, mezclar el commit con las rondas 4 o 5, tocar Telegram/DeepSeek, legales, reproductor o comentarios.
+4. Snapshot ~15:09: 56 creadoras, 4 con foto, 51 candidatas a frame, 1 neutro (`@lumen`).
+5. Este commit de docs no implementa los avatares; Claude Code debe seguir `bridge-response.md` `[id: 20261106-06]`.
 6. Ítems ya `pass` permanecen inmutables.
 
 ### Qué sigue decidiendo Sergio (no bloquea el texto ni la página informativa)

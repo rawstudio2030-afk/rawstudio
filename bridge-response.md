@@ -30,6 +30,91 @@
 
 ## Respuestas activas
 
+### Respuesta a [id: 20261106-06] — Ronda 6/10 · Avatares automáticos para creadoras sin foto
+- **fecha:** 2026-11-06 15:15 (America/Mexico_City)
+- **estado:** lista-para-claude
+- **responde a:** Asignación del coordinador. Sergio pidió por voz generar avatares automáticos: un frame no explícito del video de la creadora si no tiene foto; si no tiene ningún video, un avatar neutro (silueta o inicial), no un ícono genérico tipo balón.
+- **ronda:** 6 de 10 · **tope:** 1 hora · **tarea:** §9 de `CHECKLIST.md` (avatares de creadoras)
+- **checklist afectados (NO marques pass tú):** §9 `not_started` → el coordinador lo verifica. No rompas los `pass` de §2 ni §3 ni el trabajo de las rondas 4 y 5.
+
+#### Orden respecto a las rondas 4 y 5
+Si `[id: 20261106-04]` o `[id: 20261106-05]` todavía no están hechas y empujadas, **termínalas primero** (04, luego 05) y después sigue con esta. No mezcles esta ronda con las otras en un solo commit.
+
+#### Qué hay hoy (revisado por el coordinador el 2026-11-06 ~15:09 America/Mexico_City)
+- Foto de perfil: `public.profiles.avatar_path` + bucket público `avatars` (jpeg/png/webp, 2 MB, ruta `{uid}/{uuid}.ext`). URL: `urlAvatar()` en `src/lib/perfiles.ts`. Escritura: `subirAvatar()` en `src/screens/Perfil.tsx`; admin `fijarAvatar()` / RPC `admin_fijar_avatar`.
+- Fallback actual: **no** hay ícono tipo balón. Sin foto se ve un círculo con rayas (`repeating-linear-gradient`) o un círculo sólido `COLOR.superficieAlta` (Explorar, Comentarios). En Perfil el círculo vacío dice «Foto».
+- Videos: `public.clips` (`creator_id`, `storage_path` privado, `cover_path` público, `tiene_video`). Extracción de cuadros **ya existe** en el cliente: `src/lib/miniatura.ts` (`miniaturaDeVideo`, `cuadrosDeVideo` con 6 opciones). Se usa al publicar. No hay FFmpeg en edge functions.
+- La portada pública (`cover_path`) mide ~32 px: **no sirve como avatar**. `clip-covers-full` es el teaser nítido y suele ser explícito: **no lo uses como atajo**.
+- No uses los JPG de `perfiles/pp_big-*` (no están enlazados al frontend).
+
+#### Conteos (snapshot público, 2026-11-06 ~15:09 America/Mexico_City)
+- Creadoras (`is_creator`, no baneadas): **56**
+- Con `avatar_path` (no tocar): **4** — `@aria_cum`, `@nora_hot`, `@rawstudio2030`, `@yesenia96`
+- Sin avatar y con ≥1 clip publicado (`tiene_video` + `cover_path`): **51** — candidatas a frame
+- Sin avatar y sin clips: **1** — `@lumen` — avatar neutro
+- Clips publicados legibles: **187** (todos con video y cover)
+Los números pueden haber cambiado; el código debe operar sobre el estado real (`avatar_path` null o no; clips publicados o no), no sobre esta lista fija.
+
+#### Reglas de producto (Sergio — no las «mejores»)
+Avatares automáticos para creadoras
+1. Si la creadora ya tiene foto de perfil, no se toca.
+2. Si no tiene foto y sí tiene al menos un video publicado, se toma un frame no explícito — el más limpio y apropiado — de sus propios videos y se asigna como avatar por defecto.
+3. Si no tiene foto ni ningún video, se muestra un avatar neutro generado (silueta o inicial), no un ícono genérico tipo balón.
+El contenido de los videos es 18+. El frame no puede ser un recorte explícito a propósito.
+
+#### Decisión de UI/técnica (coordinador — no preguntar a Sergio)
+**1. No pisar fotos existentes.** Solo escribe `avatar_path` cuando es null. La creadora (o un admin) puede sustituirlo después con el flujo que ya existe.
+
+**2. De dónde sale el frame.** Del video propio (bucket privado `clips`), con URL firmada (el mismo privilegio que ya usa la publicación/admin / `ver-clip`). Reutiliza `cuadrosDeVideo` de `src/lib/miniatura.ts`. No uses `cover_path` público. No uses `clip-covers-full` como avatar. No inventes un clasificador NSFW ni una API nueva (DeepSeek no entra en esta ronda).
+
+**3. Qué significa «el más limpio y apropiado».** Heurística, no una garantía:
+- Extrae varios cuadros (las 6 opciones que ya hay, o un conjunto parecido).
+- Prefiere los más tempranos del video.
+- Quédate con exposiciones razonables (ni casi negro ni quemado) y descarta cuadros de color casi uniforme (posibles primeros planos vacíos).
+- Elige el de mejor puntaje entre los que queden.
+Documenta la heurística en el código. Un admin debe poder ver y cambiar el avatar después.
+
+**4. Cuándo se genera.**
+- Al publicar un video: si esa creadora no tiene `avatar_path`, genera y asigna el frame (el cliente ya sabe extraer cuadros en `Upload.tsx`).
+- Retroactivo: una acción de admin «Generar avatares faltantes» que recorra creadoras con `avatar_path` null y ≥1 clip publicado, extraiga, suba al bucket `avatars` y fije la ruta (vía `fijarAvatar` / `admin_fijar_avatar`). Solo si sigue null. Si puedes ejecutarla con sesión admin contra el proyecto, hazlo y reporta cuántas se asignaron; si no hay sesión admin, deja la acción lista y no finjas el backfill.
+
+**5. Avatar neutro.** Componente unificado (p. ej. `src/components/Avatar.tsx`) para listados, ficha de creadora, ficha de clip, comentarios, perfil y admin. Si hay `avatar_path`, muestra la foto. Si no, un círculo con la inicial de `display_name` (si falta, la de `handle`) sobre tokens de `diseño.ts` (`COLOR.superficieAlta` u otro fondo sobrio de marca). Alternativa aceptable: silueta simple. No rayas, no el texto «Foto» como único fallback en sitios públicos, no un ícono tipo balón ni un pictograma genérico de deporte. Para `@lumen` (y cualquier creadora sin video) basta este fallback; no hace falta subir un archivo.
+
+**6. Dónde se ve.** Sustituye los círculos rayados o planos de `Explorar.tsx`, `CreatorProfile.tsx`, `ClipDetail.tsx`, `Comentarios.tsx`, `Perfil.tsx` y pantallas admin que muestren avatar (`Usuarios`, `PublicarPor`, etc.).
+
+#### Archivos concretos a tocar (esperados)
+- `src/components/Avatar.tsx` (nuevo) y los sitios que pintan la foto
+- `src/lib/miniatura.ts` (puntaje del cuadro, si hace falta)
+- `src/screens/Upload.tsx` (asignar al publicar si no hay foto)
+- Acción o pantalla admin para el backfill
+- No toques `perfiles/pp_big-*`
+
+#### Qué no tocar
+Rondas 4 y 5 (no mezclar commits), landing/hero, reproductor, comentarios, consultas Telegram/DeepSeek, textos legales, `CLAUDE.md`, calidad auto, captions. No añadas claves `VITE_*` nuevas. No uses service role en el frontend.
+
+#### Criterios de aceptación (verificables)
+1. Quien ya tiene `avatar_path` sigue igual.
+2. Quien no tiene foto y sí tiene video puede recibir un frame en el bucket `avatars` y en `avatar_path`, solo si estaba null: al publicar y/o con la acción de admin.
+3. El frame sale del video (heurística documentada), no de la portada de 32 px ni de `clip-covers-full` ni de `perfiles/pp_big-*`.
+4. Quien no tiene foto ni video (p. ej. `@lumen`) ve un círculo con inicial o silueta, no rayas ni un ícono tipo balón.
+5. Un solo componente de avatar se usa en los sitios públicos listados.
+6. Sin clasificador NSFW nuevo, sin DeepSeek, sin claves nuevas en el frontend.
+
+#### Cómo demostrar (obligatorio en el reporte de `bridge-query.md`)
+- SHA, diff resumido, verificación.
+- Antes/después o captura: una creadora sin foto muestra inicial o silueta; el código tiene la guarda `avatar_path` null.
+- Si corriste el backfill: cuántas creadoras recibieron frame y cuántas quedaron en neutro.
+- Recorrido: listado de creadoras, una ficha, un clip, comentarios.
+
+#### Límites anti-bucle
+Máx 10 rondas en esta tarea; parar si 2 seguidas no mejoran; tope 1 hora.
+
+#### Siguiente paso para Claude Code
+1. `git pull` de `origin/main`.
+2. Si 04 o 05 siguen pendientes, termínalas primero (una por commit).
+3. Implementa esta ronda, un commit de producto (`feat: avatares automaticos para creadoras sin foto`) y `git push origin main`.
+4. Marca `bridge-query.md` `[id: 20261106-06]` como `respondida` con SHA, diff y verificación. **No** marques `CHECKLIST.md` como pass.
+
 ### Respuesta a [id: 20261106-05] — Ronda 5/10 · Página de consultas pagadas por Telegram
 - **fecha:** 2026-11-06 15:00 (America/Mexico_City)
 - **estado:** lista-para-claude
