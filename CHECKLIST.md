@@ -2,8 +2,8 @@
 
 Fuente de verdad para el coordinador y Claude Code.  
 **Repo:** https://github.com/rawstudio2030-afk/rawstudio · **Sitio:** https://rawstudio.biz  
-**Rama / HEAD docs:** `main` (instrucciones ronda 1 publicadas 2026-11-06 ~08:22 America/Mexico_City)  
-**Código de producto base del diagnóstico:** aún refleja el árbol eager de `Portal.tsx` (imports estáticos de `Portada`, `SeccionesNeon`, `launch.mp4`) hasta que Claude Code aplique la ronda 1.  
+**Rama / HEAD docs al abrir ronda 2:** `main` (asignación ronda 2 ~10:20 America/Mexico_City, 2026-11-06)  
+**Código de producto de la landing:** [`4e15d81`](https://github.com/rawstudio2030-afk/rawstudio/commit/4e15d81c7155d446fa52d941678fb5cfe3a6e018) verificado.  
 **Leyenda:** `pass` | `partial` | `fail` | `not_started`  
 Ítems en `pass` son **inmutables** salvo regresión documentada.
 
@@ -13,21 +13,22 @@ Fuente de verdad para el coordinador y Claude Code.
 
 | Tarea | Ronda | Estado | Inicio (America/Mexico_City) | Notas |
 |-------|-------|--------|------------------------------|-------|
-| Recortar landing al hero (eager loading §2.1–2.2) | **1 / 10** | Instrucciones publicadas; **código app aún sin cambio** | 2026-11-06 ~08:22 | Ver `bridge-response.md` id `20261106-01`. Tope 1 h. §2.1 sigue **`fail`** hasta verificación post-implementación. |
+| Recortar landing al hero (eager loading §2.1–2.2) | **1 / 10** | **Hecha y verificada** (`4e15d81`) | 2026-11-06 ~08:22 | §2.1 y §2.2 → `pass`. |
+| Reproductor: cromo propio + velocidad (+ PiP explícito) | **2 / 10** | Instrucciones publicadas; **código del reproductor aún nativo** | 2026-11-06 ~10:20 | Ver `bridge-response.md` id `20261106-02`. Tope 1 h. Calidad auto y captions fuera de esta ronda. |
 
 ---
 
-## Resumen de puntaje (sin cambio de score en ronda 1 docs)
+## Resumen de puntaje
 
 | Estado | Cantidad |
 |--------|----------|
-| pass | 8 |
-| partial | 10 |
-| fail | 5 |
+| pass | 10 |
+| partial | 9 |
+| fail | 4 |
 | not_started | 4 |
 | **Total ítems** | **27** |
 
-_(El score no sube con este commit: solo hay instrucciones; Claude Code aún no implementó.)_
+_(Tras verificar la ronda 1: §2.1 `fail`→`pass`, §2.2 `partial`→`pass`. El reproductor todavía no cambia el score.)_
 
 ---
 
@@ -52,7 +53,7 @@ _(El score no sube con este commit: solo hay instrucciones; Claude Code aún no 
 
 ### 1.5 Mobile-first
 - **Estado:** `partial`
-- **Evidencia:** DESIGN-BRIEF + viewport; peso inicial de portada aún alto (ligado a §2.1).
+- **Evidencia:** DESIGN-BRIEF + viewport; el peso inicial de la portada bajó en ronda 1 (paquete principal 705.67 → 640.20 kB; sin `launch.mp4` en el bundle). Sigue partial por el resto del recorrido móvil.
 
 ### 1.6 Miami Neon en modo marca vs sobrio en consumo
 - **Estado:** `pass` ✅ **inmutable**
@@ -60,25 +61,22 @@ _(El score no sube con este commit: solo hay instrucciones; Claude Code aún no 
 
 ---
 
-## 2. Eager loading (landing) — **en ronda 1**
+## 2. Eager loading (landing) — **ronda 1 hecha**
 
 ### 2.1 Carga inicial = solo hero (título, subtítulo, CTA principal)
-- **Estado:** `fail` ← **NO pasa a pass en este commit**
-- **Ronda:** 1/10 iniciada 2026-11-06 America/Mexico_City; instrucciones en `bridge-response.md` `[id: 20261106-01]`.
-- **Evidencia actual (código aún eager):** `src/screens/Portal.tsx` importa y monta de entrada `Portada`, `ComoFunciona`/`FormasDeGanar` (`SeccionesNeon.tsx`), `Cintillo`, y `import launchVideo from '../assets/launch.mp4'`. `App.tsx` solo hace `lazy` de `Admin` y `AltaCreadora`.
-- **Decisión de esta ronda (coordinador):** Hero = wordmark + titular + subtítulo + CTA «Crear mi cuenta» (+ CTA «Ver cómo funciona» sin montar destino). Diferir cintillo, SeccionesNeon, Portada y `launch.mp4` a click / lazy. Mantener Miami Neon / ES / 18% / SPEI copy.
-- **Para pasar (después de que Claude Code implemente y el coordinador verifique):** DOM de `/` sin secciones diferidas antes de click; sin import estático de mp4/Portada/SeccionesNeon desde Portal; evidencia HTML inicial vs post-click en el puente.
+- **Estado:** `pass` ✅ **inmutable**
+- **Ronda:** 1/10 verificada 2026-11-06 ~10:06 America/Mexico_City.
+- **Evidencia:** [`4e15d81`](https://github.com/rawstudio2030-afk/rawstudio/commit/4e15d81c7155d446fa52d941678fb5cfe3a6e018) — `Portal.tsx` ya no importa en estático `launch.mp4`, `Portada` ni `SeccionesNeon`. `Cintillo`, `ComoFunciona`, `FormasDeGanar` y `Portada` van con `React.lazy` y se montan al click. El iris usa un gradiente, no `<video>`. Reporte de primer paint en `bridge-query.md` [id: 20261106-01].
 
 ### 2.2 Contacto, privacidad, FAQ solo con click / petición explícita
-- **Estado:** `partial` ← **sin subir aún**
-- **Evidencia:** Rutas `/contacto` `/preguntas` `/privacidad` `/terminos` OK; `Portada.tsx` aún embebe FAQ/pie en el scroll de la landing cuando Portal la monta.
-- **Para pasar:** No montar ese bloque en primer paint; FAQ → enlace a `/preguntas`; pie solo enlaces a rutas.
+- **Estado:** `pass` ✅ **inmutable**
+- **Evidencia:** Rutas `/contacto` `/preguntas` `/privacidad` `/terminos` OK. `Portada.tsx` sustituyó el acordeón FAQ por un enlace a `/preguntas`; el pie solo enlaza esas rutas. `Portada` no se monta en el primer paint (sale con «Sobre nosotros»). `Entrar.tsx` también carga `Portada` con `lazy`.
 
 ---
 
-## 3. Reproductor de video
+## 3. Reproductor de video — **en ronda 2**
 
-Ubicación: `src/screens/ClipDetail.tsx` — `<video controls playsInline>`.
+Ubicación: `src/screens/ClipDetail.tsx` — `<video controls playsInline>` + URL firmada (`urlVideoFirmada` / `ver-clip`) + `MarcaDeAgua`.
 
 | Control | Estado |
 |---------|--------|
@@ -86,23 +84,21 @@ Ubicación: `src/screens/ClipDetail.tsx` — `<video controls playsInline>`.
 | Seek / scrub | `pass` ✅ inmutable |
 | Volumen / mute | `pass` ✅ inmutable |
 | Pantalla completa | `pass` ✅ inmutable |
-| Minimizar / PiP | `partial` |
-| Velocidad | `fail` |
-| Calidad auto | `not_started` |
-| Captions | `not_started` |
-| UX tipo YouTube | `fail` |
-
-**Fuera de ronda 1.**
+| Minimizar / PiP | `partial` ← ronda 2: botón explícito si la API existe |
+| Velocidad | `fail` ← **objetivo de ronda 2** |
+| Calidad auto | `not_started` — fuera: un solo archivo por clip; no fingir selector |
+| Captions | `not_started` — fuera: no hay pistas VTT |
+| UX tipo YouTube | `fail` ← **objetivo de ronda 2** (cromo propio, ocultar al reproducir, teclado, ±10 s) |
 
 ---
 
 ## 4. Reseñas / comentarios en videos
-- **Estado:** `not_started` — fuera de ronda 1.
+- **Estado:** `not_started` — fuera de ronda 2.
 
 ---
 
 ## 5. Consultas pagadas vía Telegram
-- **Estado:** `not_started` — fuera de ronda 1.
+- **Estado:** `not_started` — fuera de ronda 2.
 
 ---
 
@@ -115,10 +111,10 @@ Ubicación: `src/screens/ClipDetail.tsx` — `<video controls playsInline>`.
 - **Estado:** `partial`
 
 ### 6.3 Age gate / 18+
-- **Estado:** `pass` ✅ **inmutable** — no tocar en ronda 1.
+- **Estado:** `pass` ✅ **inmutable** — no tocar en ronda 2.
 
 ### 6.4 Idioma
-- **Estado:** `partial` — restos EN en `Portada.tsx`; al diferir/limpiar Portada se puede alinear a ES sin decisión de negocio.
+- **Estado:** `partial` — restos EN (p. ej. «Join us» al abrir «Sobre nosotros» en `Portada.tsx`).
 
 ---
 
@@ -127,7 +123,7 @@ Ubicación: `src/screens/ClipDetail.tsx` — `<video controls playsInline>`.
 ### 7.1 Archivos puente — `pass` ✅ inmutable
 ### 7.2 Checklist documentada — `pass` ✅ inmutable
 ### 7.3 Límites anti-bucle documentados — `pass` ✅ inmutable
-### 7.4 Diario de decisiones — `partial` (actualizado con ronda 1 en bridge-response)
+### 7.4 Diario de decisiones — `partial` (actualizado con ronda 1 verificada y ronda 2 abierta)
 ### 7.5 CLAUDE.md — `fail` (aún no existe)
 
 ---
@@ -142,18 +138,23 @@ React 19 · Vite 8 · HashRouter · Supabase · GitHub Pages · comisión 20% / 
 ### Arranque
 1. Docs puente + checklist creados sin cambio de producto.
 
-### Ronda 1 (2026-11-06) — landing al hero
-1. **Por qué:** §2.1 `fail` + pedido explícito del usuario de recortar eager loading.
-2. **Qué es hero:** wordmark + titular + subtítulo + CTA primario «Crear mi cuenta»; secundario «Ver cómo funciona» sin importar/montar la sección hasta click.
-3. **Qué se difiere:** `ComoFunciona`, `FormasDeGanar`, `Cintillo`, `Portada`/FAQ/pie, `launch.mp4`.
-4. **Legales/FAQ:** no embeber; usar rutas ya existentes.
-5. **Este commit de docs no implementa** el cambio de app; Claude Code debe seguir `bridge-response.md` `[id: 20261106-01]`.
-6. Ítems ya `pass` permanecen inmutables.
+### Ronda 1 (2026-11-06) — landing al hero — HECHA
+1. Primer paint = wordmark + titular + subtítulo + CTA «Crear mi cuenta»; secundario sin montar destino.
+2. Diferidos: `ComoFunciona`, `FormasDeGanar`, `Cintillo`, `Portada`/FAQ/pie, `launch.mp4` (opción A: gradiente en el iris).
+3. Verificado en `4e15d81` + reporte del puente. §2.1 y §2.2 son `pass` inmutables.
 
-### Qué debe decidir Sergio (solo negocio/contenido — no bloquea ronda 1)
+### Ronda 2 (2026-11-06) — reproductor
+1. **Por qué:** pedido explícito del usuario + velocidad `fail` + UX tipo YouTube `fail`.
+2. **Qué:** cromo propio (sin `controls` nativo), velocidad con `playbackRate` persistida, PiP explícito si hay API, teclado y ±10 s. Conservar URL firmada y marca de agua.
+3. **Qué no:** calidad automática (un solo archivo; haría falta transcodificar), captions (no hay VTT), landing, age gate, comentarios, Telegram, copy 80%/SPEI/18+.
+4. Este commit de docs no implementa el reproductor; Claude Code debe seguir `bridge-response.md` `[id: 20261106-02]`.
+5. Ítems ya `pass` permanecen inmutables.
+
+### Qué debe decidir Sergio (solo negocio/contenido — no bloquea ronda 2)
 - Datos legales definitivos / política retiro de compra permanente / jurisdicción / plazo verificación.
 - Home del logo con sesión (portada vs catálogo).
 - Alcance/precio consultas Telegram.
 - Lanzar vs esperar abogado.
+- Más adelante: si se invierte en transcodificar varias calidades (HLS / renditions) para poder hacer calidad automática de verdad.
 
-**Para la ronda 1 de landing: no hay decisión de negocio pendiente.**
+**Para la ronda 2 del reproductor: no hay decisión de negocio pendiente.**
