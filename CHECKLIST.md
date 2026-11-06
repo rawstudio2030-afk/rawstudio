@@ -102,7 +102,7 @@ Ubicación: `src/components/Reproductor.tsx` usado desde `src/screens/ClipDetail
 ---
 
 ## 5. Consultas pagadas vía Telegram
-- **Estado:** `not_started` — **en ronda 5** (`20261106-05`). Hoy no hay página, tarjeta ni bot. Esta ronda cubre solo la cara pública (reglas + checklist de privacidad mutua + `/consultas` + tarjeta en Precios + recuadro en `/creadoras`). Precio fijo: 20 pesos por mensaje. El usuario del bot sigue pendiente: el dueño lo va a crear. No hay cobro ni chat real en esta ronda.
+- **Estado:** `not_started` — **en ronda 5** (`20261106-05`). Hoy no hay página, tarjeta ni bot. Esta ronda cubre solo la cara pública (reglas + checklist de privacidad mutua + capa de validación con DeepSeek + `/consultas` + tarjeta en Precios + recuadro en `/creadoras`). Precio fijo: 20 pesos por mensaje. El usuario del bot sigue pendiente: el dueño lo va a crear. No hay cobro ni chat real en esta ronda.
 
 ---
 
@@ -185,8 +185,8 @@ React 19 · Vite 8 · HashRouter · Supabase · GitHub Pages · comisión 20% / 
 
 ### Ronda 5 (2026-11-06 ~15:00) — consultas por Telegram (cara pública)
 1. **Por qué:** Sergio dictó las reglas por voz y pidió empezar la sección o página.
-2. **Qué:** página `/consultas` con las reglas canónicas y el checklist de privacidad mutua; tarjeta en «Precios» que enlaza ahí; recuadro corto en `/creadoras` con la guía de tres puntos y el plazo de 2 días.
-3. **Qué no:** bot real, username inventado, cobro del mensaje, reembolso si no contestan, botón de Telegram en la ficha, tocar `/chat` (encargos), legales, reproductor, comentarios, el recorte de la ronda 4.
+2. **Qué:** página `/consultas` con las reglas canónicas, el checklist de privacidad mutua y la capa de validación (DeepSeek solo valida, no escribe respuestas); tarjeta en «Precios» que enlaza ahí; recuadro corto en `/creadoras` con la guía de tres puntos y el plazo de 2 días.
+3. **Qué no:** bot real, llamadas a DeepSeek, claves de API, username inventado, cobro del mensaje, reembolso si no contestan, botón de Telegram en la ficha, tocar `/chat` (encargos), legales, reproductor, comentarios, el recorte de la ronda 4.
 4. Precio: **20 pesos** por mensaje (Sergio corrigió 30 → 20). Checklist de privacidad mutua incluido. El usuario del bot sigue pendiente: el dueño lo va a crear (constante vacía hasta entonces).
 5. Este commit de docs no implementa la página; Claude Code debe seguir `bridge-response.md` `[id: 20261106-05]`.
 6. Ítems ya `pass` permanecen inmutables.

@@ -43,6 +43,9 @@ Sergio fijó el precio en **20 pesos** por mensaje del cliente (corrigió una ci
 #### Actualización — 2026-11-06 15:00 (America/Mexico_City)
 Sergio pidió sumar un **checklist de privacidad mutua** al paquete (se pega junto con las reglas y se pinta en `/consultas`). El usuario del bot **sigue pendiente**: el dueño lo va a crear. No inventes un `@usuario`.
 
+#### Actualización — 2026-11-06 15:03 (America/Mexico_City)
+Sergio definió la **capa de validación** con la API de DeepSeek (opción económica): solo apoya la validación, no genera el contenido de las respuestas. El texto canónico va más abajo y se pinta en `/consultas`. En esta ronda **no** implementes llamadas a DeepSeek, no guardes una clave de API y no armes el bot: el usuario sigue pendiente y el dueño lo va a crear.
+
 #### Orden respecto a la ronda 4
 Si `[id: 20261106-04]` todavía no está hecha y empujada, **termínala primero** y luego sigue con esta. No mezcles los dos recortes en un solo commit. Si 04 ya está en `origin/main`, `git pull` y arranca esta.
 
@@ -98,17 +101,35 @@ El usuario del bot todavía está pendiente: el dueño lo va a crear.
 Activa el modo de privacidad del bot al crearlo, para que no pueda leer otros chats del grupo.
 Usa un nombre de usuario dedicado, no vinculado a una cuenta personal con foto o historial visible.
 
+Capa de validación (IA de apoyo)
+
+La inteligencia artificial no escribe las respuestas. Solo ayuda a validar que se cumplan las reglas. El contenido real de cada respuesta lo escribe la creadora.
+
+Se usa la API de DeepSeek, en su opción más económica.
+
+Cómo funciona el bot:
+
+1. Recibe el mensaje pagado del cliente.
+
+2. Con DeepSeek valida dos cosas: que tenga al menos 20 palabras y que sea pertinente al hilo de la conversación y al clip o a la creadora de interés.
+
+3. Si no cumple, avisa al cliente que el mensaje no se envía y le explica por qué.
+
+4. Si cumple, se lo pasa a la creadora.
+
+5. Cuando la creadora responde, si su mensaje no cumple los lineamientos —por ejemplo, si es demasiado corto o no avanza nada (ni una pregunta de vuelta, ni un dato nuevo, ni una oferta concreta)— el bot se lo avisa. No reescribe ni genera esa respuesta por ella.
+
 - El precio es fijo: **20 pesos** por mensaje del cliente. Déjalo en una constante única (p. ej. `PRECIO_CONSULTA_TELEGRAM = '20 pesos'` en `src/content/consultas.ts`). No lo cambies a otra cifra, no uses 30 ni el marcador `[PRECIO]`, y no lo pases a dólares.
 - El usuario del bot de Telegram **sigue pendiente**: el dueño lo va a crear. Mientras tanto, constante vacía al estilo de `REDES` (p. ej. `BOT_TELEGRAM = ''`). Si está vacía, **no** pintes un enlace `t.me/…`, **no** inventes un `@usuario`, **no** digas «escríbenos al bot» con un destino inventado y **no** abras Telegram.
 
 #### Qué no está definido (fuera de esta ronda — no lo inventes)
-Cobro del mensaje (pasarela, SPEI, retención), qué pasa si la creadora no responde en 2 días (reembolso u otra consecuencia), webhooks del bot, validación en servidor de los 20 palabras sobre mensajes reales de Telegram, botón «consultar» en la ficha del clip que abra un chat, ni un username por creadora.
+Cobro del mensaje (pasarela, SPEI, retención), qué pasa si la creadora no responde en 2 días (reembolso u otra consecuencia), el bot real, llamadas a la API de DeepSeek, claves de API, webhooks, botón «consultar» en la ficha del clip que abra un chat, ni un username inventado. La capa de validación sí se describe en la página; no se implementa el circuito en esta ronda.
 
 #### Decisión de UI (coordinador — no preguntar a Sergio)
 
 **1. Página nueva `/consultas`**
 - Pantalla pública al estilo de `/preguntas`: `MarcoDocumento` (o el mismo aire), título en español (p. ej. «Consultas por Telegram»).
-- Pinta las reglas de arriba, enteras, en español, sin reescribir el sentido. El precio «20 pesos» sale de la constante. Debajo (o a continuación), pinta el **checklist de privacidad mutua** completo, también sin reescribir el sentido.
+- Pinta las reglas de arriba, enteras, en español, sin reescribir el sentido. El precio «20 pesos» sale de la constante. Debajo, pinta el **checklist de privacidad mutua** completo y la **capa de validación (IA de apoyo)** completa, también sin reescribir el sentido. Deja claro que DeepSeek solo valida y que la creadora escribe cada respuesta.
 - Deja claro que cada mensaje del cliente se paga y que esa cuota cubre la respuesta; que hacen falta ≥20 palabras; que el texto va anclado al hilo y al clip o creadora; la brújula flexible; el tope de 2 días; y la guía de tres puntos para la creadora.
 - Si `BOT_TELEGRAM` está vacío, no hay botón de «abrir Telegram». Un enlace a `/preguntas` o `/contacto` al pie está bien, como en las otras páginas de ayuda.
 - Súmala a `SCREENS` en `src/App.tsx`. Agrégala a `SIN_PUERTA_DE_EDAD` en `src/lib/rutas.ts` (se puede leer como `/preguntas` y `/creadoras`, sin sesión). No la pongas en la barra inferior.
@@ -127,14 +148,14 @@ Cobro del mensaje (pasarela, SPEI, retención), qué pasa si la creadora no resp
 - `/chat` ni Encargos, reproductor, comentarios, age gate, textos de `/privacidad` y `/terminos`, el recorte de la ronda 4 (hero, Cintillo, Portada), copy 20%/SPEI/18+ que ya está, Telegram real, pagos, Admin, Supabase.
 
 #### Archivos concretos a tocar (esperados)
-- `src/content/consultas.ts` (nuevo): constante de precio `20 pesos`, bot vacío, textos de las reglas y del checklist de privacidad mutua.
+- `src/content/consultas.ts` (nuevo): constante de precio `20 pesos`, bot vacío, textos de las reglas, del checklist de privacidad mutua y de la capa de validación (DeepSeek solo valida, no escribe).
 - `src/screens/Consultas.tsx` (nuevo) o export en `Ayuda.tsx` si encaja mejor; regístralo en `App.tsx`.
 - `src/lib/rutas.ts` (`SIN_PUERTA_DE_EDAD`).
 - `src/content/portada.ts` (`FORMAS_NEON`) y el componente que pinte esas tarjetas si hay que volver una de ellas `Enlace`.
 - `src/screens/Creators.tsx` (bloque corto + enlace).
 
 #### Criterios de aceptación (verificables)
-1. `/#/consultas` se abre sin sesión y sin age gate, muestra las seis reglas (precio de 20 pesos, 20 palabras, pertinencia, brújula, 2 días, guía de tres puntos) y el checklist de privacidad mutua (el cliente no ve el teléfono ni la cuenta personal de la creadora, solo el nombre del bot; la creadora no ve el teléfono del cliente; modo de privacidad al crear el bot; usuario dedicado, no una cuenta personal). No muestra un enlace a un bot inventado. El usuario del bot sigue pendiente: el dueño lo va a crear.
+1. `/#/consultas` se abre sin sesión y sin age gate, muestra las seis reglas (precio de 20 pesos, 20 palabras, pertinencia, brújula, 2 días, guía de tres puntos) y el checklist de privacidad mutua (el cliente no ve el teléfono ni la cuenta personal de la creadora, solo el nombre del bot; la creadora no ve el teléfono del cliente; modo de privacidad al crear el bot; usuario dedicado, no una cuenta personal). También muestra la capa de validación: DeepSeek (opción económica) solo valida apoyo; no genera respuestas; si el mensaje del cliente no cumple (menos de 20 palabras o no pertinente) no se envía y se explica por qué; si cumple, pasa a la creadora; si la respuesta de la creadora no cumple los lineamientos, se le avisa sin reescribirla. No muestra un enlace a un bot inventado. El usuario del bot sigue pendiente: el dueño lo va a crear.
 2. En `/#/`, primer paint sin cambios respecto a lo ya verificado (no aparece la tarjeta nueva hasta abrir «Precios»).
 3. Al abrir «Precios», hay una tarjeta «Consultas por Telegram» que lleva a `/consultas`.
 4. En `/#/creadoras` se lee el recuadro corto y el enlace a `/consultas`. El resto de esa página no cambia de sentido.
