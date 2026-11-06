@@ -149,7 +149,7 @@ export default function ClipDetail() {
           border: '1px solid rgba(255,255,255,.22)', background: VELO.ligero,
           color: COLOR.texto, cursor: 'pointer',
         }}><span aria-hidden style={{ font: `400 22px/1 ${FUENTE.ui}` }}>&#8249;</span></Pulsable>
-        <Wordmark ancho={104} glow={5} />
+        <span className="sin-riel"><Wordmark ancho={104} glow={5} /></span>
         <span aria-hidden style={{ width: 44 }} />
       </div>
 

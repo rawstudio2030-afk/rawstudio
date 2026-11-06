@@ -334,6 +334,13 @@ details[open] > summary > .faq-signo {
 .barra-lado  { display: none }
 .barra-abajo { display: flex }
 
+/* El logo que algunas pantallas dibujan en su propio encabezado sobra cuando
+   hay riel: el riel ya lo lleva, y con los dos salia la marca dos veces, una
+   al lado de la otra. */
+@media (min-width: 1024px) {
+  .sin-riel { display: none }
+}
+
 @media (min-width: 1024px) {
   .barra-lado   { display: flex }
   .barra-abajo  { display: none }

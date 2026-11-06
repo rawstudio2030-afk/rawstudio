@@ -70,7 +70,7 @@ export default function Explorar() {
       background: `radial-gradient(ellipse 90% 340px at 50% 0, rgba(123,60,255,.2), transparent 75%), ${COLOR.fondo}`,
     }}>
       <div style={{ padding: '46px 18px 0' }}>
-        <Wordmark ancho={116} glow={14} />
+        <div className="sin-riel"><Wordmark ancho={116} glow={14} /></div>
 
         <div style={{ marginTop: 22 }}>
           <h1 style={{

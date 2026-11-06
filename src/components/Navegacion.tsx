@@ -12,7 +12,7 @@ import {
   BARRA, ESTUDIO, RUTAS_ENTRADA, RUTAS_PANEL, REDIRIGE_SI_HAY_SESION, EXIGE_SESION,
   papelDe, visiblesPara, type Papel,
 } from '../lib/rutas'
-import { COLOR, LINEA, FUENTE } from '../lib/diseño'
+import { COLOR, LINEA, FUENTE, DEGRADADO } from '../lib/diseño'
 import Icono from './Iconos'
 import Wordmark from './Wordmark'
 import { elegirModo } from '../lib/modo'
@@ -110,7 +110,17 @@ export function BarraInferior() {
   // El panel trae barra lateral propia; la de abajo tapa filas de tabla.
   if (RUTAS_PANEL.some(r => aqui.startsWith(r))) return null
 
-  const destinos = visiblesPara(BARRA, papel, esAdmin)
+  return <VistaBarraInferior destinos={visiblesPara(BARRA, papel, esAdmin)} aqui={aqui} />
+}
+
+/** Lo que se ve de la barra. No decide QUE destinos hay —eso lo hace
+ *  `BarraInferior` segun el papel—: los recibe, y por eso se puede dibujar con
+ *  cinco o seis sin tener una sesion de cada tipo.
+ *
+ *  Direccion «Miami Neon Night» (DESIGN-BRIEF.md): el destino activo se
+ *  enciende como un letrero —icono con resplandor, rotulo con halo y un filete
+ *  de neon arriba— y el resto se apaga a un gris legible. */
+export function VistaBarraInferior({ destinos, aqui }: { destinos: Destino[]; aqui: string }) {
   const rotulo = rotuloPara(destinos.length)
 
   return (
@@ -119,13 +129,20 @@ export function BarraInferior() {
        riel en pantalla ancha. */
     <nav className="barra-abajo" style={{
       position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 900,
-      background: 'rgba(8,8,10,.96)',
-      backdropFilter: 'blur(12px)',
-      borderTop: '1px solid rgba(255,255,255,.09)',
+      background: 'rgba(8,8,10,.94)',
+      backdropFilter: 'blur(14px)',
       paddingBottom: 'env(safe-area-inset-bottom)',
     }}>
+      {/* El filo de arriba: un hilo de degradado de magenta a cian, la misma
+          linea que firma la portada. */}
+      <div aria-hidden style={{
+        position: 'absolute', left: 0, right: 0, top: 0, height: 1,
+        background: DEGRADADO.hilo, opacity: .55,
+        boxShadow: '0 0 10px rgba(255,43,209,.45)',
+      }} />
       {destinos.map(d => {
         const activo = aqui === d.path || aqui.startsWith(d.path + '/')
+        const color = resalte(d)
         return (
           <Enlace key={d.path} a={d.path} al={() => {
             // Tocar la barra tambien deja apuntado el sombrero. Sin esto, quien
@@ -133,16 +150,28 @@ export function BarraInferior() {
             // la proxima vez, sin haberlo vuelto a pedir.
             elegirModo(d.soloAdmin ? 'panel' : 'app')
           }} style={{
+            position: 'relative',
             flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
-            gap: 5, padding: '11px 4px 13px', cursor: 'pointer',
-            color: activo ? resalte(d) : d.soloAdmin ? COLOR.admin : COLOR.textoTenue,
-            borderTop: `2px solid ${activo ? resalte(d) : 'transparent'}`,
-            marginTop: -1,
+            gap: 6, padding: '12px 4px 12px', cursor: 'pointer',
+            // El apagado era textoTenue (3.78:1, no llega a AA): un rotulo de
+            // navegacion no es decoracion.
+            color: activo ? color : d.soloAdmin ? COLOR.admin : COLOR.textoSuave,
+            background: activo ? `linear-gradient(180deg, ${color}26, transparent 75%)` : 'transparent',
           }}>
-            <span style={{ display: 'flex', lineHeight: 1 }}><Icono nombre={d.icono} tam={19} /></span>
+            {activo && (
+              <span aria-hidden style={{
+                position: 'absolute', top: 0, left: '22%', right: '22%', height: 2, borderRadius: 2,
+                background: color, boxShadow: `0 0 8px ${color}, 0 0 18px ${color}99`,
+              }} />
+            )}
+            <span style={{
+              display: 'flex', lineHeight: 1,
+              filter: activo ? `drop-shadow(0 0 5px ${color}cc)` : 'none',
+            }}><Icono nombre={d.icono} tam={22} /></span>
             <span style={{
               font: `700 ${rotulo.px}px/1 ${FUENTE.ui}`, letterSpacing: rotulo.esp,
               textTransform: 'uppercase',
+              textShadow: activo ? `0 0 10px ${color}88` : 'none',
               // Sin esto un rotulo que no quepa parte en dos lineas y cambia
               // la ALTURA de la barra entera, que es peor que recortarse.
               whiteSpace: 'nowrap',
@@ -215,7 +244,10 @@ export function BarraLateral() {
   return (
     <nav className="barra-lado" style={{
       position: 'fixed', left: 0, top: 0, bottom: 0, width: ANCHO_RIEL, zIndex: 900,
-      boxSizing: 'border-box', background: COLOR.superficie,
+      boxSizing: 'border-box',
+      // El mismo cielo de la portada, muy bajo: el riel es modo sobrio, asi
+      // que solo se le insinua.
+      background: `linear-gradient(180deg, rgba(123,60,255,.1) 0%, transparent 38%), ${COLOR.superficie}`,
       borderRight: `1px solid ${LINEA.tenue}`,
       flexDirection: 'column', overflowY: 'auto',
     }}>
@@ -267,15 +299,17 @@ function Renglon({ d, aqui, tono = COLOR.acento }: {
   const activo = aqui === d.path || aqui.startsWith(d.path + '/')
   return (
     <Enlace a={d.path} al={() => elegirModo(d.soloAdmin ? 'panel' : 'app')} style={{
-      display: 'flex', alignItems: 'center', gap: 12, padding: '10px 18px',
+      display: 'flex', alignItems: 'center', gap: 12, padding: '11px 18px',
       cursor: 'pointer',
-      background: activo ? 'rgba(255,255,255,.04)' : 'transparent',
+      background: activo ? `linear-gradient(90deg, ${tono}26, transparent 85%)` : 'transparent',
       borderLeft: `2px solid ${activo ? tono : 'transparent'}`,
+      boxShadow: activo ? `-1px 0 12px -3px ${tono}` : 'none',
       color: activo ? COLOR.texto : COLOR.textoSuave,
     }}>
-      <span style={{ width: 16, textAlign: 'center', fontSize: 13,
-        color: activo ? tono : COLOR.textoApagado }}><Icono nombre={d.icono} tam={16} /></span>
-      <span style={{ font: `${activo ? 600 : 400} 13px/1 ${FUENTE.ui}` }}>{d.titulo}</span>
+      <span style={{ width: 18, display: 'grid', placeItems: 'center',
+        color: activo ? tono : COLOR.textoTenue,
+        filter: activo ? `drop-shadow(0 0 4px ${tono}cc)` : 'none' }}><Icono nombre={d.icono} tam={17} /></span>
+      <span style={{ font: `${activo ? 700 : 500} 13px/1 ${FUENTE.ui}` }}>{d.titulo}</span>
     </Enlace>
   )
 }
