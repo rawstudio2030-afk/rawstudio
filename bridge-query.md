@@ -38,14 +38,34 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 
 ## Consultas activas
 
-### [id: 20261106-02] Ronda 2 — reproductor: controles propios y velocidad
-- **fecha:** 2026-11-06 10:20 (America/Mexico_City)
-- **estado:** asignada
+### [id: 20261106-02] Ronda 2 hecha — reproductor: controles propios y velocidad
+- **fecha:** 2026-11-06 (America/Mexico_City)
+- **estado:** respondida
 - **tarea:** Reproductor de video — §3 de CHECKLIST.md (velocidad, UX tipo YouTube, PiP explícito)
-- **pregunta:** (asignación del coordinador, no una duda). Implementar `bridge-response.md` [id: 20261106-02].
-- **contexto:** `src/screens/ClipDetail.tsx` usa `<video controls playsInline>` + URL de `urlVideoFirmada` (`ver-clip`) + `MarcaDeAgua`. Play/seek/volumen/fullscreen ya pasan (inmutables). Velocidad `fail`, UX tipo YouTube `fail`, PiP `partial`. Un solo archivo por clip: no inventar menú de calidad. Sin pistas VTT: no inventar captions. HEAD de referencia al asignar: `d958580`.
-- **urgencia:** alta
-- **ya se intentó:** diagnóstico del coordinador sobre el `<video controls>` nativo; sin cambio de producto en el commit de asignación. El coordinador revisó de nuevo a las 10:29 hora de México: HEAD remoto `bde08ad`, sin `Reproductor.tsx`. **Acción inmediata:** commit de producto + push a `origin/main`, luego marcar esta entrada `respondida` con el SHA.
+- **resultado:** HECHA y en `origin/main`. Commit de producto `24a7844ec194090af20dbbb65bcbab4dadc78b` (`fix: reproductor — controles propios y velocidad`), empujado como `b36cbaa..24a0a78`. Antes no estaba implementado en el working tree: se hizo en esta ronda.
+- **diff resumido:**
+  - `src/components/Reproductor.tsx` (nuevo): `<video>` sin `controls`, con `playsInline`; barra propia con play/pausa, tiempo, progreso (`input range` con `aria-valuetext`), duración, volumen y silencio, menú de velocidad, PiP solo si `document.pictureInPictureEnabled` y pantalla completa. Todo es `Pulsable` de 44 px con `aria-label` en español. Botón central grande. Controles ocultos a los 2.5 s reproduciendo; reaparecen con puntero, toque, foco o tecla. Clic alterna play/pausa; doble toque izquierda/derecha −10/+10 s (el clic simple espera 280 ms para no pelear con el doble). Teclado con el reproductor enfocado: espacio o `k`, `j`/`l` ±10 s, flechas ±5 s, `m`, `f`.
+  - Velocidad `0.5 · 0.75 · 1 · 1.25 · 1.5 · 2` sobre `playbackRate`, guardada en `localStorage` (`rawstudio.velocidad`) y reaplicada al cargar y al cambiar de `src`.
+  - `src/screens/ClipDetail.tsx`: el `<video controls>` y la `MarcaDeAgua` sueltos se sustituyen por `<Reproductor src poster marca />`. `ClipDetail` sigue decidiendo si hay marca (`!mio && perfilPropio`). La marca vive dentro del reproductor, por debajo de la barra, y la pantalla completa se pide al contenedor para que no se pierda. Compra, renta, reembolso, reportar, candado y portada borrosa no se tocaron.
+  - `src/index.css`: estilos del `input range` (pista y pulgar) que no caben en línea.
+  - Sin tocar: `MarcaDeAgua.tsx`, `urlVideoFirmada`/`ver-clip`, Portal, age gate, Admin, Supabase.
+- **cómo se verificó** (servidor de desarrollo con un arnés temporal ya borrado, que montaba el componente con un mp4 de muestra; escritorio 1280×800 y celular 390×844):
+  1. `<video>` sin `controls` (`hasAttribute('controls')` = false) y con `playsInline`; marca presente para quien mira y ausente con `?autora=1`.
+  2. Velocidad: menú con 0.5, 0.75, Normal, 1.25, 1.5 y 2×. Tras elegir 1.5, 2 y 0.5, `video.playbackRate` valió 1.5, 2 y 0.5. Tras recargar la página, `playbackRate` y `defaultPlaybackRate` valían 2 y el botón decía «2×».
+  3. Teclado con foco en el reproductor: `l` y `j` movieron la posición (acotada a 0 y a la duración de 4 s), `ArrowRight` y `ArrowLeft` también, `m` alternó `muted`, `k` y espacio alternaron play/pausa.
+  4. Seek con la barra: valor 2 → `currentTime` 2, `aria-valuetext` «0:02 de 0:04».
+  5. Clic simple al centro alterna play/pausa tras el umbral; doble toque a la derecha y a la izquierda saltaron +10 y −10 s (acotados por el video corto).
+  6. Controles: a los 2.5 s reproduciendo la barra deja de captar clics y el cursor se oculta (la opacidad completó su transición hacia los 4 s en este navegador); reaparece con el puntero; en pausa siempre visible.
+  7. Marca vs barra: `z-index` 3 vs 5, `pointer-events: none` en la marca, y `elementFromPoint` sobre el botón de pantalla completa devuelve el botón.
+  8. Celular: sin desborde horizontal, todos los controles de 44 px de alto, volumen deslizable oculto en pantalla estrecha (queda el botón de silencio).
+  9. `npm run typecheck` y `npm run lint` sin avisos nuevos (el único aviso de `ClipDetail.tsx` ya existía); `npm run build` sin errores.
+- **NO verificado, por límite del entorno:**
+  - **Pantalla completa y PiP reales.** Tanto el navegador integrado como el Chrome controlado por la extensión rechazan `requestFullscreen` con «not granted» incluso para un botón mínimo de prueba, así que no pude ver el modo pantalla completa. Sí se verificó que el botón existe, que llama a `requestFullscreen` sobre el contenedor (que lleva marca y controles) y que PiP aparece solo cuando `document.pictureInPictureEnabled` es verdadero. Conviene que Sergio o el coordinador lo prueben a mano en un navegador normal.
+  - **Un clip real con URL firmada.** La ficha necesita sesión y un clip desbloqueado; se probó el componente con un mp4 local, no la pantalla completa de `ClipDetail`. La URL sigue saliendo de `urlVideoFirmada` sin cambios.
+- **ADVERTENCIA de seguridad (decisión que debe tomar el coordinador):** dos vías que la ronda pide sacan el video del contenedor y lo dejan SIN marca de agua, y la marca es lo que promete la página de creadoras: (a) Picture-in-Picture, que dibuja solo el video en una ventana aparte; (b) en iPhone, la pantalla completa nativa (`webkitEnterFullscreen`). Una grabación de pantalla de cualquiera de las dos no llevaría el nombre de quien mira. Se implementaron como se pidió, pero con un interruptor: la constante `VENTANAS_SIN_MARCA` de `Reproductor.tsx`. En `false`, con marca se esconden PiP y la pantalla completa de iPhone. Recomiendo `false` mientras la marca sea la protección anunciada.
+- **fuera de esta ronda, como se pidió:** calidad automática (un solo archivo por clip; sin menú de calidad) y captions (sin pistas VTT). Siguen `not_started`.
+- **¿Debería subir el checklist?** Velocidad: sí, a `pass`. UX tipo YouTube: `pass` o `partial` hasta que se pruebe la pantalla completa a mano. PiP explícito: `pass` si se acepta el botón (hay que probarlo a mano). No los marqué yo.
+- **urgencia:** baja
 
 ### [id: 20261106-01] Ronda 1 hecha — recortar landing al hero
 - **fecha:** 2026-11-06 (America/Mexico_City)
