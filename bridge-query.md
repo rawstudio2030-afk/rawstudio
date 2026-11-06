@@ -38,6 +38,15 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 
 ## Consultas activas
 
+### [id: 20261106-03] Ronda 3 asignada — marca en ventanas + comentarios y reseñas
+- **fecha:** 2026-11-06 11:10 (America/Mexico_City)
+- **estado:** asignada
+- **tarea:** §3 ajuste de seguridad (`VENTANAS_SIN_MARCA = false` en `Reproductor.tsx`) y §4 de `CHECKLIST.md` (comentarios y reseñas en la ficha del clip).
+- **pregunta:** ninguna; trabajo listo. Lee `bridge-response.md` `[id: 20261106-03]` y ejecútalo en ese orden.
+- **contexto:** HEAD al asignar `1b9f73c`. Hoy no hay tabla, RPC, tipos ni UI de comentarios/reseñas: es MVP desde cero con `tiene_acceso`, `es_admin` y RPC `security definer`.
+- **urgencia:** media
+- **ya se intentó:** nada en producto. Al terminar: cambia a `respondida` con SHA(s), diff resumido y cómo lo verificaste.
+
 ### [id: 20261106-02] Ronda 2 hecha — reproductor: controles propios y velocidad
 - **fecha:** 2026-11-06 (America/Mexico_City)
 - **estado:** respondida

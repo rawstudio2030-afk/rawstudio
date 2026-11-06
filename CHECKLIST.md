@@ -2,8 +2,8 @@
 
 Fuente de verdad para el coordinador y Claude Code.  
 **Repo:** https://github.com/rawstudio2030-afk/rawstudio · **Sitio:** https://rawstudio.biz  
-**Rama / HEAD docs al abrir ronda 2:** `main` (asignación ronda 2 ~10:20 America/Mexico_City, 2026-11-06)  
-**Código de producto de la landing:** [`4e15d81`](https://github.com/rawstudio2030-afk/rawstudio/commit/4e15d81c7155d446fa52d941678fb5cfe3a6e018) verificado.  
+**Rama / HEAD al abrir ronda 3:** `main` @ `1b9f73c` (asignación ronda 3 ~11:10 America/Mexico_City, 2026-11-06)  
+**Código de producto de la landing:** [`4e15d81`](https://github.com/rawstudio2030-afk/rawstudio/commit/4e15d81c7155d446fa52d941678fb5cfe3a6e018) verificado. **Reproductor:** [`24a0a78`](https://github.com/rawstudio2030-afk/rawstudio/commit/24a0a7844ec194090af20dbbb65bcbab4dadc78b) verificado.  
 **Leyenda:** `pass` | `partial` | `fail` | `not_started`  
 Ítems en `pass` son **inmutables** salvo regresión documentada.
 
@@ -14,7 +14,8 @@ Fuente de verdad para el coordinador y Claude Code.
 | Tarea | Ronda | Estado | Inicio (America/Mexico_City) | Notas |
 |-------|-------|--------|------------------------------|-------|
 | Recortar landing al hero (eager loading §2.1–2.2) | **1 / 10** | **Hecha y verificada** (`4e15d81`) | 2026-11-06 ~08:22 | §2.1 y §2.2 → `pass`. |
-| Reproductor: cromo propio + velocidad (+ PiP explícito) | **2 / 10** | Instrucciones publicadas; **código del reproductor aún nativo** | 2026-11-06 ~10:20 | Ver `bridge-response.md` id `20261106-02`. Tope 1 h. Calidad auto y captions fuera de esta ronda. |
+| Reproductor: cromo propio + velocidad (+ PiP explícito) | **2 / 10** | **Hecha y verificada** (`24a0a78`) | 2026-11-06 ~10:20 | Velocidad y UX tipo YouTube → `pass`; PiP → `pass` con nota. Calidad auto y captions fuera. |
+| Marca en ventanas (`VENTANAS_SIN_MARCA=false`) + comentarios y reseñas (§4) | **1 / 10** (ronda 3 global) | **Asignada** — esperando código | 2026-11-06 ~11:10 | Ver `bridge-response.md` id `20261106-03`. Tope 1 h. |
 
 ---
 
@@ -22,13 +23,13 @@ Fuente de verdad para el coordinador y Claude Code.
 
 | Estado | Cantidad |
 |--------|----------|
-| pass | 10 |
-| partial | 9 |
-| fail | 4 |
+| pass | 13 |
+| partial | 8 |
+| fail | 2 |
 | not_started | 4 |
 | **Total ítems** | **27** |
 
-_(Tras verificar la ronda 1: §2.1 `fail`→`pass`, §2.2 `partial`→`pass`. El reproductor todavía no cambia el score.)_
+_(Ronda 1: §2.1 `fail`→`pass`, §2.2 `partial`→`pass`. Ronda 2 verificada: velocidad y UX tipo YouTube `fail`→`pass`, PiP `partial`→`pass`. Antes 10/9/4/4. Fails que quedan: §6.1 legales y §7.5 CLAUDE.md.)_
 
 ---
 
@@ -74,9 +75,9 @@ _(Tras verificar la ronda 1: §2.1 `fail`→`pass`, §2.2 `partial`→`pass`. El
 
 ---
 
-## 3. Reproductor de video — **en ronda 2**
+## 3. Reproductor de video — **ronda 2 hecha**
 
-Ubicación: `src/screens/ClipDetail.tsx` — `<video controls playsInline>` + URL firmada (`urlVideoFirmada` / `ver-clip`) + `MarcaDeAgua`.
+Ubicación: `src/components/Reproductor.tsx` usado desde `src/screens/ClipDetail.tsx` (`<Reproductor src poster marca />`) + URL firmada (`urlVideoFirmada` / `ver-clip`) + marca dentro del reproductor. Evidencia: [`24a0a78`](https://github.com/rawstudio2030-afk/rawstudio/commit/24a0a7844ec194090af20dbbb65bcbab4dadc78b).
 
 | Control | Estado |
 |---------|--------|
@@ -84,16 +85,16 @@ Ubicación: `src/screens/ClipDetail.tsx` — `<video controls playsInline>` + UR
 | Seek / scrub | `pass` ✅ inmutable |
 | Volumen / mute | `pass` ✅ inmutable |
 | Pantalla completa | `pass` ✅ inmutable |
-| Minimizar / PiP | `partial` ← ronda 2: botón explícito si la API existe |
-| Velocidad | `fail` ← **objetivo de ronda 2** |
+| Minimizar / PiP | `pass` ✅ inmutable — botón explícito solo si `document.pictureInPictureEnabled`. Desde ronda 3, **con marca se esconde** (decisión de seguridad; ver `20261106-03`). |
+| Velocidad | `pass` ✅ inmutable — 0.5–2× sobre `playbackRate`, persistida en `localStorage` `rawstudio.velocidad` (`24a0a78`). |
 | Calidad auto | `not_started` — fuera: un solo archivo por clip; no fingir selector |
 | Captions | `not_started` — fuera: no hay pistas VTT |
-| UX tipo YouTube | `fail` ← **objetivo de ronda 2** (cromo propio, ocultar al reproducir, teclado, ±10 s) |
+| UX tipo YouTube | `pass` ✅ inmutable — cromo propio, ocultar a 2.5 s, teclado, doble toque ±10 s (`24a0a78`). Pantalla completa y PiP reales no se probaron a mano. |
 
 ---
 
 ## 4. Reseñas / comentarios en videos
-- **Estado:** `not_started` — fuera de ronda 2.
+- **Estado:** `not_started` — **en ronda 3** (`20261106-03`). Hoy no hay tabla, RPC ni UI. Pasa solo tras verificar código.
 
 ---
 
@@ -123,7 +124,7 @@ Ubicación: `src/screens/ClipDetail.tsx` — `<video controls playsInline>` + UR
 ### 7.1 Archivos puente — `pass` ✅ inmutable
 ### 7.2 Checklist documentada — `pass` ✅ inmutable
 ### 7.3 Límites anti-bucle documentados — `pass` ✅ inmutable
-### 7.4 Diario de decisiones — `partial` (actualizado con ronda 1 verificada y ronda 2 abierta)
+### 7.4 Diario de decisiones — `partial` (actualizado con ronda 2 verificada y ronda 3 abierta)
 ### 7.5 CLAUDE.md — `fail` (aún no existe)
 
 ---
@@ -150,11 +151,20 @@ React 19 · Vite 8 · HashRouter · Supabase · GitHub Pages · comisión 20% / 
 4. Este commit de docs no implementa el reproductor; Claude Code debe seguir `bridge-response.md` `[id: 20261106-02]`.
 5. Ítems ya `pass` permanecen inmutables.
 
-### Qué debe decidir Sergio (solo negocio/contenido — no bloquea ronda 2)
+### Ronda 2 — verificada (2026-11-06 ~11:08)
+1. Código de `24a0a78` cumple: velocidad, UX tipo YouTube y PiP a `pass`.
+2. Decisión de seguridad: `VENTANAS_SIN_MARCA=false`. PiP y `webkitEnterFullscreen` sacan el video sin marca; con marca se esconden. `requestFullscreen` del contenedor se queda.
+
+### Ronda 3 (2026-11-06 ~11:10) — marca en ventanas + comentarios y reseñas
+1. Leer: quien abre la ficha. Escribir: sesión + `tiene_acceso`. Planos, recientes primero, paginados, ≤500, sin HTML, handle público, insignia «Creadora».
+2. Borrado blando por autora, dueña o admin. Calificación 1–5 opcional, una por persona y clip, promedio y cantidad si hay ≥1.
+3. RLS + RPC `security definer`. Sin moderación, notificaciones ni hilos.
+
+### Qué debe decidir Sergio (solo negocio/contenido — no bloquea ronda 3)
 - Datos legales definitivos / política retiro de compra permanente / jurisdicción / plazo verificación.
 - Home del logo con sesión (portada vs catálogo).
 - Alcance/precio consultas Telegram.
 - Lanzar vs esperar abogado.
 - Más adelante: si se invierte en transcodificar varias calidades (HLS / renditions) para poder hacer calidad automática de verdad.
 
-**Para la ronda 2 del reproductor: no hay decisión de negocio pendiente.**
+**Para la ronda 3: no hay decisión de negocio pendiente.**
