@@ -8,7 +8,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
-import { urlAvatar } from '../lib/perfiles'
+import Avatar from '../components/Avatar'
 import { clipPorId, urlPortada, urlVideoFirmada, clipsPublicados, type ClipConAutora } from '../lib/clips'
 import { comprarClip, saldo } from '../lib/monedero'
 import { rentarClip, reembolsoDisponible, reclamarReembolso } from '../lib/canales'
@@ -120,7 +120,6 @@ export default function ClipDetail() {
   // px de alto, o sea que quien pagaba veia la misma miniatura borrosa del
   // catalogo mientras la de 720 px dormia en el bucket privado.
   const poster = portadaNitida ?? portada
-  const foto = urlAvatar(autora?.avatar_path ?? null)
   const mio = sesion?.user.id === clip.creator_id
   // Su propia creadora no necesita marca: no tiene a quien delatar.
   const marca = !mio && perfilPropio ? `@${perfilPropio.handle}` : null
@@ -212,11 +211,8 @@ export default function ClipDetail() {
             borderTop: '1px solid rgba(255,255,255,.1)', borderBottom: '1px solid rgba(255,255,255,.1)',
             cursor: 'pointer',
           }}>
-            <div style={{
-              width: 46, height: 46, borderRadius: '50%', flex: '0 0 auto',
-              border: `1.5px solid ${COLOR.acento}`,
-              background: foto ? `center/cover url(${foto})` : `repeating-linear-gradient(130deg,${COLOR.superficieAlta} 0 6px,${COLOR.superficie} 6px 12px)`,
-            }} />
+            <Avatar ruta={autora.avatar_path} nombre={autora.display_name} handle={autora.handle} tam={46}
+              style={{ border: `1.5px solid ${COLOR.acento}` }} />
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ font: `700 16px/1.3 ${FUENTE.ui}`, display: 'flex', alignItems: 'center', gap: 6 }}>
                 {autora.display_name}

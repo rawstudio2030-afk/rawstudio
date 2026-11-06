@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import { subirArchivo, subirPortada, crearClip, type Visibilidad } from '../lib/clips'
+import { asignarAvatarSiFalta } from '../lib/avatarAuto'
 import {
   miniaturaDeVideo, tiraDeVideo, cuadrosDeVideo, achicar,
   ANCHO_PUBLICO, type Cuadro,
@@ -36,7 +37,7 @@ const MODOS: { v: Visibilidad; t: string }[] = [
 
 export default function Upload() {
   const nav = useNavigate()
-  const { sesion, perfil, cargando } = useSesion()
+  const { sesion, perfil, cargando, refrescarPerfil } = useSesion()
   const refVideo = useRef<HTMLInputElement>(null)
   const refPortada = useRef<HTMLInputElement>(null)
 
@@ -192,6 +193,17 @@ export default function Upload() {
       published: true,
     })
     if (r.error) { setEstado('error'); setDetalle(r.error); return }
+
+    // Sin foto de perfil, el avatar sale de este mismo video (el cuadro mas
+    // limpio de los primeros segundos). Nunca pisa una foto que ya exista, y si
+    // algo falla se queda la inicial: el clip ya esta publicado y esto no lo
+    // detiene.
+    if (!perfil?.avatar_path) {
+      setPaso('Preparando tu foto de perfil…')
+      try {
+        if (await asignarAvatarSiFalta(sesion.user.id, video) === 'asignado') await refrescarPerfil()
+      } catch { /* la inicial sigue ahi */ }
+    }
 
     // El clip SI se publico. Si la portada se quedo fuera no se navega: se
     // dice, con el clip ya a salvo y una liga para ir a verlo. Irse en

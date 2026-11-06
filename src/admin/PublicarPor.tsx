@@ -15,7 +15,7 @@ import {
   creadorasGestionables, publicarPara, fijarAvatar,
   type CreadoraGestionable,
 } from '../lib/admin'
-import { urlAvatar } from '../lib/perfiles'
+import Avatar from '../components/Avatar'
 import { aCentavos } from '../lib/dinero'
 import { Boton, Campo, Etiquetado, Insignia, Selector, desde } from './piezas'
 import { Pulsable } from '../components/Pulsable'
@@ -79,13 +79,8 @@ export default function PublicarPor() {
               cursor: c.verificada ? 'pointer' : 'not-allowed',
               opacity: c.verificada ? 1 : .55,
             }}>
-              <div style={{
-                width: 38, height: 38, borderRadius: '50%', flex: '0 0 auto',
-                border: `1px solid ${LINEA.suave}`,
-                background: urlAvatar(c.avatar_path)
-                  ? `center/cover url(${urlAvatar(c.avatar_path)})`
-                  : `repeating-linear-gradient(130deg,${COLOR.superficieAlta} 0 5px,${COLOR.superficie} 5px 10px)`,
-              }} />
+              <Avatar ruta={c.avatar_path} nombre={c.nombre} handle={c.handle} tam={38}
+                style={{ border: `1px solid ${LINEA.suave}` }} />
               <div style={{ flex: 1 }}>
                 <div style={{ font: `400 13px/1.3 ${FUENTE.ui}` }}>{c.nombre}</div>
                 <div style={{ font: `400 11px/1.45 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
@@ -184,13 +179,8 @@ function Formulario({ c, vuelve }: { c: CreadoraGestionable; vuelve: () => void 
       <div style={{ display: 'flex', alignItems: 'center', gap: 13, marginBottom: 20 }}>
         <Pulsable al={vuelve} rotulo="Volver" style={{ cursor: 'pointer', font: `400 22px/1 ${FUENTE.ui}`,
           color: COLOR.textoSuave }}>‹</Pulsable>
-        <div style={{
-          width: 38, height: 38, borderRadius: '50%',
-          border: `1px solid ${LINEA.suave}`,
-          background: urlAvatar(c.avatar_path)
-            ? `center/cover url(${urlAvatar(c.avatar_path)})`
-            : `repeating-linear-gradient(130deg,${COLOR.superficieAlta} 0 5px,${COLOR.superficie} 5px 10px)`,
-        }} />
+        <Avatar ruta={c.avatar_path} nombre={c.nombre} handle={c.handle} tam={38}
+          style={{ border: `1px solid ${LINEA.suave}` }} />
         <div>
           <div style={{ font: `400 16px/1.3 ${FUENTE.ui}` }}>{c.nombre}</div>
           <div style={{ font: `400 11px/1.45 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
@@ -206,7 +196,7 @@ function Formulario({ c, vuelve }: { c: CreadoraGestionable; vuelve: () => void 
 
       {/* Foto de perfil: se puede cambiar desde aqui porque ella no puede
           entrar a su cuenta a ponersela. */}
-      {!urlAvatar(c.avatar_path) && (
+      {!c.avatar_path && (
         <div style={{ marginBottom: 18, padding: '12px 14px', border: `1px solid ${LINEA.tenue}` }}>
           <div style={{ font: `400 12px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave,
             marginBottom: 10 }}>

@@ -13,7 +13,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
-import { perfilPorHandle, urlAvatar } from '../lib/perfiles'
+import { perfilPorHandle } from '../lib/perfiles'
+import Avatar from '../components/Avatar'
 import { clipsDe, urlPortada, type Clip } from '../lib/clips'
 import { portadaDe } from '../lib/portadas'
 import type { PerfilPublico } from '../lib/supabase'
@@ -97,7 +98,6 @@ export default function CreatorProfile() {
     />
   )
 
-  const foto = urlAvatar(perfil.avatar_path)
   const esMio = mio?.id === perfil.id
   const desde = new Date(perfil.created_at).toLocaleDateString('es-MX', { month: 'short', year: 'numeric' })
 
@@ -137,10 +137,8 @@ export default function CreatorProfile() {
             flex: '0 0 auto', width: 104, height: 104, borderRadius: '50%', padding: 3, boxSizing: 'border-box',
             background: DEGRADADO.hilo, boxShadow: `${GLOW.magenta}, 0 0 30px rgba(0,229,255,.25)`,
           }}>
-            <div style={{
-              width: '100%', height: '100%', borderRadius: '50%', border: `3px solid ${COLOR.fondo}`, boxSizing: 'border-box',
-              background: foto ? `center/cover url(${foto})` : `repeating-linear-gradient(130deg,${COLOR.superficieAlta} 0 8px,${COLOR.superficie} 8px 16px)`,
-            }} />
+            <Avatar ruta={perfil.avatar_path} nombre={perfil.display_name} handle={perfil.handle} tam={98}
+              style={{ border: `3px solid ${COLOR.fondo}` }} />
           </div>
           <div style={{ minWidth: 0, paddingBottom: 6 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

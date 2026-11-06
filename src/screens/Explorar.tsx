@@ -7,7 +7,8 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import { clipsPublicados, urlPortada, type ClipConAutora } from '../lib/clips'
-import { urlAvatar, creadoras, type FichaCreadora } from '../lib/perfiles'
+import { creadoras, type FichaCreadora } from '../lib/perfiles'
+import Avatar from '../components/Avatar'
 import { portadaDe } from '../lib/portadas'
 import { TONO, insignias, duracion } from '../lib/catalogo'
 import { usd } from '../lib/dinero'
@@ -133,13 +134,8 @@ export default function Explorar() {
                   border: `1.5px solid ${TONO.c.borde}`, background: 'rgba(0,229,255,.04)',
                   boxShadow: `0 0 8px rgba(${TONO.c.rgb},.3), 0 0 20px rgba(${TONO.c.rgb},.12)`,
                 }}>
-                  <div style={{
-                    width: 46, height: 46, borderRadius: '50%', flex: '0 0 auto',
-                    border: `1.5px solid ${COLOR.acento}`,
-                    background: g.avatar_path
-                      ? `center/cover url(${urlAvatar(g.avatar_path)})`
-                      : COLOR.superficieAlta,
-                  }} />
+                  <Avatar ruta={g.avatar_path} nombre={g.display_name} handle={g.handle} tam={46}
+                    style={{ border: `1.5px solid ${COLOR.acento}` }} />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ font: `700 16px/1.3 ${FUENTE.ui}`, display: 'flex', alignItems: 'center', gap: 6 }}>
                       {g.display_name}
@@ -190,7 +186,6 @@ export default function Explorar() {
           <div className="rejilla-clips">
             {visibles.map(c => {
               const p = portadaDe(c.id, urlPortada(c.cover_path))
-              const f = urlAvatar(c.profiles?.avatar_path ?? null)
               const marca = insignias(c)
               const t = TONO[marca[0].tono]
               const dur = duracion(c.duration_s)
@@ -244,11 +239,8 @@ export default function Explorar() {
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6, marginTop: 8 }}>
                       {c.profiles ? (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
-                          <div style={{
-                            width: 20, height: 20, borderRadius: '50%', flex: '0 0 auto',
-                            background: f ? `center/cover url(${f})` : COLOR.superficieAlta,
-                            border: `1px solid ${t.borde}`,
-                          }} />
+                          <Avatar ruta={c.profiles.avatar_path} nombre={c.profiles.display_name}
+                            handle={c.profiles.handle} tam={20} style={{ border: `1px solid ${t.borde}` }} />
                           <span style={{
                             font: `400 10px/1.3 ${FUENTE.mono}`, color: COLOR.textoSuave,
                             overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',

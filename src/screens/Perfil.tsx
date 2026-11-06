@@ -16,6 +16,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useSesion } from '../lib/sesion'
 import { subirAvatar, urlAvatar } from '../lib/perfiles'
+import Avatar from '../components/Avatar'
 import PaisesBloqueados from '../components/PaisesBloqueados'
 import { usePapel } from '../components/Navegacion'
 import { ATAJOS_PERFIL, visiblesPara } from '../lib/rutas'
@@ -182,13 +183,9 @@ export default function Perfil() {
           <Pulsable
             al={() => archivo.current?.click()}
             rotulo={foto ? 'Cambiar foto de perfil' : 'Subir foto de perfil'}
-            style={{
-              width: 84, height: 84, borderRadius: '50%', flex: '0 0 auto', cursor: 'pointer',
-              border: `2px solid ${COLOR.acento}`, overflow: 'hidden',
-              background: foto ? `center/cover url(${foto})` : `repeating-linear-gradient(130deg,${COLOR.superficieAlta} 0 8px,${COLOR.superficie} 8px 16px)`,
-              display: 'grid', placeItems: 'center',
-            }}>
-            {!foto && <span style={{ ...etiqueta, color: COLOR.textoTenue }}>Foto</span>}
+            style={{ flex: '0 0 auto', cursor: 'pointer', borderRadius: '50%', display: 'grid' }}>
+            <Avatar ruta={perfil?.avatar_path} nombre={nombre} handle={perfil?.handle} tam={84}
+              style={{ border: `2px solid ${COLOR.acento}` }} />
           </Pulsable>
           <div style={{ minWidth: 0 }}>
             <Pulsable al={() => archivo.current?.click()} style={{

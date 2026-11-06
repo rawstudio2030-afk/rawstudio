@@ -9,6 +9,7 @@ import { cuantos } from '../lib/plural'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Almacenamiento from './Almacenamiento'
+import AvatarAuto from './AvatarAuto'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 import { sembrarDemo, borrarDemo, censurarPortadasAntiguas, type ResultadoCensura } from '../lib/admin'
 import { Boton, Confirmar } from './piezas'
@@ -41,6 +42,8 @@ export default function Herramientas() {
               + (censura.fallos.length ? ` · ${censura.fallos.length} fallaron: ${censura.fallos.slice(0, 3).join(' · ')}` : '')}
         accion={<Boton tono="primario" al={() => setDialogo('censurar')}
           activo={!(censura && 'hechas' in censura)}>Encoger las portadas viejas</Boton>} />
+
+      <AvatarAuto />
 
       <Tarjeta titulo="Contenido de demostración"
         texto="Perfiles y clips falsos para que la aplicación no se vea vacía mientras se prueba. Todo queda marcado con es_demo, y hay que borrarlo antes de abrir al público."

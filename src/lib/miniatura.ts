@@ -293,3 +293,114 @@ export async function cuadrosDeVideo(
     URL.revokeObjectURL(fuente)
   }
 }
+
+/* ==================== Avatar automatico ====================
+ *
+ * Para una creadora sin foto de perfil: un cuadro de SU PROPIO video, recortado
+ * a cuadrado.
+ *
+ * QUE ES Y QUE NO ES «el cuadro mas limpio»: es una heuristica de calidad de
+ * imagen, NO un clasificador de contenido. No sabe que hay en el cuadro. Lo que
+ * hace es:
+ *   1. sacar seis cuadros de la primera mitad del video (del 8% al 50%): las
+ *      tomas del principio suelen ser la presentacion y no lo explicito;
+ *   2. descartar los casi negros, los quemados y los de color casi uniforme
+ *      (un primer plano vacio, un fundido);
+ *   3. puntuar los demas por exposicion cercana al medio y por detalle, con un
+ *      bono a los mas tempranos;
+ *   4. quedarse con el de mejor puntaje y recortar el centro a 256 px.
+ * Si NINGUN cuadro pasa el filtro devuelve null y la persona se queda con su
+ * inicial: un avatar neutro es mejor que uno malo.
+ *
+ * Como es 18+, esto NO garantiza que el cuadro sea inocuo. Por eso el
+ * retroactivo de administracion pide ver y confirmar cada propuesta, y la
+ * creadora puede cambiar la foto cuando quiera desde Ajustes. */
+export const LADO_AVATAR = 256
+const CUADROS_AVATAR = 6
+const DESDE_AVATAR = 0.08
+const HASTA_AVATAR = 0.5
+const PESO_TEMPRANO = 0.3
+const LADO_PUNTAJE = 48
+/** Luminancia media aceptable (0-255) y desviacion minima: debajo, es un cuadro
+ *  casi negro, casi blanco o casi liso. */
+const BRILLO_MIN = 45
+const BRILLO_MAX = 215
+const CONTRASTE_MIN = 14
+
+/** Puntaje de 0 a 1 de un cuadro, o -1 si se descarta. Recibe los pixeles
+ *  RGBA de una version chica del cuadro. Es pura, para poder probarla. */
+export function puntuarCuadro(rgba: Uint8ClampedArray | number[]): number {
+  const n = Math.floor(rgba.length / 4)
+  if (n === 0) return -1
+  let suma = 0, suma2 = 0
+  for (let i = 0; i < n; i++) {
+    const l = 0.2126 * rgba[i * 4] + 0.7152 * rgba[i * 4 + 1] + 0.0722 * rgba[i * 4 + 2]
+    suma += l; suma2 += l * l
+  }
+  const media = suma / n
+  const desv = Math.sqrt(Math.max(0, suma2 / n - media * media))
+  if (media < BRILLO_MIN || media > BRILLO_MAX || desv < CONTRASTE_MIN) return -1
+  const exposicion = 1 - Math.abs(media - 128) / 128
+  const detalle = Math.min(desv / 64, 1)
+  return exposicion * 0.5 + detalle * 0.5
+}
+
+/** Un avatar cuadrado de 256 px sacado del video, o null si no hay un cuadro
+ *  aceptable o el navegador no puede con el formato. `fuente` es un archivo
+ *  local o una URL (firmada) ya autorizada. */
+export async function avatarDeVideo(fuente: File | string): Promise<File | null> {
+  const local = typeof fuente !== 'string'
+  const url = local ? URL.createObjectURL(fuente) : fuente
+  const v = document.createElement('video')
+  v.preload = 'auto'; v.muted = true; v.playsInline = true
+  // Con una URL de otro origen, sin esto el canvas queda contaminado y leer los
+  // pixeles lanza: se captura mas abajo y se devuelve null.
+  v.crossOrigin = 'anonymous'
+
+  const esperar = (ev: string, ms: number) => new Promise<boolean>(res => {
+    const reloj = setTimeout(() => res(false), ms)
+    v.addEventListener(ev, () => { clearTimeout(reloj); res(true) }, { once: true })
+    v.addEventListener('error', () => { clearTimeout(reloj); res(false) }, { once: true })
+  })
+
+  try {
+    v.src = url
+    if (!await esperar('loadedmetadata', 12000)) return null
+    const d = v.duration, vw = v.videoWidth, vh = v.videoHeight
+    if (!isFinite(d) || d <= 0 || !vw || !vh) return null
+
+    const lado = Math.min(vw, vh)
+    const sx = (vw - lado) / 2, sy = (vh - lado) / 2
+    const chico = document.createElement('canvas')
+    chico.width = chico.height = LADO_PUNTAJE
+    const grande = document.createElement('canvas')
+    grande.width = grande.height = LADO_AVATAR
+    const cc = chico.getContext('2d', { willReadFrequently: true })
+    const cg = grande.getContext('2d')
+    if (!cc || !cg) return null
+
+    let mejor: { puntaje: number; blob: Blob } | null = null
+    for (let i = 0; i < CUADROS_AVATAR; i++) {
+      const frac = DESDE_AVATAR + ((HASTA_AVATAR - DESDE_AVATAR) * i) / (CUADROS_AVATAR - 1)
+      v.currentTime = Math.min(Math.max(d * frac, 0.05), Math.max(d - 0.05, 0.05))
+      if (!await esperar('seeked', 8000)) break
+
+      cc.drawImage(v, sx, sy, lado, lado, 0, 0, LADO_PUNTAJE, LADO_PUNTAJE)
+      const base = puntuarCuadro(cc.getImageData(0, 0, LADO_PUNTAJE, LADO_PUNTAJE).data)
+      if (base < 0) continue
+      const total = base + PESO_TEMPRANO * (1 - i / (CUADROS_AVATAR - 1))
+      if (mejor && total <= mejor.puntaje) continue
+
+      cg.drawImage(v, sx, sy, lado, lado, 0, 0, LADO_AVATAR, LADO_AVATAR)
+      const b = await new Promise<Blob | null>(res => grande.toBlob(res, 'image/jpeg', 0.85))
+      if (b) mejor = { puntaje: total, blob: b }
+    }
+    return mejor ? new File([mejor.blob], 'avatar.jpg', { type: 'image/jpeg' }) : null
+  } catch {
+    return null
+  } finally {
+    v.removeAttribute('src')
+    v.load()
+    if (local) URL.revokeObjectURL(url)
+  }
+}

@@ -13,7 +13,7 @@
  */
 import { useEffect, useState } from 'react'
 import { Pulsable, Enlace } from './Pulsable'
-import { urlAvatar } from '../lib/perfiles'
+import Avatar from './Avatar'
 import { cuantos } from '../lib/plural'
 import {
   comentariosDe, resumenResenas, comentar, calificar, quitarCalificacion,
@@ -223,17 +223,11 @@ export default function Comentarios({ clip, esDuenia, haySesion, desbloqueado }:
         ) : (
           <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
             {filas.map(c => {
-              const foto = urlAvatar(c.avatar_path)
               const nombre = c.handle ? `@${c.handle}` : 'Cuenta eliminada'
               return (
                 <li key={c.id} style={{ display: 'flex', gap: 12, padding: '14px 0',
                   borderTop: `1px solid ${LINEA.tenue}` }}>
-                  <div aria-hidden style={{
-                    width: 36, height: 36, flex: '0 0 auto', borderRadius: '50%',
-                    background: foto ? `center/cover url(${foto})` : COLOR.superficieAlta,
-                    display: 'grid', placeItems: 'center', color: COLOR.textoSuave,
-                    font: `700 14px/1 ${FUENTE.ui}`,
-                  }}>{foto ? '' : (c.handle?.[0] ?? '·').toUpperCase()}</div>
+                  <Avatar ruta={c.avatar_path} nombre={c.display_name} handle={c.handle} tam={36} />
                   <div style={{ minWidth: 0, flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap',
                       font: `700 13px/1.2 ${FUENTE.ui}` }}>
