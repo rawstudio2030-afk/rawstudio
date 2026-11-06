@@ -38,14 +38,52 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 
 ## Consultas activas
 
-### [id: 20261106-03] Ronda 3 asignada — marca en ventanas + comentarios y reseñas
-- **fecha:** 2026-11-06 11:10 (America/Mexico_City)
-- **estado:** asignada
-- **tarea:** §3 ajuste de seguridad (`VENTANAS_SIN_MARCA = false` en `Reproductor.tsx`) y §4 de `CHECKLIST.md` (comentarios y reseñas en la ficha del clip).
-- **pregunta:** ninguna; trabajo listo. Lee `bridge-response.md` `[id: 20261106-03]` y ejecútalo en ese orden.
-- **contexto:** HEAD al asignar `1b9f73c`. Hoy no hay tabla, RPC, tipos ni UI de comentarios/reseñas: es MVP desde cero con `tiene_acceso`, `es_admin` y RPC `security definer`.
+### [id: 20261106-03] Ronda 3 hecha — marca en ventanas + comentarios y reseñas
+- **fecha:** 2026-11-06 (America/Mexico_City)
+- **estado:** respondida
+- **tarea:** §3 ajuste de seguridad (`VENTANAS_SIN_MARCA = false`) y §4 de `CHECKLIST.md` (comentarios y reseñas en la ficha del clip).
+- **resultado:** HECHA y en `origin/main` (`339195f..fb594f1`). **LA MIGRACIÓN TODAVÍA NO ESTÁ APLICADA EN LA BASE DE PRODUCCIÓN** (ver «Estado de despliegue»).
+- **commits (SHA completos):**
+  1. `1a1536f76b9f3724788a72247f9b2b1e3ba3b152` — `fix: reproductor — no abrir ventanas sin marca de agua`
+  2. `fb594f1817891010d730b088f2536c1e87bcfc1a` — `feat: comentarios y reseñas en la ficha del clip`
+- **diff resumido:**
+  - `src/components/Reproductor.tsx`: `VENTANAS_SIN_MARCA = false` y el comentario de cabecera, que ya decía «las permite o las esconde», ahora dice que hoy están escondidas. Nada más.
+  - `supabase/migrations/20261123000000_comentarios.sql` (nuevo): tablas `comentarios_clip` y `resenas_clip` (PK `(clip_id, autora_id)`), RLS activado y **cero políticas**, `revoke all` a `anon` y `authenticated`. Funciones `security definer` con `search_path = ''`: `comentarios_de`, `resumen_resenas` (lectura, `anon` y `authenticated`), `comentar`, `calificar`, `quitar_calificacion`, `borrar_comentario` (solo `authenticated`) y dos piezas internas sin permiso de ejecución, `ficha_visible` y `puede_opinar`, que reúne las comprobaciones.
+  - `src/lib/comentarios.ts` (nuevo): envoltorios de las RPC, como `reportes.ts`.
+  - `src/components/Comentarios.tsx` (nuevo): cabecera «★ 4.3 · 12 reseñas» solo con ≥1 reseña, estrellas de 44 px con `aria-label` y `aria-pressed`, caja con contador `n/500`, lista, «Cargar más», borrado con confirmación, insignia «Creadora». Texto como nodo de React (`pre-wrap`, `overflow-wrap: anywhere`), sin `dangerouslySetInnerHTML`.
+  - `src/screens/ClipDetail.tsx`: monta `<Comentarios>` antes de «Reportar este clip». Compra, renta, reembolso, paywall, geobloqueo, portada borrosa y `Reportar` no se tocaron.
+- **A. Marca en ventanas — qué controles aparecen:**
+  - **Con marca** (cualquiera que no sea la autora): sin botón de PiP; no se llama a `webkitEnterFullscreen`; el botón de pantalla completa sigue (pide `requestFullscreen` al contenedor, que lleva marca y barra). Controles visibles: play/pausa, silencio, velocidad y pantalla completa.
+  - **Sin marca** (la autora viendo lo suyo): se ofrecen PiP y la nativa de iPhone si el navegador tiene la API.
+  - Lo comprobé por lectura del código (`puedePip` y `puedeCompleta` con `VENTANAS_SIN_MARCA = false`) y con la compilación; no repetí la prueba en pantalla del reproductor en esta ronda. Pantalla completa y PiP reales siguen sin poder probarse en el entorno automatizado (lo rechaza hasta un botón mínimo).
+- **B. Comentarios y reseñas — quién puede qué** (decidido en el servidor; la UI solo evita ofrecer lo que se rechazaría):
+
+  | | leer comentarios y resumen | comentar | calificar | borrar |
+  |---|---|---|---|---|
+  | anónimo | sí, si la ficha se ve (clip publicado, no borrado, creadora no vetada) | no (la función ni se puede ejecutar) | no | no |
+  | sesión sin acceso al video | sí | no: «Desbloquea el video para opinar» | no | solo lo suyo |
+  | con acceso (compra, renta, suscripción o gratis vigente) | sí | sí | sí, una por clip; recalificar la actualiza | lo suyo |
+  | autora del clip | sí, también sin publicar | sí (sale con insignia) | **no**: «No puedes calificar tu propio clip» | los de cualquiera en su clip |
+  | administración | sí | sí | sí | cualquiera, y queda en la bitácora |
+  | cuenta vetada o suspendida | sus comentarios y calificaciones no se muestran ni cuentan (vetada) | no | no | lo suyo |
+  | sin mayoría de edad confirmada | sí | no: «Confirma que eres mayor de edad…» | no | lo suyo |
+
+- **Cómo se verificó:**
+  1. **Servidor, base de pruebas local con las 85 migraciones** (simula Supabase; la llamada por PostgREST real no se probó): 70 casos llamando a las funciones directamente con cada rol, no ocultando botones. Resultado en `/Users/soov/Documents/X/pruebas-seguridad-p0/c_resultado.txt`.
+     - Leer: anónimo ve el clip publicado (2) y no el pendiente ni el borrado (0); la autora ve los de su clip pendiente; los de una cuenta vetada no salen; una cuenta anonimizada sale como «Cuenta eliminada» sin handle; el resultado de `comentarios_de` no incluye correo ni el id de la autora.
+     - Comentar: anónimo → «permiso denegado a la función»; sin acceso → rechazado; con compra, gratis y autora → pasa; sin edad confirmada, vetada y suspendida → rechazado; clip borrado o sin publicar de otra → rechazado. Vacío, solo espacios, solo saltos y tabulaciones, y espacio duro con ancho cero → «Escribe algo antes de publicar»; 501 caracteres → rechazado; 500 → pasa; `<script>` se guarda literal; los espacios de los bordes se recortan y los saltos internos se conservan; el 6.º comentario en un minuto → «Vas demasiado rápido».
+     - Calificar: 4 → 4.0/1; recalificar 2 → 2.0/1 (no se duplica); 4 y 3 → 3.5/2; la calificación de una cuenta vetada no cuenta; la autora, quien no tiene acceso y el anónimo son rechazados; 0 y 6, rechazados; `quitar_calificacion` vuelve a 0.
+     - Borrar: la autora, la autora del clip y administración pueden; un tercero → «No puedes borrar este comentario»; borrar dos veces → «no existe»; anónimo → permiso denegado; el borrado de administración deja 1 fila en la bitácora y el de la propia autora, ninguna; `puede_borrar` es verdadero para la autora, la dueña y administración, y falso para un tercero y para un anónimo.
+     - Paginación: 25 comentarios → página 1 trae 20, la 2.ª (con `antes`) trae 5 con 0 repetidos; `cuantos = 100` se acota a 50.
+     - **RLS:** activado en las dos tablas, 0 políticas; insert, select, update y delete directos como `authenticated`, e insert como `anon`, dan «permiso denegado».
+  2. **Dos fallos que la propia prueba encontró y que ya están corregidos:** `btrim` solo recorta espacios, así que un comentario de solo saltos de línea se publicaba; y `puede_borrar`/`es_mio` salían nulos para quien no tiene sesión.
+  3. **Interfaz**, componente montado en un arnés temporal (ya borrado) con un sustituto en memoria de las funciones, escritorio y 390×844: lista de 20 + «Cargar más» (26 en total, 0 repetidos), publicar (se recorta, la caja se vacía y el comentario sale primero), calificar 4, recalificar 2 y quitar, borrar con confirmación (cancelar no borra), HTML y un `<script>` pintados como texto literal, palabra de 80 caracteres sin romper el ancho ni desbordar, insignia «Creadora», estrellas de 44 px, estado vacío («Todavía no hay comentarios», sin estrellas en la cabecera), anónimo («Entra para comentar», enlace a `#/entrar`), sesión sin acceso («Desbloquea el video para comentar») y la autora (formulario sin estrellas, botón borrar en todos).
+  4. `npm run typecheck`: sin errores. `npm run lint`: sin errores ni avisos nuevos en los archivos tocados (el aviso de `ClipDetail.tsx` ya existía). `npm run build`: sin errores (paquete principal 657.72 kB, gzip 185.68). Las suites anteriores (dinero, ataques, D, E, G, H) dan lo mismo con la migración nueva en la cadena.
+- **Estado de despliegue — importante:** el código ya está publicado, pero **`supabase db push` no se ha corrido**: no estaba en lo que se pidió y es producción. Hasta aplicarlo, en la ficha la lista saldrá como «Todavía no hay comentarios» y, para quien tenga acceso, publicar o calificar dará un error del servidor. No rompe nada más. La migración solo añade tablas y funciones nuevas, sin tocar las existentes.
+- **No verificado, dicho sin rodeos:** la ficha real con una URL firmada (solo se probó el componente aislado); las llamadas por PostgREST contra la base real; el comportamiento con muchos comentarios (la media se calcula al vuelo con un índice por clip, sin tabla de agregados); y la prueba en pantalla del reproductor con la marca en esta ronda.
+- **Decisiones que tomé y conviene saber:** (a) la lectura va también para el rol anónimo, porque el catálogo ya es legible para `anon` y la puerta de edad es de pantalla; si se quiere que el texto de los comentarios no sea público para quien no ha confirmado la edad en servidor, hay que pedir sesión en `comentarios_de`; (b) los comentarios de una cuenta anonimizada se conservan como «Cuenta eliminada» (no hizo falta tocar `admin_anonimizar_cuenta`); (c) los comentarios se borran en cascada si se borra el clip o una cuenta de demostración, nunca los de una cuenta real, que el guardián de cuentas no deja borrar; (d) no hay edición de comentarios, hilos, reportes de comentarios, moderación ni notificaciones, como se pidió.
+- **¿Debería subir el checklist?** §4 Reseñas/comentarios: pasa de `not_started` a `partial` hasta que la migración esté aplicada y se pruebe en la ficha real; entonces `pass`. §3 PiP: `pass` con la nota de que con marca se esconde. No los marqué yo.
 - **urgencia:** media
-- **ya se intentó:** nada en producto. Al terminar: cambia a `respondida` con SHA(s), diff resumido y cómo lo verificaste.
 
 ### [id: 20261106-02] Ronda 2 hecha — reproductor: controles propios y velocidad
 - **fecha:** 2026-11-06 (America/Mexico_City)
