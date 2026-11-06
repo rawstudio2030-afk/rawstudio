@@ -4,7 +4,7 @@
 // edad" y entraba. Eso basta para mirar, pero no para publicar: quien aparece
 // en el contenido debe ser adulto comprobado, y esa es la parte que la ley no
 // perdona.
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { cuantos } from '../lib/plural'
 import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
@@ -51,6 +51,24 @@ export default function Verificar() {
   const [selfie, setSelfie] = useState<File | null>(null)
   const [estado, setEstado] = useState<'listo' | 'enviando' | 'ok' | 'revision' | 'error'>('listo')
   const [detalle, setDetalle] = useState('')
+  // ¿Ya hay un consentimiento biometrico vigente en el servidor? Sin el, el
+  // servidor no recibe las imagenes ni abre la solicitud. `null` = todavia no se
+  // sabe; se trata como que no, y la casilla se muestra.
+  const [consentido, setConsentido] = useState<boolean | null>(null)
+  const [acepta, setAcepta] = useState(false)
+  const idCasilla = useId()
+  const uid = sesion?.user.id
+
+  useEffect(() => {
+    if (!uid) return
+    let vivo = true
+    supabase.from('consentimientos').select('otorgado')
+      .eq('user_id', uid).eq('tipo', 'biometricos')
+      .order('created_at', { ascending: false }).order('id', { ascending: false })
+      .limit(1).maybeSingle()
+      .then(({ data }) => { if (vivo) setConsentido(data?.otorgado === true) })
+    return () => { vivo = false }
+  }, [uid])
 
   if (cargando) return <Centro texto="Cargando…" />
   if (!sesion) return <Centro texto="Necesitas entrar." accion={{ texto: 'Entrar', al: () => nav('/acceso') }} />
@@ -62,6 +80,7 @@ export default function Verificar() {
   const edad = edadDe(nacimiento)
   const edadOk = edad !== null && edad >= 18 && edad <= 120
   const puede = edadOk && !!ine && !!selfie && estado !== 'enviando'
+    && (consentido === true || acepta)
 
   /** Sube las imagenes al bucket privado y abre una revision manual.
    *
@@ -92,6 +111,16 @@ export default function Verificar() {
   const enviar = async () => {
     if (!puede || !sesion) return
     setEstado('enviando'); setDetalle('')
+
+    // El consentimiento se anota en el servidor ANTES de mandar nada: la INE y
+    // la selfie son datos biometricos, y el servidor no las recibe sin el.
+    if (consentido !== true) {
+      const { error } = await supabase.rpc('registrar_consentimiento', {
+        p_tipo: 'biometricos', p_otorgado: true,
+      })
+      if (error) { setEstado('error'); setDetalle(error.message); return }
+      setConsentido(true)
+    }
 
     // Sin microservicio configurado, va directo a revision manual.
     if (!SERVICIO) {
@@ -223,6 +252,30 @@ export default function Verificar() {
       <Foto etiqueta="Selfie" nota="De frente, con buena luz y sin lentes oscuros"
         archivo={selfie} refInput={refSelfie} camara="user"
         onElegir={f => { setSelfie(f); if (estado === 'error') setEstado('listo') }} />
+
+      {/* Consentimiento expreso y separado: ninguna casilla preseleccionada, y
+          solo se pide si todavia no hay uno vigente. */}
+      {consentido !== true && (
+        <div style={{ display: 'flex', gap: 11, alignItems: 'flex-start' }}>
+          <input type="checkbox" id={idCasilla} className="casilla"
+            checked={acepta} onChange={e => setAcepta(e.target.checked)}
+            style={{
+              width: 22, height: 22, flex: '0 0 auto', marginTop: 1, borderRadius: 6,
+              border: `1.5px solid ${acepta ? COLOR.dinero : 'rgba(255,255,255,.4)'}`,
+              background: acepta ? COLOR.dinero : 'transparent',
+              color: COLOR.fondo, cursor: 'pointer',
+            }} />
+          <label htmlFor={idCasilla} style={{
+            font: `400 13px/1.5 ${FUENTE.ui}`, color: '#CFCAD3', cursor: 'pointer',
+          }}>
+            Autorizo el tratamiento de mis <b>datos biométricos faciales</b> y de mi
+            identificación (INE y selfie) para verificar mi identidad y mi edad, como
+            explica el <a href="#/privacidad" target="_blank" rel="noopener noreferrer"
+              onClick={e => e.stopPropagation()} style={{ color: COLOR.admin }}>aviso de
+            privacidad</a>. <span style={{ color: COLOR.acento }}>*</span>
+          </label>
+        </div>
+      )}
 
       {estado === 'error' && (
         <div role="alert" style={{ font: `400 14px/1.45 ${FUENTE.ui}`, color: '#FF7BE6' }}>{detalle}</div>
