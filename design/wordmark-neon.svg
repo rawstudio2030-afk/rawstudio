@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200" width="800" height="200">
+  <defs>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <text x="20" y="140" font-family="Arial Black, sans-serif" font-size="120" font-weight="900" fill="#FF2BD1" filter="url(#glow)">RAW</text>
+  <text x="320" y="140" font-family="Arial, sans-serif" font-size="110" font-weight="700" fill="#C8FF3D" filter="url(#glow)">studio</text>
+</svg>
