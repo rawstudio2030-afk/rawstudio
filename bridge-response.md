@@ -37,6 +37,9 @@
 - **ronda:** 5 de 10 · **tope:** 1 hora · **tarea:** §5 de `CHECKLIST.md` (consultas pagadas vía Telegram) — solo la cara pública del servicio, no el bot ni el cobro
 - **checklist afectados (NO marques pass tú):** §5 `not_started` → el coordinador lo verifica. No rompas los `pass` de §2 ni §3 ni el recorte de la ronda 4.
 
+#### Actualización — 2026-11-06 14:59 (America/Mexico_City)
+Sergio fijó el precio en **20 pesos** por mensaje del cliente (corrigió una cifra de 30 que no debe usarse). Sustituye cualquier `[PRECIO]` o «30 pesos» por **20 pesos**. El resto de las reglas no cambia.
+
 #### Orden respecto a la ronda 4
 Si `[id: 20261106-04]` todavía no está hecha y empujada, **termínala primero** y luego sigue con esta. No mezcles los dos recortes en un solo commit. Si 04 ya está en `origin/main`, `git pull` y arranca esta.
 
@@ -55,7 +58,7 @@ Reglas del servicio de consultas pagadas por Telegram
 RAWstudio ofrece consultas pagadas por Telegram entre quien pregunta y la creadora. Cada mensaje que envía el cliente es un mensaje de pago.
 
 1. Precio
-Cada mensaje del cliente cuesta [PRECIO]. Ese pago cubre ese mensaje y la respuesta de la creadora.
+Cada mensaje del cliente cuesta 20 pesos. Ese pago cubre ese mensaje y la respuesta de la creadora.
 
 2. Extensión
 El mensaje del cliente debe tener al menos 20 palabras. Si tiene menos, no se envía.
@@ -74,7 +77,7 @@ Saluda.
 Responde lo que preguntaron.
 Ofrece el siguiente paso.
 
-- El monto numérico **no está definido**. Deja el marcador `[PRECIO]` en una constante única (p. ej. `PRECIO_CONSULTA_TELEGRAM = '[PRECIO]'` en `src/content/consultas.ts`). No inventes 5, 10 ni 99 dólares ni pesos.
+- El precio es fijo: **20 pesos** por mensaje del cliente. Déjalo en una constante única (p. ej. `PRECIO_CONSULTA_TELEGRAM = '20 pesos'` en `src/content/consultas.ts`). No lo cambies a otra cifra, no uses 30 ni el marcador `[PRECIO]`, y no lo pases a dólares.
 - El usuario del bot de Telegram **no está definido**. Constante vacía al estilo de `REDES` (p. ej. `BOT_TELEGRAM = ''`). Si está vacía, **no** pintes un enlace `t.me/…`, **no** digas «escríbenos al bot» con un destino inventado y **no** abras Telegram.
 
 #### Qué no está definido (fuera de esta ronda — no lo inventes)
@@ -84,7 +87,7 @@ Cobro del mensaje (pasarela, SPEI, retención), qué pasa si la creadora no resp
 
 **1. Página nueva `/consultas`**
 - Pantalla pública al estilo de `/preguntas`: `MarcoDocumento` (o el mismo aire), título en español (p. ej. «Consultas por Telegram»).
-- Pinta las reglas de arriba, enteras, en español, sin reescribir el sentido. El `[PRECIO]` sale de la constante.
+- Pinta las reglas de arriba, enteras, en español, sin reescribir el sentido. El precio «20 pesos» sale de la constante.
 - Deja claro que cada mensaje del cliente se paga y que esa cuota cubre la respuesta; que hacen falta ≥20 palabras; que el texto va anclado al hilo y al clip o creadora; la brújula flexible; el tope de 2 días; y la guía de tres puntos para la creadora.
 - Si `BOT_TELEGRAM` está vacío, no hay botón de «abrir Telegram». Un enlace a `/preguntas` o `/contacto` al pie está bien, como en las otras páginas de ayuda.
 - Súmala a `SCREENS` en `src/App.tsx`. Agrégala a `SIN_PUERTA_DE_EDAD` en `src/lib/rutas.ts` (se puede leer como `/preguntas` y `/creadoras`, sin sesión). No la pongas en la barra inferior.
@@ -103,14 +106,14 @@ Cobro del mensaje (pasarela, SPEI, retención), qué pasa si la creadora no resp
 - `/chat` ni Encargos, reproductor, comentarios, age gate, textos de `/privacidad` y `/terminos`, el recorte de la ronda 4 (hero, Cintillo, Portada), copy 20%/SPEI/18+ que ya está, Telegram real, pagos, Admin, Supabase.
 
 #### Archivos concretos a tocar (esperados)
-- `src/content/consultas.ts` (nuevo): constante de precio `[PRECIO]`, bot vacío, textos de las reglas.
+- `src/content/consultas.ts` (nuevo): constante de precio `20 pesos`, bot vacío, textos de las reglas.
 - `src/screens/Consultas.tsx` (nuevo) o export en `Ayuda.tsx` si encaja mejor; regístralo en `App.tsx`.
 - `src/lib/rutas.ts` (`SIN_PUERTA_DE_EDAD`).
 - `src/content/portada.ts` (`FORMAS_NEON`) y el componente que pinte esas tarjetas si hay que volver una de ellas `Enlace`.
 - `src/screens/Creators.tsx` (bloque corto + enlace).
 
 #### Criterios de aceptación (verificables)
-1. `/#/consultas` se abre sin sesión y sin age gate, muestra las seis reglas (precio con `[PRECIO]`, 20 palabras, pertinencia, brújula, 2 días, guía de tres puntos) y no muestra un enlace a un bot inventado.
+1. `/#/consultas` se abre sin sesión y sin age gate, muestra las seis reglas (precio de 20 pesos, 20 palabras, pertinencia, brújula, 2 días, guía de tres puntos) y no muestra un enlace a un bot inventado.
 2. En `/#/`, primer paint sin cambios respecto a lo ya verificado (no aparece la tarjeta nueva hasta abrir «Precios»).
 3. Al abrir «Precios», hay una tarjeta «Consultas por Telegram» que lleva a `/consultas`.
 4. En `/#/creadoras` se lee el recuadro corto y el enlace a `/consultas`. El resto de esa página no cambia de sentido.

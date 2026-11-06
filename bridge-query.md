@@ -43,7 +43,7 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 - **estado:** asignada
 - **tarea:** §5 de CHECKLIST.md — cara pública del servicio de consultas por Telegram (página `/consultas`, tarjeta en Precios, recuadro en `/creadoras`).
 - **pregunta:** Asignación del coordinador. Implementar `bridge-response.md` `[id: 20261106-05]`. Si `20261106-04` no está hecha, termínala primero.
-- **contexto:** Sergio dictó las reglas por voz el 2026-11-06 ~14:57 hora de México: precio por mensaje del cliente `[PRECIO]` (sin monto), mínimo 20 palabras, pertinencia al hilo y al clip o creadora, brújula flexible, tope de 2 días, guía de tres puntos. No hay usuario del bot ni cobro definido. HEAD al asignar: ver el remoto; la ronda 4 (`20261106-04`) puede seguir pendiente.
+- **contexto:** Sergio dictó las reglas por voz el 2026-11-06 ~14:57 hora de México: precio fijo de 20 pesos por mensaje del cliente, mínimo 20 palabras, pertinencia al hilo y al clip o creadora, brújula flexible, tope de 2 días, guía de tres puntos. No hay usuario del bot ni cobro definido. HEAD al asignar: ver el remoto; la ronda 4 (`20261106-04`) puede seguir pendiente.
 - **urgencia:** media
 - **ya se intentó:** nada de Telegram existe en el repo.
 

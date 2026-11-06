@@ -102,7 +102,7 @@ Ubicación: `src/components/Reproductor.tsx` usado desde `src/screens/ClipDetail
 ---
 
 ## 5. Consultas pagadas vía Telegram
-- **Estado:** `not_started` — **en ronda 5** (`20261106-05`). Hoy no hay página, tarjeta ni bot. Esta ronda cubre solo la cara pública (reglas + `/consultas` + tarjeta en Precios + recuadro en `/creadoras`). Precio `[PRECIO]` y usuario del bot siguen sin definirse; no hay cobro ni chat real en esta ronda.
+- **Estado:** `not_started` — **en ronda 5** (`20261106-05`). Hoy no hay página, tarjeta ni bot. Esta ronda cubre solo la cara pública (reglas + `/consultas` + tarjeta en Precios + recuadro en `/creadoras`). Precio fijo: 20 pesos por mensaje. El usuario del bot sigue sin definirse; no hay cobro ni chat real en esta ronda.
 
 ---
 
@@ -187,11 +187,10 @@ React 19 · Vite 8 · HashRouter · Supabase · GitHub Pages · comisión 20% / 
 1. **Por qué:** Sergio dictó las reglas por voz y pidió empezar la sección o página.
 2. **Qué:** página `/consultas` con las reglas canónicas; tarjeta en «Precios» que enlaza ahí; recuadro corto en `/creadoras` con la guía de tres puntos y el plazo de 2 días.
 3. **Qué no:** bot real, username inventado, cobro del mensaje, reembolso si no contestan, botón de Telegram en la ficha, tocar `/chat` (encargos), legales, reproductor, comentarios, el recorte de la ronda 4.
-4. Precio: marcador `[PRECIO]`. Bot: constante vacía.
+4. Precio: **20 pesos** por mensaje (Sergio corrigió 30 → 20). Bot: constante vacía.
 5. Este commit de docs no implementa la página; Claude Code debe seguir `bridge-response.md` `[id: 20261106-05]`.
 6. Ítems ya `pass` permanecen inmutables.
 
 ### Qué sigue decidiendo Sergio (no bloquea el texto ni la página informativa)
-- El monto numérico que reemplaza `[PRECIO]`.
 - El usuario del bot de Telegram.
 - Cómo se cobra el mensaje y qué pasa si la creadora no responde en 2 días.
