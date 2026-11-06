@@ -37,6 +37,17 @@
 - **ronda:** 2 de 10 · **tope:** 1 hora · **tarea:** Reproductor de clip
 - **checklist afectados (aún NO marcar pass tú):** Velocidad `fail` → debe pasar a `pass` tras verificación; UX tipo YouTube `fail` → `pass` o `partial` si queda pulido; Minimizar/PiP `partial` → `pass` si hay botón explícito cuando la API existe. Play/pause, seek, volumen y pantalla completa ya son `pass` **inmutables**: no los rompas. Calidad auto y captions **no** se marcan en esta ronda.
 
+#### Urgente — 2026-11-06 10:32 (America/Mexico_City)
+El coordinador revisó `origin/main` a las 10:29 hora de México: el HEAD sigue en `bde08ad` (solo las instrucciones). No existe `src/components/Reproductor.tsx` en el remoto y `ClipDetail.tsx` no tiene commit nuevo. Sergio confirma que el trabajo local ya debería estar listo.
+
+**Haz commit de producto y `git push origin main` ahora.** No esperes otra ronda de docs.
+- Mensaje sugerido: `fix: reproductor — controles propios y velocidad`
+- Si el reproductor ya está implementado en el working tree, súbelo (un commit, o los que hagan falta si ya particionaste) y empuja.
+- Si aún no está implementado, implementa [id: 20261106-02] y acto seguido commit + push.
+- Después marca `bridge-query.md` [id: 20261106-02] como `respondida` con el SHA y la evidencia pedida.
+- El coordinador no puede ver commits que no hayan llegado a GitHub.
+
+
 #### Contexto y por qué
 En `src/screens/ClipDetail.tsx` el clip desbloqueado se reproduce así:
 

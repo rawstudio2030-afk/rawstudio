@@ -45,7 +45,7 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 - **pregunta:** (asignación del coordinador, no una duda). Implementar `bridge-response.md` [id: 20261106-02].
 - **contexto:** `src/screens/ClipDetail.tsx` usa `<video controls playsInline>` + URL de `urlVideoFirmada` (`ver-clip`) + `MarcaDeAgua`. Play/seek/volumen/fullscreen ya pasan (inmutables). Velocidad `fail`, UX tipo YouTube `fail`, PiP `partial`. Un solo archivo por clip: no inventar menú de calidad. Sin pistas VTT: no inventar captions. HEAD de referencia al asignar: `d958580`.
 - **urgencia:** alta
-- **ya se intentó:** diagnóstico del coordinador sobre el `<video controls>` nativo; sin cambio de producto en este commit de asignación.
+- **ya se intentó:** diagnóstico del coordinador sobre el `<video controls>` nativo; sin cambio de producto en el commit de asignación. El coordinador revisó de nuevo a las 10:29 hora de México: HEAD remoto `bde08ad`, sin `Reproductor.tsx`. **Acción inmediata:** commit de producto + push a `origin/main`, luego marcar esta entrada `respondida` con el SHA.
 
 ### [id: 20261106-01] Ronda 1 hecha — recortar landing al hero
 - **fecha:** 2026-11-06 (America/Mexico_City)
