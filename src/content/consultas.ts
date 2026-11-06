@@ -5,17 +5,17 @@ import { cuantos } from '../lib/plural'
  * Lo dicto Sergio y se pinta tal cual en /consultas, sin reescribir el sentido.
  * Este archivo es lo unico que hay que tocar si cambia una regla o el precio.
  *
- * Lo que NO hay todavia, a proposito: el bot (su usuario lo va a crear el
- * dueño), el cobro del mensaje, la API de validacion ni nada que abra Telegram.
- * Por eso `BOT_TELEGRAM` esta vacio y la pagina no pinta ningun enlace a un
- * bot: un destino inventado seria peor que ninguno. */
+ * El usuario del bot ya existe (`BOT_TELEGRAM`). El cobro del mensaje y la
+ * API de validacion todavia no. El token del bot NUNCA va en este archivo
+ * ni en el frontend.
+ */
 
 /** Precio fijo por mensaje del cliente. Una sola vez, aqui; en pesos, no en
  *  dolares. */
 export const PRECIO_CONSULTA_TELEGRAM = '20 pesos'
 
-/** Usuario del bot de Telegram, sin la arroba. Vacio hasta que el dueño lo cree. */
-export const BOT_TELEGRAM = ''
+/** Usuario del bot de Telegram, sin la arroba. */
+export const BOT_TELEGRAM = 'RawStudios_bot'
 
 /** Minimo de palabras de un mensaje del cliente. */
 export const MIN_PALABRAS = 20
@@ -66,7 +66,7 @@ export const PRIVACIDAD = {
     l: [
       'Nunca ves el número telefónico de la creadora.',
       'Nunca ves su cuenta personal de Telegram.',
-      'Solo ves el nombre del bot (por ejemplo, Raw Studio).',
+      'Solo ves el nombre del bot (RawStudio).',
     ],
   },
   creadora: {
@@ -77,11 +77,11 @@ export const PRIVACIDAD = {
     ],
   },
   bot: {
-    t: 'Al crear el bot',
+    t: 'El bot',
     l: [
-      'El usuario del bot todavía está pendiente: el dueño lo va a crear.',
-      'Activa el modo de privacidad del bot al crearlo, para que no pueda leer otros chats del grupo.',
-      'Usa un nombre de usuario dedicado, no vinculado a una cuenta personal con foto o historial visible.',
+      'Se llama RawStudio y su usuario es @RawStudios_bot.',
+      'Tiene el modo de privacidad activo, para que no pueda leer otros chats del grupo.',
+      'Es un usuario dedicado, no vinculado a una cuenta personal con foto o historial visible.',
     ],
   },
 }

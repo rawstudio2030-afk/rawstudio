@@ -4,9 +4,7 @@
  * edad, como /preguntas y /contacto, porque quien decide si usarlo tiene que
  * poder ver las reglas antes de crear una cuenta.
  *
- * No hay boton de «abrir Telegram»: el bot todavia no existe (ver
- * `content/consultas.ts`). Pintar un enlace a un usuario inventado seria peor
- * que no pintar ninguno.
+ * El enlace a Telegram sale de `BOT_TELEGRAM`. El token del bot no vive aqui.
  *
  * El texto sale tal cual de `content/consultas.ts`: este archivo solo lo
  * dispone. Modo consumo, igual que las demas paginas de lectura.
@@ -16,7 +14,7 @@ import { MarcoDocumento } from '../components/Documento'
 import { Enlace } from '../components/Pulsable'
 import { COLOR, LINEA, FUENTE, RADIO } from '../lib/diseño'
 import {
-  INTRO, REGLAS, GUIA_CREADORA, PRIVACIDAD, VALIDACION,
+  INTRO, REGLAS, GUIA_CREADORA, PRIVACIDAD, VALIDACION, BOT_TELEGRAM,
 } from '../content/consultas'
 
 const cuerpo: React.CSSProperties = {
@@ -51,6 +49,30 @@ export default function Consultas() {
       <div style={{ marginTop: 14, font: `400 12px/1.5 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
         Plataforma para mayores de 18 años.
       </div>
+
+      {BOT_TELEGRAM && (
+        <a
+          href={`https://t.me/${BOT_TELEGRAM}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="pulsable"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            marginTop: 18,
+            minHeight: 44,
+            padding: '0 18px',
+            borderRadius: RADIO.neon,
+            border: `1.5px solid ${LINEA.marcada}`,
+            font: `700 15px/1.3 ${FUENTE.ui}`,
+            color: COLOR.admin,
+            textDecoration: 'none',
+            background: 'transparent',
+          }}
+        >
+          Abrir @{BOT_TELEGRAM} en Telegram
+        </a>
+      )}
 
       {/* ---------- las reglas ---------- */}
       <Titulo>Reglas del servicio</Titulo>
