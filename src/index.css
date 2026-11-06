@@ -222,6 +222,14 @@ details[open] > summary > .faq-signo {
   color: #E9E5EC; text-shadow: 0 1px 16px rgba(6,5,11,.95);
 }
 .miami-botones { width: 100%; display: grid; gap: 14px; margin-top: 26px }
+/* «Ya tengo cuenta»: del mismo alto que «Crear mi cuenta» y con el rotulo legible,
+   no el gris apagado del boton suave de las pantallas de acceso. */
+.miami-botones .miami-boton-entrar {
+  font-size: 15px; letter-spacing: 3px; color: #F2F0F3; border-color: rgba(255,255,255,.55);
+  background: rgba(8,8,10,.6);
+}
+/* En pantalla ancha los botones van de dos en dos; este ocupa la fila entera. */
+.miami-botones .miami-boton-ancho { grid-column: 1 / -1 }
 .miami-boton {
   box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 12px;
   min-height: 58px; padding: 0 18px; cursor: pointer;

@@ -164,7 +164,11 @@ export default function Portal() {
 
           <div className="miami-botones">
             <Enlace a="/registro" className="miami-boton miami-boton-magenta">Crear mi cuenta</Enlace>
-            <Pulsable al={() => pedir('como', 'como-funciona')} className="miami-boton miami-boton-cian">
+            {/* Quien regresa viene a entrar, no a leer: era un enlace chico
+                subrayado al final de la pantalla y no se veia. Ahora es un boton
+                del mismo tamaño que el de crear cuenta, justo debajo. */}
+            <Enlace a="/acceso" className="miami-boton miami-boton-suave miami-boton-entrar">Ya tengo cuenta</Enlace>
+            <Pulsable al={() => pedir('como', 'como-funciona')} className="miami-boton miami-boton-cian miami-boton-ancho">
               <svg aria-hidden width="18" height="18" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round">
                 <path d="M7 5v14l11.5-7Z" />
@@ -182,10 +186,9 @@ export default function Portal() {
               : <Pulsable key={o.t} al={() => pedir(o.s!, o.id!)} className="miami-opcion">{o.t}</Pulsable>)}
           </nav>
 
-          {/* Quien ya tiene cuenta, y quien solo viene a mirar: son los dos
-              caminos que no son «crear cuenta» y no pueden desaparecer. */}
+          {/* Quien solo viene a mirar: el camino que no es «crear cuenta» ni
+              «entrar» y no puede desaparecer. */}
           <div className="miami-enlaces">
-            <Enlace a="/acceso">Ya tengo cuenta</Enlace>
             <Enlace a="/age">Solo vengo a ver &#8594;</Enlace>
           </div>
         </div>
