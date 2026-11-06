@@ -17,7 +17,7 @@
  */
 import { useId } from 'react'
 import { cuantos, palabra } from '../lib/plural'
-import { COLOR, LINEA, FUENTE } from '../lib/diseño'
+import { COLOR, FUENTE } from '../lib/diseño'
 
 export type Pais = {
   /** ISO 3166-1 alfa-2. De aqui sale la bandera. */
@@ -155,11 +155,11 @@ export default function Telefono({ valor, cambia, autoFoco }: {
   const id = useId()
   const { pais, nacional } = partir(valor)
 
+  // El borde, el fondo y el foco salen de `.campo-sobrio` (index.css): aqui
+  // solo va lo que es de este campo.
   const caja: React.CSSProperties = {
-    background: 'transparent', color: COLOR.texto,
-    border: `1px solid ${LINEA.suave}`, borderRadius: 0,
-    padding: '12px 13px', font: `400 16px/1.45 ${FUENTE.ui}`, outline: 'none',
-    boxSizing: 'border-box', height: 46,
+    padding: '12px 13px', font: `400 16px/1.45 ${FUENTE.ui}`,
+    boxSizing: 'border-box', height: 50,
   }
 
   const p = PAISES.find(x => x.c === pais)
@@ -173,12 +173,15 @@ export default function Telefono({ valor, cambia, autoFoco }: {
           cortado a «🇲🇽 +52 Méx». Asi la lista abierta conserva los nombres
           —que es como se encuentra un pais— y cerrado se ve solo la bandera
           con su codigo, que es lo unico que hace falta ahi. */}
-      <div className="pais-caja" style={{
+      <div className="pais-caja campo-sobrio" style={{
         ...caja, position: 'relative', flex: '0 0 auto', width: 104,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6,
       }}>
         <span style={{ whiteSpace: 'nowrap' }}>{corto}</span>
-        <span aria-hidden style={{ color: COLOR.textoTenue, fontSize: 10 }}>&#9662;</span>
+        <svg aria-hidden width="10" height="6" viewBox="0 0 10 6" fill="none" stroke={COLOR.textoSuave}
+          strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flex: '0 0 auto' }}>
+          <path d="M1 1l4 4 4-4" />
+        </svg>
         <select
           aria-label="País del teléfono" id={id} value={pais}
           onChange={e => cambia(juntar(e.target.value, nacional))}
@@ -200,7 +203,7 @@ export default function Telefono({ valor, cambia, autoFoco }: {
         value={nacional}
         onChange={e => cambia(juntar(pais || 'MX', e.target.value.replace(/\D/g, '').slice(0, 15)))}
         placeholder={pais === 'MX' ? '5512345678' : 'Número'}
-        style={{ ...caja, flex: 1, minWidth: 0 }} />
+        className="campo-sobrio" style={{ ...caja, flex: 1, minWidth: 0 }} />
     </div>
   )
 }

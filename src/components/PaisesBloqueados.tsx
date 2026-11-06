@@ -31,7 +31,7 @@ export default function PaisesBloqueados({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <span style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', color: COLOR.textoTenue }}>
+      <span style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase', color: COLOR.textoSuave }}>
         Ocultar en estos países
       </span>
 
@@ -40,11 +40,12 @@ export default function PaisesBloqueados({
           const on = valor.includes(c)
           return (
             <Pulsable key={c} al={() => alternar(c)} activado={on} style={{
-              padding: '9px 11px', cursor: 'pointer',
-              font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
+              minHeight: 40, padding: '0 14px', cursor: 'pointer', borderRadius: 999,
+              display: 'inline-flex', alignItems: 'center',
+              font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
               background: on ? COLOR.admin : 'transparent',
               color: on ? COLOR.fondo : COLOR.textoSuave,
-              border: `1px solid ${on ? COLOR.admin : LINEA.media}`,
+              border: `1px solid ${on ? COLOR.admin : LINEA.fuerte}`,
             }}>{n}</Pulsable>
           )
         })}
@@ -52,18 +53,18 @@ export default function PaisesBloqueados({
 
       {/* Los que no están en la lista corta */}
       <div style={{ display: 'flex', gap: 7 }}>
-        <input value={otro} maxLength={2}
+        <input value={otro} maxLength={2} className="campo-sobrio" aria-label="Otro país, código de dos letras"
           onChange={e => setOtro(e.target.value.toUpperCase().replace(/[^A-Z]/g, ''))}
           onKeyDown={e => { if (e.key === 'Enter') agregarOtro() }}
           placeholder="Otro (ej. FR)"
           style={{
-            width: 130, boxSizing: 'border-box', background: COLOR.superficie,
-            border: '1px solid rgba(255,255,255,.14)', color: COLOR.texto,
-            font: `400 13px/1 ${FUENTE.mono}`, padding: '11px', outline: 'none',
+            width: 140, boxSizing: 'border-box', minHeight: 44,
+            font: `400 14px/1 ${FUENTE.mono}`, padding: '0 12px',
           }} />
         <Pulsable al={agregarOtro} style={{
-          padding: '11px 14px', border: '1px solid rgba(255,255,255,.16)',
-          color: COLOR.textoSuave, font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
+          minHeight: 44, padding: '0 16px', display: 'inline-flex', alignItems: 'center', borderRadius: 12,
+          border: `1px solid ${LINEA.fuerte}`,
+          color: COLOR.textoSuave, font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
           textTransform: 'uppercase', cursor: 'pointer',
         }}>Agregar</Pulsable>
       </div>
@@ -72,21 +73,22 @@ export default function PaisesBloqueados({
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
           {valor.filter(c => !FRECUENTES.some(([f]) => f === c)).map(c => (
             <Pulsable key={c} al={() => alternar(c)} rotulo={`Quitar ${c}`} style={{
-              padding: '8px 10px', cursor: 'pointer',
-              font: `700 10px/1 ${FUENTE.mono}`, letterSpacing: 1.2,
+              minHeight: 40, padding: '0 13px', cursor: 'pointer', borderRadius: 999,
+              display: 'inline-flex', alignItems: 'center',
+              font: `700 11px/1 ${FUENTE.mono}`, letterSpacing: 1.2,
               background: COLOR.admin, color: COLOR.fondo,
             }}>{c} ×</Pulsable>
           ))}
         </div>
       )}
 
-      <div style={{ font: `400 12px/1.6 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
+      <div style={{ font: `400 13px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
         {nota ?? 'Quien se conecte desde ahí no podrá abrirlo.'}
       </div>
 
       {/* Se dice el limite real. Prometer un bloqueo infalible seria lo peor
           que se le puede decir a alguien que se esconde de su entorno. */}
-      <div style={{ font: `400 10px/1.6 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
+      <div style={{ font: `400 12px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
         Ojo: una VPN salta esto. Reduce mucho el riesgo, no lo elimina.
       </div>
     </div>

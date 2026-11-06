@@ -21,18 +21,21 @@ import { usePapel } from '../components/Navegacion'
 import { ATAJOS_PERFIL, visiblesPara } from '../lib/rutas'
 import { miTelefono, guardarTelefono, limpiarTelefono } from '../lib/contacto'
 import Telefono, { valorValido, pistaDe } from '../components/Telefono'
-import { COLOR, FUENTE } from '../lib/diseño'
+import { COLOR, FUENTE, RADIO } from '../lib/diseño'
 import Icono from '../components/Iconos'
 import { Pulsable, Enlace } from '../components/Pulsable'
 
 
+/* Modo consumo: los rotulos y los textos de ayuda van en `textoSuave`. Eran
+   `textoTenue` y `textoApagado` (3.78:1 y 2.97:1), que no llegan a AA, y esta es
+   la pantalla donde se lee lo que pide cada dato. */
 const etiqueta: React.CSSProperties = {
-  font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', color: COLOR.textoTenue,
+  font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase', color: COLOR.textoSuave,
 }
+// El borde, el fondo y el foco salen de `.campo-sobrio` (index.css).
 const campo: React.CSSProperties = {
-  width: '100%', boxSizing: 'border-box', background: COLOR.superficie,
-  border: '1px solid rgba(255,255,255,.14)', color: COLOR.texto,
-  font: `400 16px/1.3 ${FUENTE.ui}`, padding: '15px', outline: 'none',
+  width: '100%', boxSizing: 'border-box',
+  font: `400 16px/1.3 ${FUENTE.ui}`, padding: '15px',
 }
 
 export default function Perfil() {
@@ -154,7 +157,7 @@ export default function Perfil() {
   return (
     <div style={{
       minHeight: '100%', boxSizing: 'border-box',
-      padding: `54px 24px ${sucio || estado !== 'listo' ? 120 : 44}px`,
+      padding: `20px 18px ${sucio || estado !== 'listo' ? 130 : 44}px`,
       background: COLOR.fondo, color: COLOR.texto, fontFamily: FUENTE.ui,
       display: 'flex', flexDirection: 'column',
       // Un formulario a mil pixeles de ancho no se llena: el ojo pierde la
@@ -162,10 +165,13 @@ export default function Perfil() {
       // porque no hay de otra; en pantalla ancha si.
       width: '100%', maxWidth: 680, margin: '0 auto',
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 26 }}>
-        <Pulsable al={() => nav(-1)} rotulo="Volver" style={{ font: `400 26px/1 ${FUENTE.ui}`, color: COLOR.textoSuave, cursor: 'pointer' }}>‹</Pulsable>
-        <span style={{ ...etiqueta, color: COLOR.dinero }}>Ajustes de cuenta</span>
-        <span style={{ width: 14 }} />
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+        <Pulsable al={() => nav(-1)} rotulo="Volver" style={{
+          width: 44, height: 44, borderRadius: '50%', display: 'grid', placeItems: 'center',
+          border: '1px solid rgba(255,255,255,.22)', color: COLOR.texto, cursor: 'pointer',
+        }}><span aria-hidden style={{ font: `400 22px/1 ${FUENTE.ui}` }}>&#8249;</span></Pulsable>
+        <h1 style={{ ...etiqueta, margin: 0, color: COLOR.dinero }}>Ajustes de cuenta</h1>
+        <span aria-hidden style={{ width: 44 }} />
       </div>
 
       {/* ---------- Lo que ve el público ---------- */}
@@ -177,22 +183,23 @@ export default function Perfil() {
             al={() => archivo.current?.click()}
             rotulo={foto ? 'Cambiar foto de perfil' : 'Subir foto de perfil'}
             style={{
-              width: 82, height: 82, borderRadius: '50%', flex: '0 0 auto', cursor: 'pointer',
+              width: 84, height: 84, borderRadius: '50%', flex: '0 0 auto', cursor: 'pointer',
               border: `2px solid ${COLOR.acento}`, overflow: 'hidden',
               background: foto ? `center/cover url(${foto})` : `repeating-linear-gradient(130deg,${COLOR.superficieAlta} 0 8px,${COLOR.superficie} 8px 16px)`,
               display: 'grid', placeItems: 'center',
             }}>
-            {!foto && <span style={{ ...etiqueta, color: COLOR.textoApagado }}>Foto</span>}
+            {!foto && <span style={{ ...etiqueta, color: COLOR.textoTenue }}>Foto</span>}
           </Pulsable>
           <div style={{ minWidth: 0 }}>
             <Pulsable al={() => archivo.current?.click()} style={{
-              display: 'inline-block', border: '1px solid rgba(255,255,255,.16)', color: COLOR.textoSuave,
-              padding: '10px 13px', font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6,
+              display: 'inline-flex', alignItems: 'center', minHeight: 44, padding: '0 16px', borderRadius: 12,
+              border: '1px solid rgba(255,255,255,.28)', color: COLOR.texto,
+              font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 1.4,
               textTransform: 'uppercase', cursor: 'pointer',
             }}>
               {subiendo ? 'Subiendo…' : foto ? 'Cambiar foto' : 'Subir foto'}
             </Pulsable>
-            <div style={{ font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 8 }}>
+            <div style={{ font: `400 12px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave, marginTop: 8 }}>
               JPG, PNG o WebP · máximo 2 MB
             </div>
           </div>
@@ -205,7 +212,7 @@ export default function Perfil() {
 
         <Campo etiquetaTexto="Nombre artístico"
           pie="Como quieres que te vean. Se puede cambiar cuando quieras.">
-          <input value={nombre} onChange={e => setNombre(e.target.value)}
+          <input value={nombre} onChange={e => setNombre(e.target.value)} className="campo-sobrio"
             placeholder="Como quieres que te vean" maxLength={40} style={campo} />
         </Campo>
 
@@ -213,13 +220,14 @@ export default function Perfil() {
           pie={handleOk || !handle
             ? 'Entre 3 y 24 caracteres: letras, números y guion bajo.'
             : 'Necesita entre 3 y 24 caracteres.'}
-          pieColor={handleOk || !handle ? undefined : COLOR.acento}>
+          pieColor={handleOk || !handle ? undefined : '#FF7BE6'}>
           <div style={{ position: 'relative' }}>
-            <span style={{
+            <span aria-hidden style={{
               position: 'absolute', left: 15, top: '50%', transform: 'translateY(-50%)',
-              font: `400 16px/1 ${FUENTE.ui}`, color: COLOR.textoTenue,
+              font: `400 16px/1 ${FUENTE.ui}`, color: COLOR.textoSuave,
             }}>@</span>
-            <input value={handle} maxLength={24}
+            <input value={handle} maxLength={24} className="campo-sobrio"
+              aria-invalid={!!handle && !handleOk}
               onChange={e => setHandle(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
               placeholder="tu_usuario" style={{ ...campo, paddingLeft: 32 }} />
           </div>
@@ -227,6 +235,7 @@ export default function Perfil() {
 
         <Campo etiquetaTexto="Sobre ti" pie={`${bio.length}/300`}>
           <textarea value={bio} onChange={e => setBio(e.target.value)} rows={3} maxLength={300}
+            className="campo-sobrio"
             placeholder="Una o dos líneas sobre lo que haces."
             style={{ ...campo, resize: 'vertical', fontFamily: FUENTE.ui }} />
         </Campo>
@@ -235,8 +244,8 @@ export default function Perfil() {
             lo que se acaba de editar, no una accion de cuenta. */}
         {perfil && (
           <Enlace a={`/creator/${perfil.handle}`} style={{
-            alignSelf: 'flex-start', cursor: 'pointer',
-            font: `400 12px/1 ${FUENTE.mono}`, color: COLOR.textoTenue,
+            alignSelf: 'flex-start', cursor: 'pointer', padding: '13px 0',
+            font: `400 13px/1 ${FUENTE.mono}`, color: COLOR.textoSuave,
             textDecoration: 'underline', textUnderlineOffset: 5,
           }}>Ver cómo se ve &#8594;</Enlace>
         )}
@@ -252,7 +261,7 @@ export default function Perfil() {
               Cambiarlo tiene que pasar por una confirmacion al correo viejo,
               y eso todavia no existe; dejar el campo editable prometeria algo
               que no se cumple. */}
-          <div style={{ ...campo, color: COLOR.textoSuave, userSelect: 'text' }}>
+          <div className="campo-sobrio" style={{ ...campo, color: COLOR.textoSuave, userSelect: 'text', overflowWrap: 'anywhere' }}>
             {sesion.user.email ?? '—'}
           </div>
         </Campo>
@@ -260,7 +269,7 @@ export default function Perfil() {
         <Campo etiquetaTexto="Teléfono"
           pie={telefono ? pistaDe(telefono)
             : 'Por si el correo rebota. Solo lo ve la administración.'}
-          pieColor={telefono && !telOk ? COLOR.acento : undefined}>
+          pieColor={telefono && !telOk ? '#FF7BE6' : undefined}>
           <Telefono valor={telefono} cambia={setTelefono} />
         </Campo>
       </Seccion>
@@ -275,15 +284,15 @@ export default function Perfil() {
           style={{
             boxSizing: 'border-box', width: '100%', textAlign: 'left',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14,
-            padding: '16px 15px', cursor: 'pointer',
-            border: `1px ${creadora ? 'solid' : 'dashed'} rgba(200,255,61,${creadora ? .5 : .3})`,
+            padding: '16px 16px', cursor: 'pointer', borderRadius: RADIO.neon,
+            border: `1px ${creadora ? 'solid' : 'dashed'} rgba(200,255,61,${creadora ? .55 : .35})`,
             background: creadora ? 'rgba(200,255,61,.07)' : 'transparent',
           }}>
           <div>
-            <div style={{ font: `700 12px/1.3 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase', color: creadora ? COLOR.dinero : COLOR.textoSuave }}>
+            <div style={{ font: `700 13px/1.3 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase', color: creadora ? COLOR.dinero : COLOR.texto }}>
               Quiero publicar
             </div>
-            <div style={{ font: `400 12px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 5 }}>
+            <div style={{ font: `400 13px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave, marginTop: 5 }}>
               {creadora
                 ? (perfil?.identidad_verificada
                     ? 'Tu perfil de creadora está activo'
@@ -291,15 +300,16 @@ export default function Perfil() {
                 : 'Habilita tu perfil de creadora'}
             </div>
           </div>
-          <div style={{
-            width: 46, height: 26, borderRadius: 13, flex: '0 0 auto',
+          <div aria-hidden style={{
+            width: 48, height: 28, borderRadius: 14, flex: '0 0 auto',
             background: creadora ? COLOR.dinero : COLOR.superficieAlta, position: 'relative',
+            border: creadora ? 'none' : '1px solid rgba(255,255,255,.2)', boxSizing: 'border-box',
             transition: 'background .18s',
           }}>
             <div style={{
-              position: 'absolute', top: 3, left: creadora ? 23 : 3,
+              position: 'absolute', top: creadora ? 4 : 3, left: creadora ? 24 : 3,
               width: 20, height: 20, borderRadius: '50%',
-              background: creadora ? COLOR.fondo : COLOR.textoApagado, transition: 'left .18s',
+              background: creadora ? COLOR.fondo : COLOR.textoSuave, transition: 'left .18s',
             }} />
           </div>
         </Pulsable>
@@ -308,17 +318,14 @@ export default function Perfil() {
             persona esperando a que pase algo que no va a pasar sola. */}
         {creadora && !perfil?.identidad_verificada && (
           <div style={{
-            padding: '13px 15px', border: `1px solid ${COLOR.admin}`,
-            font: `400 13px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave,
+            padding: '15px 16px', borderRadius: RADIO.neon, border: `1px solid ${COLOR.admin}`,
+            font: `400 14px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave,
           }}>
             Ya puedes entrar al estudio y subir, pero <b style={{ color: COLOR.texto }}>
             nada se publica</b> hasta que verifiquemos tu identidad y tu edad.
-            <Enlace a="/verificar" style={{
-              display: 'block', boxSizing: 'border-box', width: '100%',
-              marginTop: 11, textAlign: 'center', padding: '12px 0', cursor: 'pointer',
-              background: COLOR.admin, color: COLOR.fondo,
-              font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
-            }}>Verificar mi identidad</Enlace>
+            <Enlace a="/verificar" className="boton-principal" style={{ marginTop: 14 }}>
+              Verificar mi identidad
+            </Enlace>
           </div>
         )}
 
@@ -340,17 +347,17 @@ export default function Perfil() {
           puerta a un papel que aun no tiene. Por eso se queda. */}
       {atajos.length > 0 && (
         <Seccion titulo="Y además">
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {atajos.map(a => (
               <Enlace key={a.path} a={a.path} style={{
-                display: 'flex', alignItems: 'center', gap: 13, padding: '15px 13px',
-                cursor: 'pointer', border: '1px solid rgba(255,255,255,.09)',
+                display: 'flex', alignItems: 'center', gap: 13, padding: '15px 14px', minHeight: 54,
+                cursor: 'pointer', borderRadius: RADIO.neon, border: '1px solid rgba(255,255,255,.14)',
               }}>
-                <span style={{ width: 26, textAlign: 'center', fontSize: 16, color: COLOR.dinero }}>
-                  <Icono nombre={a.icono} tam={16} />
+                <span style={{ width: 26, display: 'grid', placeItems: 'center', color: COLOR.dinero }}>
+                  <Icono nombre={a.icono} tam={18} />
                 </span>
                 <span style={{ flex: 1, font: `500 16px/1.3 ${FUENTE.ui}`, color: COLOR.texto }}>{a.titulo}</span>
-                <span style={{ color: COLOR.textoApagado }}>›</span>
+                <span aria-hidden style={{ color: COLOR.textoSuave }}>›</span>
               </Enlace>
             ))}
           </div>
@@ -364,9 +371,9 @@ export default function Perfil() {
             lleva por delante lo que estabas escribiendo. Aqui va al final, en
             su propia seccion y sin peso de boton principal. */}
         <Pulsable al={async () => { await salir(); nav('/entrar', { replace: true }) }} style={{
-          alignSelf: 'flex-start', cursor: 'pointer',
-          border: '1px solid rgba(255,43,209,.45)', color: COLOR.acento,
-          padding: '13px 20px', font: `700 10px/1 ${FUENTE.ui}`,
+          alignSelf: 'flex-start', cursor: 'pointer', minHeight: 48, display: 'inline-flex', alignItems: 'center',
+          borderRadius: 12, border: '1px solid rgba(255,43,209,.55)', color: '#FF5BDC',
+          padding: '0 22px', font: `700 12px/1 ${FUENTE.ui}`,
           letterSpacing: 1.6, textTransform: 'uppercase',
         }}>Cerrar sesión</Pulsable>
       </Seccion>
@@ -379,21 +386,14 @@ export default function Perfil() {
           nada. Asi tambien se ve desde cualquier punto que quedo algo pendiente. */}
       {(sucio || estado !== 'listo') && (
         <div className="barra-guardar">
-          <div style={{ width: '100%', maxWidth: 680 - 48, margin: '0 auto' }}>
+          <div style={{ width: '100%', maxWidth: 680 - 36, margin: '0 auto' }}>
           {estado === 'error' && (
-            <div style={{
-              font: `400 12px/1.45 ${FUENTE.ui}`, color: COLOR.acento, marginBottom: 10,
+            <div role="alert" style={{
+              font: `400 13px/1.45 ${FUENTE.ui}`, color: '#FF7BE6', marginBottom: 10,
             }}>{detalle}</div>
           )}
-          <Pulsable al={guardar} activo={puedeGuardar} style={{
-            boxSizing: 'border-box', width: '100%',
-            background: puedeGuardar ? COLOR.acento : COLOR.superficieAlta,
-            color: puedeGuardar ? COLOR.fondo : COLOR.textoApagado,
-            textAlign: 'center', padding: 17,
-            font: `700 13px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
-            boxShadow: puedeGuardar ? '0 0 34px rgba(255,43,209,.42)' : 'none',
-            cursor: puedeGuardar ? 'pointer' : 'default',
-          }}>
+          <Pulsable al={guardar} activo={puedeGuardar} className="boton-principal"
+            style={{ width: '100%' }}>
             {estado === 'guardando' ? 'Guardando…'
               : estado === 'guardado' ? '✓ Guardado'
               : 'Guardar cambios'}
@@ -405,23 +405,23 @@ export default function Perfil() {
   )
 }
 
-/** Una seccion con su rotulo. La pantalla tenia cinco asuntos distintos
- *  —lo publico, publicar, los atajos, la cuenta y el guardado— uno detras de
- *  otro, todos con el mismo peso y sin nada que dijera donde terminaba uno y
- *  empezaba el siguiente. */
+/** Una seccion con su rotulo, en una tarjeta. La pantalla tenia cinco asuntos
+ *  distintos —lo publico, publicar, los atajos, la cuenta y el guardado— uno
+ *  detras de otro, todos con el mismo peso y sin nada que dijera donde
+ *  terminaba uno y empezaba el siguiente. */
 function Seccion({ titulo, nota, primera, children }: {
   titulo: string; nota?: string; primera?: boolean; children: React.ReactNode
 }) {
   return (
     <section style={{
-      display: 'flex', flexDirection: 'column', gap: 18,
-      marginTop: primera ? 0 : 28, paddingTop: primera ? 0 : 24,
-      borderTop: primera ? 'none' : '1px solid rgba(255,255,255,.09)',
+      display: 'flex', flexDirection: 'column', gap: 18, boxSizing: 'border-box',
+      marginTop: primera ? 0 : 14, padding: '20px 18px', borderRadius: RADIO.neon,
+      border: '1px solid rgba(255,255,255,.12)', background: COLOR.superficie,
     }}>
       <div>
-        <div style={etiqueta}>{titulo}</div>
+        <h2 style={{ ...etiqueta, margin: 0 }}>{titulo}</h2>
         {nota && (
-          <div style={{ marginTop: 8, font: `400 12px/1.6 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
+          <div style={{ marginTop: 8, font: `400 13px/1.55 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
             {nota}
           </div>
         )}
@@ -439,7 +439,7 @@ function Campo({ etiquetaTexto, pie, pieColor, children }: {
       <span style={etiqueta}>{etiquetaTexto}</span>
       {children}
       {pie && (
-        <span style={{ font: `400 10px/1.45 ${FUENTE.mono}`, color: pieColor ?? COLOR.textoApagado }}>
+        <span style={{ font: `400 12px/1.45 ${FUENTE.ui}`, color: pieColor ?? COLOR.textoSuave }}>
           {pie}
         </span>
       )}
@@ -457,11 +457,7 @@ function Aviso({ texto, accion }: { texto: string; accion?: { texto: string; al:
     }}>
       {texto}
       {accion && (
-        <Pulsable al={accion.al} style={{
-          background: COLOR.acento, color: COLOR.fondo, padding: '15px 26px',
-          font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
-          cursor: 'pointer',
-        }}>{accion.texto}</Pulsable>
+        <Pulsable al={accion.al} className="boton-principal" style={{ padding: '0 28px' }}>{accion.texto}</Pulsable>
       )}
     </div>
   )
