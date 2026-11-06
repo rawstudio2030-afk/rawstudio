@@ -397,6 +397,14 @@ export async function banearCuenta(id: string, motivo: string) {
   return error?.message ?? ''
 }
 
+/** Quita lo que identifica a la persona y cierra la cuenta, conservando el
+ *  historial (libro, compras, retiros, consentimientos). El servidor se niega
+ *  si hay saldo, un retiro sin resolver o imagenes de verificacion sin borrar. */
+export async function anonimizarCuenta(id: string, motivo: string) {
+  const { error } = await supabase.rpc('admin_anonimizar_cuenta', { objetivo: id, motivo })
+  return error?.message ?? ''
+}
+
 export async function reactivarCuenta(id: string) {
   const { error } = await supabase.rpc('admin_reactivar', { objetivo: id })
   return error?.message ?? ''
@@ -407,8 +415,14 @@ export async function ajustarSaldo(id: string, cantidad: number, motivo: string)
     objetivo: id, cantidad, motivo_texto: motivo,
   })
   if (error) return { error: error.message }
+  // Pasado el tope no se aplica: queda propuesto para otra administradora.
+  if ((data as { pendiente?: boolean }).pendiente) return { error: AVISO_PROPUESTA }
   return data as { ok: boolean; saldo: number }
 }
+
+/** Lo que dice el panel cuando un ajuste o reembolso pasa del tope. */
+const AVISO_PROPUESTA =
+  'Supera el tope: quedó propuesto y NO se aplicó. Otra administradora debe aprobarlo en Retiros › Ajustes por aprobar.'
 
 /* ==================== Modulo 6: bitacora ==================== */
 
@@ -959,6 +973,7 @@ export async function reembolsar(
     destino, de_quien: deQuien, cantidad, motivo, referencia: ref ?? null,
   })
   if (error) return { error: error.message }
+  if ((data as { pendiente?: boolean }).pendiente) return { error: AVISO_PROPUESTA }
   return data as { ok: boolean; saldo_origen: number }
 }
 
@@ -990,6 +1005,44 @@ export async function fijarTipoCambio(centavosPorDolar: number) {
   const { error } = await supabase.rpc('admin_ajustar_bandera_num', {
     p_clave: 'tipo_cambio_usd_mxn', p_valor: centavosPorDolar,
   })
+  return error?.message ?? ''
+}
+
+/** ¿Las tasas de retencion ya las confirmo un contador? Mientras no, el
+ *  servidor se niega a aprobar retiros. */
+export async function tasasConfirmadas(): Promise<boolean> {
+  const { data } = await supabase.from('ajustes')
+    .select('valor').eq('clave', 'tasas_retencion_confirmadas').maybeSingle()
+  return data?.valor === true
+}
+
+export async function confirmarTasas(valor: boolean) {
+  const { error } = await supabase.rpc('admin_ajustar_bandera', {
+    p_clave: 'tasas_retencion_confirmadas', p_valor: valor,
+  })
+  return error?.message ?? ''
+}
+
+/** Ajustes y reembolsos que pasaron del tope y esperan a otra administradora. */
+export type AjustePendiente = {
+  id: string; tipo: 'ajuste' | 'reembolso'; cantidad: number
+  objetivo: string; objetivo_handle: string; de_quien_handle: string | null
+  motivo: string; propuesto_handle: string; propuesto_at: string
+  puede_aprobar: boolean
+}
+
+export async function ajustesPendientes(): Promise<AjustePendiente[]> {
+  const { data } = await supabase.rpc('admin_ajustes_pendientes')
+  return (data ?? []) as AjustePendiente[]
+}
+
+export async function aprobarAjuste(id: string) {
+  const { error } = await supabase.rpc('admin_aprobar_ajuste', { p_id: id })
+  return error?.message ?? ''
+}
+
+export async function rechazarAjuste(id: string, nota: string) {
+  const { error } = await supabase.rpc('admin_rechazar_ajuste', { p_id: id, p_nota: nota })
   return error?.message ?? ''
 }
 

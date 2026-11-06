@@ -12,6 +12,8 @@ import { usd, aCentavos } from '../lib/dinero'
 import {
   listarRetiros, resolverRetiro, marcarPagado, encargosEnDisputa,
   reembolsar, tipoCambio, fijarTipoCambio,
+  tasasConfirmadas, confirmarTasas,
+  ajustesPendientes, aprobarAjuste, rechazarAjuste, type AjustePendiente,
   type Retiro, type EstadoRetiro, type EncargoDisputa,
 } from '../lib/admin'
 import {
@@ -46,6 +48,10 @@ export default function Retiros() {
   const [dialogo, setDialogo] = useState<
     { r: Retiro; que: 'aprobar' | 'rechazar' | 'pagar' } | null>(null)
   const [reembolso, setReembolso] = useState<EncargoDisputa | null>(null)
+  const [tasas, setTasas] = useState(false)
+  const [confirmaTasas, setConfirmaTasas] = useState(false)
+  const [pend, setPend] = useState<AjustePendiente[]>([])
+  const [firma, setFirma] = useState<{ a: AjustePendiente; que: 'aprobar' | 'rechazar' } | null>(null)
 
   const cargar = useCallback(async () => {
     setCargando(true)
@@ -53,13 +59,16 @@ export default function Retiros() {
     setFilas(r.filas); setTotal(r.total); setError(r.error); setCargando(false)
     setCoin(await tipoCambio())
     setDisputas(await encargosEnDisputa())
+    setTasas(await tasasConfirmadas())
+    setPend(await ajustesPendientes())
   }, [estado, pagina])
 
   useEffect(() => { cargar() }, [cargar])
 
   const tras = async (m: string) => {
     if (m) { setError(m); return }
-    setError(''); setDialogo(null); setReembolso(null); await cargar()
+    setError(''); setDialogo(null); setReembolso(null); setFirma(null)
+    setConfirmaTasas(false); await cargar()
   }
 
   const columnas: Columna<Retiro>[] = [
@@ -144,6 +153,61 @@ export default function Retiros() {
         </div>
       </div>
 
+      {/* ---- Tasas de retencion ---- */}
+      <div style={{ marginBottom: 16, padding: '12px 14px',
+        border: `1px solid ${tasas ? LINEA.tenue : '#FFB020'}` }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
+              textTransform: 'uppercase', color: tasas ? COLOR.texto : '#FFB020' }}>
+              {tasas ? 'Tasas de retención confirmadas' : 'Tasas de retención provisionales'}
+            </div>
+            <div style={{ marginTop: 6, font: `400 11px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
+              {tasas
+                ? 'Un contador las confirmó. Los retiros se pueden aprobar.'
+                : 'Las tasas de ISR e IVA son un marcador de posición. Sin que un contador las confirme no se puede aprobar ningún retiro.'}
+            </div>
+          </div>
+          <Boton tono={tasas ? 'normal' : 'primario'} al={() => setConfirmaTasas(true)}>
+            {tasas ? 'Marcar como provisionales' : 'Ya las confirmó mi contador'}
+          </Boton>
+        </div>
+      </div>
+
+      {/* ---- Ajustes por aprobar ---- */}
+      {pend.length > 0 && (
+        <div style={{ marginBottom: 16, padding: '13px 15px', border: '1px solid #FFB020' }}>
+          <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
+            textTransform: 'uppercase', color: '#FFB020' }}>
+            Ajustes por aprobar · {pend.length}
+          </div>
+          <div style={{ marginTop: 6, font: `400 11px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
+            Pasaron del tope y no se han aplicado. Los aprueba otra administradora; si solo hay una,
+            ella misma pasadas 24 horas.
+          </div>
+          <div style={{ marginTop: 10, display: 'grid', gap: 8 }}>
+            {pend.map(a => (
+              <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 12,
+                padding: '9px 11px', background: COLOR.superficie }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ font: `400 12px/1.45 ${FUENTE.ui}`, color: COLOR.texto }}>
+                    {a.tipo === 'ajuste'
+                      ? <>Ajuste de <b style={{ color: COLOR.dinero }}>{usd(a.cantidad)}</b> a @{a.objetivo_handle}</>
+                      : <>Reembolso de <b style={{ color: COLOR.dinero }}>{usd(a.cantidad)}</b> de @{a.de_quien_handle} a @{a.objetivo_handle}</>}
+                  </div>
+                  <div style={{ marginTop: 4, font: `400 11px/1.45 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
+                    {a.motivo} · propuso @{a.propuesto_handle} · {desde(a.propuesto_at)}
+                  </div>
+                </div>
+                <Boton chico tono="primario" activo={a.puede_aprobar}
+                  al={() => setFirma({ a, que: 'aprobar' })}>Aprobar</Boton>
+                <Boton chico tono="peligro" al={() => setFirma({ a, que: 'rechazar' })}>Rechazar</Boton>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* ---- Disputas ---- */}
       {disputas.length > 0 && (
         <div style={{ marginBottom: 16, padding: '13px 15px', border: '1px solid #FF4444' }}>
@@ -197,6 +261,34 @@ export default function Retiros() {
           vacia={cargando ? 'Cargando…' : 'Ninguna solicitud aquí'} />
       </div>
       <Paginador pagina={pagina} porPagina={POR_PAGINA} total={total} cambia={setPagina} />
+
+      {confirmaTasas && (
+        <Confirmar titulo={tasas ? 'Volver a marcar las tasas como provisionales' : 'Confirmar las tasas de retención'}
+          tono={tasas ? 'peligro' : 'primario'} etiqueta={tasas ? 'Marcar provisionales' : 'Confirmar'}
+          cuerpo={tasas
+            ? <>Mientras estén provisionales no se podrá aprobar ningún retiro.</>
+            : <>Confirmas que un contador revisó las tasas de ISR e IVA de la tabla de retenciones. A partir de
+              aquí los retiros se aprueban y se calculan con ellas. Queda en la bitácora a tu nombre.</>}
+          cancela={() => setConfirmaTasas(false)}
+          al={async () => tras(await confirmarTasas(!tasas))} />
+      )}
+
+      {firma?.que === 'aprobar' && (
+        <Confirmar titulo="Aprobar el ajuste" tono="primario" etiqueta="Aprobar y aplicar"
+          cuerpo={<>Se aplica de inmediato en el libro: {firma.a.tipo === 'ajuste'
+            ? <>{usd(firma.a.cantidad)} a @{firma.a.objetivo_handle}</>
+            : <>{usd(firma.a.cantidad)} de @{firma.a.de_quien_handle} a @{firma.a.objetivo_handle}</>}.
+            Lo propuso @{firma.a.propuesto_handle}: «{firma.a.motivo}».</>}
+          cancela={() => setFirma(null)}
+          al={async () => tras(await aprobarAjuste(firma.a.id))} />
+      )}
+
+      {firma?.que === 'rechazar' && (
+        <Confirmar titulo="Rechazar el ajuste" etiqueta="Rechazar" exigeMotivo
+          cuerpo={<>No se aplica nada. Queda anotado quién lo rechazó y por qué.</>}
+          cancela={() => setFirma(null)}
+          al={async m => tras(await rechazarAjuste(firma.a.id, m))} />
+      )}
 
       {dialogo?.que === 'aprobar' && (
         <Confirmar titulo="Aprobar el retiro" tono="primario" etiqueta="Aprobar"

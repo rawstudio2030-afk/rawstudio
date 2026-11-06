@@ -5,6 +5,7 @@ import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 import { usd, aCentavos } from '../lib/dinero'
 import {
   listarUsuarios, fichaUsuario, suspenderCuenta, banearCuenta, reactivarCuenta, cambiarCorreo,
+  anonimizarCuenta,
   ajustarSaldo, otorgarAdmin, revocarAdmin, marcarCreadora,
   type FilaUsuario, type FichaUsuario, type OrdenUsuarios,
   type RolUsuario, type EstadoCuenta,
@@ -21,7 +22,7 @@ const POR_PAGINA = 25
 
 /** Que confirmacion esta abierta. Cada accion destructiva o de dinero tiene
  *  la suya; ninguna se ejecuta con un solo clic desde la tabla. */
-type Dialogo = 'suspender' | 'banear' | 'reactivar' | 'saldo' | 'rol' | 'correo' | null
+type Dialogo = 'suspender' | 'banear' | 'reactivar' | 'saldo' | 'rol' | 'correo' | 'anonimizar' | null
 
 export default function Usuarios() {
   const [filas, setFilas]   = useState<FilaUsuario[]>([])
@@ -200,6 +201,18 @@ export default function Usuarios() {
           cancela={() => setDialogo(null)}
           al={m => banearCuenta(abierta.id, m).then(tras)} />
       )}
+      {dialogo === 'anonimizar' && abierta && (
+        <Confirmar titulo="Anonimizar la cuenta" tono="peligro" etiqueta="Anonimizar"
+          exigeMotivo
+          cuerpo={<>Se quita lo que identifica a <b style={{ color: COLOR.texto }}>@{abierta.handle}</b>:
+            nombre, descripción, foto, correo, teléfono y sesiones. Sus clips pasan a borrados y sus
+            suscripciones activas se cancelan. <b style={{ color: COLOR.texto }}>No se borra el
+            historial</b>: libro de movimientos, compras, retiros, consentimientos, cuenta de cobro y
+            expediente se conservan. No se puede deshacer. Se niega si la cuenta tiene saldo, un
+            retiro sin resolver o imágenes de verificación sin borrar.</>}
+          cancela={() => setDialogo(null)}
+          al={m => anonimizarCuenta(abierta.id, m).then(tras)} />
+      )}
       {dialogo === 'reactivar' && abierta && (
         <Confirmar titulo="Reactivar cuenta" tono="primario" etiqueta="Reactivar"
           cuerpo={<>Se levanta el castigo de <b style={{ color: COLOR.texto }}>@{abierta.handle}</b> y
@@ -300,6 +313,7 @@ function Ficha({ fila, ficha, cierra, pide }: {
           <Boton al={() => pide('saldo')}>Ajustar saldo</Boton>
           <Boton al={() => pide('rol')}>Cambiar rol</Boton>
           <Boton al={() => pide('correo')}>Corregir correo</Boton>
+          <Boton tono="peligro" al={() => pide('anonimizar')}>Anonimizar</Boton>
         </div>
 
         <div style={{ marginTop: 12, font: `400 11px/1.45 ${FUENTE.mono}`, color: COLOR.textoSuave }}>

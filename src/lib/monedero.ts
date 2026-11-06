@@ -132,7 +132,10 @@ export async function misCompras(): Promise<Lectura<Comprado[]>> {
 }
 
 export async function ajustarSaldo(id: string, cantidad: number, motivo: string) {
-  const { error } = await supabase.rpc('admin_ajustar_saldo',
+  const { data, error } = await supabase.rpc('admin_ajustar_saldo',
     { objetivo: id, cantidad, motivo_texto: motivo })
-  return error ? error.message : null
+  if (error) return error.message
+  // Pasado el tope no se aplica: queda propuesto para otra administradora.
+  if ((data as { pendiente?: boolean } | null)?.pendiente) return 'Supera el tope: quedó propuesto y NO se aplicó. Otra administradora debe aprobarlo en Retiros › Ajustes por aprobar.'
+  return null
 }
