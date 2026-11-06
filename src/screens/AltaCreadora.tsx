@@ -21,12 +21,13 @@ import Centro from '../components/Centro'
 
 
 const etiqueta: React.CSSProperties = {
-  font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', color: COLOR.textoTenue,
+  font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', color: COLOR.textoSuave,
 }
+// El fondo, el borde y el foco salen de `.campo-admin` (index.css): herramienta
+// del panel, en cian.
 const campo: React.CSSProperties = {
-  width: '100%', boxSizing: 'border-box', background: COLOR.superficie,
-  border: '1px solid rgba(255,255,255,.14)', color: COLOR.texto,
-  font: `400 16px/1.3 ${FUENTE.ui}`, padding: '15px', outline: 'none',
+  width: '100%', boxSizing: 'border-box',
+  font: `400 16px/1.3 ${FUENTE.ui}`, padding: '15px',
 }
 
 type Paso = 'datos' | 'documentos' | 'clips' | 'listo'
@@ -135,10 +136,10 @@ export default function AltaCreadora() {
       </div>
 
       <div>
-        <div style={{ fontFamily: FUENTE.display, fontSize: 38, lineHeight: 1, textTransform: 'uppercase' }}>
+        <div style={{ font: `700 28px/1.15 ${FUENTE.ui}` }}>
           Alta de<br /><span style={{ color: COLOR.dinero }}>creadora</span>
         </div>
-        <div style={{ font: `400 10px/1.6 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 8 }}>
+        <div style={{ font: `400 11px/1.6 ${FUENTE.mono}`, color: COLOR.textoSuave, marginTop: 8 }}>
           {['datos', 'documentos', 'clips'].map((p, i) =>
             `${i + 1}. ${p}${paso === p ? '  ←' : ''}`).join('   ')}
         </div>
@@ -150,12 +151,12 @@ export default function AltaCreadora() {
         <>
           <Etiquetado t="Nombre artístico">
             <input value={nombre} onChange={e => setNombre(e.target.value)} maxLength={40}
-              placeholder="Como la va a ver la gente" style={campo} />
+              placeholder="Como la va a ver la gente" className="campo-admin" style={campo} />
           </Etiquetado>
           <Etiquetado t="Usuario" pista={handle && !handleOk ? 'Entre 3 y 24: letras, números y guion bajo' : 'Será su @'}>
             <input value={handle} maxLength={24}
               onChange={e => setHandle(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
-              placeholder="sin_espacios" style={campo} />
+              placeholder="sin_espacios" className="campo-admin" style={campo} />
           </Etiquetado>
           {/* Correo y telefono van ANTES de la bio porque sin ellos el alta
               no sirve: el correo es el que usa «olvidé mi contraseña» —hasta
@@ -165,7 +166,7 @@ export default function AltaCreadora() {
             pista={email && !emailOk ? 'Ese correo no tiene forma de correo'
               : 'Es a donde le llega «olvidé mi contraseña». Tiene que ser suyo y real.'}>
             <input value={email} onChange={e => setEmail(e.target.value.trim())}
-              type="email" placeholder="ella@ejemplo.com" style={campo} />
+              type="email" placeholder="ella@ejemplo.com" className="campo-admin" style={campo} />
           </Etiquetado>
           <Etiquetado t="Teléfono"
             pista={telefono ? pistaDe(telefono)
@@ -174,11 +175,11 @@ export default function AltaCreadora() {
           </Etiquetado>
           <Etiquetado t="Sobre ella">
             <textarea value={bio} onChange={e => setBio(e.target.value)} rows={2} maxLength={300}
-              style={{ ...campo, resize: 'vertical', fontFamily: FUENTE.ui }} />
+              className="campo-admin" style={{ ...campo, resize: 'vertical', fontFamily: FUENTE.ui }} />
           </Etiquetado>
           <Etiquetado t="Nota interna" pista="Solo tú la ves. Útil para recordar de dónde salió el acuerdo.">
             <input value={nota} onChange={e => setNota(e.target.value)} maxLength={200}
-              placeholder="Firmó contrato en marzo" style={campo} />
+              placeholder="Firmó contrato en marzo" className="campo-admin" style={campo} />
           </Etiquetado>
           <Boton texto={ocupado ? 'Creando…' : 'Crear perfil'} activo={puedeCrear} al={crear} />
         </>
@@ -205,7 +206,7 @@ export default function AltaCreadora() {
           <Etiquetado t="Fecha del consentimiento" pista="Puede ser muy anterior a hoy.">
             <input type="date" value={fechaConsent} max={new Date().toISOString().slice(0, 10)}
               onChange={e => setFechaConsent(e.target.value)}
-              style={{ ...campo, colorScheme: 'dark' }} />
+              className="campo-admin" style={{ ...campo, colorScheme: 'dark' }} />
           </Etiquetado>
 
           {/* La foto va aqui y no en el primer paso porque una creadora dada
@@ -232,7 +233,7 @@ export default function AltaCreadora() {
           </div>
 
           <Etiquetado t="Título del clip">
-            <input value={titulo} onChange={e => setTitulo(e.target.value)} maxLength={90} style={campo} />
+            <input value={titulo} onChange={e => setTitulo(e.target.value)} maxLength={90} className="campo-admin" style={campo} />
           </Etiquetado>
           <Archivo t="Video" f={video} onElegir={setVideo}
             acepta="video/mp4,video/quicktime,video/webm" nota="MP4, MOV o WebM" />
@@ -247,14 +248,14 @@ export default function AltaCreadora() {
               }}>$</span>
               <input value={precio} onChange={e => setPrecio(e.target.value)}
                 inputMode="decimal" placeholder="2.40" maxLength={9}
-                style={{
+                className="campo-admin" style={{
                   ...campo, fontFamily: FUENTE.mono, paddingLeft: 30,
                   borderColor: centavos === null ? COLOR.dinero : 'rgba(255,255,255,.14)',
                 }} />
               <span style={{
                 position: 'absolute', right: 15, top: '50%', transform: 'translateY(-50%)',
-                font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
-                color: COLOR.textoTenue, pointerEvents: 'none',
+                font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
+                color: COLOR.textoSuave, pointerEvents: 'none',
               }}>USD</span>
             </div>
           </Etiquetado>
@@ -265,7 +266,7 @@ export default function AltaCreadora() {
           <Enlace a={`/creator/${creadora.handle}`} style={{
             display: 'block', boxSizing: 'border-box', width: '100%',
             border: '1px solid rgba(255,255,255,.16)', color: COLOR.textoSuave, textAlign: 'center',
-            padding: 16, font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2,
+            padding: 16, font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 2.2,
             textTransform: 'uppercase', cursor: 'pointer',
           }}>Ver su perfil</Enlace>
         </>
@@ -279,7 +280,7 @@ function Etiquetado({ t, pista, children }: { t: string; pista?: string; childre
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <span style={etiqueta}>{t}</span>
       {children}
-      {pista && <span style={{ font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado }}>{pista}</span>}
+      {pista && <span style={{ font: `400 11px/1.45 ${FUENTE.mono}`, color: COLOR.textoSuave }}>{pista}</span>}
     </div>
   )
 }
@@ -300,8 +301,8 @@ function Archivo({ t, f, onElegir, acepta, nota }: {
           background: `repeating-linear-gradient(130deg,${COLOR.superficieAlta} 0 8px,${COLOR.superficie} 8px 16px)`,
         }} />
         <div style={{ minWidth: 0 }}>
-          <div style={{ ...etiqueta, color: f ? COLOR.dinero : COLOR.textoTenue }}>{f ? `${t} · listo` : t}</div>
-          <div style={{ font: `400 12px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 6, wordBreak: 'break-all' }}>
+          <div style={{ ...etiqueta, color: f ? COLOR.dinero : COLOR.textoSuave }}>{f ? `${t} · listo` : t}</div>
+          <div style={{ font: `400 12px/1.45 ${FUENTE.mono}`, color: COLOR.textoSuave, marginTop: 6, wordBreak: 'break-all' }}>
             {f ? `${f.name} · ${(f.size / 1048576).toFixed(1)} MB` : nota}
           </div>
         </div>
@@ -323,10 +324,11 @@ function Boton({ texto, activo, al }: { texto: string; activo: boolean; al: () =
   return (
     <Pulsable al={al} activo={activo} style={{
       boxSizing: 'border-box', width: '100%',
-      background: activo ? COLOR.acento : COLOR.superficieAlta, color: activo ? COLOR.fondo : COLOR.textoApagado,
-      textAlign: 'center', padding: 18, marginTop: 4,
+      // Cian, como el resto del panel: es el contexto privilegiado.
+      background: activo ? COLOR.admin : COLOR.superficieAlta, color: activo ? COLOR.fondo : COLOR.textoSuave,
+      textAlign: 'center', padding: 18, marginTop: 4, borderRadius: 12,
       font: `700 13px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
-      boxShadow: activo ? '0 0 34px rgba(255,43,209,.42)' : 'none',
+      boxShadow: activo ? '0 0 18px rgba(0,229,255,.3)' : 'none',
       cursor: activo ? 'pointer' : 'default',
     }}>{texto}</Pulsable>
   )

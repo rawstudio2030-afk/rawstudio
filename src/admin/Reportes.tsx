@@ -62,13 +62,13 @@ export default function Reportes() {
         {PESTANAS.map(p => (
           <Pulsable key={p.v} al={() => { setEstado(p.v); setPagina(0) }} activado={estado === p.v} style={{
             padding: '9px 15px', cursor: 'pointer',
-            font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
-            color: estado === p.v ? COLOR.admin : COLOR.textoTenue,
+            font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
+            color: estado === p.v ? COLOR.admin : COLOR.textoSuave,
             borderBottom: `2px solid ${estado === p.v ? COLOR.admin : 'transparent'}`,
           }}>
             {p.t}
-            <span style={{ marginLeft: 7, font: `400 10px/1 ${FUENTE.mono}`,
-              color: p.v === 'nuevo' && conteo.nuevo ? '#FF4444' : COLOR.textoApagado }}>
+            <span style={{ marginLeft: 7, font: `400 11px/1 ${FUENTE.mono}`,
+              color: p.v === 'nuevo' && conteo.nuevo ? '#FF4444' : COLOR.textoSuave }}>
               {conteo[p.v] ?? 0}
             </span>
           </Pulsable>
@@ -90,7 +90,7 @@ export default function Reportes() {
       )}
 
       {filas.length === 0 ? (
-        <div style={{ padding: '70px 20px', textAlign: 'center', color: COLOR.textoTenue,
+        <div style={{ padding: '70px 20px', textAlign: 'center', color: COLOR.textoSuave,
           font: `400 13px/1.45 ${FUENTE.ui}`, border: `1px solid ${LINEA.tenue}` }}>
           {cargando ? 'Cargando…' : estado === 'nuevo'
             ? 'Nada esperando. Es la mejor noticia de este panel.'
@@ -168,10 +168,10 @@ function Ficha({ r, pide, tras }: {
             <Insignia texto={`${r.otros_del_mismo} sobre lo mismo`} color="#FF4444" />
           )}
           {r.clip_estado && r.clip_estado !== 'aprobado' && (
-            <Insignia texto={`clip ${r.clip_estado}`} color={COLOR.textoTenue} />
+            <Insignia texto={`clip ${r.clip_estado}`} color={COLOR.textoSuave} />
           )}
           {r.perfil_estado && r.perfil_estado !== 'activa' && (
-            <Insignia texto={`cuenta ${r.perfil_estado}`} color={COLOR.textoTenue} />
+            <Insignia texto={`cuenta ${r.perfil_estado}`} color={COLOR.textoSuave} />
           )}
         </div>
 
@@ -188,13 +188,13 @@ function Ficha({ r, pide, tras }: {
           </div>
         )}
 
-        <div style={{ marginTop: 7, font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
+        <div style={{ marginTop: 7, font: `400 11px/1.45 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
           Reportó @{r.reporta_handle ?? '—'} · {desde(r.created_at)} · {fechaHora(r.created_at)}
           {r.ip && <> · {r.ip}</>}
         </div>
 
         {r.nota_resolucion && (
-          <div style={{ marginTop: 7, font: `400 10px/1.45 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
+          <div style={{ marginTop: 7, font: `400 11px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
             <b style={{ color: COLOR.dinero }}>Resolución:</b> {r.nota_resolucion}
           </div>
         )}

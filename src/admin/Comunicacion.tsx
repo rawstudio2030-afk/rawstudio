@@ -64,7 +64,7 @@ export default function Comunicacion() {
 
   const columnas: Columna<Campana>[] = [
     { clave: 'fecha', titulo: 'Cuándo', ancho: 165,
-      pinta: c => <span style={{ font: `400 10px/1.3 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
+      pinta: c => <span style={{ font: `400 11px/1.3 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
         {fechaHora(c.created_at)}</span> },
     { clave: 'canal', titulo: 'Canal', ancho: 100,
       pinta: c => <Insignia texto={c.canal} color={c.canal === 'correo' ? COLOR.admin : COLOR.acento} /> },
@@ -87,8 +87,8 @@ export default function Comunicacion() {
         {(['redactar', 'historial', 'redes_sociales'] as const).map(p => (
           <Pulsable key={p} al={() => setPestana(p)} activado={pestana === p} style={{
             padding: '9px 15px', cursor: 'pointer',
-            font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
-            color: pestana === p ? COLOR.admin : COLOR.textoTenue,
+            font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
+            color: pestana === p ? COLOR.admin : COLOR.textoSuave,
             borderBottom: `2px solid ${pestana === p ? COLOR.admin : 'transparent'}`,
           }}>
             {p === 'redactar' ? 'Redactar' : p === 'historial' ? `Historial (${historial.length})` : 'Redes Sociales'}
@@ -107,14 +107,14 @@ export default function Comunicacion() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 15 }}>
             <div style={{ padding: 15, border: `1px solid ${LINEA.tenue}`, borderRadius: 4 }}>
               <div style={{ font: `700 12px/1 ${FUENTE.ui}`, marginBottom: 10 }}>X (Twitter)</div>
-              <div style={{ font: `400 10px/1.45 ${FUENTE.ui}`, color: COLOR.textoTenue, marginBottom: 15 }}>
+              <div style={{ font: `400 11px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave, marginBottom: 15 }}>
                 Publica tuits y expande tu audiencia en X.
               </div>
               <Boton tono="primario" activo={false} al={() => {}}>Configurar X</Boton>
             </div>
             <div style={{ padding: 15, border: `1px solid ${LINEA.tenue}`, borderRadius: 4 }}>
               <div style={{ font: `700 12px/1 ${FUENTE.ui}`, marginBottom: 10 }}>TikTok</div>
-              <div style={{ font: `400 10px/1.45 ${FUENTE.ui}`, color: COLOR.textoTenue, marginBottom: 15 }}>
+              <div style={{ font: `400 11px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave, marginBottom: 15 }}>
                 Publica videos cortos en TikTok y llega a más personas.
               </div>
               <Boton tono="primario" activo={false} al={() => {}}>Configurar TikTok</Boton>
@@ -140,7 +140,7 @@ export default function Comunicacion() {
 
             <div style={{ marginBottom: 16, padding: '10px 12px',
               border: `1px solid ${gente.length ? LINEA.tenue : '#FFB020'}`,
-              font: `400 10px/1.6 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
+              font: `400 11px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
               {gente.length === 0
                 ? <span style={{ color: '#FFB020' }}>Ese segmento no tiene a nadie ahora mismo.</span>
                 : <><b style={{ color: COLOR.dinero }}>{gente.length} destinatario
@@ -164,7 +164,7 @@ export default function Comunicacion() {
                   : 'Escribe en texto plano; el formato lo pone la plantilla.'} />
             } />
 
-            <div style={{ marginTop: 8, font: `400 10px/1.6 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
+            <div style={{ marginTop: 8, font: `400 11px/1.6 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
               Variables: {'{nombre_usuario}'} · {'{handle}'} · {'{correo}'}
             </div>
 
@@ -189,14 +189,14 @@ export default function Comunicacion() {
 
           {/* ---- Vista previa y plantillas ---- */}
           <div>
-            <div style={{ font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
-              textTransform: 'uppercase', color: COLOR.textoTenue, marginBottom: 8 }}>
+            <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
+              textTransform: 'uppercase', color: COLOR.textoSuave, marginBottom: 8 }}>
               Vista previa
             </div>
             <div style={{ border: `1px solid ${LINEA.tenue}`, padding: 14, background: COLOR.fondo }}>
               {muestra ? (
                 <>
-                  <div style={{ font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado,
+                  <div style={{ font: `400 11px/1.45 ${FUENTE.mono}`, color: COLOR.textoSuave,
                     paddingBottom: 8, borderBottom: `1px solid ${LINEA.tenue}` }}>
                     Como lo vería @{muestra.handle}
                   </div>
@@ -208,23 +208,23 @@ export default function Comunicacion() {
                   <div style={{ marginTop: 10, font: `400 13px/1.6 ${FUENTE.ui}`,
                     color: COLOR.textoSuave, whiteSpace: 'pre-wrap' }}>
                     {cuerpo ? personalizar(cuerpo, muestra)
-                      : <span style={{ color: COLOR.textoApagado }}>Escribe algo y aparecerá aquí</span>}
+                      : <span style={{ color: COLOR.textoSuave }}>Escribe algo y aparecerá aquí</span>}
                   </div>
                 </>
               ) : (
-                <div style={{ font: `400 12px/1.45 ${FUENTE.ui}`, color: COLOR.textoApagado }}>
+                <div style={{ font: `400 12px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
                   Sin destinatarios, no hay a quién previsualizar.
                 </div>
               )}
             </div>
 
-            <div style={{ margin: '20px 0 8px', font: `700 9px/1 ${FUENTE.ui}`,
-              letterSpacing: 1.2, textTransform: 'uppercase', color: COLOR.textoTenue }}>
+            <div style={{ margin: '20px 0 8px', font: `700 10px/1 ${FUENTE.ui}`,
+              letterSpacing: 1.2, textTransform: 'uppercase', color: COLOR.textoSuave }}>
               Plantillas
             </div>
             {lista.length === 0 ? (
-              <div style={{ padding: '16px 0', font: `400 10px/1.45 ${FUENTE.ui}`,
-                color: COLOR.textoApagado }}>Todavía no has guardado ninguna.</div>
+              <div style={{ padding: '16px 0', font: `400 11px/1.45 ${FUENTE.ui}`,
+                color: COLOR.textoSuave }}>Todavía no has guardado ninguna.</div>
             ) : lista.map(p => (
               <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 8,
                 padding: '9px 0', borderBottom: `1px solid ${LINEA.tenue}` }}>
@@ -232,7 +232,7 @@ export default function Comunicacion() {
                   setCanal(p.canal); setAsunto(p.asunto ?? ''); setCuerpo(p.cuerpo)
                 }} style={{ flex: 1, textAlign: 'left', cursor: 'pointer' }}>
                   <div style={{ font: `400 12px/1.3 ${FUENTE.ui}`, color: COLOR.texto }}>{p.nombre}</div>
-                  <div style={{ font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
+                  <div style={{ font: `400 11px/1.45 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
                     {p.canal}
                   </div>
                 </Pulsable>

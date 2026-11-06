@@ -81,7 +81,7 @@ export default function Contenido() {
               : `repeating-linear-gradient(130deg,${COLOR.superficieAlta} 0 4px,${COLOR.superficie} 4px 8px)` }} />
           <div>
             <div style={{ color: COLOR.texto }}>{c.title}</div>
-            <div style={{ font: `400 10px/1.3 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
+            <div style={{ font: `400 11px/1.3 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
               {c.tipo === 'creadora'
                 ? `@${c.profiles?.handle ?? '—'}`
                 : <span style={{ color: COLOR.admin }}>RAWstudio · {c.tipo}</span>}
@@ -103,7 +103,7 @@ export default function Contenido() {
       </div>
     ) },
     { clave: 'precio', titulo: 'Precio', numerica: true, ancho: 90,
-      pinta: c => <span style={{ color: c.price_coins ? COLOR.dinero : COLOR.textoApagado }}>
+      pinta: c => <span style={{ color: c.price_coins ? COLOR.dinero : COLOR.textoSuave }}>
         {c.price_coins ? usd(c.price_coins) : 'gratis'}</span> },
     { clave: 'fecha', titulo: 'Subido', ancho: 130,
       pinta: c => <span style={{ color: COLOR.textoSuave }}>{desde(c.created_at)}</span> },
@@ -138,11 +138,11 @@ export default function Contenido() {
       {/* ---- Purga pendiente ---- */}
       {pendientes.length > 0 && (
         <div style={{ marginBottom: 16, padding: '13px 15px', border: '1px solid #FFB020' }}>
-          <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
+          <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
             textTransform: 'uppercase', color: '#FFB020' }}>
             {pendientes.length} archivo{pendientes.length > 1 ? 's' : ''} cumplió los 30 días
           </div>
-          <div style={{ margin: '8px 0 12px', font: `400 10px/1.6 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
+          <div style={{ margin: '8px 0 12px', font: `400 11px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
             Siguen ocupando espacio. Purgarlos borra el video y la portada de forma
             irreversible; la ficha del clip se conserva para la bitácora.
           </div>
@@ -175,12 +175,12 @@ export default function Contenido() {
           return (
             <Pulsable key={p.v} al={() => setFiltro(p.v)} activado={!accion && filtro === p.v} style={{
               padding: '9px 15px', cursor: 'pointer',
-              font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
+              font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
               marginLeft: p.v === 'subir' ? 'auto' : undefined,
               marginRight: p.v === 'subir' ? 8 : undefined,
               color: filtro === p.v
                 ? (accion ? COLOR.fondo : COLOR.admin)
-                : (accion ? COLOR.acento : COLOR.textoTenue),
+                : (accion ? COLOR.acento : COLOR.textoSuave),
               background: accion && filtro === p.v ? COLOR.acento : 'transparent',
               border: accion ? `1px solid ${COLOR.acento}` : undefined,
               borderBottom: accion
@@ -218,7 +218,7 @@ export default function Contenido() {
       </div>
 
       {filtro === 'destacados' && filas.length > 0 && (
-        <div style={{ marginTop: 12, font: `400 10px/1.45 ${FUENTE.ui}`, color: COLOR.textoApagado }}>
+        <div style={{ marginTop: 12, font: `400 11px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
           El número es la posición en la portada: el 1 sale primero. Lo no destacado va
           después, por fecha.
         </div>

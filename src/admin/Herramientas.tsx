@@ -5,6 +5,7 @@
  * alta de creadoras se movera al Modulo 3 (Contenido) cuando exista; el
  * contenido de demostracion se borra completo antes de abrir al publico.
  */
+import { cuantos } from '../lib/plural'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Almacenamiento from './Almacenamiento'
@@ -36,7 +37,7 @@ export default function Herramientas() {
           ? 'Desde el 3 de noviembre cada portada sale a 32 px en público y nítida solo para quien compró. Pero 187 clips se publicaron antes y su portada pública mide 160 px: se ve todo. Esto las encoge igual que a las nuevas. Se puede repetir sin riesgo: lo que ya está a 32 px se salta.'
           : 'hechas' in censura
             ? `Revisando ${censura.hechas} de ${censura.total}…`
-            : `Revisadas ${censura.revisadas}: ${censura.encogidas} encogidas, ${censura.yaEstaban} ya estaban a 32 px`
+            : `Revisadas ${censura.revisadas}: ${cuantos(censura.encogidas, 'encogida')}, ${censura.yaEstaban} ya ${censura.yaEstaban === 1 ? 'estaba' : 'estaban'} a 32 px`
               + (censura.fallos.length ? ` · ${censura.fallos.length} fallaron: ${censura.fallos.slice(0, 3).join(' · ')}` : '')}
         accion={<Boton tono="primario" al={() => setDialogo('censurar')}
           activo={!(censura && 'hechas' in censura)}>Encoger las portadas viejas</Boton>} />
@@ -96,7 +97,7 @@ function Tarjeta({ titulo, texto, accion }: {
 }) {
   return (
     <div style={{ border: `1px solid ${LINEA.tenue}`, padding: '16px 18px' }}>
-      <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
+      <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
         textTransform: 'uppercase', color: COLOR.texto }}>{titulo}</div>
       <div style={{ margin: '9px 0 14px', font: `400 12px/1.6 ${FUENTE.ui}`,
         color: COLOR.textoSuave }}>{texto}</div>

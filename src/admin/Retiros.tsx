@@ -66,7 +66,7 @@ export default function Retiros() {
     { clave: 'quien', titulo: 'Creadora', pinta: r => (
       <div>
         <div style={{ color: COLOR.texto }}>{r.nombre}</div>
-        <div style={{ font: `400 10px/1.3 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
+        <div style={{ font: `400 11px/1.3 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
           @{r.handle}{!r.verificada && <span style={{ color: '#FF4444' }}> · sin verificar</span>}
         </div>
       </div>
@@ -76,13 +76,13 @@ export default function Retiros() {
     { clave: 'pesos', titulo: 'En pesos', numerica: true, ancho: 130,
       pinta: r => r.bruto_mxn != null
         ? <span>{pesos(r.bruto_mxn)}</span>
-        : <span style={{ color: coin ? COLOR.textoTenue : '#FFB020' }}>
+        : <span style={{ color: coin ? COLOR.textoSuave : '#FFB020' }}>
             {coin ? pesos(Math.round(r.coins * coin / 100)) : 'falta el tipo de cambio'}</span> },
     { clave: 'neto', titulo: 'Neto', numerica: true, ancho: 120,
-      pinta: r => <span style={{ color: r.neto_mxn ? COLOR.dinero : COLOR.textoApagado }}>
+      pinta: r => <span style={{ color: r.neto_mxn ? COLOR.dinero : COLOR.textoSuave }}>
         {pesos(r.neto_mxn)}</span> },
     { clave: 'saldo', titulo: 'Saldo actual', numerica: true, ancho: 110,
-      pinta: r => <span style={{ color: COLOR.textoTenue }}>{usd(r.saldo_actual)}</span> },
+      pinta: r => <span style={{ color: COLOR.textoSuave }}>{usd(r.saldo_actual)}</span> },
     { clave: 'cuando', titulo: 'Pedido', ancho: 120,
       pinta: r => <span style={{ color: COLOR.textoSuave }}>{desde(r.created_at)}</span> },
     { clave: 'acc', titulo: '', pinta: r => (
@@ -97,7 +97,7 @@ export default function Retiros() {
           </Boton>
         )}
         {r.spei_ref && (
-          <span style={{ font: `400 10px/1.6 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
+          <span style={{ font: `400 11px/1.6 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
             {r.spei_ref}
           </span>
         )}
@@ -112,11 +112,11 @@ export default function Retiros() {
         border: `1px solid ${coin ? LINEA.tenue : '#FFB020'}` }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <div style={{ flex: 1 }}>
-            <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
+            <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
               textTransform: 'uppercase', color: coin ? COLOR.texto : '#FFB020' }}>
               {coin ? `1 USD = ${pesos(coin)}` : 'Falta definir el tipo de cambio dólar-peso'}
             </div>
-            <div style={{ marginTop: 6, font: `400 10px/1.6 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
+            <div style={{ marginTop: 6, font: `400 11px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
               {coin
                 ? 'Con este tipo de cambio se convierten los dólares que ganó a los pesos que se le transfieren, y sobre esos pesos se calculan las retenciones del SAT.'
                 : 'Sin este número no se puede aprobar ningún retiro: la creadora gana en dólares y el SPEI se manda en pesos.'}
@@ -147,7 +147,7 @@ export default function Retiros() {
       {/* ---- Disputas ---- */}
       {disputas.length > 0 && (
         <div style={{ marginBottom: 16, padding: '13px 15px', border: '1px solid #FF4444' }}>
-          <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
+          <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
             textTransform: 'uppercase', color: '#FF4444' }}>
             {disputas.length} encargo{disputas.length > 1 ? 's' : ''} pagado y no entregado
           </div>
@@ -159,8 +159,8 @@ export default function Retiros() {
                   <div style={{ font: `400 12px/1.45 ${FUENTE.ui}`, color: COLOR.texto }}>
                     {d.descripcion.slice(0, 90)}{d.descripcion.length > 90 ? '…' : ''}
                   </div>
-                  <div style={{ marginTop: 4, font: `400 10px/1.45 ${FUENTE.mono}`,
-                    color: COLOR.textoTenue }}>
+                  <div style={{ marginTop: 4, font: `400 11px/1.45 ${FUENTE.mono}`,
+                    color: COLOR.textoSuave }}>
                     @{d.fan_handle} pagó {usd(d.coins)} a @{d.creadora_handle} ·{' '}
                     <span style={{ color: '#FF4444' }}>{d.dias_de_retraso} días de retraso</span>
                   </div>
@@ -176,8 +176,8 @@ export default function Retiros() {
         {PESTANAS.map(p => (
           <Pulsable key={p.v} al={() => { setEstado(p.v); setPagina(0) }} activado={estado === p.v} style={{
             padding: '9px 15px', cursor: 'pointer',
-            font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
-            color: estado === p.v ? COLOR.admin : COLOR.textoTenue,
+            font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
+            color: estado === p.v ? COLOR.admin : COLOR.textoSuave,
             borderBottom: `2px solid ${estado === p.v ? COLOR.admin : 'transparent'}`,
           }}>{p.t}</Pulsable>
         ))}
@@ -204,7 +204,7 @@ export default function Retiros() {
             @{dialogo.r.handle} y se calcula la dispersión con las retenciones de ISR e IVA que
             correspondan a su régimen. Todavía no manda el dinero: eso lo haces tú por SPEI y
             después lo marcas como pagado.
-            <div style={{ marginTop: 10, font: `400 10px/1.6 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
+            <div style={{ marginTop: 10, font: `400 11px/1.6 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
               {dialogo.r.titular} · {dialogo.r.banco}<br />CLABE {dialogo.r.clabe}
               {dialogo.r.rfc && <> · RFC {dialogo.r.rfc}</>}
             </div></>}

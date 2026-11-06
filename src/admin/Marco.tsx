@@ -98,7 +98,7 @@ export function Marco({ children, titulo, resumen }: {
         }}>
           <Wordmark ancho={118} glow={7} />
           <div style={{
-            marginTop: 8, font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.6,
+            marginTop: 9, font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.6,
             textTransform: 'uppercase', color: COLOR.admin,
           }}>Administración</div>
         </div>
@@ -121,18 +121,18 @@ export function Marco({ children, titulo, resumen }: {
                 style={{
                   boxSizing: 'border-box', width: '100%', textAlign: 'left',
                   display: 'flex', alignItems: 'center', gap: 10,
-                  padding: '9px 18px',
+                  padding: '10px 18px',
                   cursor: m.listo ? 'pointer' : 'not-allowed',
-                  opacity: m.listo ? 1 : .32,
-                  background: aqui ? 'rgba(0,229,255,.07)' : 'transparent',
+                  opacity: m.listo ? 1 : .45,
+                  background: aqui ? 'rgba(0,229,255,.1)' : 'transparent',
                   borderLeft: `2px solid ${aqui ? COLOR.admin : 'transparent'}`,
                 }}>
                 <span style={{
-                  font: `400 10px/1 ${FUENTE.mono}`,
-                  color: aqui ? COLOR.admin : COLOR.textoApagado,
+                  font: `400 11px/1 ${FUENTE.mono}`,
+                  color: aqui ? COLOR.admin : COLOR.textoSuave,
                 }}>{m.n}</span>
                 <span style={{
-                  font: `${aqui ? 700 : 400} 12px/1 ${FUENTE.ui}`,
+                  font: `${aqui ? 700 : 500} 13px/1 ${FUENTE.ui}`,
                   color: aqui ? COLOR.texto : COLOR.textoSuave,
                 }}>{m.titulo}</span>
 
@@ -143,7 +143,7 @@ export function Marco({ children, titulo, resumen }: {
                     marginLeft: 'auto', flex: '0 0 auto',
                     background: COLOR.acento, color: COLOR.fondo,
                     borderRadius: 9, padding: '2px 7px',
-                    font: `700 10px/1.4 ${FUENTE.mono}`,
+                    font: `700 11px/1.4 ${FUENTE.mono}`,
                   }}>{vencidos}</span>
                 )}
               </Pulsable>
@@ -157,7 +157,7 @@ export function Marco({ children, titulo, resumen }: {
         <Enlace a="/clip" al={() => elegirModo('app')} style={{
           display: 'block', boxSizing: 'border-box', width: '100%',
           padding: '14px 18px', borderTop: `1px solid ${LINEA.tenue}`,
-          cursor: 'pointer', font: `400 10px/1 ${FUENTE.ui}`, color: COLOR.textoTenue,
+          cursor: 'pointer', font: `500 12px/1 ${FUENTE.ui}`, color: COLOR.textoSuave,
         }}>‹ Volver a la aplicación</Enlace>
       </nav>
 
@@ -168,11 +168,10 @@ export function Marco({ children, titulo, resumen }: {
           paddingBottom: 16, borderBottom: `1px solid ${LINEA.tenue}`,
         }}>
           <h1 style={{
-            margin: 0, font: `400 26px/1 ${FUENTE.display}`,
-            textTransform: 'uppercase', letterSpacing: 0.5,
+            margin: 0, font: `700 24px/1.1 ${FUENTE.ui}`,
           }}>{titulo}</h1>
           {resumen && (
-            <span style={{ font: `400 12px/1 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
+            <span style={{ font: `400 13px/1 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
               {resumen}
             </span>
           )}

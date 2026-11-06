@@ -95,13 +95,13 @@ export default function SubidaMasiva() {
 
   return (
     <div style={{ marginTop: 30, borderTop: `1px solid ${LINEA.suave}`, paddingTop: 24 }}>
-      <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2,
+      <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 2.2,
         textTransform: 'uppercase', color: COLOR.dinero, marginBottom: 12 }}>
         2 · Subir sus videos
       </div>
 
       <div style={{ marginBottom: 16, padding: '12px 14px', border: `1px solid ${LINEA.tenue}`,
-        font: `400 10px/1.6 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
+        font: `400 11px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
         Elige la carpeta que contiene una subcarpeta por creadora. El nombre de cada
         subcarpeta tiene que coincidir con su <b style={{ color: COLOR.texto }}>usuario</b>{' '}
         en la plataforma. El título de cada clip sale del nombre del archivo, y la portada
@@ -110,15 +110,15 @@ export default function SubidaMasiva() {
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 16 }}>
         <div style={{ border: `1px dashed ${LINEA.marcada}`, padding: '16px 15px' }}>
-          <div style={{ font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
-            textTransform: 'uppercase', color: COLOR.textoTenue, marginBottom: 10 }}>
+          <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
+            textTransform: 'uppercase', color: COLOR.textoSuave, marginBottom: 10 }}>
             La carpeta con los videos
           </div>
           <input type="file" multiple
             ref={el => { if (el) el.setAttribute('webkitdirectory', '') }}
             onChange={e => { elegirCarpeta(e.target.files); e.target.value = '' }}
             style={{ font: `400 12px/1 ${FUENTE.ui}`, color: COLOR.textoSuave }} />
-          <div style={{ marginTop: 8, font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
+          <div style={{ marginTop: 8, font: `400 11px/1.45 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
             {lote.length
               ? `${cuantos(lote.length, 'video')} en ${cuantos(carpetas.length, 'carpeta')}`
               : 'mp4, mov, webm o m4v'}
@@ -126,14 +126,14 @@ export default function SubidaMasiva() {
         </div>
 
         <div style={{ border: `1px dashed ${LINEA.marcada}`, padding: '16px 15px' }}>
-          <div style={{ font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
-            textTransform: 'uppercase', color: COLOR.textoTenue, marginBottom: 10 }}>
+          <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
+            textTransform: 'uppercase', color: COLOR.textoSuave, marginBottom: 10 }}>
             Catálogo de títulos · opcional
           </div>
           <input type="file" accept=".csv,text/csv"
             onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) cargarCatalogo(f) }}
             style={{ font: `400 12px/1 ${FUENTE.ui}`, color: COLOR.textoSuave }} />
-          <div style={{ marginTop: 8, font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
+          <div style={{ marginTop: 8, font: `400 11px/1.45 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
             archivo, titulo, descripcion, precio, visibilidad
           </div>
         </div>
@@ -154,7 +154,7 @@ export default function SubidaMasiva() {
           <b style={{ color: '#FFB020' }}>{sinCreadora.length} carpetas sin creadora:</b>{' '}
           {sinCreadora.slice(0, 6).join(', ')}
           {sinCreadora.length > 6 && ` y ${sinCreadora.length - 6} más`}.
-          <div style={{ marginTop: 6, color: COLOR.textoTenue }}>
+          <div style={{ marginTop: 6, color: COLOR.textoSuave }}>
             Dales de alta arriba con ese mismo usuario, o renombra la carpeta. Sus videos
             se omiten.
           </div>
@@ -191,7 +191,7 @@ export default function SubidaMasiva() {
                 <div key={carp || '(raiz)'}>
                   <div style={{ padding: '8px 13px', background: COLOR.superficie,
                     borderBottom: `1px solid ${LINEA.tenue}`,
-                    font: `700 10px/1 ${FUENTE.mono}`, letterSpacing: 1.2,
+                    font: `700 11px/1 ${FUENTE.mono}`, letterSpacing: 1.2,
                     color: sin ? '#FFB020' : COLOR.admin }}>
                     {carp || '(sin carpeta)'} · {suyos.length} video{suyos.length > 1 ? 's' : ''}
                     {sin && ' · sin creadora'}
@@ -200,7 +200,7 @@ export default function SubidaMasiva() {
                     const color = v.estado === 'listo' ? COLOR.dinero
                       : v.estado === 'fallo' ? '#FF4444'
                       : v.estado === 'subiendo' ? COLOR.admin
-                      : v.estado === 'espera' ? COLOR.textoTenue : '#FFB020'
+                      : v.estado === 'espera' ? COLOR.textoSuave : '#FFB020'
                     return (
                       <div key={i} style={{
                         padding: '7px 13px 7px 26px',
@@ -210,10 +210,10 @@ export default function SubidaMasiva() {
                           <span style={{ flex: 1, font: `400 12px/1.3 ${FUENTE.ui}`,
                             color: COLOR.texto, overflow: 'hidden', textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap' }}>{v.titulo}</span>
-                          <span style={{ font: `400 10px/1 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
+                          <span style={{ font: `400 11px/1 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
                             {usd(v.precio)} · {(v.archivo.size / 1048576).toFixed(0)} MB
                           </span>
-                          <span style={{ font: `700 9px/1.6 ${FUENTE.ui}`, letterSpacing: 1.2,
+                          <span style={{ font: `700 10px/1.6 ${FUENTE.ui}`, letterSpacing: 1.2,
                             textTransform: 'uppercase', color, minWidth: 74, textAlign: 'right' }}>
                             {v.estado === 'sin_creadora' ? '—'
                               : v.estado === 'no_publica' ? 'pendiente' : v.estado}
@@ -222,8 +222,8 @@ export default function SubidaMasiva() {
                         {/* El motivo del fallo se guardaba y no se pintaba:
                             "FALLO" a secas no le sirve a nadie para arreglarlo. */}
                         {v.detalle && (
-                          <div style={{ marginTop: 3, font: `400 10px/1.45 ${FUENTE.ui}`,
-                            color: v.estado === 'fallo' ? '#FF4444' : COLOR.textoTenue }}>
+                          <div style={{ marginTop: 3, font: `400 11px/1.45 ${FUENTE.ui}`,
+                            color: v.estado === 'fallo' ? '#FF4444' : COLOR.textoSuave }}>
                             {v.detalle}
                           </div>
                         )}

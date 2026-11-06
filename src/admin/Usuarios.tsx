@@ -100,7 +100,7 @@ export default function Usuarios() {
           }} />
           <div>
             <div style={{ color: COLOR.texto }}>{f.display_name}</div>
-            <div style={{ font: `400 10px/1.3 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
+            <div style={{ font: `400 11px/1.3 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
               @{f.handle}{f.es_demo && ' · demo'}
             </div>
           </div>
@@ -108,7 +108,7 @@ export default function Usuarios() {
       ),
     },
     { clave: 'email', titulo: 'Correo', ordenable: true,
-      pinta: f => <span style={{ font: `400 10px/1 ${FUENTE.mono}`, color: COLOR.textoSuave }}>{f.email}</span> },
+      pinta: f => <span style={{ font: `400 11px/1 ${FUENTE.mono}`, color: COLOR.textoSuave }}>{f.email}</span> },
     { clave: 'rol', titulo: 'Rol', ordenable: true,
       pinta: f => <Insignia texto={f.rol} color={COLOR_ROL[f.rol]} /> },
     { clave: 'estado', titulo: 'Estado', ordenable: true,
@@ -122,19 +122,19 @@ export default function Usuarios() {
       pinta: f => <span style={{ color: COLOR.textoSuave }}>{fecha(f.created_at)}</span> },
     { clave: 'ultimo_acceso', titulo: 'Último acceso', ordenable: true,
       pinta: f => (
-        <span style={{ color: f.ultimo_acceso ? COLOR.textoSuave : COLOR.textoApagado }}>
+        <span style={{ color: f.ultimo_acceso ? COLOR.textoSuave : COLOR.textoSuave }}>
           {desde(f.ultimo_acceso)}
         </span>
       ) },
     { clave: 'saldo', titulo: 'Saldo', ordenable: true, numerica: true,
       // usd(): el libro guarda CENTAVOS. En crudo, un saldo de $2.40 se leia
       // como 240 en la columna de dinero del panel.
-      pinta: f => <span style={{ color: f.saldo > 0 ? COLOR.dinero : COLOR.textoApagado }}>{usd(f.saldo)}</span> },
+      pinta: f => <span style={{ color: f.saldo > 0 ? COLOR.dinero : COLOR.textoSuave }}>{usd(f.saldo)}</span> },
     { clave: 'total_ganado', titulo: 'Ganado', ordenable: true, numerica: true,
-      pinta: f => <span style={{ color: f.total_ganado > 0 ? COLOR.dinero : COLOR.textoApagado }}>{usd(f.total_ganado)}</span> },
+      pinta: f => <span style={{ color: f.total_ganado > 0 ? COLOR.dinero : COLOR.textoSuave }}>{usd(f.total_ganado)}</span> },
     { clave: 'clips_total', titulo: 'Clips', ordenable: true, numerica: true,
       pinta: f => (
-        <span style={{ color: f.clips_total ? COLOR.textoSuave : COLOR.textoApagado }}>
+        <span style={{ color: f.clips_total ? COLOR.textoSuave : COLOR.textoSuave }}>
           {f.clips_publicados}/{f.clips_total}
         </span>
       ) },
@@ -241,10 +241,10 @@ function Ficha({ fila, ficha, cierra, pide }: {
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
-            <div style={{ font: `400 22px/1 ${FUENTE.display}`, textTransform: 'uppercase' }}>
+            <div style={{ font: `700 20px/1.2 ${FUENTE.ui}`, }}>
               {fila.display_name}
             </div>
-            <div style={{ marginTop: 4, font: `400 12px/1 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
+            <div style={{ marginTop: 4, font: `400 12px/1 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
               @{fila.handle} · {fila.email}
             </div>
           </div>
@@ -283,8 +283,8 @@ function Ficha({ fila, ficha, cierra, pide }: {
             { t: 'Clips', v: `${fila.clips_publicados}/${fila.clips_total}`, c: COLOR.texto },
           ].map(x => (
             <div key={x.t} style={{ background: COLOR.superficie, padding: '11px 13px' }}>
-              <div style={{ font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
-                textTransform: 'uppercase', color: COLOR.textoTenue }}>{x.t}</div>
+              <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
+                textTransform: 'uppercase', color: COLOR.textoSuave }}>{x.t}</div>
               <div style={{ marginTop: 5, font: `400 19px/1 ${FUENTE.mono}`, color: x.c }}>{x.v}</div>
             </div>
           ))}
@@ -302,7 +302,7 @@ function Ficha({ fila, ficha, cierra, pide }: {
           <Boton al={() => pide('correo')}>Corregir correo</Boton>
         </div>
 
-        <div style={{ marginTop: 12, font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
+        <div style={{ marginTop: 12, font: `400 11px/1.45 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
           Alta {fecha(fila.created_at)} · último acceso {desde(fila.ultimo_acceso)}
         </div>
 
@@ -314,8 +314,8 @@ function Ficha({ fila, ficha, cierra, pide }: {
              ['acciones', `Historial (${ficha?.acciones.length ?? 0})`]] as const).map(([k, t]) => (
             <Pulsable key={k} al={() => setPestana(k)} activado={pestana === k} style={{
               padding: '8px 13px', cursor: 'pointer',
-              font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
-              color: pestana === k ? COLOR.admin : COLOR.textoTenue,
+              font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
+              color: pestana === k ? COLOR.admin : COLOR.textoSuave,
               borderBottom: `2px solid ${pestana === k ? COLOR.admin : 'transparent'}`,
             }}>{t}</Pulsable>
           ))}
@@ -355,7 +355,7 @@ function Ficha({ fila, ficha, cierra, pide }: {
 
 function Vacio({ texto }: { texto: string }) {
   return <div style={{ padding: '26px 0', textAlign: 'center',
-    font: `400 12px/1 ${FUENTE.ui}`, color: COLOR.textoApagado }}>{texto}</div>
+    font: `400 12px/1 ${FUENTE.ui}`, color: COLOR.textoSuave }}>{texto}</div>
 }
 
 function Renglon({ izq, der, pie, colorDer, marca }: {
@@ -366,14 +366,14 @@ function Renglon({ izq, der, pie, colorDer, marca }: {
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
         <span style={{ font: `400 12px/1.3 ${FUENTE.ui}`, color: COLOR.texto }}>
           {izq}
-          {marca && <span style={{ marginLeft: 7, font: `700 9px/1 ${FUENTE.ui}`,
+          {marca && <span style={{ marginLeft: 7, font: `700 10px/1 ${FUENTE.ui}`,
             letterSpacing: 1.2, textTransform: 'uppercase', color: '#FFB020' }}>{marca}</span>}
         </span>
         {der && <span style={{ font: `400 12px/1.3 ${FUENTE.mono}`,
           color: colorDer ?? COLOR.textoSuave, whiteSpace: 'nowrap' }}>{der}</span>}
       </div>
-      {pie && <div style={{ marginTop: 3, font: `400 10px/1.45 ${FUENTE.mono}`,
-        color: COLOR.textoApagado, wordBreak: 'break-word' }}>{pie}</div>}
+      {pie && <div style={{ marginTop: 3, font: `400 11px/1.45 ${FUENTE.mono}`,
+        color: COLOR.textoSuave, wordBreak: 'break-word' }}>{pie}</div>}
     </div>
   )
 }
@@ -458,7 +458,7 @@ function SaldoDialogo({ fila, cancela, listo }: {
             <Campo valor={cantidad} cambia={setCantidad} mono autoFoco marcador="5.00 o -5.00" />
           } />
           {n !== 0 && (
-            <div style={{ marginTop: 8, font: `400 12px/1 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
+            <div style={{ marginTop: 8, font: `400 12px/1 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
               {usd(fila.saldo)} → <b style={{ color: COLOR.dinero }}>{usd(fila.saldo + n)}</b>
             </div>
           )}
@@ -486,7 +486,7 @@ function RolDialogo({ fila, cancela, listo }: {
         width: 460, maxWidth: '92vw', background: COLOR.superficie,
         border: `1px solid ${LINEA.fuerte}`, padding: 26,
       }}>
-        <div style={{ font: `400 22px/1 ${FUENTE.display}`, textTransform: 'uppercase' }}>
+        <div style={{ font: `700 20px/1.2 ${FUENTE.ui}`, }}>
           Cambiar rol
         </div>
         <div style={{ marginTop: 12, font: `400 13px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
@@ -523,9 +523,9 @@ function Interruptor({ titulo, nota, puesto, activo, al }: {
       border: `1px solid ${puesto ? COLOR.admin : LINEA.tenue}`, padding: '12px 14px',
     }}>
       <div style={{ flex: 1 }}>
-        <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
+        <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
           textTransform: 'uppercase', color: puesto ? COLOR.admin : COLOR.texto }}>{titulo}</div>
-        <div style={{ marginTop: 5, font: `400 10px/1.45 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
+        <div style={{ marginTop: 5, font: `400 11px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
           {nota}
         </div>
       </div>

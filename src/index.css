@@ -370,6 +370,22 @@ details[open] > summary > .faq-signo {
   .intro-neon, .intro-texto { animation: none }
 }
 
+/* ---------- Panel de administracion ----------
+ *
+ * Sobrio y en cian: es una herramienta de escritorio de sesion larga, no una
+ * vitrina. El cian es el color que el sitio reserva para lo privilegiado, asi
+ * que aqui es el de la accion principal y el del foco; el magenta queda para
+ * la marca del resto de la aplicacion. Esquina de 8 px: densa, pero a juego con
+ * las esquinas suaves del resto. */
+.campo-admin {
+  background: #08080A; color: #F2F0F3; border: 1px solid rgba(255,255,255,.2); border-radius: 8px; outline: none;
+}
+.campo-admin::placeholder { color: #8F8A94 }
+.campo-admin:focus { border-color: #00E5FF; box-shadow: 0 0 0 1px rgba(0,229,255,.35) }
+.boton-admin:focus-visible { outline: 2px solid #00E5FF; outline-offset: 2px }
+.boton-admin:not(:disabled):hover { filter: brightness(1.12) }
+.fila-admin:hover { background: rgba(0,229,255,.05) }
+
 /* ---------- Campos del modo sobrio ----------
  *
  * Los de los ajustes de cuenta y los componentes que viven dentro (telefono,

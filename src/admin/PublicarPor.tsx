@@ -46,7 +46,7 @@ export default function PublicarPor() {
   return (
     <>
       <div style={{ marginBottom: 16, padding: '10px 13px', border: `1px solid ${LINEA.tenue}`,
-        font: `400 10px/1.6 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
+        font: `400 11px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
         Solo aparecen las creadoras con expediente. A las demás, las políticas de
         almacenamiento no dejan escribirles — listarlas aquí sería ofrecer algo que
         después fallaría.
@@ -65,7 +65,7 @@ export default function PublicarPor() {
 
       {lista.length === 0 ? (
         <div style={{ padding: '60px 20px', textAlign: 'center', border: `1px solid ${LINEA.tenue}`,
-          font: `400 13px/1.45 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
+          font: `400 13px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
           {busqueda ? 'Nadie con ese nombre.'
             : 'Todavía no has dado de alta a ninguna creadora.'}
         </div>
@@ -88,7 +88,7 @@ export default function PublicarPor() {
               }} />
               <div style={{ flex: 1 }}>
                 <div style={{ font: `400 13px/1.3 ${FUENTE.ui}` }}>{c.nombre}</div>
-                <div style={{ font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
+                <div style={{ font: `400 11px/1.45 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
                   @{c.handle} · alta {desde(c.alta_at)} · {c.clips_publicados}/{c.clips_total} publicados
                 </div>
               </div>
@@ -102,7 +102,7 @@ export default function PublicarPor() {
       )}
 
       {lista.some(c => !c.verificada) && (
-        <div style={{ marginTop: 14, font: `400 10px/1.45 ${FUENTE.ui}`, color: COLOR.textoApagado }}>
+        <div style={{ marginTop: 14, font: `400 11px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
           Las apagadas no se pueden elegir: sin identidad verificada, la base rechaza
           cualquier publicación. Sube sus documentos desde el alta o resuelve su
           verificación en el módulo 09.
@@ -193,7 +193,7 @@ function Formulario({ c, vuelve }: { c: CreadoraGestionable; vuelve: () => void 
         }} />
         <div>
           <div style={{ font: `400 16px/1.3 ${FUENTE.ui}` }}>{c.nombre}</div>
-          <div style={{ font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
+          <div style={{ font: `400 11px/1.45 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
             @{c.handle}
           </div>
         </div>
@@ -208,7 +208,7 @@ function Formulario({ c, vuelve }: { c: CreadoraGestionable; vuelve: () => void 
           entrar a su cuenta a ponersela. */}
       {!urlAvatar(c.avatar_path) && (
         <div style={{ marginBottom: 18, padding: '12px 14px', border: `1px solid ${LINEA.tenue}` }}>
-          <div style={{ font: `400 12px/1.45 ${FUENTE.ui}`, color: COLOR.textoTenue,
+          <div style={{ font: `400 12px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave,
             marginBottom: 10 }}>
             No tiene foto de perfil, y no puede ponérsela sola.
           </div>
@@ -244,8 +244,8 @@ function Formulario({ c, vuelve }: { c: CreadoraGestionable; vuelve: () => void 
                 setFila(f => [...f, ...nuevos])
               }}
               style={{ font: `400 12px/1 ${FUENTE.ui}`, color: COLOR.textoSuave }} />
-            <div style={{ marginTop: 9, font: `400 10px/1.45 ${FUENTE.ui}`,
-              color: COLOR.textoApagado }}>
+            <div style={{ marginTop: 9, font: `400 11px/1.45 ${FUENTE.ui}`,
+              color: COLOR.textoSuave }}>
               Puedes elegir varios a la vez. MP4, MOV o WebM · hasta 2 GB cada uno.
               La portada se saca del propio video.
             </div>
@@ -270,8 +270,8 @@ function Formulario({ c, vuelve }: { c: CreadoraGestionable; vuelve: () => void 
                       font: `400 13px/1.3 ${FUENTE.ui}`,
                       opacity: f.estado === 'listo' ? .5 : 1,
                     }} />
-                  <span style={{ font: `400 10px/1.45 ${FUENTE.mono}`,
-                    color: COLOR.textoApagado, whiteSpace: 'nowrap' }}>
+                  <span style={{ font: `400 11px/1.45 ${FUENTE.mono}`,
+                    color: COLOR.textoSuave, whiteSpace: 'nowrap' }}>
                     {(f.archivo.size / 1048576).toFixed(1)} MB
                   </span>
                   {f.estado === 'listo'    && <Insignia texto="publicado" color={COLOR.dinero} />}
@@ -280,13 +280,13 @@ function Formulario({ c, vuelve }: { c: CreadoraGestionable; vuelve: () => void 
                   {f.estado === 'espera' && !ocupado && (
                     <Pulsable rotulo="Quitar esta fila"
                       al={() => setFila(x => x.filter((_, j) => j !== i))}
-                      style={{ cursor: 'pointer', color: COLOR.textoApagado,
+                      style={{ cursor: 'pointer', color: COLOR.textoSuave,
                         font: `400 16px/1 ${FUENTE.ui}`, padding: '0 3px' }}>×</Pulsable>
                   )}
                 </div>
               ))}
               {fila.some(f => f.detalle) && (
-                <div style={{ font: `400 10px/1.45 ${FUENTE.mono}`, color: '#FF4444' }}>
+                <div style={{ font: `400 11px/1.45 ${FUENTE.mono}`, color: '#FF4444' }}>
                   {fila.filter(f => f.detalle).map((f, i) => (
                     <div key={i}>{f.titulo}: {f.detalle}</div>
                   ))}
@@ -312,8 +312,8 @@ function Formulario({ c, vuelve }: { c: CreadoraGestionable; vuelve: () => void 
               ]} />
             } />
           </div>
-          <div style={{ marginTop: 7, font: `400 10px/1.45 ${FUENTE.ui}`,
-            color: COLOR.textoApagado }}>
+          <div style={{ marginTop: 7, font: `400 11px/1.45 ${FUENTE.ui}`,
+            color: COLOR.textoSuave }}>
             El precio y la visibilidad se aplican a todos los de la fila. Se cambian
             después uno por uno si hace falta.
           </div>
@@ -341,11 +341,11 @@ function Formulario({ c, vuelve }: { c: CreadoraGestionable; vuelve: () => void 
         </div>
 
         <div style={{ border: `1px solid ${LINEA.tenue}`, padding: 14, height: 'fit-content' }}>
-          <div style={{ font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
-            textTransform: 'uppercase', color: COLOR.textoTenue, marginBottom: 10 }}>
+          <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
+            textTransform: 'uppercase', color: COLOR.textoSuave, marginBottom: 10 }}>
             Queda registrado
           </div>
-          <div style={{ font: `400 10px/1.6 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
+          <div style={{ font: `400 11px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
             El clip aparece como suyo y el dinero va a su saldo. En la bitácora queda
             anotado que lo subiste tú, con tu IP — la marca <b style={{ color: COLOR.texto }}>
             por_administración</b> en el detalle del evento.

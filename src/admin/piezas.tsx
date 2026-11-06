@@ -20,18 +20,20 @@ export function Boton({ children, al, tono = 'normal', activo = true, chico }: {
   children: ReactNode; al: () => void; tono?: TonoBoton
   activo?: boolean; chico?: boolean
 }) {
-  const color = tono === 'peligro' ? '#FF4444' : tono === 'primario' ? COLOR.acento : COLOR.textoSuave
+  // El primario es CIAN, no magenta: el panel es el contexto privilegiado, y el
+  // cian es el color que el sitio ya reserva para eso. El peligro sigue en rojo.
+  const color = tono === 'peligro' ? '#FF4444' : tono === 'primario' ? COLOR.admin : COLOR.textoSuave
   return (
-    <button type="button" disabled={!activo} onClick={al} style={{
-      font: `700 ${chico ? 9 : 10}px/1 ${FUENTE.ui}`,
+    <button type="button" disabled={!activo} onClick={al} className="boton-admin" style={{
+      font: `700 ${chico ? 10 : 11}px/1 ${FUENTE.ui}`,
       letterSpacing: 1.2, textTransform: 'uppercase',
-      padding: chico ? '6px 10px' : '9px 14px',
-      background: tono === 'primario' && activo ? COLOR.acento : 'transparent',
+      padding: chico ? '7px 11px' : '10px 15px',
+      background: tono === 'primario' && activo ? COLOR.admin : 'transparent',
       color: tono === 'primario' && activo ? COLOR.fondo : color,
       border: `1px solid ${activo ? color : LINEA.tenue}`,
       opacity: activo ? 1 : .4,
       cursor: activo ? 'pointer' : 'not-allowed',
-      borderRadius: 0, whiteSpace: 'nowrap',
+      borderRadius: 8, whiteSpace: 'nowrap',
     }}>{children}</button>
   )
 }
@@ -43,8 +45,8 @@ function Encabezado({ ordenable, al, alinea, children }: {
 }) {
   const pinta = {
     display: 'block', width: '100%', boxSizing: 'border-box' as const,
-    textAlign: alinea, padding: '9px 12px',
-    font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
+    textAlign: alinea, padding: '10px 12px',
+    font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
     textTransform: 'uppercase' as const, color: 'inherit',
   }
   if (!ordenable) return <div style={pinta}>{children}</div>
@@ -53,11 +55,10 @@ function Encabezado({ ordenable, al, alinea, children }: {
 
 /* ---------- Campos ---------- */
 
+// El fondo, el borde y el foco salen de `.campo-admin` (index.css).
 const campoBase = {
   width: '100%', boxSizing: 'border-box' as const,
-  background: COLOR.fondo, color: COLOR.texto,
-  border: `1px solid ${LINEA.suave}`, borderRadius: 0,
-  padding: '9px 11px', font: `400 13px/1.45 ${FUENTE.ui}`, outline: 'none',
+  padding: '9px 11px', font: `400 13px/1.45 ${FUENTE.ui}`,
 }
 
 export function Campo({ valor, cambia, marcador, tipo = 'text', mono, autoFoco }: {
@@ -66,7 +67,7 @@ export function Campo({ valor, cambia, marcador, tipo = 'text', mono, autoFoco }
 }) {
   return (
     <input type={tipo} value={valor} placeholder={marcador} autoFocus={autoFoco}
-      onChange={e => cambia(e.target.value)}
+      className="campo-admin" onChange={e => cambia(e.target.value)}
       style={{ ...campoBase, fontFamily: mono ? FUENTE.mono : FUENTE.ui }} />
   )
 }
@@ -76,7 +77,7 @@ export function AreaTexto({ valor, cambia, marcador, filas = 3 }: {
 }) {
   return (
     <textarea value={valor} placeholder={marcador} rows={filas}
-      onChange={e => cambia(e.target.value)}
+      className="campo-admin" onChange={e => cambia(e.target.value)}
       style={{ ...campoBase, resize: 'vertical' }} />
   )
 }
@@ -85,7 +86,7 @@ export function Selector<T extends string>({ valor, cambia, opciones }: {
   valor: T; cambia: (v: T) => void; opciones: { v: T; t: string }[]
 }) {
   return (
-    <select value={valor} onChange={e => cambia(e.target.value as T)}
+    <select value={valor} onChange={e => cambia(e.target.value as T)} className="campo-admin"
       style={{ ...campoBase, cursor: 'pointer', width: 'auto', minWidth: 120 }}>
       {opciones.map(o => <option key={o.v} value={o.v}>{o.t}</option>)}
     </select>
@@ -99,8 +100,8 @@ export function Etiquetado({ texto, hijo, ancho }: {
     <label style={{ display: 'block', width: ancho }}>
       <span style={{
         display: 'block', marginBottom: 5,
-        font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
-        textTransform: 'uppercase', color: COLOR.textoTenue,
+        font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
+        textTransform: 'uppercase', color: COLOR.textoSuave,
       }}>{texto}</span>
       {hijo}
     </label>
@@ -135,13 +136,12 @@ export function Confirmar({ titulo, cuerpo, etiqueta, tono = 'peligro',
       position: 'fixed', inset: 0, zIndex: 90,
       background: 'rgba(8,8,10,.82)', display: 'grid', placeItems: 'center',
     }}>
-      <div onClick={e => e.stopPropagation()} style={{
+      <div role="dialog" aria-modal="true" aria-label={titulo} onClick={e => e.stopPropagation()} style={{
         width: 460, maxWidth: '92vw', background: COLOR.superficie,
-        border: `1px solid ${LINEA.fuerte}`, padding: 26,
+        border: `1px solid ${LINEA.fuerte}`, borderRadius: 14, padding: 26,
       }}>
         <div style={{
-          font: `400 22px/1 ${FUENTE.display}`, textTransform: 'uppercase',
-          color: COLOR.texto, letterSpacing: 0.5,
+          font: `700 20px/1.2 ${FUENTE.ui}`,
         }}>{titulo}</div>
 
         <div style={{
@@ -193,13 +193,13 @@ export function Tabla<T>({ columnas, filas, clave, orden, descendente, ordenar,
   if (!filas.length) {
     return (
       <div style={{
-        padding: '60px 20px', textAlign: 'center', color: COLOR.textoTenue,
-        font: `400 13px/1.45 ${FUENTE.ui}`, border: `1px solid ${LINEA.tenue}`,
+        padding: '60px 20px', textAlign: 'center', color: COLOR.textoSuave,
+        font: `400 13px/1.45 ${FUENTE.ui}`, border: `1.5px dashed ${LINEA.marcada}`, borderRadius: 10,
       }}>{vacia ?? 'Sin resultados'}</div>
     )
   }
   return (
-    <div style={{ border: `1px solid ${LINEA.tenue}`, overflowX: 'auto' }}>
+    <div style={{ border: `1px solid ${LINEA.suave}`, borderRadius: 10, overflowX: 'auto' }}>
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
         <thead>
           <tr>
@@ -211,7 +211,7 @@ export function Tabla<T>({ columnas, filas, clave, orden, descendente, ordenar,
                   background: COLOR.superficieAlta,
                   textAlign: c.numerica ? 'right' : 'left',
                   padding: 0, width: c.ancho,
-                  color: orden === c.clave ? COLOR.admin : COLOR.textoTenue,
+                  color: orden === c.clave ? COLOR.admin : COLOR.textoSuave,
                   borderBottom: `1px solid ${LINEA.suave}`,
                   userSelect: 'none', whiteSpace: 'nowrap',
                 }}>
@@ -233,10 +233,10 @@ export function Tabla<T>({ columnas, filas, clave, orden, descendente, ordenar,
           {filas.map(f => {
             const k = clave(f)
             return (
-              <tr key={k}
+              <tr key={k} className={alElegir ? 'fila-admin' : undefined}
                 {...(alElegir ? tecladoComoBoton(() => alElegir(f)) : {})}
                 style={{
-                background: elegida === k ? 'rgba(0,229,255,.06)' : 'transparent',
+                background: elegida === k ? 'rgba(0,229,255,.1)' : undefined,
                 cursor: alElegir ? 'pointer' : 'default',
               }}>
                 {columnas.map(c => (
@@ -269,7 +269,7 @@ export function Paginador({ pagina, porPagina, total, cambia }: {
   return (
     <div style={{
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      marginTop: 12, font: `400 10px/1 ${FUENTE.mono}`, color: COLOR.textoTenue,
+      marginTop: 12, font: `400 11px/1 ${FUENTE.mono}`, color: COLOR.textoSuave,
     }}>
       <span>{desde}–{hasta} de {total}</span>
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -286,8 +286,8 @@ export function Paginador({ pagina, porPagina, total, cambia }: {
 export function Insignia({ texto, color }: { texto: string; color: string }) {
   return (
     <span style={{
-      display: 'inline-block', padding: '2px 7px',
-      font: `700 9px/1.45 ${FUENTE.ui}`, letterSpacing: 1.2,
+      display: 'inline-block', padding: '2px 8px', borderRadius: 6,
+      font: `700 10px/1.45 ${FUENTE.ui}`, letterSpacing: 1.2,
       textTransform: 'uppercase', color, border: `1px solid ${color}`,
     }}>{texto}</span>
   )
@@ -297,7 +297,7 @@ export const COLOR_ESTADO: Record<string, string> = {
   activa: COLOR.dinero, suspendida: '#FFB020', baneada: '#FF4444',
 }
 export const COLOR_ROL: Record<string, string> = {
-  admin: COLOR.admin, creadora: COLOR.acento, usuaria: COLOR.textoTenue,
+  admin: COLOR.admin, creadora: COLOR.acento, usuaria: COLOR.textoSuave,
 }
 
 /* ---------- Formato ---------- */

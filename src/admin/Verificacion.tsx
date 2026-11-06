@@ -55,7 +55,7 @@ export default function Verificacion() {
   return (
     <>
       <div style={{ marginBottom: 16, padding: '10px 13px', border: `1px solid ${LINEA.tenue}`,
-        font: `400 10px/1.6 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
+        font: `400 11px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
         Los documentos se ven con una liga firmada que caduca en cinco minutos y no se
         copian a ningún lado. De cada persona solo se conserva un sí o un no y la fecha;
         las imágenes se borran en la fecha marcada en su ficha.
@@ -65,13 +65,13 @@ export default function Verificacion() {
         {PESTANAS.map(p => (
           <Pulsable key={p.v} al={() => { setEstado(p.v); setPagina(0) }} activado={estado === p.v} style={{
             padding: '9px 15px', cursor: 'pointer',
-            font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
-            color: estado === p.v ? COLOR.admin : COLOR.textoTenue,
+            font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
+            color: estado === p.v ? COLOR.admin : COLOR.textoSuave,
             borderBottom: `2px solid ${estado === p.v ? COLOR.admin : 'transparent'}`,
           }}>
             {p.t}
-            <span style={{ marginLeft: 7, font: `400 10px/1 ${FUENTE.mono}`,
-              color: COLOR.textoApagado }}>{conteo[p.v] ?? 0}</span>
+            <span style={{ marginLeft: 7, font: `400 11px/1 ${FUENTE.mono}`,
+              color: COLOR.textoSuave }}>{conteo[p.v] ?? 0}</span>
           </Pulsable>
         ))}
       </div>
@@ -82,7 +82,7 @@ export default function Verificacion() {
       )}
 
       {filas.length === 0 ? (
-        <div style={{ padding: '70px 20px', textAlign: 'center', color: COLOR.textoTenue,
+        <div style={{ padding: '70px 20px', textAlign: 'center', color: COLOR.textoSuave,
           font: `400 13px/1.45 ${FUENTE.ui}`, border: `1px solid ${LINEA.tenue}` }}>
           {cargando ? 'Cargando…' : 'Nada aquí'}
         </div>
@@ -96,11 +96,11 @@ export default function Verificacion() {
             }}>
               <div style={{ flex: 1 }}>
                 <div style={{ font: `400 13px/1.3 ${FUENTE.ui}` }}>
-                  {v.nombre} <span style={{ color: COLOR.textoTenue,
-                    font: `400 10px/1 ${FUENTE.mono}` }}>@{v.handle}</span>
+                  {v.nombre} <span style={{ color: COLOR.textoSuave,
+                    font: `400 11px/1 ${FUENTE.mono}` }}>@{v.handle}</span>
                 </div>
-                <div style={{ marginTop: 5, font: `400 10px/1.45 ${FUENTE.mono}`,
-                  color: COLOR.textoApagado }}>
+                <div style={{ marginTop: 5, font: `400 11px/1.45 ${FUENTE.mono}`,
+                  color: COLOR.textoSuave }}>
                   Solicitó {desde(v.created_at)}
                   {v.edad != null && <> · {v.edad} años</>}
                   {v.intentos > 1 && <> · {v.intentos} intentos</>}
@@ -160,10 +160,10 @@ function Ficha({ v, cierra, listo }: {
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
-            <div style={{ font: `400 22px/1 ${FUENTE.display}`, textTransform: 'uppercase' }}>
+            <div style={{ font: `700 20px/1.2 ${FUENTE.ui}`, }}>
               {v.nombre}
             </div>
-            <div style={{ marginTop: 5, font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
+            <div style={{ marginTop: 5, font: `400 11px/1.45 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
               @{v.handle} · {v.email}
             </div>
           </div>
@@ -194,7 +194,7 @@ function Ficha({ v, cierra, listo }: {
           </div>
         )}
 
-        <div style={{ marginTop: 14, font: `400 10px/1.6 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
+        <div style={{ marginTop: 14, font: `400 11px/1.6 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
           Solicitó {fechaHora(v.created_at)}<br />
           {/* Esto decia «se borran el <fecha>» SIEMPRE, en futuro, incluso en
               una ficha de hace dos meses cuyas imágenes seguían enteras. Era
@@ -252,15 +252,15 @@ function Documento({ titulo, url, vacio = 'Sin archivo' }: {
 }) {
   return (
     <div>
-      <div style={{ font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
-        textTransform: 'uppercase', color: COLOR.textoTenue, marginBottom: 6 }}>{titulo}</div>
+      <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
+        textTransform: 'uppercase', color: COLOR.textoSuave, marginBottom: 6 }}>{titulo}</div>
       <div style={{
         aspectRatio: '4/3', border: `1px solid ${LINEA.tenue}`, background: COLOR.fondo,
         display: 'grid', placeItems: 'center', overflow: 'hidden',
       }}>
         {url
           ? <img src={url} alt={titulo} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-          : <span style={{ font: `400 10px/1.5 ${FUENTE.ui}`, color: COLOR.textoApagado,
+          : <span style={{ font: `400 11px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave,
               textAlign: 'center', padding: '0 14px' }}>
               {vacio}
             </span>}
@@ -272,8 +272,8 @@ function Documento({ titulo, url, vacio = 'Sin archivo' }: {
 function Dato({ t, v, c }: { t: string; v: string; c?: string }) {
   return (
     <div style={{ background: COLOR.superficie, padding: '11px 13px' }}>
-      <div style={{ font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
-        textTransform: 'uppercase', color: COLOR.textoTenue }}>{t}</div>
+      <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
+        textTransform: 'uppercase', color: COLOR.textoSuave }}>{t}</div>
       <div style={{ marginTop: 6, font: `400 16px/1 ${FUENTE.mono}`, color: c ?? COLOR.texto }}>{v}</div>
     </div>
   )

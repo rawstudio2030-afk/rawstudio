@@ -99,7 +99,7 @@ export default function ExpedientesMasivos() {
         textTransform: 'uppercase', color: COLOR.texto, marginBottom: 8 }}>
         Expedientes por carpeta
       </div>
-      <p style={{ margin: '0 0 14px', font: `400 12px/1.6 ${FUENTE.ui}`, color: COLOR.textoTenue,
+      <p style={{ margin: '0 0 14px', font: `400 12px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave,
         maxWidth: 720 }}>
         Una subcarpeta por creadora, con el nombre de usuario, y dentro sus dos documentos:
         la identificación y el consentimiento firmado. Reconozco los nombres que traigan
@@ -118,12 +118,12 @@ export default function ExpedientesMasivos() {
         <span style={{
           display: 'inline-block', padding: '11px 16px', cursor: 'pointer',
           border: `1px solid ${COLOR.admin}`, color: COLOR.admin,
-          font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
+          font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
         }}>Elegir carpeta de expedientes</span>
       </label>
 
       <div style={{ marginTop: 16, paddingTop: 14, borderTop: `1px dashed ${LINEA.tenue}` }}>
-        <div style={{ font: `400 12px/1.6 ${FUENTE.ui}`, color: COLOR.textoTenue,
+        <div style={{ font: `400 12px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave,
           marginBottom: 10, maxWidth: 720 }}>
           <b style={{ color: COLOR.textoSuave }}>O con una tabla</b>, si los documentos no
           están ordenados por carpeta. Columnas: <code>handle</code>,{' '}
@@ -133,8 +133,8 @@ export default function ExpedientesMasivos() {
         </div>
         <div style={{ display: 'flex', gap: 22, flexWrap: 'wrap', alignItems: 'flex-start' }}>
           <div>
-            <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
-              textTransform: 'uppercase', color: COLOR.textoTenue, marginBottom: 7 }}>
+            <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
+              textTransform: 'uppercase', color: COLOR.textoSuave, marginBottom: 7 }}>
               1 · Los archivos
             </div>
             <input type="file" multiple accept="image/*,application/pdf"
@@ -145,13 +145,13 @@ export default function ExpedientesMasivos() {
                 setSueltos(m)
               }}
               style={{ font: `400 12px/1 ${FUENTE.ui}`, color: COLOR.textoSuave }} />
-            <div style={{ marginTop: 6, font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
+            <div style={{ marginTop: 6, font: `400 11px/1.45 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
               {sueltos.size ? `${cuantos(sueltos.size, 'archivo')} ${palabra(sueltos.size, 'listo')}` : 'ninguno todavía'}
             </div>
           </div>
           <div>
-            <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
-              textTransform: 'uppercase', color: COLOR.textoTenue, marginBottom: 7 }}>
+            <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
+              textTransform: 'uppercase', color: COLOR.textoSuave, marginBottom: 7 }}>
               2 · La tabla
             </div>
             <input type="file" accept=".csv,text/csv"
@@ -195,8 +195,8 @@ export default function ExpedientesMasivos() {
               <thead>
                 <tr>{['Creadora', 'Identificación', 'Consentimiento', 'Estado'].map(t => (
                   <th key={t} style={{ textAlign: 'left', padding: '9px 12px',
-                    borderBottom: `1px solid ${LINEA.tenue}`, color: COLOR.textoTenue,
-                    font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
+                    borderBottom: `1px solid ${LINEA.tenue}`, color: COLOR.textoSuave,
+                    font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
                     textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{t}</th>
                 ))}</tr>
               </thead>
@@ -219,7 +219,7 @@ export default function ExpedientesMasivos() {
                     <td style={{ ...celda, color: colorDe(e.estado) }}>
                       {etiqueta(e.estado)}
                       {e.detalle && (
-                        <div style={{ color: COLOR.textoTenue, font: `400 10px/1.45 ${FUENTE.ui}` }}>
+                        <div style={{ color: COLOR.textoSuave, font: `400 11px/1.45 ${FUENTE.ui}` }}>
                           {e.detalle}
                         </div>
                       )}
@@ -235,13 +235,13 @@ export default function ExpedientesMasivos() {
               {ocupado ? 'Subiendo…' : `Subir ${porSubir} ${porSubir === 1 ? 'expediente' : 'expedientes'}`}
             </Boton>
             {avance && (
-              <span style={{ font: `400 12px/1 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
+              <span style={{ font: `400 12px/1 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
                 {avance}
               </span>
             )}
           </div>
 
-          <p style={{ marginTop: 12, font: `400 10px/1.6 ${FUENTE.ui}`, color: COLOR.textoTenue,
+          <p style={{ marginTop: 12, font: `400 11px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave,
             maxWidth: 720 }}>
             Con los dos documentos cargados la verificación se enciende sola. Los clips que
             ya estén subidos <b>no</b> aparecen por eso: siguen pendientes de moderación
@@ -258,7 +258,7 @@ const celda: React.CSSProperties = { padding: '9px 12px', verticalAlign: 'top' }
 function colorDe(e: ExpedienteEnLote['estado']) {
   return e === 'listo' ? COLOR.dinero
     : e === 'fallo' || e === 'sin_creadora' || e === 'incompleto' ? COLOR.acento
-    : e === 'ya' ? COLOR.textoTenue
+    : e === 'ya' ? COLOR.textoSuave
     : COLOR.textoSuave
 }
 

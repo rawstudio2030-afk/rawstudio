@@ -65,13 +65,13 @@ export default function AltaMasiva() {
 
   return (
     <>
-      <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2,
+      <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 2.2,
         textTransform: 'uppercase', color: COLOR.dinero, marginBottom: 12 }}>
         1 · Dar de alta las creadoras
       </div>
 
       <div style={{ marginBottom: 18, padding: '12px 14px', border: `1px solid ${LINEA.tenue}`,
-        font: `400 10px/1.6 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
+        font: `400 11px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
         Sube la tabla con <b style={{ color: COLOR.texto }}>handle</b>,{' '}
         <b style={{ color: COLOR.texto }}>nombre</b>, <b style={{ color: COLOR.texto }}>email</b> y{' '}
         <b style={{ color: COLOR.texto }}>telefono</b>. El correo es a donde le llega
@@ -86,21 +86,21 @@ export default function AltaMasiva() {
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 18 }}>
         <div style={{ border: `1px dashed ${LINEA.marcada}`, padding: '16px 15px' }}>
-          <div style={{ font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
-            textTransform: 'uppercase', color: COLOR.textoTenue, marginBottom: 10 }}>
+          <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
+            textTransform: 'uppercase', color: COLOR.textoSuave, marginBottom: 10 }}>
             1 · La tabla
           </div>
           <input type="file" accept=".csv,text/csv"
             onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) cargarTabla(f) }}
             style={{ font: `400 12px/1 ${FUENTE.ui}`, color: COLOR.textoSuave }} />
-          <div style={{ marginTop: 8, font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
+          <div style={{ marginTop: 8, font: `400 11px/1.45 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
             {filas.length ? `${cuantos(filas.length, 'fila')} ${palabra(filas.length, 'leída')}` : 'CSV separado por comas'}
           </div>
         </div>
 
         <div style={{ border: `1px dashed ${LINEA.marcada}`, padding: '16px 15px' }}>
-          <div style={{ font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
-            textTransform: 'uppercase', color: COLOR.textoTenue, marginBottom: 10 }}>
+          <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
+            textTransform: 'uppercase', color: COLOR.textoSuave, marginBottom: 10 }}>
             2 · Los documentos y fotos
           </div>
           <input type="file" multiple accept="image/*,application/pdf"
@@ -111,7 +111,7 @@ export default function AltaMasiva() {
               setArchivos(m)
             }}
             style={{ font: `400 12px/1 ${FUENTE.ui}`, color: COLOR.textoSuave }} />
-          <div style={{ marginTop: 8, font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
+          <div style={{ marginTop: 8, font: `400 11px/1.45 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
             {archivos.size ? `${cuantos(archivos.size, 'archivo')} ${palabra(archivos.size, 'listo')}` : 'Selecciónalos todos de golpe'}
           </div>
         </div>
@@ -148,33 +148,33 @@ export default function AltaMasiva() {
                 && !!archivos.get(f.archivo_consentimiento.toLowerCase())
               const color = f.estado === 'creada' ? COLOR.dinero
                 : f.estado === 'fallo' || f.estado === 'invalida' ? '#FF4444'
-                : f.estado === 'creando' ? COLOR.admin : COLOR.textoTenue
+                : f.estado === 'creando' ? COLOR.admin : COLOR.textoSuave
               return (
                 <div key={i} style={{
                   display: 'flex', alignItems: 'center', gap: 12, padding: '9px 13px',
                   borderBottom: i < filas.length - 1 ? `1px solid ${LINEA.tenue}` : 'none',
                 }}>
-                  <span style={{ width: 34, font: `400 10px/1 ${FUENTE.mono}`,
-                    color: COLOR.textoApagado }}>{f.linea}</span>
+                  <span style={{ width: 34, font: `400 11px/1 ${FUENTE.mono}`,
+                    color: COLOR.textoSuave }}>{f.linea}</span>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ font: `400 13px/1.3 ${FUENTE.ui}`, color: COLOR.texto }}>
                       {f.nombre || <i style={{ color: '#FF4444' }}>sin nombre</i>}
-                      <span style={{ marginLeft: 8, font: `400 10px/1 ${FUENTE.mono}`,
-                        color: COLOR.textoTenue }}>@{f.handle}</span>
+                      <span style={{ marginLeft: 8, font: `400 11px/1 ${FUENTE.mono}`,
+                        color: COLOR.textoSuave }}>@{f.handle}</span>
                     </div>
                     {(f.errores.length > 0 || f.detalle) && (
-                      <div style={{ marginTop: 3, font: `400 10px/1.45 ${FUENTE.ui}`, color }}>
+                      <div style={{ marginTop: 3, font: `400 11px/1.45 ${FUENTE.ui}`, color }}>
                         {f.errores.join(' · ') || f.detalle}
                       </div>
                     )}
                   </div>
                   {f.estado === 'lista' && (
-                    <span style={{ font: `400 10px/1 ${FUENTE.mono}`,
+                    <span style={{ font: `400 11px/1 ${FUENTE.mono}`,
                       color: tieneDocs ? COLOR.dinero : '#FFB020' }}>
                       {tieneDocs ? 'con expediente' : 'sin documentos'}
                     </span>
                   )}
-                  <span style={{ font: `700 9px/1.6 ${FUENTE.ui}`, letterSpacing: 1.2,
+                  <span style={{ font: `700 10px/1.6 ${FUENTE.ui}`, letterSpacing: 1.2,
                     textTransform: 'uppercase', color, minWidth: 62, textAlign: 'right' }}>
                     {f.estado === 'invalida' ? 'error' : f.estado}
                   </span>

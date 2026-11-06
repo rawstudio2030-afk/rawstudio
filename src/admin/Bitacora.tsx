@@ -76,12 +76,12 @@ export default function Bitacora() {
 
   const columnas: Columna<EventoBitacora>[] = [
     { clave: 'created_at', titulo: 'Cuándo', ancho: 165,
-      pinta: e => <span style={{ font: `400 10px/1.3 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
+      pinta: e => <span style={{ font: `400 11px/1.3 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
         {fechaHora(e.created_at)}</span> },
     { clave: 'actor', titulo: 'Quién', ancho: 165,
       pinta: e => e.actor_handle
         ? <span>@{e.actor_handle}</span>
-        : <span style={{ color: COLOR.textoApagado }}>—</span> },
+        : <span style={{ color: COLOR.textoSuave }}>—</span> },
     { clave: 'accion', titulo: 'Qué hizo',
       pinta: e => (
         <span style={{ color: GRAVE.has(e.accion) ? '#FFB020' : COLOR.texto }}>
@@ -91,11 +91,11 @@ export default function Bitacora() {
     { clave: 'objetivo', titulo: 'Sobre quién', ancho: 165,
       pinta: e => e.objetivo_handle && e.objetivo !== e.actor
         ? <span style={{ color: COLOR.textoSuave }}>@{e.objetivo_handle}</span>
-        : <span style={{ color: COLOR.textoApagado }}>—</span> },
+        : <span style={{ color: COLOR.textoSuave }}>—</span> },
     { clave: 'ip', titulo: 'IP', ancho: 130,
       pinta: e => e.ip
-        ? <span style={{ font: `400 10px/1.3 ${FUENTE.mono}`, color: COLOR.textoSuave }}>{e.ip}</span>
-        : <span style={{ font: `400 10px/1.3 ${FUENTE.mono}`, color: COLOR.textoApagado }}
+        ? <span style={{ font: `400 11px/1.3 ${FUENTE.mono}`, color: COLOR.textoSuave }}>{e.ip}</span>
+        : <span style={{ font: `400 11px/1.3 ${FUENTE.mono}`, color: COLOR.textoSuave }}
             title="El evento no nació de una petición HTTP, o no había cabeceras">sin IP</span> },
     { clave: 'detalle', titulo: 'Detalle',
       pinta: e => {
@@ -104,7 +104,7 @@ export default function Bitacora() {
         return (
           <Pulsable al={() => setAbierto(abierto_ ? null : e.id)} activado={abierto_}
             style={{
-              font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue,
+              font: `400 11px/1.45 ${FUENTE.mono}`, color: COLOR.textoSuave,
               cursor: 'pointer',
               whiteSpace: abierto_ ? 'pre-wrap' : 'nowrap',
               display: 'inline-block',
@@ -121,7 +121,7 @@ export default function Bitacora() {
     <>
       <div style={{
         marginBottom: 14, padding: '9px 12px', border: `1px solid ${LINEA.tenue}`,
-        font: `400 10px/1.45 ${FUENTE.ui}`, color: COLOR.textoTenue,
+        font: `400 11px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave,
       }}>
         Registro inmutable. La base rechaza cualquier intento de editarlo o borrarlo,
         venga de donde venga.
