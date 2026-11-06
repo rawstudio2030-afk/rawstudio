@@ -49,8 +49,7 @@ export default function Centro({ titulo, texto, accion, encendido = false, child
 
       {titulo && (
         <div style={{
-          fontFamily: FUENTE.display, fontSize: 38, lineHeight: 1,
-          textTransform: 'uppercase', color: COLOR.texto, fontStyle: 'normal',
+          font: `700 32px/1.15 ${FUENTE.ui}`, color: COLOR.texto, fontStyle: 'normal',
         }}>
           {titulo[0]}<br />{titulo[1]}<br />
           <span style={{ color: COLOR.dinero }}>{titulo[2]}</span>
@@ -63,11 +62,9 @@ export default function Centro({ titulo, texto, accion, encendido = false, child
       <div style={{ maxWidth: 330, lineHeight: 1.45 }}>{texto}</div>
 
       {accion && (
-        <Pulsable al={accion.al} style={{
-          background: COLOR.acento, color: COLOR.fondo, padding: '15px 26px',
-          font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
-          fontStyle: 'normal', cursor: 'pointer',
-        }}>{accion.texto}</Pulsable>
+        <Pulsable al={accion.al} className="boton-principal" style={{ padding: '0 28px', fontStyle: 'normal' }}>
+          {accion.texto}
+        </Pulsable>
       )}
 
       {children}

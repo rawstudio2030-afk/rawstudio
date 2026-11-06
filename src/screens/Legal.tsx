@@ -9,7 +9,6 @@
 // contacto y preguntas frecuentes.
 import { PRIVACIDAD, TERMINOS, VERSION_LEGAL, PENDIENTES_ABOGADO } from '../content/legal'
 import { MarcoDocumento, Apartado, PieContacto } from '../components/Documento'
-import { COLOR } from '../lib/diseño'
 
 const AVISO = {
   titulo: 'Borrador sin revisión legal',
@@ -22,7 +21,7 @@ const AVISO = {
 const resaltar = (t: string) =>
   t.split(/(\[[^\]]+\])/g).map((p, i) =>
     p.startsWith('[')
-      ? <mark key={i} style={{ background: 'rgba(255,43,209,.22)', color: COLOR.acento, padding: '1px 4px' }}>{p}</mark>
+      ? <mark key={i} style={{ background: 'rgba(255,43,209,.22)', color: '#FF7BE6', padding: '1px 5px', borderRadius: 4 }}>{p}</mark>
       : <span key={i}>{p}</span>)
 
 export function Privacidad() {

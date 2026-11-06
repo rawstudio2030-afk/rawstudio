@@ -15,7 +15,7 @@
 import type { ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Wordmark from './Wordmark'
-import { COLOR, TINTE, FUENTE } from '../lib/diseño'
+import { COLOR, FUENTE, RADIO } from '../lib/diseño'
 import { Pulsable } from './Pulsable'
 
 export type Aviso = { titulo: string; texto: string; lista?: string[] }
@@ -29,42 +29,46 @@ export function MarcoDocumento({ titulo, version, aviso, children }: {
   children: ReactNode
 }) {
   const nav = useNavigate()
+  /* Modo consumo (DESIGN-BRIEF.md): son textos para LEER, a veces largos y con
+   * consecuencias legales. Fondo plano, titular de interfaz, cuerpo en un gris
+   * claro y cero decoracion. */
   return (
     <div style={{
-      minHeight: '100%', boxSizing: 'border-box', padding: '48px 22px 40px',
+      minHeight: '100%', boxSizing: 'border-box', padding: '20px 18px 40px',
       background: COLOR.fondo, color: COLOR.texto, fontFamily: FUENTE.ui,
       width: '100%', maxWidth: 720, margin: '0 auto',
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 26 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
         <Wordmark ancho={110} glow={12} />
         <Pulsable al={() => nav(-1)} rotulo="Volver" style={{
-          font: `400 26px/1 ${FUENTE.ui}`, color: COLOR.textoSuave, cursor: 'pointer',
-        }}>×</Pulsable>
+          width: 44, height: 44, borderRadius: '50%', display: 'grid', placeItems: 'center',
+          border: '1px solid rgba(255,255,255,.22)', color: COLOR.texto, cursor: 'pointer',
+        }}><span aria-hidden style={{ font: `400 22px/1 ${FUENTE.ui}` }}>×</span></Pulsable>
       </div>
 
-      <div style={{ fontFamily: FUENTE.display, fontSize: 38, lineHeight: 1, textTransform: 'uppercase' }}>
+      <h1 style={{ margin: 0, font: `700 30px/1.15 ${FUENTE.ui}` }}>
         {titulo[0]}{titulo[1] && <><br /><span style={{ color: COLOR.dinero }}>{titulo[1]}</span></>}
-      </div>
+      </h1>
 
       {version && (
-        <div style={{ font: `400 10px/1.6 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 10 }}>
+        <div style={{ font: `400 12px/1.6 ${FUENTE.mono}`, color: COLOR.textoSuave, marginTop: 10 }}>
           Versión {version}
         </div>
       )}
 
       {aviso && (
         <div style={{
-          marginTop: 22, padding: '16px 15px',
-          border: '1.5px dashed rgba(255,43,209,.45)', background: TINTE.acento,
+          marginTop: 22, padding: '16px 16px', borderRadius: RADIO.neon,
+          border: '1.5px dashed rgba(255,43,209,.55)', background: 'rgba(255,43,209,.06)',
         }}>
-          <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', color: COLOR.acento }}>
+          <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase', color: '#FF5BDC' }}>
             {aviso.titulo}
           </div>
-          <div style={{ font: `400 13px/1.6 ${FUENTE.ui}`, color: COLOR.texto, marginTop: 9 }}>
+          <div style={{ font: `400 14px/1.6 ${FUENTE.ui}`, color: COLOR.texto, marginTop: 9 }}>
             {aviso.texto}
           </div>
           {aviso.lista && (
-            <ul style={{ margin: '10px 0 0', paddingLeft: 17, font: `400 12px/1.6 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
+            <ul style={{ margin: '10px 0 0', paddingLeft: 18, font: `400 13px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
               {aviso.lista.map(p => <li key={p}>{p}</li>)}
             </ul>
           )}
@@ -85,12 +89,13 @@ export function Apartado({ titulo, cuerpo, resaltar }: {
 }) {
   return (
     <div style={{ marginTop: 30 }}>
-      <div style={{
-        font: `700 10px/1.45 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
-        color: COLOR.dinero, marginBottom: 12,
-      }}>{titulo}</div>
+      <h2 style={{
+        margin: '0 0 12px', font: `700 12px/1.45 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
+        color: COLOR.dinero,
+      }}>{titulo}</h2>
       {cuerpo.map((p, i) => (
-        <p key={i} style={{ margin: '0 0 12px', font: `400 16px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
+        // Un gris mas claro que `textoSuave` para el cuerpo: es lectura larga.
+        <p key={i} style={{ margin: '0 0 12px', font: `400 16px/1.65 ${FUENTE.ui}`, color: '#C2BDC7' }}>
           {resaltar ? resaltar(p) : p}
         </p>
       ))}
@@ -103,8 +108,8 @@ export function Apartado({ titulo, cuerpo, resaltar }: {
 export function PieContacto({ texto, correo }: { texto: string; correo: string }) {
   return (
     <div style={{
-      marginTop: 34, paddingTop: 20, borderTop: '1px solid rgba(255,255,255,.09)',
-      fontFamily: FUENTE.ui, fontSize: 16, color: COLOR.textoTenue,
+      marginTop: 34, paddingTop: 20, borderTop: '1px solid rgba(255,255,255,.12)',
+      fontFamily: FUENTE.ui, fontSize: 16, color: COLOR.textoSuave,
     }}>
       {texto}{' '}
       <a href={`mailto:${correo}`} style={{ color: COLOR.dinero, textDecoration: 'underline', textUnderlineOffset: 3 }}>

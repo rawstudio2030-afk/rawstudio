@@ -12,7 +12,7 @@
  * lados; fija, siempre mide la pantalla.
  */
 import type { ReactNode } from 'react'
-import FondoMiami from './FondoMiami'
+import FondoFijo from './FondoFijo'
 import Wordmark from './Wordmark'
 
 export default function PaginaMiami({ children, logo = true }: {
@@ -22,10 +22,7 @@ export default function PaginaMiami({ children, logo = true }: {
 }) {
   return (
     <div className="pagina-miami">
-      <div aria-hidden className="pagina-miami-fondo">
-        <FondoMiami />
-        <div className="pagina-miami-velo" />
-      </div>
+      <FondoFijo />
       <div className="pagina-miami-cuerpo">
         {logo && (
           <div style={{ display: 'flex', justifyContent: 'center', padding: '6px 0 4px' }}>
