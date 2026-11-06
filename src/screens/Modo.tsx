@@ -60,7 +60,7 @@ export default function Modo() {
           fontSize: 'clamp(34px, 9vw, 46px)', lineHeight: 1, textTransform: 'uppercase',
         }}>¿Cómo entras hoy?</h1>
         <p style={{
-          margin: '12px 0 0', fontFamily: FUENTE.serif, fontStyle: 'italic',
+          margin: '12px 0 0', fontFamily: FUENTE.ui,
           fontSize: 19, lineHeight: 1.3, color: COLOR.textoSuave,
         }}>
           Tu cuenta hace dos trabajos. Elige uno y el otro se quita de en medio.

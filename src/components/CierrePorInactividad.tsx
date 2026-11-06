@@ -88,7 +88,7 @@ export default function CierrePorInactividad() {
         ¿Sigues<br />ahí?
       </div>
       <div style={{
-        fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19, lineHeight: 1.45,
+        fontFamily: FUENTE.ui, fontSize: 19, lineHeight: 1.45,
         color: COLOR.textoSuave, maxWidth: 320,
       }}>
         Por seguridad cerramos la sesión sola cuando nadie la usa. Nos quedan

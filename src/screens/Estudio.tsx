@@ -23,6 +23,7 @@ import { useSesion } from '../lib/sesion'
 import { resumen, canales, type Canal, type ResumenEstudio } from '../lib/estudio'
 import { usd } from '../lib/dinero'
 import { COLOR, FUENTE } from '../lib/diseño'
+import Icono from '../components/Iconos'
 import { Pulsable, Enlace } from '../components/Pulsable'
 import Centro from '../components/Centro'
 
@@ -86,7 +87,7 @@ export default function Estudio() {
       <div style={{ fontFamily: FUENTE.display, fontSize: 38, lineHeight: 1, textTransform: 'uppercase', marginBottom: 8 }}>
         Formas<br /><span style={{ color: COLOR.dinero }}>de ganar</span>
       </div>
-      <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19, lineHeight: 1.3, color: COLOR.textoSuave, marginBottom: 24 }}>
+      <div style={{ fontFamily: FUENTE.ui, fontSize: 19, lineHeight: 1.3, color: COLOR.textoSuave, marginBottom: 24 }}>
         No tienes que usarlas todas. Empieza por una y ve sumando.
       </div>
 
@@ -174,7 +175,7 @@ function Lista({ canales, nav }: { canales: Canal[]; nav: (r: string) => void })
                 opacity: activo ? 1 : .58,
               }}>
               <span style={{ width: 24, textAlign: 'center', fontSize: 16, color: COLOR_ESTADO[c.estado], marginTop: 1 }}>
-                {c.icono}
+                <Icono nombre={c.icono} tam={18} />
               </span>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>

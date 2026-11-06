@@ -236,7 +236,7 @@ export default function Upload() {
         <div style={{ ...etiqueta, color: video ? COLOR.dinero : COLOR.textoTenue }}>
           {video ? 'Video listo' : 'Elegir video'}
         </div>
-        <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 16, color: COLOR.textoSuave, marginTop: 9, wordBreak: 'break-all' }}>
+        <div style={{ fontFamily: FUENTE.ui, fontSize: 16, color: COLOR.textoSuave, marginTop: 9, wordBreak: 'break-all' }}>
           {video ? `${video.name} · ${(video.size / 1048576).toFixed(1)} MB` : 'MP4, MOV o WebM · hasta 2 GB'}
         </div>
       </Pulsable>

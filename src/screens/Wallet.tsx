@@ -146,7 +146,7 @@ export default function Dinero() {
       </div>
 
       {visibles.length === 0 ? (
-        <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 16, color: COLOR.textoTenue, padding: '22px 0' }}>
+        <div style={{ fontFamily: FUENTE.ui, fontSize: 16, color: COLOR.textoTenue, padding: '22px 0' }}>
           {fallo ? 'No pudimos leer tus movimientos. No es que no haya.'
             : pestana === 'gane' ? 'Todavía no has ganado nada.'
             : pestana === 'gaste' ? 'Todavía no has gastado nada.'

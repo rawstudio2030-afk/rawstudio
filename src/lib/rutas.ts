@@ -83,25 +83,25 @@ export type Destino = {
  *  que ocupa su propio lugar. Son cinco y no cuatro: el limite practico de una
  *  barra de telefono, y el mismo numero que usa Instagram. */
 export const BARRA: Destino[] = [
-  { path: '/clip',      titulo: 'Explorar',   icono: '▶', papeles: ['visitante', 'usuaria', 'creadora'] },
-  { path: '/library',   titulo: 'Biblioteca', icono: '▤', papeles: ['usuaria'] },
-  { path: '/estudio',   titulo: 'Estudio',    icono: '◆', papeles: ['creadora'] },
-  { path: '/creadoras', titulo: 'Publicar',   icono: '✦', papeles: ['visitante'] },
-  { path: '/chat',      titulo: 'Mensajes',   icono: '✉', papeles: ['usuaria', 'creadora'] },
-  { path: '/wallet',    titulo: 'Dinero',     icono: '$', papeles: ['usuaria', 'creadora'] },
+  { path: '/clip',      titulo: 'Explorar',   icono: 'play', papeles: ['visitante', 'usuaria', 'creadora'] },
+  { path: '/library',   titulo: 'Biblioteca', icono: 'biblioteca', papeles: ['usuaria'] },
+  { path: '/estudio',   titulo: 'Estudio',    icono: 'estudio', papeles: ['creadora'] },
+  { path: '/creadoras', titulo: 'Publicar',   icono: 'chispa', papeles: ['visitante'] },
+  { path: '/chat',      titulo: 'Mensajes',   icono: 'sobre', papeles: ['usuaria', 'creadora'] },
+  { path: '/wallet',    titulo: 'Dinero',     icono: 'dinero', papeles: ['usuaria', 'creadora'] },
   /* «Yo» muestra el perfil, no los ajustes. Apuntaba a /perfil, que es un
      formulario: nombre, foto, contacto, cerrar sesion. Una pestaña que se
      llama «Yo» y abre un formulario convierte el destino en un pasillo, y
      deja los ajustes de una vez al mismo nivel que lo que se usa a diario.
      Ahora abre /yo —foto, nombre, @handle, bio, tus clips— y los ajustes
      cuelgan de un boton de ahi dentro. */
-  { path: '/yo',        titulo: 'Yo',         icono: '●', papeles: ['usuaria', 'creadora'] },
-  { path: '/entrar',    titulo: 'Entrar',     icono: '→', papeles: ['visitante'] },
+  { path: '/yo',        titulo: 'Yo',         icono: 'persona', papeles: ['usuaria', 'creadora'] },
+  { path: '/entrar',    titulo: 'Entrar',     icono: 'entrar', papeles: ['visitante'] },
   /* La puerta al panel va al final y es el cambiador de ida. El de vuelta es
      «Volver a la aplicacion» en la barra lateral del panel. Antes esto era un
      renglon enterrado en «Yo»: diez modulos escondidos entre «mis ganancias» y
      «mi monedero». */
-  { path: '/admin',     titulo: 'Panel',      icono: '⚙', papeles: [], soloAdmin: true },
+  { path: '/admin',     titulo: 'Panel',      icono: 'engrane', papeles: [], soloAdmin: true },
 ]
 
 /** Accesos que viven dentro de "Yo", segun quien seas. */
@@ -127,8 +127,8 @@ export const BARRA: Destino[] = [
  *
  *  Ninguna pantalla se borro. Cambiaron de sitio, o se piden cuando tocan. */
 export const ESTUDIO: Destino[] = [
-  { path: '/upload',       titulo: 'Subir un clip', icono: '↑', papeles: ['creadora'] },
-  { path: '/estudio/blog', titulo: 'Blog',          icono: '✍︎', papeles: ['creadora'] },
+  { path: '/upload',       titulo: 'Subir un clip', icono: 'subir', papeles: ['creadora'] },
+  { path: '/estudio/blog', titulo: 'Blog',          icono: 'texto', papeles: ['creadora'] },
 ]
 
 /** Accesos que viven dentro de «Yo».
@@ -142,7 +142,7 @@ export const ESTUDIO: Destino[] = [
  *  atajo a una pantalla que ya tiene, es la puerta a un papel que aun no
  *  tiene. */
 export const ATAJOS_PERFIL: Destino[] = [
-  { path: '/creadoras', titulo: 'Quiero publicar', icono: '✦', papeles: ['usuaria'] },
+  { path: '/creadoras', titulo: 'Quiero publicar', icono: 'chispa', papeles: ['usuaria'] },
 ]
 
 /** Quien eres. Administrar no entra aqui: va aparte, porque se cruza con

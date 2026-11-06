@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import wordmark from '../assets/wordmark.png'
 import launchVideo from '../assets/launch.mp4'
-import { COLOR } from '../lib/diseño'
+import { COLOR, FUENTE } from '../lib/diseño'
 import { Pulsable } from '../components/Pulsable'
 
 export default function Launch() {
@@ -81,7 +81,7 @@ export default function Launch() {
         <div style={{position: "relative", width: "242px", height: "90px", margin: "0 auto", transform: "rotate(-2deg)", filter: "drop-shadow(0 0 22px rgba(255,43,209,.7))"}}>
           <img src={wordmark} alt="RAWstudio" style={{width: "100%", height: "auto", display: "block"}} />
         </div>
-        <div style={{fontFamily: "'Instrument Serif',serif", fontStyle: "italic", fontSize: "16px", color: COLOR.textoSuave, marginTop: "8px"}}>
+        <div style={{fontFamily: FUENTE.ui, fontSize: "16px", color: COLOR.textoSuave, marginTop: "8px"}}>
           pay to see it
         </div>
       </div>

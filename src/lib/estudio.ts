@@ -88,7 +88,7 @@ export async function resumen(uid: string): Promise<ResumenEstudio> {
 export function canales(r: ResumenEstudio): Canal[] {
   const lista: Canal[] = [
     {
-      clave: 'clips', titulo: 'Videos de pago', icono: '▶', ruta: '/upload',
+      clave: 'clips', titulo: 'Videos de pago', icono: 'play', ruta: '/upload',
       grupo: 'hacer',
       descripcion: r.clipsPublicados > 0
         ? `${r.clipsPublicados} ${palabra(r.clipsPublicados, 'publicado')} de ${r.clips}`
@@ -97,7 +97,7 @@ export function canales(r: ResumenEstudio): Canal[] {
       nota: 'Al subir eliges tambien si se puede rentar por 48 o 72 horas',
     },
     {
-      clave: 'encargos', titulo: 'Mensajes y encargos', icono: '✉', ruta: '/chat',
+      clave: 'encargos', titulo: 'Mensajes y encargos', icono: 'sobre', ruta: '/chat',
       grupo: 'hacer',
       descripcion: r.encargosAbiertos > 0
         ? `${cuantos(r.encargosAbiertos, 'solicitud', 'solicitudes')} ${palabra(r.encargosAbiertos, 'abierta')}`
@@ -105,13 +105,13 @@ export function canales(r: ResumenEstudio): Canal[] {
       estado: 'listo',
     },
     {
-      clave: 'blog', titulo: 'Blog', icono: '✍︎', ruta: '/estudio/blog',
+      clave: 'blog', titulo: 'Blog', icono: 'texto', ruta: '/estudio/blog',
       grupo: 'hacer',
       descripcion: r.posts > 0 ? cuantos(r.posts, 'entrada') : 'Texto para tus suscriptoras',
       estado: 'listo',
     },
     {
-      clave: 'niveles', titulo: 'Suscripción mensual', icono: '★', ruta: '/estudio/niveles',
+      clave: 'niveles', titulo: 'Suscripción mensual', icono: 'ciclo', ruta: '/estudio/niveles',
       grupo: 'ajustar',
       descripcion: r.niveles > 0
         ? `${cuantos(r.niveles, 'nivel', 'niveles')} ${palabra(r.niveles, 'activo')}`
@@ -128,7 +128,7 @@ export function canales(r: ResumenEstudio): Canal[] {
   // impide cobrar, en vez de descubrirlo al pulsar el boton.
   if (!r.tieneCuenta) {
     lista.push({
-      clave: 'cobro', titulo: 'Cuenta para cobrar', icono: '↓',
+      clave: 'cobro', titulo: 'Cuenta para cobrar', icono: 'banco',
       ruta: '/estudio/cobro', grupo: 'ajustar',
       descripcion: 'Sin esto puedes ganar, pero no puedes retirar',
       estado: 'sin_configurar',

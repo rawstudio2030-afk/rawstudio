@@ -205,7 +205,7 @@ function Detalle({ e, cierra, recarga }: {
         </Boton>
       )}
       {e.estado === 'aceptado' && e.soy_creadora && (
-        <div style={{ font: `400 13px/1.6 ${FUENTE.serif}`, fontStyle: 'italic',
+        <div style={{ font: `400 13px/1.6 ${FUENTE.ui}`,
           color: COLOR.textoTenue }}>
           Aceptado. Falta que pague para que empieces.
         </div>
@@ -258,7 +258,7 @@ function Detalle({ e, cierra, recarga }: {
             </>
           )
         ) : (
-          <div style={{ font: `400 13px/1.6 ${FUENTE.serif}`, fontStyle: 'italic',
+          <div style={{ font: `400 13px/1.6 ${FUENTE.ui}`,
             color: COLOR.textoTenue }}>
             Pagado. Tu dinero está retenido hasta que entregue
             {e.entrega_max && <>, y se comprometió a hacerlo antes

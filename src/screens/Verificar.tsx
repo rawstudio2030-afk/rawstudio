@@ -154,7 +154,7 @@ export default function Verificar() {
         <div style={{ fontFamily: FUENTE.display, fontSize: 38, lineHeight: 1, textTransform: 'uppercase' }}>
           Comprueba<br />que eres<br /><span style={{ color: COLOR.dinero }}>tú.</span>
         </div>
-        <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19, lineHeight: 1.45, color: COLOR.textoSuave, marginTop: 14 }}>
+        <div style={{ fontFamily: FUENTE.ui, fontSize: 19, lineHeight: 1.45, color: COLOR.textoSuave, marginTop: 14 }}>
           Solo hace falta una vez, y solo para publicar o cobrar. Quien únicamente mira no pasa por aquí.
         </div>
       </div>

@@ -137,7 +137,7 @@ export default function Portal() {
 
             <p style={{
               margin: '16px 0 0', maxWidth: 430,
-              fontFamily: FUENTE.serif, fontStyle: 'italic',
+              fontFamily: FUENTE.ui,
               fontSize: 'clamp(17px, 4.6vw, 21px)', lineHeight: 1.3,
               color: COLOR.textoSuave,
             }}>

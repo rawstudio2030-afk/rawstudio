@@ -92,7 +92,7 @@ export default function AgeGate() {
             mayor.
           </span>
         </div>
-        <div style={{fontFamily: "'Instrument Serif',serif", fontStyle: "italic", fontSize: "22px", lineHeight: "1.3", color: COLOR.textoSuave}}>
+        <div style={{fontFamily: FUENTE.ui, fontSize: "22px", lineHeight: "1.3", color: COLOR.textoSuave}}>
           Todo lo que hay detrás de esta puerta se paga, es privado, y lo hacen personas que eligieron estar aquí.
         </div>
         <div style={{display: "flex", gap: "8px", alignItems: "center", marginTop: "4px"}}>

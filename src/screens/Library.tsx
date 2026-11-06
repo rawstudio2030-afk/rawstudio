@@ -48,7 +48,7 @@ export default function Library() {
 
       {fallo ? (
         <div style={{ padding: '50px 20px', textAlign: 'center', border: `1px solid ${COLOR.acento}` }}>
-          <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19, color: COLOR.textoSuave }}>
+          <div style={{ fontFamily: FUENTE.ui, fontSize: 19, color: COLOR.textoSuave }}>
             No pudimos leer lo que compraste.
           </div>
           <div style={{ font: `400 12px/1.6 ${FUENTE.mono}`, color: COLOR.textoTenue, marginTop: 10 }}>
@@ -62,7 +62,7 @@ export default function Library() {
         </div>
       ) : compras.length === 0 ? (
         <div style={{ padding: '50px 20px', textAlign: 'center', border: '1px dashed rgba(255,255,255,.12)' }}>
-          <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19, color: COLOR.textoSuave }}>
+          <div style={{ fontFamily: FUENTE.ui, fontSize: 19, color: COLOR.textoSuave }}>
             Todavía no has desbloqueado nada.
           </div>
           <Enlace a="/clip" style={{

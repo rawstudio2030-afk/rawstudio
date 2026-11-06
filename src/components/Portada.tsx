@@ -56,7 +56,7 @@ export default function Portada() {
           De cada dólar que te pagan, <b>ochenta centavos son tuyos.</b>
         </div>
         <div style={{
-          marginTop: 9, fontFamily: FUENTE.serif, fontStyle: 'italic',
+          marginTop: 9, fontFamily: FUENTE.ui,
           fontSize: 16, lineHeight: 1.45, color: COLOR.textoSuave,
         }}>
           Sin cuota mensual, sin cargo por publicar y sin exclusividad.

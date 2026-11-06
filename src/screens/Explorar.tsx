@@ -214,7 +214,7 @@ function Vacio({ texto, accion }: { texto: string; accion?: { texto: string; al:
       padding: '60px 20px', textAlign: 'center',
       border: '1px dashed rgba(255,255,255,.12)',
     }}>
-      <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19, color: COLOR.textoSuave }}>{texto}</div>
+      <div style={{ fontFamily: FUENTE.ui, fontSize: 19, color: COLOR.textoSuave }}>{texto}</div>
       {accion && (
         <Pulsable al={accion.al} style={{
           marginTop: 18, display: 'inline-block', background: COLOR.acento, color: COLOR.fondo,

@@ -81,8 +81,6 @@ export const FUENTE = {
    *  todo lo que se lee en columna y debe alinearse. */
   mono: "'Space Mono', monospace",
 
-  /** Instrument Serif. Acentos editoriales en cursiva. */
-  serif: "'Instrument Serif', serif",
 } as const
 
 /* ---------- Forma ---------- */

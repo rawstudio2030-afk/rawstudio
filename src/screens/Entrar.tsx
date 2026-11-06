@@ -38,7 +38,7 @@ export default function Entrar() {
         <div style={{ fontFamily: FUENTE.display, fontSize: 52, lineHeight: 1, textTransform: 'uppercase' }}>
           Elige<br />cómo<br /><span style={{ color: COLOR.dinero }}>entras.</span>
         </div>
-        <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 22, lineHeight: 1.3, color: COLOR.textoSuave }}>
+        <div style={{ fontFamily: FUENTE.ui, fontSize: 22, lineHeight: 1.3, color: COLOR.textoSuave }}>
           Con tu correo y una contraseña. El acceso por liga también sigue ahí.
         </div>
 

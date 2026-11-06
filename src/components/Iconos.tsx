@@ -39,6 +39,34 @@ const TRAZOS: Record<string, string> = {
   documento: 'M14 3H7a1.5 1.5 0 0 0-1.5 1.5v15A1.5 1.5 0 0 0 7 21h10a1.5 1.5 0 0 0 1.5-1.5V7.5ZM14 3v4.5h4.5M4 20.5 20 4.5',
   /** Escudo con palomita: la edad se comprueba. */
   escudo: 'M12 2.5 20 6v6c0 5-3.6 8.2-8 9.5-4.4-1.3-8-4.5-8-9.5V6ZM8.8 11.8l2.4 2.4 4-4.5',
+
+  // ---- Navegacion ----
+  // Estos reemplazan a los glifos Unicode de la barra, el riel y el estudio
+  // (▶ ▤ ◆ ✦ ✉ ● → ⚙ ↑ $ ↓). Un glifo se pinta distinto en cada sistema, dos
+  // ya necesitaban un parche para no salir como emoji, y ninguno iba con los
+  // once de arriba. Mismo trazo, mismo lienzo.
+  /** Explorar. */
+  play: 'M7 5v14l11.5-7Z',
+  /** Biblioteca: dos lomos y uno recargado. */
+  biblioteca: 'M4 4h4v16H4zM10 4h4v16h-4zM16 5l3.7-1 3.8 14.6-3.7 1Z',
+  /** Estudio: la claqueta. */
+  estudio: 'M3.5 9h17v11h-17zM3.5 9l2-4.5h14l1 4.5M8.5 4.5l2 4.5M13 4.5l2 4.5',
+  /** Publicar: la chispa. */
+  chispa: 'M12 3c.6 4.5 3.5 7.4 8 8-4.5.6-7.4 3.5-8 8-.6-4.5-3.5-7.4-8-8 4.5-.6 7.4-3.5 8-8Z',
+  /** Mensajes. */
+  sobre: 'M3 6.5h18v11H3zM3 7l9 6.5L21 7',
+  /** Yo. */
+  persona: 'M12 11.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM4.5 20.5c1-4 3.8-6 7.5-6s6.5 2 7.5 6',
+  /** Entrar: la puerta y la flecha hacia dentro. */
+  entrar: 'M13.5 3H20v18h-6.5M3.5 12h11M11 8.5l3.5 3.5-3.5 3.5',
+  /** Panel: el engrane, como dial con ocho marcas. */
+  engrane: 'M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4ZM12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1',
+  /** Subir un clip: la bandeja y la flecha. */
+  subir: 'M4 15.5v3.5a1.5 1.5 0 0 0 1.5 1.5h13a1.5 1.5 0 0 0 1.5-1.5v-3.5M12 15V4M7.5 8.5 12 4l4.5 4.5',
+  /** Dinero: el billete. */
+  dinero: 'M3 7h18v10H3zM12 14.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z',
+  /** Cuenta para cobrar: el banco. */
+  banco: 'M3 10l9-5.5L21 10M4.5 10v8M9.5 10v8M14.5 10v8M19.5 10v8M3 20h18',
 }
 
 export type NombreIcono = keyof typeof TRAZOS

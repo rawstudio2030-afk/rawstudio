@@ -138,7 +138,7 @@ export default function CreatorProfile() {
         </div>
 
         {perfil.bio && (
-          <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19, lineHeight: 1.45, color: COLOR.textoSuave, marginTop: 16 }}>
+          <div style={{ fontFamily: FUENTE.ui, fontSize: 19, lineHeight: 1.45, color: COLOR.textoSuave, marginTop: 16 }}>
             {perfil.bio}
           </div>
         )}
@@ -169,7 +169,7 @@ export default function CreatorProfile() {
               <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', color: COLOR.textoApagado }}>
                 {falloClips ? 'No se pudieron cargar' : 'Sin clips todavía'}
               </div>
-              <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 16, color: COLOR.textoTenue, marginTop: 10 }}>
+              <div style={{ fontFamily: FUENTE.ui, fontSize: 16, color: COLOR.textoTenue, marginTop: 10 }}>
                 {falloClips ? 'No significa que no haya publicado nada.'
                   : esMio && perfil.is_creator ? 'Cuando publiques, tus clips aparecen aquí.'
                   // Quien todavia no publica no necesita que le digan que sus

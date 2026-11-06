@@ -41,7 +41,7 @@ export default function Centro({ titulo, texto, accion, encendido = false, child
     <div style={{
       minHeight: '100%', boxSizing: 'border-box', padding: '64px 26px',
       background: COLOR.fondo, color: COLOR.textoSuave,
-      fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19,
+      fontFamily: FUENTE.ui, fontSize: 19,
       display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center', gap: 20, textAlign: 'center',
     }}>

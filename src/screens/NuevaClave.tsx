@@ -70,7 +70,7 @@ export default function NuevaClave() {
             <div style={{ fontFamily: FUENTE.display, fontSize: 46, lineHeight: 1, textTransform: 'uppercase' }}>
               Listo,<br />ya<br /><span style={{ color: COLOR.dinero }}>quedó.</span>
             </div>
-            <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19, lineHeight: 1.3, color: COLOR.textoSuave }}>
+            <div style={{ fontFamily: FUENTE.ui, fontSize: 19, lineHeight: 1.3, color: COLOR.textoSuave }}>
               Tu contraseña nueva ya está guardada. La próxima vez entras directo con ella.
             </div>
           </>
@@ -79,7 +79,7 @@ export default function NuevaClave() {
             <div style={{ fontFamily: FUENTE.display, fontSize: 46, lineHeight: 1, textTransform: 'uppercase' }}>
               Este enlace<br /><span style={{ color: COLOR.dinero }}>ya expiró.</span>
             </div>
-            <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19, lineHeight: 1.3, color: COLOR.textoSuave }}>
+            <div style={{ fontFamily: FUENTE.ui, fontSize: 19, lineHeight: 1.3, color: COLOR.textoSuave }}>
               Los enlaces de recuperación duran poco, a propósito. Pide uno nuevo y ábrelo en cuanto llegue.
             </div>
           </>

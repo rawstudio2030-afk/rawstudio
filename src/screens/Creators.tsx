@@ -1,7 +1,7 @@
 // Pantalla 09 — Para creadoras
 // Pagina de venta del lado creador. Adaptada a la paleta y tipografia de las
 // otras ocho: Anton para titulares, Space Grotesk para cuerpo y botones,
-// Space Mono para etiquetas, Instrument Serif italica para las bajadas.
+// Space Mono para etiquetas, Space Grotesk en gris suave para las bajadas.
 import { useRef } from 'react'
 import wordmark from '../assets/wordmark.png'
 import {
@@ -106,7 +106,7 @@ export default function Creators() {
             Tu contenido.<br />Tus reglas.<br />
             <span style={{ color: PINK, textShadow: '0 0 30px rgba(255,43,209,.5)' }}>Tu 80%.</span>
           </div>
-          <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19, lineHeight: 1.3, color: MUTED, marginBottom: 28 }}>
+          <div style={{ fontFamily: FUENTE.ui, fontSize: 19, lineHeight: 1.3, color: MUTED, marginBottom: 28 }}>
             Cobras directo de tus suscriptores, sin intermediarios y sin exclusividad.{' '}
             <span style={{ color: PAPER }}>Lo que subes sigue siendo tuyo</span>, y si alguien lo filtra, nosotros lo perseguimos.
           </div>
@@ -137,7 +137,7 @@ export default function Creators() {
         <div id="proteccion" style={{ paddingTop: 46, borderTop: `1px solid ${LINE}` }}>
           <div style={{ ...etiqueta(CYAN), marginBottom: 14 }}>Protección y seguridad</div>
           <div style={titular}>Pregunta lo <span style={{ color: PINK }}>incómodo</span></div>
-          <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19, lineHeight: 1.3, color: MUTED, margin: '-8px 0 26px' }}>
+          <div style={{ fontFamily: FUENTE.ui, fontSize: 19, lineHeight: 1.3, color: MUTED, margin: '-8px 0 26px' }}>
             Las dudas que todas tienen antes de subir el primer video. Aquí están contestadas sin adorno: lo que sí podemos hacer, y lo que no.
           </div>
 

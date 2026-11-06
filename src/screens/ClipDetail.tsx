@@ -195,7 +195,7 @@ export default function ClipDetail() {
         </div>
 
         {clip.description && (
-          <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19, lineHeight: 1.45, color: COLOR.textoSuave, marginTop: 12 }}>
+          <div style={{ fontFamily: FUENTE.ui, fontSize: 19, lineHeight: 1.45, color: COLOR.textoSuave, marginTop: 12 }}>
             {clip.description}
           </div>
         )}
@@ -236,7 +236,7 @@ export default function ClipDetail() {
             <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', color: COLOR.admin }}>
               No disponible en tu país
             </div>
-            <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 16, lineHeight: 1.45, color: COLOR.textoSuave, marginTop: 9 }}>
+            <div style={{ fontFamily: FUENTE.ui, fontSize: 16, lineHeight: 1.45, color: COLOR.textoSuave, marginTop: 9 }}>
               Quien publicó este clip decidió no mostrarlo aquí. No es un error
               ni falta de pago: es su elección, y la respetamos.
             </div>
@@ -249,7 +249,7 @@ export default function ClipDetail() {
             <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', color: COLOR.dinero }}>
               Es tuyo
             </div>
-            <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 16, color: COLOR.textoSuave, marginTop: 9 }}>
+            <div style={{ fontFamily: FUENTE.ui, fontSize: 16, color: COLOR.textoSuave, marginTop: 9 }}>
               Lo ves completo porque lo publicaste tú.
             </div>
           </div>

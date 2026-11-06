@@ -89,7 +89,7 @@ export function Vacio({ texto }: { texto: string }) {
   return (
     <div style={{
       padding: '48px 20px', textAlign: 'center', border: `1px solid ${LINEA.tenue}`,
-      font: `400 13px/1.6 ${FUENTE.serif}`, fontStyle: 'italic', color: COLOR.textoTenue,
+      font: `400 13px/1.6 ${FUENTE.ui}`, color: COLOR.textoTenue,
     }}>{texto}</div>
   )
 }

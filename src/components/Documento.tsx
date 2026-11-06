@@ -104,7 +104,7 @@ export function PieContacto({ texto, correo }: { texto: string; correo: string }
   return (
     <div style={{
       marginTop: 34, paddingTop: 20, borderTop: '1px solid rgba(255,255,255,.09)',
-      fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 16, color: COLOR.textoTenue,
+      fontFamily: FUENTE.ui, fontSize: 16, color: COLOR.textoTenue,
     }}>
       {texto}{' '}
       <a href={`mailto:${correo}`} style={{ color: COLOR.dinero, textDecoration: 'underline', textUnderlineOffset: 3 }}>

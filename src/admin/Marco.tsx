@@ -9,6 +9,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
+import Wordmark from '../components/Wordmark'
 import { elegirModo } from '../lib/modo'
 import { ANCHO_MINIMO } from './piezas'
 import { Pulsable, Enlace } from '../components/Pulsable'
@@ -88,20 +89,19 @@ export function Marco({ children, titulo, resumen }: {
         position: 'sticky', top: 0, height: '100vh',
         display: 'flex', flexDirection: 'column',
       }}>
-        <Enlace a="/clip" style={{
-          display: 'block', boxSizing: 'border-box', width: '100%',
-          padding: '20px 18px 16px', cursor: 'pointer',
+        {/* La misma marca que en el resto del sitio. El panel es otro lugar,
+            pero no otra empresa: lo que lo distingue es el rotulo cian de
+            abajo, no un logo distinto. */}
+        <div style={{
+          boxSizing: 'border-box', width: '100%', padding: '18px 18px 14px',
           borderBottom: `1px solid ${LINEA.tenue}`,
         }}>
+          <Wordmark ancho={118} glow={7} />
           <div style={{
-            font: `400 19px/1 ${FUENTE.display}`, textTransform: 'uppercase',
-            letterSpacing: 0.5, color: COLOR.texto,
-          }}>RAWstudio</div>
-          <div style={{
-            marginTop: 5, font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.6,
+            marginTop: 8, font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.6,
             textTransform: 'uppercase', color: COLOR.admin,
           }}>Administración</div>
-        </Enlace>
+        </div>
 
         <div style={{ flex: 1, overflowY: 'auto', padding: '10px 0' }}>
           {MODULOS.map(m => {

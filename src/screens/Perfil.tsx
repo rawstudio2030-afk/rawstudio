@@ -22,6 +22,7 @@ import { ATAJOS_PERFIL, visiblesPara } from '../lib/rutas'
 import { miTelefono, guardarTelefono, limpiarTelefono } from '../lib/contacto'
 import Telefono, { valorValido, pistaDe } from '../components/Telefono'
 import { COLOR, FUENTE } from '../lib/diseño'
+import Icono from '../components/Iconos'
 import { Pulsable, Enlace } from '../components/Pulsable'
 
 
@@ -346,7 +347,7 @@ export default function Perfil() {
                 cursor: 'pointer', border: '1px solid rgba(255,255,255,.09)',
               }}>
                 <span style={{ width: 26, textAlign: 'center', fontSize: 16, color: COLOR.dinero }}>
-                  {a.icono}
+                  <Icono nombre={a.icono} tam={16} />
                 </span>
                 <span style={{ flex: 1, font: `500 16px/1.3 ${FUENTE.ui}`, color: COLOR.texto }}>{a.titulo}</span>
                 <span style={{ color: COLOR.textoApagado }}>›</span>
@@ -450,7 +451,7 @@ function Aviso({ texto, accion }: { texto: string; accion?: { texto: string; al:
   return (
     <div style={{
       minHeight: '100%', boxSizing: 'border-box', padding: '64px 26px',
-      background: COLOR.fondo, color: COLOR.textoSuave, fontFamily: FUENTE.serif, fontStyle: 'italic',
+      background: COLOR.fondo, color: COLOR.textoSuave, fontFamily: FUENTE.ui,
       fontSize: 19, display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center', gap: 20, textAlign: 'center',
     }}>
@@ -459,7 +460,7 @@ function Aviso({ texto, accion }: { texto: string; accion?: { texto: string; al:
         <Pulsable al={accion.al} style={{
           background: COLOR.acento, color: COLOR.fondo, padding: '15px 26px',
           font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
-          fontStyle: 'normal', cursor: 'pointer',
+          cursor: 'pointer',
         }}>{accion.texto}</Pulsable>
       )}
     </div>

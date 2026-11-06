@@ -13,6 +13,8 @@ import {
   papelDe, visiblesPara, type Papel,
 } from '../lib/rutas'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
+import Icono from './Iconos'
+import Wordmark from './Wordmark'
 import { elegirModo } from '../lib/modo'
 
 
@@ -137,7 +139,7 @@ export function BarraInferior() {
             borderTop: `2px solid ${activo ? resalte(d) : 'transparent'}`,
             marginTop: -1,
           }}>
-            <span style={{ fontSize: 16, lineHeight: 1 }}>{d.icono}</span>
+            <span style={{ display: 'flex', lineHeight: 1 }}><Icono nombre={d.icono} tam={19} /></span>
             <span style={{
               font: `700 ${rotulo.px}px/1 ${FUENTE.ui}`, letterSpacing: rotulo.esp,
               textTransform: 'uppercase',
@@ -217,11 +219,13 @@ export function BarraLateral() {
       borderRight: `1px solid ${LINEA.tenue}`,
       flexDirection: 'column', overflowY: 'auto',
     }}>
-      <Enlace a="/clip" style={{
-        display: 'block', padding: '20px 18px 16px', cursor: 'pointer',
-        font: `400 19px/1 ${FUENTE.display}`, textTransform: 'uppercase',
-        letterSpacing: 0.5, color: COLOR.texto,
-      }}>RAWstudio</Enlace>
+      {/* El logo de verdad, no la palabra en Anton. En la portada y en el
+          acceso sale la marca con su resplandor, y aqui salia «RAWSTUDIO»
+          escrito: dos marcas para el mismo sitio. Wordmark ya es un boton que
+          lleva a casa, asi que no va dentro de un Enlace. */}
+      <div style={{ padding: '18px 18px 14px' }}>
+        <Wordmark ancho={118} glow={7} />
+      </div>
 
       <div style={{ padding: '4px 0 10px' }}>
         {principales.map(d => <Renglon key={d.path} d={d} aqui={aqui} />)}
@@ -270,7 +274,7 @@ function Renglon({ d, aqui, tono = COLOR.acento }: {
       color: activo ? COLOR.texto : COLOR.textoSuave,
     }}>
       <span style={{ width: 16, textAlign: 'center', fontSize: 13,
-        color: activo ? tono : COLOR.textoApagado }}>{d.icono}</span>
+        color: activo ? tono : COLOR.textoApagado }}><Icono nombre={d.icono} tam={16} /></span>
       <span style={{ font: `${activo ? 600 : 400} 13px/1 ${FUENTE.ui}` }}>{d.titulo}</span>
     </Enlace>
   )

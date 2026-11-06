@@ -251,7 +251,7 @@ export default function Acceso({ modo }: { modo: Modo }) {
               {aviso.titulo[0]}<br />{aviso.titulo[1]}<br />
               <span style={{ color: COLOR.dinero }}>{aviso.titulo[2]}</span>
             </div>
-            <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19, lineHeight: 1.3, color: COLOR.textoSuave }}>
+            <div style={{ fontFamily: FUENTE.ui, fontSize: 19, lineHeight: 1.3, color: COLOR.textoSuave }}>
               {aviso.texto}
             </div>
             <div style={{ font: `400 12px/1.6 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
@@ -264,7 +264,7 @@ export default function Acceso({ modo }: { modo: Modo }) {
               {t.titulo[0]}<br />{t.titulo[1]}<br />
               <span style={{ color: COLOR.dinero }}>{t.titulo[2]}</span>
             </div>
-            <div style={{ fontFamily: FUENTE.serif, fontStyle: 'italic', fontSize: 19, lineHeight: 1.3, color: COLOR.textoSuave }}>
+            <div style={{ fontFamily: FUENTE.ui, fontSize: 19, lineHeight: 1.3, color: COLOR.textoSuave }}>
               {t.bajada}
             </div>
 
