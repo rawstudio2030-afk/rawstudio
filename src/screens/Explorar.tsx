@@ -9,6 +9,7 @@ import { useSesion } from '../lib/sesion'
 import { clipsPublicados, urlPortada, type ClipConAutora } from '../lib/clips'
 import { urlAvatar, creadoras, type FichaCreadora } from '../lib/perfiles'
 import { portadaDe } from '../lib/portadas'
+import { TONO, insignias, duracion } from '../lib/catalogo'
 import { usd } from '../lib/dinero'
 import TarjetaClip from '../components/TarjetaClip'
 import Wordmark from '../components/Wordmark'
@@ -17,36 +18,6 @@ import Icono from '../components/Iconos'
 import { COLOR, FUENTE, RADIO, DEGRADADO } from '../lib/diseño'
 
 type Filtro = 'todo' | 'gratis' | 'pago' | 'creadoras'
-
-/* ---------- el marco de neon de cada clip ----------
- *
- * El color dice de un vistazo que es: magenta lo que se paga, cian lo de
- * suscriptoras, lima lo gratis. Va en el marco y en la insignia; el precio y
- * el resto del texto se quedan sobrios. */
-type Tono = 'm' | 'c' | 'l'
-const TONO: Record<Tono, { borde: string; rgb: string }> = {
-  m: { borde: '#FF4FE0', rgb: '255,43,209' },
-  c: { borde: '#19E6FF', rgb: '0,229,255' },
-  l: { borde: '#C8FF3D', rgb: '200,255,61' },
-}
-
-type Rotulo = { tono: Tono; texto: string; icono?: string }
-
-/** Que insignia lleva un clip. Un clip de pago se puede comprar y, si la
- *  creadora lo permite, rentar: la insignia dice PAGO y, aparte, RENTA. */
-function insignias(c: ClipConAutora): Rotulo[] {
-  if (c.visibility === 'gratis') return [{ tono: 'l', texto: 'Gratis' }]
-  if (c.visibility === 'suscriptores') return [{ tono: 'c', texto: 'Suscriptores', icono: 'estrella' }]
-  const r: Rotulo[] = [{ tono: 'm', texto: 'Pago', icono: 'candado' }]
-  if (c.renta_coins != null && c.renta_horas != null) r.push({ tono: 'm', texto: `Renta ${c.renta_horas} h` })
-  return r
-}
-
-/** 125 s -> «2:05». */
-function duracion(s: number | null | undefined) {
-  if (!s || s <= 0) return null
-  return `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, '0')}`
-}
 
 export default function Explorar() {
   const nav = useNavigate()

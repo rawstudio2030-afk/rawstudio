@@ -2,10 +2,14 @@
 // Reescrita: antes era el mock del deck con "Mira Vanta" a mano; ahora lee el
 // perfil real desde la base.
 //
-// Las cifras de clips, suscriptores y calificacion NO se muestran todavia: esos
-// datos no existen aun (no hay tabla de clips ni de suscripciones) y poner
-// numeros inventados en una pantalla que ya lee datos reales es peor que no
-// ponerlos, porque parecen ciertos.
+// Las cifras que se muestran son las que existen de verdad: cuantos clips y
+// desde cuando esta en la plataforma. NO hay seguidores (no existe seguir) ni
+// se expone el numero de suscriptoras, y poner numeros inventados en una
+// pantalla que ya lee datos reales es peor que no ponerlos, porque parecen
+// ciertos. Tampoco hay boton de «Seguir», por lo mismo.
+//
+// Modo marca (DESIGN-BRIEF.md): un perfil se visita para conocer a alguien, no
+// para consumir.
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
@@ -13,7 +17,12 @@ import { perfilPorHandle, urlAvatar } from '../lib/perfiles'
 import { clipsDe, urlPortada, type Clip } from '../lib/clips'
 import { portadaDe } from '../lib/portadas'
 import type { PerfilPublico } from '../lib/supabase'
-import { COLOR, FUENTE } from '../lib/diseño'
+import { COLOR, FUENTE, RADIO, GLOW, DEGRADADO } from '../lib/diseño'
+import { nivelesDe } from '../lib/canales'
+import { TONO, insignias, duracion } from '../lib/catalogo'
+import TarjetaClip from '../components/TarjetaClip'
+import Icono from '../components/Iconos'
+import { BannerMiami } from '../components/FondoMiami'
 import Reportar from '../components/Reportar'
 import OfertaCreadora from '../components/OfertaCreadora'
 import { usd } from '../lib/dinero'
@@ -32,6 +41,8 @@ export default function CreatorProfile() {
   const [falloClips, setFalloClips] = useState<string | null>(null)
   const [intento, setIntento] = useState(0)
   const [clips, setClips] = useState<Clip[]>([])
+  // Para saber si hay algo a lo que suscribirse antes de ofrecer el boton.
+  const [hayNiveles, setHayNiveles] = useState(false)
 
   // Sin handle en la ruta se muestra el propio, que es el caso de "ver como se
   // ve mi perfil" y evita una pantalla vacia al entrar sin parametro.
@@ -61,6 +72,13 @@ export default function CreatorProfile() {
     return () => { vivo = false }
   }, [perfil])
 
+  useEffect(() => {
+    if (!perfil) { setHayNiveles(false); return }
+    let vivo = true
+    nivelesDe(perfil.id).then(n => { if (vivo) setHayNiveles(n.length > 0) })
+    return () => { vivo = false }
+  }, [perfil])
+
   if (cargando) return <Centro texto="Cargando…" />
 
   // «No existe @fulanita» es una afirmacion fuerte: para ella significa que su
@@ -81,65 +99,110 @@ export default function CreatorProfile() {
 
   const foto = urlAvatar(perfil.avatar_path)
   const esMio = mio?.id === perfil.id
+  const desde = new Date(perfil.created_at).toLocaleDateString('es-MX', { month: 'short', year: 'numeric' })
+
+  const boton = {
+    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, boxSizing: 'border-box',
+    flex: 1, minHeight: 54, padding: '0 14px', borderRadius: RADIO.neon, cursor: 'pointer',
+    font: `500 14px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase', color: '#FFF',
+  } as const
 
   return (
     <div style={{
-      minHeight: '100%', boxSizing: 'border-box', background: COLOR.fondo,
-      color: COLOR.texto, fontFamily: FUENTE.ui, display: 'flex', flexDirection: 'column',
+      minHeight: '100%', boxSizing: 'border-box', color: COLOR.texto, fontFamily: FUENTE.ui,
+      display: 'flex', flexDirection: 'column',
+      background: `radial-gradient(ellipse 90% 320px at 50% 0, rgba(123,60,255,.16), transparent 75%), ${COLOR.fondo}`,
     }}>
-      {/* portada */}
-      <div style={{
-        height: 190, position: 'relative', flex: '0 0 auto',
-        background: `repeating-linear-gradient(130deg,${COLOR.superficieAlta} 0 10px,${COLOR.superficie} 10px 20px)`,
-      }}>
-        <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg,rgba(8,8,10,.2) 0%,${COLOR.fondo} 100%)` }} />
+      {/* El banner: el skyline de Miami. Nadie tiene aun banner propio. */}
+      <div style={{ height: 176, position: 'relative', flex: '0 0 auto', overflow: 'hidden' }}>
+        <BannerMiami />
+        <div aria-hidden style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg,rgba(8,8,10,.25) 0%,${COLOR.fondo} 100%)` }} />
         {/* Sin handle en la ruta esta pantalla es la pestaña «Yo», no una
             pantalla a la que se entro desde otra: un boton de volver ahi manda
             a donde estuvieras antes, que no es «atras» de nada. */}
         {handle && (
           <Pulsable al={() => nav(-1)} rotulo="Volver" style={{
-            position: 'absolute', top: 18, left: 16, width: 38, height: 38,
-            borderRadius: '50%', border: '1px solid rgba(255,255,255,.22)',
-            display: 'grid', placeItems: 'center', font: `400 19px/1 ${FUENTE.ui}`,
-            color: COLOR.texto, cursor: 'pointer', background: 'rgba(8,8,10,.5)',
-          }}>‹</Pulsable>
+            position: 'absolute', top: 14, left: 14, width: 44, height: 44,
+            borderRadius: '50%', border: '1px solid rgba(255,255,255,.25)',
+            display: 'grid', placeItems: 'center', color: COLOR.texto,
+            cursor: 'pointer', background: 'rgba(8,8,10,.55)',
+          }}><span aria-hidden style={{ font: `400 22px/1 ${FUENTE.ui}` }}>&#8249;</span></Pulsable>
         )}
       </div>
 
-      <div style={{ padding: '0 22px 40px', marginTop: -46 }}>
-        <div style={{
-          width: 92, height: 92, borderRadius: '50%', border: `2px solid ${COLOR.acento}`,
-          overflow: 'hidden', position: 'relative',
-          background: foto ? `center/cover url(${foto})` : `repeating-linear-gradient(130deg,${COLOR.superficieAlta} 0 8px,${COLOR.superficie} 8px 16px)`,
-          filter: 'drop-shadow(0 0 22px rgba(255,43,209,.4))',
-        }} />
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginTop: 15 }}>
-          <span style={{ fontFamily: FUENTE.display, fontSize: 32, lineHeight: 1, textTransform: 'uppercase' }}>
-            {perfil.display_name}
-          </span>
-          {perfil.verified && <span style={{ color: COLOR.admin, fontSize: 16 }}>&#10038;</span>}
+      <div style={{ padding: '0 20px 40px', marginTop: -52, position: 'relative', boxSizing: 'border-box', width: '100%', maxWidth: 760, marginLeft: 'auto', marginRight: 'auto' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 16 }}>
+          {/* El anillo de neon: degradado de magenta a cian detras de la foto. */}
+          <div style={{
+            flex: '0 0 auto', width: 104, height: 104, borderRadius: '50%', padding: 3, boxSizing: 'border-box',
+            background: DEGRADADO.hilo, boxShadow: `${GLOW.magenta}, 0 0 30px rgba(0,229,255,.25)`,
+          }}>
+            <div style={{
+              width: '100%', height: '100%', borderRadius: '50%', border: `3px solid ${COLOR.fondo}`, boxSizing: 'border-box',
+              background: foto ? `center/cover url(${foto})` : `repeating-linear-gradient(130deg,${COLOR.superficieAlta} 0 8px,${COLOR.superficie} 8px 16px)`,
+            }} />
+          </div>
+          <div style={{ minWidth: 0, paddingBottom: 6 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <h1 style={{ margin: 0, font: `700 26px/1.1 ${FUENTE.ui}`, overflowWrap: 'anywhere' }}>{perfil.display_name}</h1>
+              {perfil.verified && (
+                <span role="img" aria-label="Verificada" style={{ color: COLOR.admin, display: 'grid', flex: '0 0 auto' }}>
+                  <Icono nombre="verificada" tam={20} />
+                </span>
+              )}
+            </div>
+            <div style={{ font: `400 13px/1.45 ${FUENTE.mono}`, color: COLOR.textoSuave, marginTop: 5 }}>@{perfil.handle}</div>
+          </div>
         </div>
 
-        <div style={{ font: `400 13px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue, marginTop: 6 }}>
-          @{perfil.handle}
-          {perfil.is_creator && (
-            <span style={{
-              marginLeft: 9, background: COLOR.dinero, color: COLOR.fondo, padding: '4px 7px',
-              font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
-            }}>Creadora</span>
-          )}
-          {perfil.es_demo && (
-            <span style={{
-              marginLeft: 7, background: COLOR.textoTenue, color: COLOR.fondo, padding: '4px 7px',
-              font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
-            }}>Demostración</span>
-          )}
-        </div>
+        {(perfil.is_creator || perfil.es_demo) && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 14 }}>
+            {perfil.is_creator && (
+              <span style={{
+                border: `1px solid ${COLOR.dinero}`, color: COLOR.dinero, borderRadius: 6, padding: '5px 8px',
+                font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.4, textTransform: 'uppercase',
+              }}>Creadora</span>
+            )}
+            {perfil.es_demo && (
+              <span style={{
+                border: `1px solid ${COLOR.textoTenue}`, color: COLOR.textoSuave, borderRadius: 6, padding: '5px 8px',
+                font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.4, textTransform: 'uppercase',
+              }}>Demostración</span>
+            )}
+          </div>
+        )}
 
         {perfil.bio && (
-          <div style={{ fontFamily: FUENTE.ui, fontSize: 19, lineHeight: 1.45, color: COLOR.textoSuave, marginTop: 16 }}>
-            {perfil.bio}
+          <div style={{ font: `400 16px/1.5 ${FUENTE.ui}`, color: '#CFCAD3', marginTop: 16 }}>{perfil.bio}</div>
+        )}
+
+        {/* Las cifras que hay. Dos, y las dos son ciertas. */}
+        <div style={{
+          display: 'grid', gridTemplateColumns: '1fr 1fr', marginTop: 22,
+          borderTop: '1px solid rgba(255,255,255,.12)', borderBottom: '1px solid rgba(255,255,255,.12)',
+        }}>
+          <div style={{ padding: '16px 0', textAlign: 'center' }}>
+            <div style={{ font: `700 24px/1 ${FUENTE.ui}` }}>{clips.length}</div>
+            <div style={{ font: `400 12px/1 ${FUENTE.ui}`, color: COLOR.textoSuave, marginTop: 7 }}>{clips.length === 1 ? 'Clip' : 'Clips'}</div>
+          </div>
+          <div style={{ padding: '16px 0', textAlign: 'center', borderLeft: '1px solid rgba(255,255,255,.12)' }}>
+            <div style={{ font: `700 24px/1 ${FUENTE.ui}`, textTransform: 'capitalize' }}>{desde}</div>
+            <div style={{ font: `400 12px/1 ${FUENTE.ui}`, color: COLOR.textoSuave, marginTop: 7 }}>En RAWstudio desde</div>
+          </div>
+        </div>
+
+        {/* El boton de suscripcion baja a donde esta la oferta, que es donde
+            ya vive la logica de suscribirse. Solo si hay a que suscribirse. */}
+        {!esMio && hayNiveles && (
+          <div style={{ display: 'flex', marginTop: 18 }}>
+            <Pulsable al={() => document.getElementById('suscripcion')?.scrollIntoView({ behavior: 'smooth', block: 'center' })} style={{
+              ...boton,
+              border: '2px solid #19E6FF', background: 'linear-gradient(180deg, rgba(0,229,255,.16), rgba(0,229,255,.05))',
+              boxShadow: '0 0 10px rgba(0,229,255,.55), 0 0 28px rgba(0,229,255,.3), inset 0 0 16px rgba(0,229,255,.2)',
+              textShadow: '0 0 10px rgba(180,250,255,.6)',
+            }}>
+              <Icono nombre="corona" tam={20} />Suscripción
+            </Pulsable>
           </div>
         )}
 
@@ -154,19 +217,23 @@ export default function CreatorProfile() {
             hacer. Dos significados en el mismo sitio es peor que un boton
             que se lee. */}
         {esMio && (
-          <Enlace a="/perfil" style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9,
-            boxSizing: 'border-box', width: '100%',
-            marginTop: 24, border: '1px solid rgba(255,255,255,.16)', color: COLOR.textoSuave,
-            textAlign: 'center', padding: 17, font: `700 12px/1 ${FUENTE.ui}`,
-            letterSpacing: 2.2, textTransform: 'uppercase', cursor: 'pointer',
-          }}><span style={{ fontSize: 15, letterSpacing: 0 }}>⚙</span>Ajustes de cuenta</Enlace>
+          <div style={{ display: 'flex', marginTop: 18 }}>
+            <Enlace a="/perfil" style={{
+              ...boton,
+              border: '2px solid #FF4FE0', background: 'linear-gradient(180deg, rgba(255,43,209,.2), rgba(255,43,209,.06))',
+              boxShadow: '0 0 10px rgba(255,43,209,.55), 0 0 28px rgba(255,43,209,.3), inset 0 0 16px rgba(255,43,209,.2)',
+              textShadow: '0 0 10px rgba(255,200,245,.6)',
+            }}><Icono nombre="engrane" tam={20} />Ajustes de cuenta</Enlace>
+          </div>
         )}
 
-        <div style={{ marginTop: 28 }}>
+        <div style={{ marginTop: 26 }}>
           {clips.length === 0 ? (
-            <div style={{ padding: '26px 18px', textAlign: 'center', border: `1px ${falloClips ? 'solid' : 'dashed'} ${falloClips ? COLOR.acento : 'rgba(255,255,255,.12)'}` }}>
-              <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', color: COLOR.textoApagado }}>
+            <div style={{
+              padding: '28px 18px', textAlign: 'center', borderRadius: RADIO.neon,
+              border: `1.5px ${falloClips ? 'solid' : 'dashed'} ${falloClips ? COLOR.acento : 'rgba(255,255,255,.2)'}`,
+            }}>
+              <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase', color: COLOR.textoSuave }}>
                 {falloClips ? 'No se pudieron cargar' : 'Sin clips todavía'}
               </div>
               <div style={{ fontFamily: FUENTE.ui, fontSize: 16, color: COLOR.textoTenue, marginTop: 10 }}>
@@ -179,43 +246,67 @@ export default function CreatorProfile() {
               </div>
               {esMio && perfil.is_creator && (
                 <Enlace a="/upload" style={{
-                  marginTop: 16, display: 'inline-block', background: COLOR.acento, color: COLOR.fondo,
-                  padding: '14px 22px', font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6,
-                  textTransform: 'uppercase', cursor: 'pointer',
+                  marginTop: 16, display: 'inline-block', padding: '16px 24px', cursor: 'pointer',
+                  borderRadius: RADIO.neon, border: '2px solid #FF4FE0', color: '#FFF',
+                  background: 'linear-gradient(180deg, rgba(255,43,209,.26), rgba(255,43,209,.1))',
+                  boxShadow: '0 0 10px rgba(255,43,209,.6), 0 0 28px rgba(255,43,209,.35), inset 0 0 16px rgba(255,43,209,.25)',
+                  font: `500 13px/1 ${FUENTE.ui}`, letterSpacing: 2.6, textTransform: 'uppercase',
                 }}>Publicar el primero</Enlace>
               )}
             </div>
           ) : (
-            <>
-              <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', color: COLOR.textoTenue, marginBottom: 12 }}>
-                {clips.length} {clips.length === 1 ? 'clip' : 'clips'}
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 10 }}>
-                {clips.map(c => {
-                  const p = portadaDe(c.id, urlPortada(c.cover_path))
-                  return (
-                    <Enlace key={c.id} a={`/clip/${c.id}`} style={{
-                      display: 'block', aspectRatio: '3/4', position: 'relative', cursor: 'pointer',
-                      background: `center/cover url(${p})`,
-                    }}>
-                      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,transparent 45%,rgba(8,8,10,.9) 100%)' }} />
-                      {!c.published && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
+              {clips.map(c => {
+                const p = portadaDe(c.id, urlPortada(c.cover_path))
+                const marca = insignias(c)
+                const t = TONO[marca[0].tono]
+                const dur = duracion(c.duration_s)
+                return (
+                  <article key={c.id} style={{
+                    padding: 4, borderRadius: 12, boxSizing: 'border-box',
+                    border: `1.5px solid ${t.borde}`, background: `rgba(${t.rgb},.05)`,
+                    boxShadow: `0 0 7px rgba(${t.rgb},.38), 0 0 18px rgba(${t.rgb},.14)`,
+                  }}>
+                    <div style={{ borderRadius: 8, overflow: 'hidden' }}>
+                      <TarjetaClip portada={p} tira={urlPortada(c.preview_path ?? null)} a={`/clip/${c.id}`}>
+                        <div aria-hidden style={{ position: 'absolute', inset: 0, background: DEGRADADO.duotono, mixBlendMode: 'soft-light' }} />
+                        <div aria-hidden style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(8,8,10,.1) 50%,rgba(8,8,10,.8) 100%)' }} />
+                        {dur && (
+                          <span style={{
+                            position: 'absolute', top: 5, left: 5, background: 'rgba(8,8,10,.72)', borderRadius: 5,
+                            padding: '3px 5px', font: `700 9px/1 ${FUENTE.mono}`, color: COLOR.texto,
+                          }}>{dur}</span>
+                        )}
+                        {marca[0].icono && (
+                          <span style={{ position: 'absolute', top: 5, right: 5, color: t.borde, display: 'grid',
+                            filter: `drop-shadow(0 0 4px ${t.borde})` }}>
+                            <Icono nombre={marca[0].icono} tam={14} />
+                          </span>
+                        )}
+                        {!c.published && (
+                          <span style={{
+                            position: 'absolute', top: 5, left: 5, right: 5, textAlign: 'center',
+                            background: COLOR.acento, color: COLOR.fondo, borderRadius: 5, padding: '3px 4px',
+                            font: `700 8px/1 ${FUENTE.ui}`, letterSpacing: 1, textTransform: 'uppercase',
+                          }}>Borrador</span>
+                        )}
                         <span style={{
-                          position: 'absolute', top: 8, left: 8, background: COLOR.acento, color: COLOR.fondo,
-                          padding: '4px 6px', font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
-                        }}>Borrador</span>
-                      )}
-                      <div style={{ position: 'absolute', left: 9, right: 9, bottom: 9 }}>
-                        <div style={{ font: `500 12px/1.3 ${FUENTE.ui}`, color: COLOR.texto }}>{c.title}</div>
-                        <div style={{ font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.dinero, marginTop: 3 }}>
-                          {c.visibility === 'gratis' ? 'gratis' : c.visibility === 'suscriptores' ? 'suscriptores' : `${usd(c.price_coins)}`}
-                        </div>
-                      </div>
-                    </Enlace>
-                  )
-                })}
-              </div>
-            </>
+                          position: 'absolute', right: 5, bottom: 5, borderRadius: 5, padding: '3px 5px',
+                          background: 'rgba(8,8,10,.78)', border: `1px solid ${t.borde}`,
+                          font: `700 10px/1 ${FUENTE.mono}`, color: c.visibility === 'pago' ? COLOR.dinero : t.borde,
+                        }}>
+                          {c.visibility === 'gratis' ? 'Gratis' : c.visibility === 'suscriptores' ? 'Subs' : usd(c.price_coins)}
+                        </span>
+                      </TarjetaClip>
+                    </div>
+                    <div style={{
+                      padding: '6px 2px 2px', font: `500 11px/1.3 ${FUENTE.ui}`, color: COLOR.textoSuave,
+                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                    }}>{c.title}</div>
+                  </article>
+                )
+              })}
+            </div>
           )}
         </div>
 

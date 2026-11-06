@@ -20,7 +20,8 @@ import {
   type Movimiento, type Cara,
 } from '../lib/monedero'
 import { usd } from '../lib/dinero'
-import { COLOR, LINEA, FUENTE } from '../lib/diseño'
+import { COLOR, LINEA, FUENTE, RADIO, GLOW } from '../lib/diseño'
+import Icono from '../components/Iconos'
 import { Pulsable } from '../components/Pulsable'
 import { Enlace } from '../components/Pulsable'
 import Centro from '../components/Centro'
@@ -62,74 +63,148 @@ export default function Dinero() {
   const visibles = pestana === 'todo' ? movs : movs.filter(m => caraDe(m) === pestana)
 
   return (
+    <VistaDinero
+      centavos={centavos} fallo={fallo} esCreadora={esCreadora} totales={t}
+      movimientos={visibles} pestana={pestana} alPestana={setPestana}
+      alReintentar={() => setIntento(n => n + 1)} alVolver={() => nav(-1)} />
+  )
+}
+
+/** Lo que se ve. No sabe de donde salen los datos: los recibe, y por eso se
+ *  puede dibujar con datos de muestra sin tocar el libro contable.
+ *
+ *  Modo consumo (DESIGN-BRIEF.md): fondo plano, sin animacion, y el color solo
+ *  donde hay dinero —lima lo que entra o se tiene, magenta lo que sale—. */
+export function VistaDinero({
+  centavos, fallo, esCreadora, totales: t, movimientos, pestana, alPestana, alReintentar, alVolver,
+}: {
+  centavos: number
+  fallo: string | null
+  esCreadora: boolean
+  totales: { gane: number; gaste: number; retirado: number }
+  movimientos: Movimiento[]
+  pestana: Pestana
+  alPestana: (p: Pestana) => void
+  alReintentar: () => void
+  alVolver: () => void
+}) {
+  const rotulo = { font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase' as const, color: COLOR.textoSuave }
+
+  return (
     <div style={{
-      minHeight: '100%', boxSizing: 'border-box', padding: '54px 22px 40px',
+      minHeight: '100%', boxSizing: 'border-box', padding: '20px 18px 40px',
       background: COLOR.fondo, color: COLOR.texto, fontFamily: FUENTE.ui,
       width: '100%', maxWidth: 680, margin: '0 auto',
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 26 }}>
-        <Pulsable al={() => nav(-1)} rotulo="Volver" style={{ font: `400 26px/1 ${FUENTE.ui}`, color: COLOR.textoSuave, cursor: 'pointer' }}>‹</Pulsable>
-        <span style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', color: COLOR.dinero }}>
-          Dinero
-        </span>
-        <span style={{ width: 14 }} />
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 22 }}>
+        <Pulsable al={alVolver} rotulo="Volver" style={{
+          width: 44, height: 44, borderRadius: '50%', display: 'grid', placeItems: 'center',
+          border: '1px solid rgba(255,255,255,.22)', color: COLOR.texto, cursor: 'pointer',
+        }}><span aria-hidden style={{ font: `400 22px/1 ${FUENTE.ui}` }}>&#8249;</span></Pulsable>
+        <span style={{ ...rotulo, color: COLOR.dinero }}>Dinero</span>
+        <span aria-hidden style={{ width: 44 }} />
       </div>
 
       {/* ---------- Saldo ---------- */}
-      <div style={{ border: `1px solid ${LINEA.suave}`, padding: '24px 20px' }}>
-        <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', color: COLOR.textoTenue }}>
-          Saldo
-        </div>
-        {/* usd() y no el entero en crudo: el libro guarda CENTAVOS. Antes esta
-            cifra se pintaba tal cual con la palabra «dólares» al lado, asi que
-            $2.40 se leia como «240 dólares». */}
-        <div style={{
-          fontFamily: FUENTE.display, fontSize: 52, lineHeight: 1, marginTop: 12,
-          color: fallo ? COLOR.textoApagado : COLOR.dinero,
-        }}>
-          {fallo ? '—' : usd(centavos)}
-        </div>
-        {fallo ? (
-          <div style={{ marginTop: 8 }}>
-            <div style={{ font: `400 12px/1.45 ${FUENTE.mono}`, color: COLOR.acento }}>
-              No pudimos leer tu saldo. Tu dinero está donde estaba — lo que falló
-              fue la consulta.
-            </div>
-            <Pulsable al={() => setIntento(n => n + 1)} style={{
-              marginTop: 10, padding: '9px 14px', cursor: 'pointer',
-              border: `1px solid ${LINEA.media}`, color: COLOR.texto,
-              font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
-            }}>Reintentar</Pulsable>
+      <div style={rotulo}>Mi billetera</div>
+      <h1 style={{ margin: '10px 0 0', font: `700 28px/1.1 ${FUENTE.ui}` }}>Saldo disponible</h1>
+      {/* usd() y no el entero en crudo: el libro guarda CENTAVOS. Antes esta
+          cifra se pintaba tal cual con la palabra «dólares» al lado, asi que
+          $2.40 se leia como «240 dólares». */}
+      <div style={{
+        font: `700 clamp(52px, 17vw, 84px)/1 ${FUENTE.ui}`, letterSpacing: -1, marginTop: 12,
+        color: fallo ? COLOR.textoApagado : COLOR.dinero,
+        textShadow: fallo ? 'none' : '0 0 24px rgba(200,255,61,.28)',
+      }}>
+        {fallo ? '—' : usd(centavos)}
+      </div>
+      {fallo ? (
+        <div style={{ marginTop: 10 }}>
+          <div style={{ font: `400 13px/1.5 ${FUENTE.mono}`, color: COLOR.acento }}>
+            No pudimos leer tu saldo. Tu dinero está donde estaba — lo que falló
+            fue la consulta.
           </div>
-        ) : (
-          <div style={{ font: `400 12px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 8 }}>
-            {esCreadora ? 'Lo que puedes gastar o retirar.' : 'Lo que puedes gastar.'}
-          </div>
+          <Pulsable al={alReintentar} style={{
+            marginTop: 12, minHeight: 44, padding: '0 18px', display: 'inline-flex', alignItems: 'center',
+            cursor: 'pointer', borderRadius: RADIO.neon, border: `1px solid ${LINEA.fuerte}`, color: COLOR.texto,
+            font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
+          }}>Reintentar</Pulsable>
+        </div>
+      ) : (
+        <div style={{ font: `400 13px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave, marginTop: 10 }}>
+          {esCreadora ? 'Lo que puedes gastar o retirar.' : 'Lo que puedes gastar.'}
+        </div>
+      )}
+
+      {/* ---------- Acciones ----------
+          Retirar SI existe: la pantalla comprueba identidad, cuenta bancaria,
+          minimo y disponible, y dice cual falta. */}
+      <div style={{
+        display: 'flex', marginTop: 24, borderRadius: RADIO.neon, overflow: 'hidden',
+        border: '1.5px solid rgba(200,255,61,.45)', background: 'rgba(200,255,61,.04)',
+        boxShadow: `${GLOW.lima}, inset 0 0 18px rgba(200,255,61,.06)`,
+      }}>
+        {esCreadora && (
+          <Enlace a="/estudio/retirar" style={{
+            flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 12, padding: '16px 14px', cursor: 'pointer',
+          }}>
+            <span style={iconoCirculo}><Icono nombre="banco" tam={22} /></span>
+            <span style={{ minWidth: 0 }}>
+              <span style={{ display: 'block', font: `700 15px/1.2 ${FUENTE.ui}` }}>Retirar por SPEI</span>
+              <span style={{ display: 'block', font: `400 12px/1.35 ${FUENTE.ui}`, color: COLOR.textoSuave, marginTop: 4 }}>
+                Transferencia a tu cuenta
+              </span>
+            </span>
+          </Enlace>
         )}
+        <Pulsable al={() => document.getElementById('movimientos')?.scrollIntoView({ behavior: 'smooth', block: 'start' })} style={{
+          flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 12, padding: '16px 14px', cursor: 'pointer',
+          textAlign: 'left', borderLeft: esCreadora ? '1px solid rgba(255,255,255,.14)' : 'none',
+        }}>
+          <span style={iconoCirculo}><Icono nombre="texto" tam={22} /></span>
+          <span style={{ minWidth: 0 }}>
+            <span style={{ display: 'block', font: `700 15px/1.2 ${FUENTE.ui}` }}>Ver historial</span>
+            <span style={{ display: 'block', font: `400 12px/1.35 ${FUENTE.ui}`, color: COLOR.textoSuave, marginTop: 4 }}>
+              Consulta tus movimientos
+            </span>
+          </span>
+        </Pulsable>
       </div>
 
       {/* ---------- Las dos caras ---------- */}
       <div style={{
-        display: 'grid', gap: 1, marginTop: 1,
-        gridTemplateColumns: esCreadora ? 'repeat(3, 1fr)' : '1fr',
-        background: LINEA.tenue, border: `1px solid ${LINEA.suave}`, borderTop: 'none',
+        display: 'grid', gap: 8, marginTop: 14,
+        gridTemplateColumns: esCreadora ? 'repeat(3, minmax(0, 1fr))' : '1fr',
       }}>
         {esCreadora && <Cifra rotulo="Ganado" valor={t.gane} color={COLOR.dinero} />}
         <Cifra rotulo="Gastado" valor={t.gaste} color={COLOR.acento} />
         {esCreadora && <Cifra rotulo="Retirado" valor={t.retirado} color={COLOR.textoSuave} />}
       </div>
 
-      {/* ---------- Lo que todavía no se puede ---------- */}
-      <Pendiente creadora={esCreadora} />
+      {/* ---------- Lo que todavia no se puede ----------
+          Recargar sigue sin existir —hace falta un procesador de pagos
+          compatible con este giro— y decirlo es mas util que un boton que no
+          hace nada. */}
+      <div style={{ marginTop: 14, padding: '14px 16px', borderRadius: RADIO.neon, border: `1.5px dashed ${LINEA.marcada}` }}>
+        <div style={{ font: `400 13px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
+          <b style={{ color: COLOR.texto }}>Recargar</b> todavía no se puede: falta un
+          procesador de pagos compatible con este giro. Mientras tanto, la administración
+          puede acreditarte saldo.
+        </div>
+      </div>
 
       {/* ---------- Movimientos ---------- */}
+      <h2 id="movimientos" style={{ margin: '34px 0 0', font: `700 20px/1.2 ${FUENTE.ui}`, scrollMarginTop: 16 }}>
+        Movimientos
+      </h2>
+
       {esCreadora && (
-        <div style={{ display: 'flex', gap: 7, marginTop: 26 }}>
+        <div role="group" aria-label="Filtrar movimientos" style={{ display: 'flex', gap: 8, marginTop: 14, flexWrap: 'wrap' }}>
           {([['todo', 'Todo'], ['gane', 'Lo que gané'], ['gaste', 'Lo que gasté']] as [Pestana, string][])
             .map(([v, txt]) => (
-            <Pulsable key={v} al={() => setPestana(v)} activado={pestana === v} style={{
-              padding: '9px 13px', cursor: 'pointer',
-              font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
+            <Pulsable key={v} al={() => alPestana(v)} activado={pestana === v} style={{
+              minHeight: 44, padding: '0 16px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer',
+              borderRadius: 999, font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.4, textTransform: 'uppercase',
               background: pestana === v ? COLOR.dinero : 'transparent',
               color: pestana === v ? COLOR.fondo : COLOR.textoSuave,
               border: `1px solid ${pestana === v ? COLOR.dinero : LINEA.media}`,
@@ -138,89 +213,68 @@ export default function Dinero() {
         </div>
       )}
 
-      <div style={{
-        font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
-        color: COLOR.textoTenue, margin: esCreadora ? '22px 0 12px' : '26px 0 12px',
-      }}>
-        Movimientos
-      </div>
-
-      {visibles.length === 0 ? (
-        <div style={{ fontFamily: FUENTE.ui, fontSize: 16, color: COLOR.textoTenue, padding: '22px 0' }}>
+      {movimientos.length === 0 ? (
+        <div style={{ font: `400 16px/1.5 ${FUENTE.ui}`, color: COLOR.textoTenue, padding: '22px 0' }}>
           {fallo ? 'No pudimos leer tus movimientos. No es que no haya.'
             : pestana === 'gane' ? 'Todavía no has ganado nada.'
             : pestana === 'gaste' ? 'Todavía no has gastado nada.'
             : 'Todavía no hay movimientos.'}
         </div>
-      ) : visibles.map(m => (
-        <div key={m.id} style={{
-          display: 'flex', alignItems: 'center', gap: 12,
-          padding: '14px 2px', borderBottom: `1px solid ${LINEA.tenue}`,
+      ) : (
+        <div style={{
+          marginTop: 14, borderRadius: RADIO.neon, border: '1px solid rgba(255,255,255,.12)',
+          background: COLOR.superficie, overflow: 'hidden',
         }}>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ font: `500 13px/1.3 ${FUENTE.ui}` }}>{NOMBRE_MOTIVO[m.motivo]}</div>
-            <div style={{ font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue, marginTop: 3 }}>
-              {new Date(m.created_at).toLocaleDateString('es-MX')}
-              {m.nota && ` · ${m.nota}`}
-            </div>
-          </div>
-          <span style={{
-            fontFamily: FUENTE.mono, fontSize: 16, lineHeight: 1,
-            color: m.delta > 0 ? COLOR.dinero : COLOR.acento,
-          }}>
-            {m.delta > 0 ? '+' : '−'}{usd(Math.abs(m.delta))}
-          </span>
+          {movimientos.map((m, i) => {
+            const entra = m.delta > 0
+            return (
+              <div key={m.id} style={{
+                display: 'flex', alignItems: 'center', gap: 12, padding: '14px 14px',
+                borderTop: i === 0 ? 'none' : '1px solid rgba(255,255,255,.08)',
+              }}>
+                <span aria-hidden style={{
+                  flex: '0 0 auto', width: 40, height: 40, borderRadius: 10, display: 'grid', placeItems: 'center',
+                  color: entra ? COLOR.dinero : COLOR.acento,
+                  border: `1px solid ${entra ? 'rgba(200,255,61,.45)' : 'rgba(255,43,209,.45)'}`,
+                  background: COLOR.fondo,
+                }}><Icono nombre="dinero" tam={20} /></span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ font: `700 14px/1.3 ${FUENTE.ui}` }}>{NOMBRE_MOTIVO[m.motivo]}</div>
+                  <div style={{ font: `400 11px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue, marginTop: 3,
+                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {new Date(m.created_at).toLocaleDateString('es-MX')}
+                    {m.nota && ` · ${m.nota}`}
+                  </div>
+                </div>
+                <span style={{
+                  font: `700 16px/1 ${FUENTE.mono}`, whiteSpace: 'nowrap',
+                  color: entra ? COLOR.dinero : COLOR.acento,
+                }}>
+                  {entra ? '+' : '−'}{usd(Math.abs(m.delta))}
+                </span>
+              </div>
+            )
+          })}
         </div>
-      ))}
+      )}
     </div>
   )
 }
+
+const iconoCirculo = {
+  flex: '0 0 auto', width: 46, height: 46, borderRadius: '50%', display: 'grid', placeItems: 'center',
+  color: COLOR.dinero, border: `1.5px solid ${COLOR.dinero}`,
+} as const
 
 function Cifra({ rotulo, valor, color }: { rotulo: string; valor: number; color: string }) {
   return (
-    <div style={{ background: COLOR.fondo, padding: '15px 16px' }}>
-      <div style={{ font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase', color: COLOR.textoTenue }}>
+    <div style={{
+      padding: '14px 14px', borderRadius: RADIO.neon, border: '1px solid rgba(255,255,255,.12)', background: COLOR.superficie,
+    }}>
+      <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase', color: COLOR.textoSuave }}>
         {rotulo}
       </div>
-      <div style={{ font: `400 19px/1 ${FUENTE.mono}`, color, marginTop: 8 }}>{usd(valor)}</div>
+      <div style={{ font: `700 18px/1 ${FUENTE.mono}`, color, marginTop: 9, whiteSpace: 'nowrap' }}>{usd(valor)}</div>
     </div>
-  )
-}
-
-/** Retirar, y lo que todavia no se puede.
- *
- *  Recargar sigue sin existir —hace falta un procesador de pagos compatible
- *  con este giro— y decirlo es mas util que un boton que no hace nada.
- *  Retirar SI existe ya: la pantalla comprueba identidad, cuenta bancaria,
- *  minimo y disponible, y dice cual falta. */
-function Pendiente({ creadora }: { creadora: boolean }) {
-  return (
-    <>
-      {creadora && (
-        <Enlace a="/estudio/retirar" style={{
-          boxSizing: 'border-box', width: '100%',
-          marginTop: 18, padding: '16px 18px', cursor: 'pointer',
-          border: `1px solid ${COLOR.dinero}`, background: 'rgba(200,255,61,.06)',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
-        }}>
-          <div>
-            <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6,
-              textTransform: 'uppercase', color: COLOR.dinero }}>Retirar</div>
-            <div style={{ font: `400 12px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave, marginTop: 7 }}>
-              A tu cuenta, por SPEI, con las retenciones ya calculadas.
-            </div>
-          </div>
-          <span style={{ font: `700 16px/1 ${FUENTE.ui}`, color: COLOR.dinero }}>&#8594;</span>
-        </Enlace>
-      )}
-
-      <div style={{ marginTop: 12, padding: '14px 16px', border: `1px dashed ${LINEA.marcada}` }}>
-        <div style={{ font: `400 12px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
-          <b style={{ color: COLOR.texto }}>Recargar</b> todavía no se puede: falta un
-          procesador de pagos compatible con este giro. Mientras tanto, la administración
-          puede acreditarte saldo.
-        </div>
-      </div>
-    </>
   )
 }

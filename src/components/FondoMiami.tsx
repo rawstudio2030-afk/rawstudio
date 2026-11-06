@@ -297,3 +297,52 @@ export default function FondoMiami() {
     </>
   )
 }
+
+/** El banner del perfil: el skyline de la otra orilla y su reflejo, en una
+ *  franja. Las creadoras no tienen banner propio (no hay donde subirlo), asi
+ *  que todas llevan este; el dia que lo tengan, se cambia aqui por el suyo. */
+const BANNER: Forma = {
+  id: 'b', W: 400, H: 200, HOR: 140,
+  hotel: { x: 0, w: 0, top: 0 }, lejos: { x0: -10, x1: 410, alto: 105 },
+  palmas: [], reflejos: { m: [0, 200], c: [200, 400] }, semilla: 41,
+}
+
+export function BannerMiami() {
+  const f = BANNER
+  const rnd = semilla(f.semilla + 3)
+  const rayas = Array.from({ length: 22 }, (_, i) => (
+    <rect key={i} x={rnd() * f.W} y={f.HOR + 2} width={2 + rnd() * 6} height={20 + rnd() * 50}
+      fill={`url(#bn-raya-${i % 2 ? 'c' : 'm'})`} opacity={.3 + rnd() * .45} />
+  ))
+  return (
+    <svg aria-hidden focusable="false" viewBox={`0 0 ${f.W} ${f.H}`} preserveAspectRatio="xMidYMax slice"
+      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
+      <defs>
+        <linearGradient id="bn-cielo" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#07060F" /><stop offset=".55" stopColor="#2A0E42" />
+          <stop offset="1" stopColor="#5A1763" />
+        </linearGradient>
+        <linearGradient id="bn-suelo" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#1B0C30" /><stop offset="1" stopColor="#08080A" />
+        </linearGradient>
+        <linearGradient id="fm-cristal-b" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor={COLOR.acento} stopOpacity=".7" />
+          <stop offset="1" stopColor="#1A8FA0" stopOpacity=".5" />
+        </linearGradient>
+        <linearGradient id="bn-raya-m" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor={COLOR.acento} stopOpacity=".9" /><stop offset="1" stopColor={COLOR.acento} stopOpacity="0" />
+        </linearGradient>
+        <linearGradient id="bn-raya-c" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor={COLOR.admin} stopOpacity=".9" /><stop offset="1" stopColor={COLOR.admin} stopOpacity="0" />
+        </linearGradient>
+        <filter id="bn-borroso"><feGaussianBlur stdDeviation="1.6" /></filter>
+        <g id="bn-lejos"><Lejos f={f} /></g>
+      </defs>
+      <rect width={f.W} height={f.HOR + 1} fill="url(#bn-cielo)" />
+      <rect y={f.HOR} width={f.W} height={f.H - f.HOR} fill="url(#bn-suelo)" />
+      <g filter="url(#bn-borroso)">{rayas}</g>
+      <use href="#bn-lejos" />
+      <rect y={f.HOR - .5} width={f.W} height="1.2" fill={COLOR.admin} opacity=".4" />
+    </svg>
+  )
+}
