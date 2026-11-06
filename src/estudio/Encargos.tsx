@@ -23,7 +23,7 @@
  */
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { COLOR, LINEA, FUENTE } from '../lib/diseño'
+import { COLOR, LINEA, FUENTE, RADIO } from '../lib/diseño'
 import { useSesion } from '../lib/sesion'
 import {
   misEncargos, mensajesEncargo, responderEncargo, aceptarEncargo,
@@ -53,7 +53,7 @@ export default function Encargos() {
 
   return (
     <Marco titulo="Mensajes" volverA="/clip">
-      <div style={{ font: `400 13px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave, marginBottom: 20 }}>
+      <div style={{ font: `400 14px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave, marginBottom: 20 }}>
         {esCreadora ? (
           <>Alguien te pide algo concreto y propone un precio. Negocias, aceptas, te paga —
           y <b style={{ color: COLOR.texto }}>el dinero se queda retenido hasta que entregues</b>.</>
@@ -63,44 +63,14 @@ export default function Encargos() {
         )}
       </div>
 
-      {cargando ? null : lista.length === 0 ? (
-        <Vacio texto={esCreadora
-          ? 'Nadie te ha encargado nada todavía.'
-          : 'Todavía no le has pedido nada a nadie.'} />
-      ) : (
-        <div style={{ display: 'grid', gap: 10 }}>
-          {lista.map(e => {
-            const s = ESTADO_ENCARGO[e.estado] ?? { t: e.estado, c: COLOR.textoTenue }
-            return (
-              <Pulsable key={e.id} al={() => setAbierto(e)} style={{
-                boxSizing: 'border-box', width: '100%', textAlign: 'left',
-                padding: '14px 15px', border: `1px solid ${LINEA.tenue}`, cursor: 'pointer',
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
-                  <span style={{ font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
-                    {e.soy_creadora ? 'De' : 'Para'} @{e.otra_handle}
-                  </span>
-                  <span style={{ font: `700 9px/1.45 ${FUENTE.ui}`, letterSpacing: 1.2,
-                    textTransform: 'uppercase', color: s.c, whiteSpace: 'nowrap' }}>{s.t}</span>
-                </div>
-                <div style={{ marginTop: 7, font: `400 13px/1.45 ${FUENTE.ui}`,
-                  overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box',
-                  WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{e.descripcion}</div>
-                <div style={{ marginTop: 7, font: `400 16px/1 ${FUENTE.mono}`, color: COLOR.dinero }}>
-                  {usd(e.coins)}
-                </div>
-              </Pulsable>
-            )
-          })}
-        </div>
-      )}
+      {cargando ? null : <ListaEncargos lista={lista} esCreadora={esCreadora} alAbrir={setAbierto} />}
 
       {/* Lo que todavia NO es Mensajes. Este aviso vivia en Chat.tsx, que era
           la pantalla entera; se conserva porque una pestaña llamada «Mensajes»
           sin mas invita a esperar una conversacion libre que aun no existe. */}
-      <div style={{ marginTop: 26, padding: '14px 16px',
-        border: `1px dashed ${LINEA.marcada}` }}>
-        <div style={{ font: `400 12px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
+      <div style={{ marginTop: 26, padding: '15px 16px', borderRadius: RADIO.neon,
+        border: `1.5px dashed ${LINEA.marcada}` }}>
+        <div style={{ font: `400 13px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
           <b style={{ color: COLOR.texto }}>La conversación libre</b>, con
           propinas y contenido de pago dentro del mensaje, todavía no existe.
           Por ahora Mensajes son los encargos.
@@ -131,52 +101,31 @@ function Detalle({ e, cierra, recarga }: {
     await recarga()
   }
 
-  const s = ESTADO_ENCARGO[e.estado] ?? { t: e.estado, c: COLOR.textoTenue }
+  const s = ESTADO_ENCARGO[e.estado] ?? { t: e.estado, c: COLOR.textoSuave }
   const negociando = e.estado === 'propuesta' || e.estado === 'negociando'
 
   return (
     <Marco titulo="Encargo" volverA="/chat">
-      <Pulsable al={cierra} style={{ marginBottom: 14, cursor: 'pointer',
-        font: `400 12px/1 ${FUENTE.ui}`, color: COLOR.textoTenue }}>‹ Todos los encargos</Pulsable>
+      <Pulsable al={cierra} style={{ marginBottom: 6, cursor: 'pointer', minHeight: 44,
+        display: 'inline-flex', alignItems: 'center',
+        font: `400 14px/1 ${FUENTE.ui}`, color: COLOR.textoSuave }}>‹ Todos los encargos</Pulsable>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
+        <span style={{ font: `400 12px/1.45 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
           {e.soy_creadora ? 'De' : 'Para'} @{e.otra_handle}
         </span>
-        <span style={{ font: `700 9px/1.45 ${FUENTE.ui}`, letterSpacing: 1.2,
+        <span style={{ font: `700 10px/1.45 ${FUENTE.ui}`, letterSpacing: 1.1,
           textTransform: 'uppercase', color: s.c }}>{s.t}</span>
       </div>
 
-      <div style={{ marginTop: 14, font: `400 26px/1 ${FUENTE.mono}`, color: COLOR.dinero }}>
+      <div style={{ marginTop: 14, font: `700 30px/1 ${FUENTE.mono}`, color: COLOR.dinero }}>
         {usd(e.coins)}
       </div>
 
       <Aviso texto={error} />
 
       {/* Conversacion */}
-      <div style={{ margin: '20px 0', display: 'grid', gap: 10 }}>
-        {msgs.map(m => {
-          const mio = m.autor_id === sesion?.user.id
-          return (
-            <div key={m.id} style={{
-              padding: '11px 13px', border: `1px solid ${mio ? LINEA.suave : LINEA.tenue}`,
-              background: mio ? 'transparent' : COLOR.superficie,
-              marginLeft: mio ? 28 : 0, marginRight: mio ? 0 : 28,
-            }}>
-              {m.cuerpo && (
-                <div style={{ font: `400 13px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
-                  {m.cuerpo}
-                </div>
-              )}
-              {m.oferta_coins != null && (
-                <div style={{ marginTop: 6, font: `400 13px/1 ${FUENTE.mono}`, color: COLOR.dinero }}>
-                  Ofrece {usd(m.oferta_coins)}
-                </div>
-              )}
-            </div>
-          )
-        })}
-      </div>
+      <Burbujas msgs={msgs} yo={sesion?.user.id} />
 
       {/* Acciones segun el momento */}
       {negociando && (
@@ -205,8 +154,8 @@ function Detalle({ e, cierra, recarga }: {
         </Boton>
       )}
       {e.estado === 'aceptado' && e.soy_creadora && (
-        <div style={{ font: `400 13px/1.6 ${FUENTE.ui}`,
-          color: COLOR.textoTenue }}>
+        <div style={{ font: `400 14px/1.6 ${FUENTE.ui}`,
+          color: COLOR.textoSuave }}>
           Aceptado. Falta que pague para que empieces.
         </div>
       )}
@@ -217,16 +166,17 @@ function Detalle({ e, cierra, recarga }: {
             <>
               <Etiqueta texto="Elige el clip que entregas" />
               {clips.length === 0 ? (
-                <div style={{ font: `400 13px/1.6 ${FUENTE.ui}`, color: COLOR.textoTenue }}>
+                <div style={{ font: `400 14px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
                   No tienes clips. Súbelo primero y vuelve aquí.
                 </div>
               ) : (
                 <div style={{ display: 'grid', gap: 8 }}>
                   {clips.map(c => (
                     <Pulsable key={c.id} al={() => entregarEncargo(e.id, c.id).then(tras)}
-                      style={{ boxSizing: 'border-box', width: '100%', textAlign: 'left',
-                        padding: '12px 14px', border: `1px solid ${LINEA.tenue}`,
-                        cursor: 'pointer', font: `400 13px/1.3 ${FUENTE.ui}` }}>
+                      className="tarjeta-sobria"
+                      style={{ width: '100%', textAlign: 'left', minHeight: 52,
+                        padding: '0 16px', display: 'flex', alignItems: 'center',
+                        cursor: 'pointer', font: `500 15px/1.3 ${FUENTE.ui}` }}>
                       {c.title}
                     </Pulsable>
                   ))}
@@ -239,8 +189,8 @@ function Detalle({ e, cierra, recarga }: {
             </>
           ) : (
             <>
-              <div style={{ marginBottom: 14, padding: '11px 13px',
-                border: `1px solid ${COLOR.dinero}`, font: `400 13px/1.6 ${FUENTE.ui}`,
+              <div style={{ marginBottom: 14, padding: '14px 16px', borderRadius: RADIO.neon,
+                border: `1px solid ${COLOR.dinero}`, font: `400 14px/1.6 ${FUENTE.ui}`,
                 color: COLOR.textoSuave }}>
                 Ya pagó. Sus <b style={{ color: COLOR.dinero }}>{usd(e.coins)}</b> están retenidos
                 y se te abonan en cuanto entregues.
@@ -258,8 +208,8 @@ function Detalle({ e, cierra, recarga }: {
             </>
           )
         ) : (
-          <div style={{ font: `400 13px/1.6 ${FUENTE.ui}`,
-            color: COLOR.textoTenue }}>
+          <div style={{ font: `400 14px/1.6 ${FUENTE.ui}`,
+            color: COLOR.textoSuave }}>
             Pagado. Tu dinero está retenido hasta que entregue
             {e.entrega_max && <>, y se comprometió a hacerlo antes
               del {new Date(e.entrega_max).toLocaleDateString('es-MX')}</>}.
@@ -271,5 +221,75 @@ function Detalle({ e, cierra, recarga }: {
         <Boton tono="primario" al={() => nav(`/clip/${e.clip_id}`)}>Ver lo entregado</Boton>
       )}
     </Marco>
+  )
+}
+
+/** La lista de encargos. Recibe los datos: asi se puede dibujar sin pedirlos. */
+export function ListaEncargos({ lista, esCreadora, alAbrir }: {
+  lista: Encargo[]; esCreadora: boolean; alAbrir: (e: Encargo) => void
+}) {
+  return lista.length === 0 ? (
+        <Vacio texto={esCreadora
+          ? 'Nadie te ha encargado nada todavía.'
+          : 'Todavía no le has pedido nada a nadie.'} />
+      ) : (
+        <div style={{ display: 'grid', gap: 10 }}>
+          {lista.map(e => {
+            const s = ESTADO_ENCARGO[e.estado] ?? { t: e.estado, c: COLOR.textoSuave }
+            return (
+              <Pulsable key={e.id} al={() => alAbrir(e)} className="tarjeta-sobria" style={{
+                width: '100%', textAlign: 'left', padding: '15px 16px', cursor: 'pointer', minHeight: 64,
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
+                  <span style={{ font: `400 12px/1.45 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
+                    {e.soy_creadora ? 'De' : 'Para'} @{e.otra_handle}
+                  </span>
+                  <span style={{ font: `700 10px/1.45 ${FUENTE.ui}`, letterSpacing: 1.1,
+                    textTransform: 'uppercase', color: s.c, whiteSpace: 'nowrap' }}>{s.t}</span>
+                </div>
+                <div style={{ marginTop: 8, font: `400 15px/1.45 ${FUENTE.ui}`,
+                  overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box',
+                  WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{e.descripcion}</div>
+                <div style={{ marginTop: 8, font: `700 18px/1 ${FUENTE.mono}`, color: COLOR.dinero }}>
+                  {usd(e.coins)}
+                </div>
+              </Pulsable>
+            )
+          })}
+        </div>
+      );
+}
+
+/** La conversacion de un encargo. */
+export function Burbujas({ msgs, yo }: {
+  msgs: Awaited<ReturnType<typeof mensajesEncargo>>; yo: string | undefined
+}) {
+  return (
+      <div style={{ margin: '20px 0', display: 'grid', gap: 10 }}>
+        {msgs.map(m => {
+          const mio = m.autor_id === yo
+          return (
+            <div key={m.id} style={{
+              padding: '12px 14px', borderRadius: 14,
+              // Lo mio, con un velo magenta; lo suyo, en tarjeta sobria. Sin
+              // neon: es una conversacion, y se lee mucho rato.
+              border: `1px solid ${mio ? 'rgba(255,43,209,.45)' : 'rgba(255,255,255,.12)'}`,
+              background: mio ? 'rgba(255,43,209,.07)' : COLOR.superficie,
+              marginLeft: mio ? 28 : 0, marginRight: mio ? 0 : 28,
+            }}>
+              {m.cuerpo && (
+                <div style={{ font: `400 15px/1.55 ${FUENTE.ui}`, color: COLOR.texto }}>
+                  {m.cuerpo}
+                </div>
+              )}
+              {m.oferta_coins != null && (
+                <div style={{ marginTop: 6, font: `700 14px/1 ${FUENTE.mono}`, color: COLOR.dinero }}>
+                  Ofrece {usd(m.oferta_coins)}
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
   )
 }
