@@ -13,6 +13,7 @@ import { clipPorId, urlPortada, urlVideoFirmada, clipsPublicados, type ClipConAu
 import { comprarClip, saldo } from '../lib/monedero'
 import { rentarClip, reembolsoDisponible, reclamarReembolso } from '../lib/canales'
 import Reportar from '../components/Reportar'
+import Comentarios from '../components/Comentarios'
 import Reproductor from '../components/Reproductor'
 import { COLOR, VELO, TINTE, FUENTE, RADIO } from '../lib/diseño'
 import { usd } from '../lib/dinero'
@@ -371,6 +372,11 @@ export default function ClipDetail() {
             )}
           </div>
         )}
+
+        {/* Quien puede ver la ficha lee; quien puede abrir el video comenta y
+            califica (lo decide el servidor). Va antes de «Reportar». */}
+        <Comentarios key={clip.id} clip={clip.id} esDuenia={mio}
+          haySesion={!!sesion} desbloqueado={desbloqueado} />
 
         {/* Discreto y al pie: reportar no es una accion que haya que invitar
             a hacer, pero tiene que estar cuando hace falta. */}
