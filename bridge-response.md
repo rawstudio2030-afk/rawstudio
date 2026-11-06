@@ -30,6 +30,112 @@
 
 ## Respuestas activas
 
+### Respuesta a [id: 20261106-05] — Ronda 5/10 · Página de consultas pagadas por Telegram
+- **fecha:** 2026-11-06 15:00 (America/Mexico_City)
+- **estado:** lista-para-claude
+- **responde a:** Asignación del coordinador. Sergio dictó por voz las reglas del servicio y pidió empezar la sección o página en el sitio, dejando en el puente lo que ya se puede implementar.
+- **ronda:** 5 de 10 · **tope:** 1 hora · **tarea:** §5 de `CHECKLIST.md` (consultas pagadas vía Telegram) — solo la cara pública del servicio, no el bot ni el cobro
+- **checklist afectados (NO marques pass tú):** §5 `not_started` → el coordinador lo verifica. No rompas los `pass` de §2 ni §3 ni el recorte de la ronda 4.
+
+#### Orden respecto a la ronda 4
+Si `[id: 20261106-04]` todavía no está hecha y empujada, **termínala primero** y luego sigue con esta. No mezcles los dos recortes en un solo commit. Si 04 ya está en `origin/main`, `git pull` y arranca esta.
+
+#### Qué hay hoy (revisado por el coordinador en `9b06983`)
+- En el repo **no existe** integración ni mención de Telegram (ni bot, ni enlace `t.me`, ni flujo de consultas pagadas).
+- `/chat` es la bandeja de **encargos** (contenido a la medida, `src/estudio/Encargos.tsx`). **No** la conviertas en el chat de Telegram ni le pegues este servicio.
+- La landing cuenta formas de ganar en `FORMAS_NEON` (`src/content/portada.ts`) montadas por `FormasDeGanar` en «Precios»: venta, renta, suscripción, contenido a la medida, propinas, blog. Ahí no está Telegram.
+- `/creadoras` (`src/screens/Creators.tsx`) es la página de venta para quien publica: protección, beneficios, CTA de cuenta. No habla de consultas.
+- El patrón para una página pública de lectura es `/preguntas` y `/contacto` (`src/screens/Ayuda.tsx` + `MarcoDocumento`): se leen sin sesión.
+
+#### Datos de negocio que SÍ están definidos (no los inventes ni los «mejores»)
+Sergio fijó estas reglas. El texto canónico, listo para pintar, es este:
+
+Reglas del servicio de consultas pagadas por Telegram
+
+RAWstudio ofrece consultas pagadas por Telegram entre quien pregunta y la creadora. Cada mensaje que envía el cliente es un mensaje de pago.
+
+1. Precio
+Cada mensaje del cliente cuesta [PRECIO]. Ese pago cubre ese mensaje y la respuesta de la creadora.
+
+2. Extensión
+El mensaje del cliente debe tener al menos 20 palabras. Si tiene menos, no se envía.
+
+3. Pertinencia
+El mensaje debe tener que ver con lo que se pregunta. Tiene que ir anclado al hilo de la conversación y al clip o a la creadora de interés. No se aceptan mensajes sueltos, fuera de contexto o que no se relacionan con esa consulta.
+
+4. Cómo responde la creadora
+No hay un guion rígido. La brújula es flexible: cada contestación debe avanzar algo. Eso puede ser una pregunta de vuelta, un dato nuevo o una oferta concreta.
+
+5. Plazo
+La creadora tiene un máximo de 2 días para responder un mensaje pagado.
+
+6. Guía corta para la creadora
+Saluda.
+Responde lo que preguntaron.
+Ofrece el siguiente paso.
+
+- El monto numérico **no está definido**. Deja el marcador `[PRECIO]` en una constante única (p. ej. `PRECIO_CONSULTA_TELEGRAM = '[PRECIO]'` en `src/content/consultas.ts`). No inventes 5, 10 ni 99 dólares ni pesos.
+- El usuario del bot de Telegram **no está definido**. Constante vacía al estilo de `REDES` (p. ej. `BOT_TELEGRAM = ''`). Si está vacía, **no** pintes un enlace `t.me/…`, **no** digas «escríbenos al bot» con un destino inventado y **no** abras Telegram.
+
+#### Qué no está definido (fuera de esta ronda — no lo inventes)
+Cobro del mensaje (pasarela, SPEI, retención), qué pasa si la creadora no responde en 2 días (reembolso u otra consecuencia), webhooks del bot, validación en servidor de los 20 palabras sobre mensajes reales de Telegram, botón «consultar» en la ficha del clip que abra un chat, ni un username por creadora.
+
+#### Decisión de UI (coordinador — no preguntar a Sergio)
+
+**1. Página nueva `/consultas`**
+- Pantalla pública al estilo de `/preguntas`: `MarcoDocumento` (o el mismo aire), título en español (p. ej. «Consultas por Telegram»).
+- Pinta las reglas de arriba, enteras, en español, sin reescribir el sentido. El `[PRECIO]` sale de la constante.
+- Deja claro que cada mensaje del cliente se paga y que esa cuota cubre la respuesta; que hacen falta ≥20 palabras; que el texto va anclado al hilo y al clip o creadora; la brújula flexible; el tope de 2 días; y la guía de tres puntos para la creadora.
+- Si `BOT_TELEGRAM` está vacío, no hay botón de «abrir Telegram». Un enlace a `/preguntas` o `/contacto` al pie está bien, como en las otras páginas de ayuda.
+- Súmala a `SCREENS` en `src/App.tsx`. Agrégala a `SIN_PUERTA_DE_EDAD` en `src/lib/rutas.ts` (se puede leer como `/preguntas` y `/creadoras`, sin sesión). No la pongas en la barra inferior.
+- Nota visible de 18+ (una línea; el sitio ya es para mayores). No reescribas avisos legales de `/privacidad` ni `/terminos`.
+
+**2. Tarjeta en «Precios» de la landing**
+- Añade un séptimo ítem a `FORMAS_NEON` (o el arreglo que pinte `FormasDeGanar`): título «Consultas por Telegram»; descripción breve y fiel (pagas por cada mensaje; la creadora responde en un máximo de 2 días). Icono existente (p. ej. `sobre` si ya está en `Iconos`; si no, `texto`). No inventes un icono nuevo.
+- Esa tarjeta (solo esa) enlaza a `/consultas` con `Enlace`. No conviertas las otras seis en enlaces si hoy no lo son.
+- No montes esta tarjeta en el primer paint: sigue saliendo solo al abrir «Precios», como ahora. §2.1 es inmutable.
+
+**3. Recuadro corto en `/creadoras`**
+- Un bloque nuevo, no otra página pegada: el plazo de 2 días, la brújula (pregunta de vuelta, dato nuevo u oferta concreta) y la guía de tres puntos (saluda, responde lo que preguntaron, ofrece el siguiente paso). Un enlace a `/consultas` para leer las reglas completas.
+- No dupliques aquí todo el documento ni cambies el resto de la página de creadoras.
+
+**4. No tocar**
+- `/chat` ni Encargos, reproductor, comentarios, age gate, textos de `/privacidad` y `/terminos`, el recorte de la ronda 4 (hero, Cintillo, Portada), copy 20%/SPEI/18+ que ya está, Telegram real, pagos, Admin, Supabase.
+
+#### Archivos concretos a tocar (esperados)
+- `src/content/consultas.ts` (nuevo): constante de precio `[PRECIO]`, bot vacío, textos de las reglas.
+- `src/screens/Consultas.tsx` (nuevo) o export en `Ayuda.tsx` si encaja mejor; regístralo en `App.tsx`.
+- `src/lib/rutas.ts` (`SIN_PUERTA_DE_EDAD`).
+- `src/content/portada.ts` (`FORMAS_NEON`) y el componente que pinte esas tarjetas si hay que volver una de ellas `Enlace`.
+- `src/screens/Creators.tsx` (bloque corto + enlace).
+
+#### Criterios de aceptación (verificables)
+1. `/#/consultas` se abre sin sesión y sin age gate, muestra las seis reglas (precio con `[PRECIO]`, 20 palabras, pertinencia, brújula, 2 días, guía de tres puntos) y no muestra un enlace a un bot inventado.
+2. En `/#/`, primer paint sin cambios respecto a lo ya verificado (no aparece la tarjeta nueva hasta abrir «Precios»).
+3. Al abrir «Precios», hay una tarjeta «Consultas por Telegram» que lleva a `/consultas`.
+4. En `/#/creadoras` se lee el recuadro corto y el enlace a `/consultas`. El resto de esa página no cambia de sentido.
+5. `/#/chat` sigue siendo encargos, no Telegram.
+6. `npm run typecheck` (o `tsc -b`), lint y `npm run build` sin errores.
+
+#### Cómo demostrar (obligatorio en el reporte de `bridge-query.md`)
+- SHA completo y mensaje del commit.
+- Diff resumido por archivo.
+- Recorrido: `/consultas`, «Precios» → la tarjeta, `/creadoras` → el recuadro; primer paint de `/` intacto; `/chat` intacto.
+- Confirmar que no hay `t.me/` ni username inventado.
+- Salida de typecheck, lint y build.
+- Lo que no pudiste verificar, dicho sin rodeos.
+
+#### Límites anti-bucle
+Máx 10 rondas por tarea; solo iterar si mejora el checklist; parar tras 2 rondas seguidas sin mejora; tope 1 hora.
+
+#### Siguiente paso para Claude Code
+1. `git pull`.
+2. Si `20261106-04` no está empujada, hazla primero (otro commit).
+3. Implementa esta ronda, un commit de producto (`feat: pagina de consultas pagadas por Telegram`) y `git push origin main`.
+4. Marca `bridge-query.md` `[id: 20261106-05]` como `respondida` con SHA, diff y verificación. **No** marques `CHECKLIST.md` como pass.
+
+---
+
 ### Respuesta a [id: 20261106-04] — Ronda 4/10 · Recortar la Portada duplicada bajo el hero
 - **fecha:** 2026-11-06 14:35 (America/Mexico_City)
 - **estado:** lista-para-claude
