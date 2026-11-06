@@ -35,6 +35,7 @@ import NuevaClave from './screens/NuevaClave'
 import Verificar from './screens/Verificar'
 import { Privacidad, Terminos } from './screens/Legal'
 import { Contacto, Preguntas } from './screens/Ayuda'
+import Consultas from './screens/Consultas'
 /* Tambien solo para administracion, y tambien se lleva medio `lib/admin`
    consigo: dar de alta una creadora sube expediente, publica por ella y le
    fija avatar. */
@@ -68,6 +69,7 @@ export const SCREENS = [
   { path: '/terminos',  n: '19', title: 'Términos',        el: <Terminos /> },
   { path: '/contacto',  n: '26', title: 'Contacto',        el: <Contacto /> },
   { path: '/preguntas', n: '27', title: 'Preguntas frecuentes', el: <Preguntas /> },
+  { path: '/consultas', n: '28', title: 'Consultas por Telegram', el: <Consultas /> },
   { path: '/alta-creadora', n: '20', title: 'Alta de creadora', el: <AltaCreadora /> },
   { path: '/estudio/niveles',  n: '21', title: 'Suscripción mensual', el: <Niveles /> },
   { path: '/estudio/encargos', n: '22', title: 'Contenido a la medida', el: <EncargosRedirige /> },

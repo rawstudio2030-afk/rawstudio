@@ -14,6 +14,7 @@
  */
 import type { ReactNode } from 'react'
 import Icono from './Iconos'
+import { Enlace } from './Pulsable'
 import { COLOR, FUENTE, RADIO, DEGRADADO, GLOW } from '../lib/diseño'
 import { COMO_FUNCIONA, VERIFICACION_NOTA, FORMAS_NEON } from '../content/portada'
 
@@ -135,8 +136,8 @@ export function FormasDeGanar() {
       <ul style={{ listStyle: 'none', margin: '28px 0 0', padding: 0, display: 'grid', gap: 12 }}>
         {FORMAS_NEON.map((f, i) => {
           const t = alterna(i), { color, borde, rgb } = TONO[t]
-          return (
-            <li key={f.t} style={{ ...tarjeta(t), display: 'flex', gap: 16, alignItems: 'center', padding: '14px 16px' }}>
+          const contenido = (
+            <>
               <span style={{
                 flex: '0 0 auto', width: 58, height: 58, borderRadius: 10, display: 'grid', placeItems: 'center',
                 color, border: `1px solid rgba(${rgb},.55)`, background: 'rgba(8,8,10,.6)',
@@ -152,7 +153,19 @@ export function FormasDeGanar() {
                   textTransform: 'uppercase', color, textShadow: `0 0 12px rgba(${rgb},.45)`,
                 }}>{f.t}</h3>
                 <p style={{ margin: '6px 0 0', font: `400 14px/1.4 ${FUENTE.ui}`, color: '#E6E2E9' }}>{f.d}</p>
+                {f.a && (
+                  <span style={{ display: 'inline-block', marginTop: 8, font: `700 11px/1 ${FUENTE.ui}`,
+                    letterSpacing: 1.4, textTransform: 'uppercase', color }}>Leer las reglas &#8594;</span>
+                )}
               </div>
+            </>
+          )
+          const fila: React.CSSProperties = { display: 'flex', gap: 16, alignItems: 'center', padding: '14px 16px' }
+          return (
+            <li key={f.t} style={tarjeta(t)}>
+              {f.a
+                ? <Enlace a={f.a} style={{ ...fila, color: 'inherit', textDecoration: 'none', cursor: 'pointer' }}>{contenido}</Enlace>
+                : <div style={fila}>{contenido}</div>}
             </li>
           )
         })}

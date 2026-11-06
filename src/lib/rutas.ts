@@ -53,6 +53,8 @@ export const SIN_PUERTA_DE_EDAD = [
   // cuya imagen aparece sin su permiso. Una pagina de contacto detras de una
   // puerta de mayoria de edad no sirve para lo que existe.
   '/contacto', '/preguntas',
+  // Las reglas de las consultas pagadas: se leen antes de crear una cuenta.
+  '/consultas',
 ]
 
 export type Destino = {

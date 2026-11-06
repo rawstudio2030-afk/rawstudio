@@ -82,13 +82,15 @@ export const VERIFICACION_NOTA =
  *  LA SUSCRIPCION NO SE RENUEVA SOLA, y el texto no lo promete. `suscribirse`
  *  cobra una vez y deja `periodo_fin = now() + 30 dias`; nada la vuelve a
  *  cobrar. Al vencer se acaba el acceso y hay que suscribirse otra vez. */
-export const FORMAS_NEON = [
+export const FORMAS_NEON: { i: string; t: string; d: string; a?: string }[] = [
   { i: 'etiqueta', t: 'Venta permanente', d: 'Le pones precio a un video y quien lo compra lo conserva.' },
   { i: 'reloj', t: 'Renta 48/72 h', d: 'El mismo video, más barato, por 48 o 72 horas.' },
   { i: 'corona', t: 'Suscripción mensual', d: 'Acceso a todo lo tuyo por 30 días. Para seguir, se vuelven a suscribir.' },
   { i: 'lapiz', t: 'Contenido a la medida', d: 'Alguien te pide algo concreto y negocian el precio. El dinero queda retenido hasta que entregas.' },
   { i: 'corazon', t: 'Propinas', d: 'Sin pedir nada a cambio.' },
   { i: 'texto', t: 'Blog', d: 'Texto para tus suscriptoras, sin tener que grabar.' },
+  // La unica tarjeta que lleva a otra pagina: las reglas completas viven en /consultas.
+  { i: 'sobre', t: 'Consultas por Telegram', d: 'Pagas por cada mensaje y la creadora responde en un máximo de 2 días.', a: '/consultas' },
 ]
 
 export const PREGUNTAS = [

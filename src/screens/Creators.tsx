@@ -214,6 +214,32 @@ export default function Creators() {
           </div>
         ))}
 
+        {/* ---------- consultas por Telegram ----------
+            Un recuadro corto: lo que le toca a la creadora. Las reglas completas
+            (precio, privacidad, validacion) viven en /consultas. */}
+        <div id="consultas" style={{ marginTop: 30, paddingTop: 40, borderTop: `1px solid ${LINE}` }}>
+          <div style={{ ...etiqueta(CYAN), marginBottom: 14 }}>Consultas por Telegram</div>
+          <div style={{ ...tarjeta, padding: '20px 18px' }}>
+            <p style={{ margin: 0, font: `400 16px/1.55 ${FUENTE.ui}`, color: PAPER }}>
+              <b style={{ fontWeight: 700 }}>Tienes un máximo de 2 días</b> para responder un mensaje pagado.
+            </p>
+            <p style={{ margin: '10px 0 0', font: `400 16px/1.55 ${FUENTE.ui}`, color: '#CFCAD3' }}>
+              No hay guion rígido: cada contestación debe avanzar algo. Una pregunta de vuelta,
+              un dato nuevo o una oferta concreta.
+            </p>
+            <ol style={{ margin: '14px 0 0', paddingLeft: 20, color: PAPER, font: `400 16px/1.5 ${FUENTE.ui}` }}>
+              <li>Saluda.</li>
+              <li>Responde lo que preguntaron.</li>
+              <li>Ofrece el siguiente paso.</li>
+            </ol>
+            <Enlace a="/consultas" style={{
+              display: 'inline-block', marginTop: 16, cursor: 'pointer', minHeight: 44,
+              font: `700 12px/44px ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase',
+              color: CYAN, textDecoration: 'underline', textUnderlineOffset: 5,
+            }}>Leer las reglas completas &#8594;</Enlace>
+          </div>
+        </div>
+
         {/* ---------- cierre ---------- */}
         <div style={{ marginTop: 50, paddingTop: 40, borderTop: `1px solid ${LINE}`, textAlign: 'center' }}>
           <h2 style={{
