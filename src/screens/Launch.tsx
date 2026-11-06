@@ -4,7 +4,7 @@
 import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
-import wordmark from '../assets/wordmark.png'
+import Wordmark from '../components/Wordmark'
 import launchVideo from '../assets/launch.mp4'
 import { COLOR, FUENTE } from '../lib/diseño'
 import { Pulsable } from '../components/Pulsable'
@@ -78,9 +78,7 @@ export default function Launch() {
       <video ref={vidRef} src={launchVideo} autoPlay muted loop playsInline style={{position: "absolute", inset: "0", width: "100%", height: "100%", objectFit: "cover", display: "block"}} />
       <div style={{position: "absolute", inset: "0", background: `radial-gradient(circle at 50% 34%,transparent 26%,rgba(8,8,10,.4) 62%,rgba(8,8,10,.92) 100%),linear-gradient(180deg,rgba(8,8,10,.55) 0%,transparent 24%,rgba(8,8,10,.45) 52%,rgba(8,8,10,.9) 70%,${COLOR.fondo} 82%)`, pointerEvents: "none"}} />
       <div style={{position: "absolute", bottom: "118px", textAlign: "center", animation: "agWordIn 6.5s ease-out both"}}>
-        <div style={{position: "relative", width: "242px", height: "90px", margin: "0 auto", transform: "rotate(-2deg)", filter: "drop-shadow(0 0 22px rgba(255,43,209,.7))"}}>
-          <img src={wordmark} alt="RAWstudio" style={{width: "100%", height: "auto", display: "block"}} />
-        </div>
+        <Wordmark ancho={242} glow={22} centrado />
         <div style={{fontFamily: FUENTE.ui, fontSize: "16px", color: COLOR.textoSuave, marginTop: "8px"}}>
           pay to see it
         </div>

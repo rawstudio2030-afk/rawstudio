@@ -3,7 +3,7 @@
 // otras ocho: Anton para titulares, Space Grotesk para cuerpo y botones,
 // Space Mono para etiquetas, Space Grotesk en gris suave para las bajadas.
 import { useRef } from 'react'
-import wordmark from '../assets/wordmark.png'
+import Wordmark from '../components/Wordmark'
 import {
   SECCIONES, FAQ, NO_PROMETEMOS, ICONS,
   PINK, LIME, CYAN, INK, PAPER, MUTED, DIM, LINE,
@@ -78,9 +78,7 @@ export default function Creators() {
 
         {/* ---------- encabezado ---------- */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14, marginBottom: 26 }}>
-          <div style={{ width: 132, height: 49, transform: 'rotate(-2deg)', filter: `drop-shadow(0 0 16px rgba(255,43,209,.6))` }}>
-            <img src={wordmark} alt="RAWstudio" style={{ width: '100%', height: 'auto', display: 'block' }} />
-          </div>
+          <Wordmark ancho={132} glow={14} />
           <span style={{ ...etiqueta(LIME), border: `1.5px solid ${LIME}`, padding: '8px 11px', whiteSpace: 'nowrap' }}>
             Escudo activo
           </span>

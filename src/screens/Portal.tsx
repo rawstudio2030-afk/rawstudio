@@ -12,15 +12,18 @@
  * color acido, trazo de linoleo y fondo de op art que se retuerce. Nada de
  * esto es imagen: son curvas que se redibujan once veces por segundo.
  */
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Enlace } from '../components/Pulsable'
 import { useSesion } from '../lib/sesion'
 import Wordmark from '../components/Wordmark'
 import Portada from '../components/Portada'
 import { FiltrosHervor, Borde } from '../components/Hervor'
-import { FondoOpArt, Ojo, RecorteIris, OJO } from '../components/OpArt'
-import { COLOR, LINEA, FUENTE } from '../lib/diseño'
+import { Ojo, RecorteIris, OJO } from '../components/OpArt'
+import FondoMiami from '../components/FondoMiami'
+import { ComoFunciona, FormasDeGanar } from '../components/SeccionesNeon'
+import { Pulsable } from '../components/Pulsable'
+import { COLOR, FUENTE } from '../lib/diseño'
 import launchVideo from '../assets/launch.mp4'
 
 /** Segundo del video donde ya se ve la espiral. */
@@ -31,7 +34,55 @@ const CINTILLO = [
   'marca de agua con tu nombre', 'bloqueo por país', 'fecha de retiro',
 ]
 
+/** Las opciones de debajo de los botones. «Creadores» ya tiene su pagina; las
+ *  demas son secciones de esta misma portada, que se alcanzan con scroll.
+ *  No son enlaces `#...` porque el sitio usa HashRouter: un enlace asi cambia
+ *  la ruta en vez de bajar a la seccion. */
+const OPCIONES: { t: string; id?: string; a?: string }[] = [
+  { t: 'Cómo funciona', id: 'como-funciona' },
+  { t: 'Precios', id: 'precios' },
+  { t: 'Creadores', a: '/creadoras' },
+  { t: 'Sobre nosotros', id: 'sobre-nosotros' },
+]
+
+function irA(id: string) {
+  const quieto = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  document.getElementById(id)?.scrollIntoView({ behavior: quieto ? 'auto' : 'smooth', block: 'start' })
+}
+
+/** El 18+: un octagono de borde doble con una estrella arriba, en gris, como
+ *  en los mockups. Es una advertencia, no un adorno: discreta a proposito. */
+function Insignia18() {
+  const gris = '#8F8A94'
+  return (
+    <svg role="img" aria-label="Solo para mayores de 18 años" width="116" height="66" viewBox="0 0 116 66">
+      <polygon points="16,6 100,6 112,18 112,50 100,62 16,62 4,50 4,18"
+        fill="rgba(8,8,10,.55)" stroke={gris} strokeWidth="1.6" />
+      <polygon points="19,10 97,10 107,20 107,48 97,58 19,58 9,48 9,20"
+        fill="none" stroke={gris} strokeWidth="1" opacity=".55" />
+      <path d="M58 0 l2.2 4.4 4.4 2.2-4.4 2.2L58 13.2l-2.2-4.4-4.4-2.2 4.4-2.2Z" fill={gris} />
+      <text x="58" y="49" textAnchor="middle" fill={gris}
+        style={{ font: `400 38px/1 ${FUENTE.display}`, letterSpacing: 1 }}>18+</text>
+    </svg>
+  )
+}
+
+/** ¿Pantalla ancha? Solo para el tamaño del wordmark: el resto del cambio
+ *  entre celular y escritorio lo hace el CSS. */
+function useAncha() {
+  const q = '(min-width: 720px)'
+  const [ancha, setAncha] = useState(() => window.matchMedia(q).matches)
+  useEffect(() => {
+    const m = window.matchMedia(q)
+    const al = () => setAncha(m.matches)
+    m.addEventListener('change', al)
+    return () => m.removeEventListener('change', al)
+  }, [])
+  return ancha
+}
+
 export default function Portal() {
+  const ancha = useAncha()
   const nav = useNavigate()
   const { sesion, perfil, cargando } = useSesion()
 
@@ -50,132 +101,120 @@ export default function Portal() {
       <FiltrosHervor />
       <RecorteIris />
 
-      {/* ---------- portada ---------- */}
-      <section className="portal-alto" style={{
-        position: 'relative', display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center',
-        padding: '46px 26px 34px', boxSizing: 'border-box', overflow: 'hidden',
-      }}>
-        <FondoOpArt opacidad={.26} />
-        {/* Velo: sin esto el titular en Anton pelea contra los anillos y
-            pierde. Mismo recurso que el age gate usa sobre la cortina. */}
-        <div aria-hidden style={{
-          position: 'absolute', inset: 0, pointerEvents: 'none',
-          background: `radial-gradient(ellipse at 50% 40%, rgba(8,8,10,.18) 0%, rgba(8,8,10,.8) 55%, ${COLOR.fondo} 100%)`,
-        }} />
-
-        <div className="portal-marca"><Wordmark ancho={158} glow={18} /></div>
-
-        {/* En celular esto es una columna; con ancho suficiente el ojo se pasa
-            al lado y el texto queda a su izquierda. No es capricho: apilado,
-            en una pantalla de portatil de 720 de alto, los botones quedaban
-            fuera de vista y una portada cuyo boton no se ve no sirve de nada. */}
-        <div className="portal-cuerpo">
-          <div className="portal-ojo">
-            {/* El video va dentro del iris y el dibujo encima: comparten centro
-                por construccion, asi que nunca se descuadran. */}
-            <div style={{
-              position: 'relative', width: '100%',
-              aspectRatio: `${OJO.ancho} / ${OJO.alto}`,
-            }}>
-              {/* El recorte va en el contenedor y el acercamiento en el video.
-                  Al reves no funciona: clip-path se aplica ANTES de la
-                  transformacion, asi que escalar el video escalaba tambien su
-                  recorte y el iris crecia en vez de acercarse.
-                  El video se agranda porque su ojo esta al centro y encogido; a
-                  tamaño natural cabia el ojo entero dentro del iris y se veia
-                  un ojo diminuto dentro de otro. */}
-              <div className="ojo-recorte" style={{
-                position: 'absolute', left: '50%', top: '50%',
-                transform: 'translate(-50%,-50%)',
-                width: `${OJO.iris * 2 / OJO.ancho * 100}%`, aspectRatio: '1',
-                overflow: 'hidden',
+      {/* ---------- portada ----------
+          Direccion «Miami Neon Night» (DESIGN-BRIEF.md y mockups aprobados):
+          una calle de Miami de noche detras de un letrero de neon. El ojo de
+          siempre se queda, pero sutil y por detras de las palmeras: ya no es
+          el protagonista. */}
+      <section className="portal-alto portal-miami">
+        <div className="miami-escena" aria-hidden>
+          <div className="miami-luna">
+            <div className="portal-ojo-caja">
+              {/* El video va dentro del iris y el dibujo encima: comparten centro
+                  por construccion, asi que nunca se descuadran. */}
+              <div style={{
+                position: 'relative', width: '100%',
+                aspectRatio: `${OJO.ancho} / ${OJO.alto}`,
               }}>
-                <video
-                  src={launchVideo} autoPlay muted playsInline
-                  // El video dura 4 s y el primer segundo y cuarto es el ojo
-                  // todavia cerrado: dentro del iris eso se ve como un hueco
-                  // negro, no como un parpadeo. Se arranca y se repite desde
-                  // que la espiral ya esta ahi.
-                  //
-                  // Sin `loop` a proposito: con loop el salto lo hace el
-                  // navegador al cuadro cero y se alcanza a ver el negro. Con
-                  // `ended` el salto lo damos nosotros al segundo que
-                  // queremos.
-                  //
-                  // Si el navegador bloquea la reproduccion automatica, queda
-                  // congelado en ese mismo segundo. La espiral no gira, pero
-                  // el ojo tiene iris; con el cuadro cero se quedaria hueco.
-                  onLoadedMetadata={e => { e.currentTarget.currentTime = DESDE }}
-                  onEnded={e => {
-                    e.currentTarget.currentTime = DESDE
-                    void e.currentTarget.play().catch(() => {})
-                  }}
-                  style={{
-                    width: '100%', height: '100%', objectFit: 'cover',
-                    // Un poco de acercamiento nada mas. A 2.1 se entraba al
-                    // centro de la espiral, que es casi todo negro, y el iris
-                    // se veia vacio.
-                    transform: 'scale(1.15)', display: 'block',
-                  }} />
+                {/* El recorte va en el contenedor y el acercamiento en el video.
+                    Al reves no funciona: clip-path se aplica ANTES de la
+                    transformacion, asi que escalar el video escalaba tambien su
+                    recorte y el iris crecia en vez de acercarse.
+                    El video se agranda porque su ojo esta al centro y encogido; a
+                    tamaño natural cabia el ojo entero dentro del iris y se veia
+                    un ojo diminuto dentro de otro. */}
+                <div className="ojo-recorte" style={{
+                  position: 'absolute', left: '50%', top: '50%',
+                  transform: 'translate(-50%,-50%)',
+                  width: `${OJO.iris * 2 / OJO.ancho * 100}%`, aspectRatio: '1',
+                  overflow: 'hidden',
+                }}>
+                  <video
+                    src={launchVideo} autoPlay muted playsInline
+                    // El video dura 4 s y el primer segundo y cuarto es el ojo
+                    // todavia cerrado: dentro del iris eso se ve como un hueco
+                    // negro, no como un parpadeo. Se arranca y se repite desde
+                    // que la espiral ya esta ahi.
+                    //
+                    // Sin `loop` a proposito: con loop el salto lo hace el
+                    // navegador al cuadro cero y se alcanza a ver el negro. Con
+                    // `ended` el salto lo damos nosotros al segundo que
+                    // queremos.
+                    //
+                    // Si el navegador bloquea la reproduccion automatica, queda
+                    // congelado en ese mismo segundo. La espiral no gira, pero
+                    // el ojo tiene iris; con el cuadro cero se quedaria hueco.
+                    onLoadedMetadata={e => { e.currentTarget.currentTime = DESDE }}
+                    onEnded={e => {
+                      e.currentTarget.currentTime = DESDE
+                      void e.currentTarget.play().catch(() => {})
+                    }}
+                    style={{
+                      width: '100%', height: '100%', objectFit: 'cover',
+                      // Un poco de acercamiento nada mas. A 2.1 se entraba al
+                      // centro de la espiral, que es casi todo negro, y el iris
+                      // se veia vacio.
+                      transform: 'scale(1.15)', display: 'block',
+                    }} />
+                </div>
+                <Ojo />
               </div>
-              <Ojo />
             </div>
           </div>
+          <FondoMiami />
+        </div>
 
-          <div className="portal-texto">
-            <h1 style={{
-              margin: '18px 0 0', fontFamily: FUENTE.display, fontWeight: 400,
-              // Interlineado 1: en español las mayusculas llevan acento y con
-              // menos de 1 la linea de arriba se los come.
-              fontSize: 'clamp(40px, min(12.5vw, 8.4vh), 76px)', lineHeight: 1,
-              textTransform: 'uppercase', letterSpacing: '-.5px',
-            }}>
-              Graba.<br />Ponle precio.<br />
-              <span style={{ color: COLOR.dinero }}>Cobra.</span>
-            </h1>
+        {/* Sin este velo el titular pelea con las luces de la ciudad. */}
+        <div aria-hidden className="miami-velo" />
 
-            <p style={{
-              margin: '16px 0 0', maxWidth: 430,
-              fontFamily: FUENTE.ui,
-              fontSize: 'clamp(17px, 4.6vw, 21px)', lineHeight: 1.3,
-              color: COLOR.textoSuave,
-            }}>
-              El 80% de cada dólar es tuyo. Sin exclusividad, sin cuota mensual y
-              sin que nadie decida por ti qué subes.
-            </p>
+        <div className="miami-cuerpo">
+          <Wordmark ancho={ancha ? 360 : 250} glow={ancha ? 26 : 20} tubo />
 
-            <div style={{ width: '100%', maxWidth: 380, display: 'grid', gap: 10, marginTop: 22 }}>
-              <Enlace a="/registro" style={{
-                textAlign: 'center', padding: 19, cursor: 'pointer',
-                background: COLOR.acento, color: COLOR.fondo,
-                font: `700 13px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
-                boxShadow: '0 0 34px rgba(255,43,209,.42)',
-              }}>Crear mi cuenta</Enlace>
-              <Enlace a="/acceso" style={{
-                textAlign: 'center', padding: 18, cursor: 'pointer',
-                border: `1px solid ${LINEA.fuerte}`, color: COLOR.textoSuave,
-                font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
-              }}>Ya tengo cuenta</Enlace>
-            </div>
+          <h1 className="miami-titular">
+            Graba.<br />Ponle precio.<br />Cobra.
+          </h1>
 
-            {/* La intro mandaba sola al age gate. Sin ese pase automatico hace
-                falta una salida explicita para quien solo viene a mirar. */}
-            <Enlace a="/age" style={{
-              marginTop: 17, cursor: 'pointer',
-              font: `400 12px/1 ${FUENTE.mono}`, color: COLOR.textoTenue,
-              textDecoration: 'underline', textUnderlineOffset: 5,
-            }}>Solo vengo a ver &#8594;</Enlace>
+          <p className="miami-sub">
+            El 80% de cada dólar es tuyo.<br />Sin exclusividad.
+          </p>
 
-            <div style={{
-              marginTop: 22, font: `400 9px/1 ${FUENTE.mono}`,
-              letterSpacing: 1.6, textTransform: 'uppercase', color: COLOR.textoApagado,
-            }}>Solo mayores de 18</div>
+          <div className="miami-botones">
+            <Enlace a="/registro" className="miami-boton miami-boton-magenta">Crear mi cuenta</Enlace>
+            <Pulsable al={() => irA('como-funciona')} className="miami-boton miami-boton-cian">
+              <svg aria-hidden width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round">
+                <path d="M7 5v14l11.5-7Z" />
+              </svg>
+              Ver cómo funciona
+            </Pulsable>
+          </div>
+
+          {/* Las opciones, a la vista y en una sola fila, con los dos colores
+              del neon alternados. En celular no hay barra con enlaces, y lo
+              que no se ve en la primera pantalla no se encuentra. */}
+          <nav className="miami-opciones" aria-label="Secciones">
+            {OPCIONES.map(o => o.a
+              ? <Enlace key={o.t} a={o.a} className="miami-opcion">{o.t}</Enlace>
+              : <Pulsable key={o.t} al={() => irA(o.id!)} className="miami-opcion">{o.t}</Pulsable>)}
+          </nav>
+
+          {/* Quien ya tiene cuenta, y quien solo viene a mirar: son los dos
+              caminos que no son «crear cuenta» y no pueden desaparecer. */}
+          <div className="miami-enlaces">
+            <Enlace a="/acceso">Ya tengo cuenta</Enlace>
+            <Enlace a="/age">Solo vengo a ver &#8594;</Enlace>
           </div>
         </div>
+
+        <div className="miami-18"><Insignia18 /></div>
       </section>
 
       <Cintillo />
+
+      {/* Lo que el hero promete —«ver como funciona», «precios»— esta aqui
+          mismo debajo, en el mismo estilo. */}
+      <ComoFunciona />
+      <FormasDeGanar />
 
       {/* ---------- el resto ---------- */}
       {/* En pantalla ancha el texto se iba a mas de mil pixeles de linea y no

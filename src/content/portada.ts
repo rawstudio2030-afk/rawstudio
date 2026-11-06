@@ -21,7 +21,7 @@ export const QUE_ES = [
 export const FORMAS_DE_GANAR = [
   { i: 'etiqueta', t: 'Venta permanente', d: 'Le pones precio a un video y quien lo compra lo conserva.' },
   { i: 'reloj', t: 'Renta por tiempo', d: 'El mismo video, más barato, por 48 o 72 horas.' },
-  { i: 'ciclo', t: 'Suscripción mensual', d: 'Acceso a todo lo tuyo mientras estén suscritas.' },
+  { i: 'ciclo', t: 'Suscripción mensual', d: 'Acceso a todo lo tuyo por 30 días. Para seguir, se vuelven a suscribir.' },
   { i: 'lapiz', t: 'Contenido a la medida', d: 'Alguien te pide algo concreto y negocian el precio. El dinero queda retenido hasta que entregas.' },
   { i: 'corazon', t: 'Propinas', d: 'Sin pedir nada a cambio.' },
   { i: 'texto', t: 'Blog', d: 'Texto para tus suscriptoras, sin tener que grabar.' },
@@ -61,6 +61,34 @@ export const PASOS = [
   { n: '04', v: 'identidad', t: 'Verifica tu identidad', d: 'Una identificación y una selfie. Se revisan y se borran.' },
   { n: '05', v: 'precio',    t: 'Ponle precio', d: 'Venta, renta, suscripción o las tres. Se cambia cuando quieras.' },
   { n: '06', v: 'cobro',     t: 'Cobra', d: 'A tu cuenta, por SPEI, con las retenciones que marca la ley ya calculadas.' },
+]
+
+/** «Como funciona», en tres. Son los seis pasos de `PASOS` resumidos: crear la
+ *  cuenta, subir y poner precio, cobrar. El de verificar la identidad no
+ *  desaparece: va en `VERIFICACION_NOTA`, debajo de las tarjetas, porque es lo
+ *  unico que se hace UNA vez y no un paso mas del camino. */
+export const COMO_FUNCIONA = [
+  { i: 'personaMas', t: 'Crea tu cuenta', d: 'Correo y contraseña. Nada más por ahora.' },
+  { i: 'nubeSubir', t: 'Sube tu video y ponle precio', d: 'Venta, renta, suscripción o las tres. Se cambia cuando quieras.' },
+  { i: 'banco', t: 'Cobra el 80% por SPEI', d: 'A tu cuenta, con las retenciones que marca la ley ya calculadas.' },
+]
+
+export const VERIFICACION_NOTA =
+  'Para cobrar verificamos tu identidad una sola vez: una identificación y una selfie que se revisan y se borran.'
+
+/** «Formas de ganar», en las tarjetas de neon: las cinco de DESIGN-BRIEF.md y,
+ *  por decision del dueño, el blog como sexta.
+ *
+ *  LA SUSCRIPCION NO SE RENUEVA SOLA, y el texto no lo promete. `suscribirse`
+ *  cobra una vez y deja `periodo_fin = now() + 30 dias`; nada la vuelve a
+ *  cobrar. Al vencer se acaba el acceso y hay que suscribirse otra vez. */
+export const FORMAS_NEON = [
+  { i: 'etiqueta', t: 'Venta permanente', d: 'Le pones precio a un video y quien lo compra lo conserva.' },
+  { i: 'reloj', t: 'Renta 48/72 h', d: 'El mismo video, más barato, por 48 o 72 horas.' },
+  { i: 'corona', t: 'Suscripción mensual', d: 'Acceso a todo lo tuyo por 30 días. Para seguir, se vuelven a suscribir.' },
+  { i: 'lapiz', t: 'Contenido a la medida', d: 'Alguien te pide algo concreto y negocian el precio. El dinero queda retenido hasta que entregas.' },
+  { i: 'corazon', t: 'Propinas', d: 'Sin pedir nada a cambio.' },
+  { i: 'texto', t: 'Blog', d: 'Texto para tus suscriptoras, sin tener que grabar.' },
 ]
 
 export const PREGUNTAS = [

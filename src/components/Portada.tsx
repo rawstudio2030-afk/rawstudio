@@ -12,17 +12,16 @@ import type { ReactNode } from 'react'
 import { COLOR, LINEA, TINTE, FUENTE } from '../lib/diseño'
 import Icono from './Iconos'
 import { Regla, Marco } from './Hervor'
-import { Vineta, useEnPantalla } from './Vinetas'
 import { Enlace } from './Pulsable'
 import { FondoOpArt } from './OpArt'
 import {
-  REDES, QUE_ES, FORMAS_DE_GANAR, SEGURIDAD, VALORES, PASOS, PREGUNTAS,
+  REDES, QUE_ES, SEGURIDAD, VALORES, PREGUNTAS,
 } from '../content/portada'
 
 export default function Portada() {
   return (
     <div style={{ marginTop: 56 }}>
-      <Seccion rotulo="¿Qué es RAWstudio?">
+      <Seccion rotulo="¿Qué es RAWstudio?" id="sobre-nosotros">
         <Titular>
           Tu contenido.<br />
           <span style={{ color: COLOR.acento }}>Tu precio.</span><br />
@@ -68,15 +67,7 @@ export default function Portada() {
 
       {/* ---------- Lo que hay aqui ---------- */}
       <Seccion rotulo="Lo que hay aquí">
-        <Sub>Formas de ganar</Sub>
-        <div style={{ display: 'grid', gap: 1, background: LINEA.tenue,
-          border: `1px solid ${LINEA.tenue}`, marginTop: 14 }}>
-          {FORMAS_DE_GANAR.map(f => (
-            <Fila key={f.t} icono={f.i} titulo={f.t} texto={f.d} color={COLOR.dinero} />
-          ))}
-        </div>
-
-        <Sub estilo={{ marginTop: 32 }}>Seguridad</Sub>
+        <Sub>Seguridad</Sub>
         <div style={{ display: 'grid', gap: 1, background: LINEA.tenue,
           border: `1px solid ${LINEA.tenue}`, marginTop: 14 }}>
           {SEGURIDAD.map(f => (
@@ -119,11 +110,6 @@ export default function Portada() {
           diez mil perfiles.
         </p>
       </div>
-
-      {/* ---------- Como empezar ---------- */}
-      <Seccion rotulo="Cómo empezar">
-        <Pasos />
-      </Seccion>
 
       {/* ---------- FAQ ---------- */}
       <Seccion rotulo="Preguntas frecuentes">
@@ -212,9 +198,11 @@ function Fila({ icono, titulo, texto, color }: {
   )
 }
 
-function Seccion({ rotulo, children }: { rotulo: string; children: ReactNode }) {
+/** `id` es el ancla a la que baja el scroll desde las opciones de la portada
+ *  (Portal.tsx). `scrollMarginTop` deja aire arriba al llegar. */
+function Seccion({ rotulo, id, children }: { rotulo: string; id?: string; children: ReactNode }) {
   return (
-    <div style={{ marginTop: 44 }}>
+    <div id={id} style={{ marginTop: 44, scrollMarginTop: 24 }}>
       <div style={{
         font: `700 10px/1.4 ${FUENTE.ui}`, letterSpacing: 2.2,
         textTransform: 'uppercase', color: COLOR.textoTenue, marginBottom: 0,
@@ -270,40 +258,5 @@ function Red({ href, texto }: { href: string; texto: string }) {
       color: COLOR.textoSuave, textDecoration: 'none',
       font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
     }}>{texto}</a>
-  )
-}
-
-/** Los seis pasos, cada uno con su dibujo.
- *
- *  Antes eran dos bloques: la lista numerada y, debajo, seis recuadros
- *  punteados esperando capturas. Decian lo mismo dos veces y uno de los dos
- *  estaba vacio. Ahora es un solo bloque donde el dibujo acompaña al paso.
- *
- *  La animacion se pausa cuando el bloque no se ve: son seis viñetas de
- *  varios trazos cada una, y casi siempre estan fuera de pantalla. */
-function Pasos() {
-  const { ref, visible } = useEnPantalla<HTMLDivElement>()
-
-  return (
-    <div ref={ref} className={visible ? undefined : 'quieto'} style={{
-      marginTop: 6, display: 'grid', gap: 1,
-      gridTemplateColumns: 'repeat(auto-fill, minmax(218px, 1fr))',
-      background: LINEA.tenue, border: `1px solid ${LINEA.tenue}`,
-    }}>
-      {PASOS.map(p => (
-        <div key={p.n} style={{ background: COLOR.fondo, padding: '20px 18px 22px' }}>
-          <div style={{ height: 104, color: COLOR.acento, marginBottom: 14 }}>
-            <Vineta nombre={p.v} />
-          </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 9 }}>
-            <span style={{ font: `400 16px/1 ${FUENTE.mono}`, color: COLOR.acento }}>{p.n}</span>
-            <span style={{ font: `700 12px/1.3 ${FUENTE.ui}`, letterSpacing: 1.2,
-              textTransform: 'uppercase', color: COLOR.texto }}>{p.t}</span>
-          </div>
-          <div style={{ marginTop: 8, font: `400 13px/1.45 ${FUENTE.ui}`,
-            color: COLOR.textoSuave }}>{p.d}</div>
-        </div>
-      ))}
-    </div>
   )
 }

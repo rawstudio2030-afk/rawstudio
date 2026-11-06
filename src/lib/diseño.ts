@@ -90,4 +90,58 @@ export const FUENTE = {
  *  radios que nadie usa. */
 export const RADIO = {
   circulo: '50%',
+  /** Botones y tarjetas de neon de la portada, como en los mockups. Es el
+   *  unico radio de «esquina suave»: el resto del sitio sigue de esquina viva. */
+  neon: 14,
+} as const
+
+/* ======================================================================
+ * Miami Neon Night — tokens aditivos (ver DESIGN-BRIEF.md)
+ *
+ * Todo lo de arriba sigue igual. Esto solo AÑADE lo que pide la direccion
+ * nueva: resplandor de neon, degradados de noche y la paleta de la escena de
+ * la portada. Magenta, cian y lima son los mismos de COLOR; aqui se nombran
+ * sus resplandores, que antes estaban escritos a mano en cada pantalla.
+ * ====================================================================== */
+
+/** Resplandor. Para `boxShadow`, salvo `texto*` (`textShadow`) y `imagen`
+ *  (`filter`, para PNG/SVG con transparencia).
+ *
+ *  Un `clip-path` recorta el resplandor del mismo elemento: si la pieza lleva
+ *  esquina cortada, el brillo va en su contenedor. */
+export const GLOW = {
+  magenta: '0 0 14px rgba(255,43,209,.55), 0 0 38px rgba(255,43,209,.28)',
+  magentaFuerte: '0 0 18px rgba(255,43,209,.7), 0 0 52px rgba(255,43,209,.38)',
+  cian: '0 0 14px rgba(0,229,255,.5), 0 0 36px rgba(0,229,255,.24)',
+  lima: '0 0 12px rgba(200,255,61,.45), 0 0 30px rgba(200,255,61,.2)',
+  /** Anillo de 1 px: foco y seleccion, tambien en modo sobrio. */
+  hilo: '0 0 0 1px rgba(255,43,209,.5)',
+
+  /** `textShadow` de letrero de neon: nucleo claro, luego el color. */
+  textoMagenta: '0 0 4px rgba(255,255,255,.45), 0 0 10px #FF2BD1, 0 0 26px rgba(255,43,209,.65), 0 0 54px rgba(255,43,209,.35)',
+  textoLima: '0 0 4px rgba(255,255,255,.4), 0 0 10px #C8FF3D, 0 0 24px rgba(200,255,61,.55), 0 0 48px rgba(200,255,61,.28)',
+  textoCian: '0 0 4px rgba(255,255,255,.4), 0 0 10px #00E5FF, 0 0 24px rgba(0,229,255,.55)',
+
+  /** `filter` para una imagen con transparencia. */
+  imagen: (px: number, rgba = '255,43,209,.6') => `drop-shadow(0 0 ${px}px rgba(${rgba}))`,
+} as const
+
+/** Degradados de la escena nocturna. Son de FONDO: nunca de texto de lectura. */
+export const DEGRADADO = {
+  /** Cielo de la portada: casi negro arriba, violeta y magenta hacia el
+   *  horizonte, como la luz de una ciudad que no se apaga. */
+  cielo: 'linear-gradient(180deg, #08080A 0%, #0C0716 34%, #1A0B2E 62%, #3A0F4A 82%, #6A1458 100%)',
+  /** Piso mojado: el horizonte se apaga hacia abajo. */
+  suelo: 'linear-gradient(180deg, rgba(106,20,88,.55) 0%, rgba(26,11,46,.85) 40%, #08080A 100%)',
+  /** Filete que va de magenta a cian. */
+  hilo: 'linear-gradient(90deg, #FF2BD1, #00E5FF)',
+} as const
+
+/** Paleta de la escena (edificios, ventanas, palmeras). Solo para ilustracion:
+ *  no se usa en la interfaz. */
+export const MIAMI = {
+  edificio: '#0B0813',
+  edificioClaro: '#140D22',
+  palmera: '#06050A',
+  agua: '#0A0612',
 } as const

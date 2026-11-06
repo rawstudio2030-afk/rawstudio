@@ -67,6 +67,16 @@ const TRAZOS: Record<string, string> = {
   dinero: 'M3 7h18v10H3zM12 14.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z',
   /** Cuenta para cobrar: el banco. */
   banco: 'M3 10l9-5.5L21 10M4.5 10v8M9.5 10v8M14.5 10v8M19.5 10v8M3 20h18',
+
+  // ---- Portada: «Como funciona» y «Formas de ganar» ----
+  /** Crear cuenta: una persona y el signo de mas. */
+  personaMas: 'M10 11.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM3 20.5c.9-3.8 3.4-6 7-6s6.1 2.2 7 6M19 7.5v6M16 10.5h6',
+  /** Subir un video: la nube y la flecha. */
+  nubeSubir: 'M7 18.5a4.6 4.6 0 0 1-.7-9.15A6.2 6.2 0 0 1 18.2 9.6 4.5 4.5 0 0 1 17.5 18.5ZM12 16v-6M9.2 12.6 12 9.8l2.8 2.8',
+  /** Suscripcion: la corona. */
+  corona: 'M3.5 8.5l4.5 4 4-6.5 4 6.5 4.5-4-1.6 10.5H5.1ZM5.5 21h13',
+  /** Ganancia: barras que suben. */
+  grafica: 'M4 20.5h16M6.5 20.5v-5M11.5 20.5v-8.5M16.5 20.5V9M5 9l5-3.8 3.2 2.9L19 3.5M15.8 3.5H19v3.2',
 }
 
 export type NombreIcono = keyof typeof TRAZOS
