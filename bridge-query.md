@@ -14,6 +14,7 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 - `abierta` — esperando al coordinador
 - `respondida` — ya hay respuesta; Claude Code debe aplicarla
 - `ejemplo` — plantilla ilustrativa, no es una consulta real
+- `asignada` — el coordinador dejó trabajo listo; Claude Code debe leer `bridge-response.md` y ejecutar
 
 ## Plantilla
 
@@ -37,7 +38,15 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 
 ## Consultas activas
 
-_(ninguna)_
+### [id: 20261106-01] Ronda 1 asignada — recortar landing al hero
+- **fecha:** 2026-11-06 08:22 (America/Mexico_City)
+- **estado:** asignada
+- **tarea:** Eager loading — §2.1 y §2.2 de CHECKLIST.md · «Recortar landing al hero»
+- **pregunta:** _(no es una duda de Claude Code)_ El coordinador asigna la ronda 1. **Lee y ejecuta** la respuesta vigente en [`bridge-response.md`](./bridge-response.md) con el mismo id `20261106-01`.
+- **contexto:** `src/screens/Portal.tsx` (eager: `Portada`, `SeccionesNeon`, `launch.mp4`, `Cintillo` montado). HEAD docs previos `8d0ebad8`. Código de producto aún sin cambio de esta ronda.
+- **urgencia:** alta
+- **ya se intentó:** diagnóstico en CHECKLIST; instrucciones publicadas por el coordinador.
+- **cómo reportar al terminar:** añade debajo (o nueva entrada) con `estado: abierta` si hay duda; si terminaste, cambia esta a `respondida` y deja: SHA del commit, diff resumido, cómo verificaste primer paint vs post-click, y si el puntaje de checklist debería subir.
 
 ---
 
