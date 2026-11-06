@@ -336,6 +336,9 @@ details[open] > summary > .faq-signo {
 }
 .miami-boton-suave {
   border: 1.5px solid rgba(255,255,255,.3); background: rgba(8,8,10,.55); color: #C9C4CC;
+  /* Un rotulo largo puede partirse en dos lineas: con `line-height: 1` quedaban
+     pegadas. Aqui hay mas aire y menos espaciado de letras. */
+  font-size: 13px; letter-spacing: 1.8px; line-height: 1.3; padding-top: 10px; padding-bottom: 10px; text-align: center;
 }
 .miami-boton-google { border: 0; background: #F2F0F3; color: #08080A; letter-spacing: 2px }
 .acceso-enlace {

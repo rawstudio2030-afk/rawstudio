@@ -4,22 +4,26 @@
 // edad" y entraba. Eso basta para mirar, pero no para publicar: quien aparece
 // en el contenido debe ser adulto comprobado, y esa es la parte que la ley no
 // perdona.
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { cuantos } from '../lib/plural'
 import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import { supabase } from '../lib/supabase'
-import Wordmark from '../components/Wordmark'
-import { COLOR, LINEA, TINTE, FUENTE } from '../lib/diseño'
+import { COLOR, FUENTE, RADIO } from '../lib/diseño'
+import Icono from '../components/Iconos'
 import { Pulsable, Enlace } from '../components/Pulsable'
 import Centro from '../components/Centro'
 
 
 const SERVICIO = import.meta.env.VITE_VERIFICACION_URL as string | undefined
 
+/* Modo sobrio: es un tramite con datos sensibles, y quien lo hace tiene que
+   poder leer cada instruccion. Rotulos y ayudas en `textoSuave` (eran
+   textoTenue y textoApagado, bajo AA) y campos de `.campo-sobrio`. */
 const etiqueta: React.CSSProperties = {
-  font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', color: COLOR.textoTenue,
+  font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase', color: COLOR.textoSuave,
 }
+const ayuda: React.CSSProperties = { font: `400 12px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave }
 
 /** Edad a partir de la fecha. Se calcula tambien aqui para avisar de inmediato,
  *  pero la que MANDA es la del servidor: esta se puede saltar editando el
@@ -141,36 +145,40 @@ export default function Verificar() {
 
   return (
     <div style={{
-      minHeight: '100%', boxSizing: 'border-box', padding: '54px 22px 40px',
+      minHeight: '100%', boxSizing: 'border-box', padding: '20px 18px 40px',
       background: COLOR.fondo, color: COLOR.texto, fontFamily: FUENTE.ui,
-      display: 'flex', flexDirection: 'column', gap: 20,
+      display: 'flex', flexDirection: 'column', gap: 18,
+      width: '100%', maxWidth: 680, margin: '0 auto',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Wordmark ancho={116} glow={14} />
-        <Enlace a="/estudio" rotulo="Cerrar" style={{ font: `400 26px/1 ${FUENTE.ui}`, color: COLOR.textoSuave, cursor: 'pointer' }}>×</Enlace>
+        <h1 style={{ ...etiqueta, margin: 0, color: COLOR.dinero }}>Verificar identidad</h1>
+        <Enlace a="/estudio" rotulo="Cerrar" style={{
+          width: 44, height: 44, borderRadius: '50%', display: 'grid', placeItems: 'center',
+          border: '1px solid rgba(255,255,255,.22)', color: COLOR.texto, cursor: 'pointer',
+        }}><span aria-hidden style={{ font: `400 22px/1 ${FUENTE.ui}` }}>×</span></Enlace>
       </div>
 
       <div>
-        <div style={{ fontFamily: FUENTE.display, fontSize: 38, lineHeight: 1, textTransform: 'uppercase' }}>
-          Comprueba<br />que eres<br /><span style={{ color: COLOR.dinero }}>tú.</span>
-        </div>
-        <div style={{ fontFamily: FUENTE.ui, fontSize: 19, lineHeight: 1.45, color: COLOR.textoSuave, marginTop: 14 }}>
+        <h2 style={{ margin: 0, font: `700 28px/1.15 ${FUENTE.ui}` }}>
+          Comprueba que eres <span style={{ color: COLOR.dinero }}>tú.</span>
+        </h2>
+        <div style={{ font: `400 16px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave, marginTop: 12 }}>
           Solo hace falta una vez, y solo para publicar o cobrar. Quien únicamente mira no pasa por aquí.
         </div>
       </div>
 
       {/* Lo que se promete en la pagina de creadoras, dicho aqui donde importa. */}
       <div style={{
-        border: '1.5px dashed rgba(200,255,61,.4)', background: TINTE.dinero,
-        padding: '16px 15px',
+        borderRadius: RADIO.neon, border: '1.5px dashed rgba(200,255,61,.5)', background: 'rgba(200,255,61,.05)',
+        padding: '16px 16px',
       }}>
         <div style={{ ...etiqueta, color: COLOR.dinero }}>Qué hacemos con esto</div>
-        <div style={{ font: `400 13px/1.6 ${FUENTE.ui}`, color: COLOR.texto, marginTop: 9 }}>
+        <div style={{ font: `400 14px/1.6 ${FUENTE.ui}`, color: COLOR.texto, marginTop: 9 }}>
           {SERVICIO
             ? <>Las fotos se revisan <b>en memoria</b> y no se guardan. De todo esto solo conservamos que eres mayor de edad y la fecha.</>
             : <>Una persona del equipo revisa tus fotos y las <b>borra al terminar</b>. De todo esto solo conservamos que eres mayor de edad y la fecha.</>}
         </div>
-        <div style={{ font: `400 12px/1.6 ${FUENTE.mono}`, color: COLOR.textoTenue, marginTop: 9 }}>
+        <div style={{ ...ayuda, marginTop: 9 }}>
           {SERVICIO
             ? 'Única excepción: si el cotejo no es concluyente, las guardamos hasta que una persona lo revise, y se borran al resolverlo.'
             : 'Tu documento nunca se guarda completo, solo una huella que no permite reconstruirlo.'}
@@ -178,16 +186,15 @@ export default function Verificar() {
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <span style={etiqueta}>Fecha de nacimiento</span>
-        <input type="date" value={nacimiento} max={new Date().toISOString().slice(0, 10)}
+        <label htmlFor="ver-nacimiento" style={etiqueta}>Fecha de nacimiento</label>
+        <input id="ver-nacimiento" type="date" value={nacimiento} max={new Date().toISOString().slice(0, 10)}
+          className="campo-sobrio" aria-invalid={!!nacimiento && !edadOk}
           onChange={e => { setNacimiento(e.target.value); if (estado === 'error') setEstado('listo') }}
           style={{
-            width: '100%', boxSizing: 'border-box', background: COLOR.superficie,
-            border: `1px solid ${nacimiento && !edadOk ? COLOR.acento : LINEA.media}`,
-            color: COLOR.texto, font: `400 16px/1 ${FUENTE.ui}`,
-            padding: '16px 15px', outline: 'none', colorScheme: 'dark',
+            width: '100%', boxSizing: 'border-box',
+            font: `400 16px/1 ${FUENTE.ui}`, padding: '16px 15px', colorScheme: 'dark',
           }} />
-        <span style={{ font: `400 10px/1.45 ${FUENTE.mono}`, color: nacimiento && !edadOk ? COLOR.acento : COLOR.textoApagado }}>
+        <span style={{ ...ayuda, color: nacimiento && !edadOk ? '#FF7BE6' : COLOR.textoSuave }}>
           {!nacimiento ? 'Debe coincidir con tu identificación.'
             : !edadOk ? 'Necesitas 18 años o más para publicar.'
             : `${cuantos(edad, 'año')}.`}
@@ -198,18 +205,15 @@ export default function Verificar() {
           dos cuentas, pero exigirlo dejaria fuera a quien no trae su documento
           a la mano o viene de otro pais. */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <span style={etiqueta}>Número de documento · opcional</span>
-        <input value={documento} maxLength={30}
+        <label htmlFor="ver-documento" style={etiqueta}>Número de documento · opcional</label>
+        <input id="ver-documento" value={documento} maxLength={30} className="campo-sobrio"
           onChange={e => setDocumento(e.target.value.toUpperCase())}
           placeholder="CURP, pasaporte o el que uses"
           style={{
-            width: '100%', boxSizing: 'border-box', background: COLOR.superficie,
-            border: '1px solid rgba(255,255,255,.14)', color: COLOR.texto,
-            font: `400 16px/1 ${FUENTE.mono}`, letterSpacing: 1.2, padding: '16px 15px', outline: 'none',
+            width: '100%', boxSizing: 'border-box',
+            font: `400 16px/1 ${FUENTE.mono}`, letterSpacing: 1.2, padding: '16px 15px',
           }} />
-        <span style={{ font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado }}>
-          Solo guardamos una huella, nunca el número.
-        </span>
+        <span style={ayuda}>Solo guardamos una huella, nunca el número.</span>
       </div>
 
       <Foto etiqueta="Tu identificación" nota="INE, pasaporte o cédula. Completa y sin reflejos"
@@ -221,17 +225,11 @@ export default function Verificar() {
         onElegir={f => { setSelfie(f); if (estado === 'error') setEstado('listo') }} />
 
       {estado === 'error' && (
-        <div style={{ font: `400 13px/1.45 ${FUENTE.ui}`, color: COLOR.acento }}>{detalle}</div>
+        <div role="alert" style={{ font: `400 14px/1.45 ${FUENTE.ui}`, color: '#FF7BE6' }}>{detalle}</div>
       )}
 
-      <Pulsable al={enviar} activo={puede} style={{
-        boxSizing: 'border-box', width: '100%',
-        marginTop: 'auto', background: puede ? COLOR.acento : COLOR.superficieAlta,
-        color: puede ? COLOR.fondo : COLOR.textoApagado, textAlign: 'center', padding: 19,
-        font: `700 13px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
-        boxShadow: puede ? '0 0 34px rgba(255,43,209,.42)' : 'none',
-        cursor: puede ? 'pointer' : 'default',
-      }}>
+      <Pulsable al={enviar} activo={puede} className="boton-principal"
+        style={{ width: '100%', marginTop: 'auto' }}>
         {estado === 'enviando' ? 'Verificando…' : 'Enviar para verificar'}
       </Pulsable>
     </div>
@@ -243,24 +241,39 @@ function Foto({ etiqueta: et, nota, archivo, refInput, camara, onElegir }: {
   refInput: React.RefObject<HTMLInputElement | null>
   camara: 'user' | 'environment'; onElegir: (f: File) => void
 }) {
+  // La vista previa de un documento de identidad: se crea UNA vez por archivo y
+  // se revoca al cambiarlo o al salir. Antes se llamaba a createObjectURL dentro
+  // del render, que crea una URL nueva en cada pintada y no revoca ninguna: la
+  // imagen de una INE quedaba retenida en memoria tantas veces como se repintara.
+  const [vista, setVista] = useState<string | null>(null)
+  useEffect(() => {
+    if (!archivo) { setVista(null); return }
+    const u = URL.createObjectURL(archivo)
+    setVista(u)
+    return () => URL.revokeObjectURL(u)
+  }, [archivo])
+
   return (
     <>
       <Pulsable al={() => refInput.current?.click()} style={{
-        boxSizing: 'border-box', width: '100%', textAlign: 'left',
-        display: 'flex', alignItems: 'center', gap: 13, cursor: 'pointer',
-        border: `1px ${archivo ? 'solid' : 'dashed'} rgba(255,255,255,${archivo ? '.2' : '.16'})`,
-        background: archivo ? TINTE.dinero : 'transparent', padding: 14,
+        boxSizing: 'border-box', width: '100%', textAlign: 'left', minHeight: 80,
+        display: 'flex', alignItems: 'center', gap: 14, cursor: 'pointer', borderRadius: RADIO.neon,
+        border: `1.5px ${archivo ? 'solid' : 'dashed'} ${archivo ? 'rgba(200,255,61,.6)' : 'rgba(255,255,255,.28)'}`,
+        background: archivo ? 'rgba(200,255,61,.05)' : 'transparent', padding: 14,
       }}>
         <div style={{
-          width: 52, height: 52, flex: '0 0 auto',
-          background: archivo ? `center/cover url(${URL.createObjectURL(archivo)})`
-                              : `repeating-linear-gradient(130deg,${COLOR.superficieAlta} 0 8px,${COLOR.superficie} 8px 16px)`,
-        }} />
+          width: 56, height: 56, flex: '0 0 auto', borderRadius: 10, display: 'grid', placeItems: 'center',
+          color: COLOR.textoSuave,
+          background: vista ? `center/cover url(${vista})`
+                            : `repeating-linear-gradient(130deg,${COLOR.superficieAlta} 0 8px,${COLOR.superficie} 8px 16px)`,
+        }}>
+          {!vista && <span aria-hidden style={{ display: 'grid' }}><Icono nombre="subir" tam={22} /></span>}
+        </div>
         <div style={{ minWidth: 0 }}>
-          <div style={{ ...etiquetaBase, color: archivo ? COLOR.dinero : COLOR.textoTenue }}>
+          <div style={{ ...etiquetaBase, color: archivo ? COLOR.dinero : COLOR.textoSuave }}>
             {archivo ? `${et} · listo` : et}
           </div>
-          <div style={{ font: `400 12px/1.45 ${FUENTE.mono}`, color: COLOR.textoApagado, marginTop: 6 }}>{nota}</div>
+          <div style={{ font: `400 13px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave, marginTop: 6 }}>{nota}</div>
         </div>
       </Pulsable>
       {/* capture abre la camara directo en movil, que es donde se hace esto */}
@@ -272,5 +285,5 @@ function Foto({ etiqueta: et, nota, archivo, refInput, camara, onElegir }: {
 }
 
 const etiquetaBase: React.CSSProperties = {
-  font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
+  font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase',
 }
