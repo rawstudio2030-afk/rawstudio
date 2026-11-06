@@ -7,8 +7,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import Wordmark from '../components/Wordmark'
-import { COLOR, LINEA, FUENTE } from '../lib/diseño'
+import PaginaMiami from '../components/PaginaMiami'
+import { COLOR, FUENTE } from '../lib/diseño'
 import { Pulsable } from '../components/Pulsable'
 
 
@@ -55,101 +55,68 @@ export default function NuevaClave() {
   }
 
   return (
-    <div style={{
-      minHeight: '100%', boxSizing: 'border-box', padding: '64px 26px 44px',
-      background: COLOR.fondo, color: COLOR.texto, fontFamily: FUENTE.ui,
-      display: 'flex', flexDirection: 'column',
-    }}>
-      <Wordmark ancho={150} glow={16} />
-
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 18, padding: '32px 0' }}>
-        <div style={{ width: 64, height: 3, background: COLOR.acento }} />
-
+    <PaginaMiami>
+      <div className="tarjeta-acceso">
         {estado === 'hecho' ? (
           <>
-            <div style={{ fontFamily: FUENTE.display, fontSize: 46, lineHeight: 1, textTransform: 'uppercase' }}>
-              Listo,<br />ya<br /><span style={{ color: COLOR.dinero }}>quedó.</span>
-            </div>
-            <div style={{ fontFamily: FUENTE.ui, fontSize: 19, lineHeight: 1.3, color: COLOR.textoSuave }}>
+            <h1 className="acceso-titulo">Listo,<br />ya<br /><span className="neon-lima">quedó.</span></h1>
+            <p className="acceso-bajada">
               Tu contraseña nueva ya está guardada. La próxima vez entras directo con ella.
-            </div>
+            </p>
+            <Pulsable al={() => nav('/clip', { replace: true })} className="miami-boton miami-boton-magenta">Entrar</Pulsable>
           </>
         ) : haySesion === false ? (
           <>
-            <div style={{ fontFamily: FUENTE.display, fontSize: 46, lineHeight: 1, textTransform: 'uppercase' }}>
-              Este enlace<br /><span style={{ color: COLOR.dinero }}>ya expiró.</span>
-            </div>
-            <div style={{ fontFamily: FUENTE.ui, fontSize: 19, lineHeight: 1.3, color: COLOR.textoSuave }}>
+            <h1 className="acceso-titulo">Este enlace<br /><span className="neon-lima">ya expiró.</span></h1>
+            <p className="acceso-bajada">
               Los enlaces de recuperación duran poco, a propósito. Pide uno nuevo y ábrelo en cuanto llegue.
-            </div>
+            </p>
+            <Pulsable al={() => { sessionStorage.removeItem('rawstudio.recuperando'); nav('/acceso', { replace: true }) }}
+              className="miami-boton miami-boton-magenta">Pedir otro enlace</Pulsable>
           </>
         ) : (
           <>
-            <div style={{ fontFamily: FUENTE.display, fontSize: 46, lineHeight: 1, textTransform: 'uppercase' }}>
-              Pon tu<br />contraseña<br /><span style={{ color: COLOR.dinero }}>nueva.</span>
-            </div>
+            <h1 className="acceso-titulo">Pon tu<br />contraseña<br /><span className="neon-lima">nueva.</span></h1>
 
             <div style={{ position: 'relative' }}>
               <input
-                type={ver ? 'text' : 'password'} autoComplete="new-password"
+                type={ver ? 'text' : 'password'} autoComplete="new-password" className="campo-neon"
+                aria-label="Contraseña nueva" aria-invalid={estado === 'error'}
                 placeholder="contraseña nueva" value={clave}
                 onChange={e => { setClave(e.target.value); if (estado === 'error') setEstado('listo') }}
-                style={campo(estado === 'error')} />
+                style={{ paddingRight: 74 }} />
               <Pulsable al={() => setVer(v => !v)} activado={ver} style={{
-                position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)',
-                font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
-                color: COLOR.textoTenue, cursor: 'pointer', padding: 6,
+                position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)',
+                minWidth: 56, minHeight: 44, display: 'grid', placeItems: 'center',
+                font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
+                color: COLOR.textoSuave, cursor: 'pointer',
               }}>{ver ? 'Ocultar' : 'Ver'}</Pulsable>
             </div>
 
             <input
-              type={ver ? 'text' : 'password'} autoComplete="new-password"
+              type={ver ? 'text' : 'password'} autoComplete="new-password" className="campo-neon"
+              aria-label="Repite la contraseña" aria-invalid={repetir.length > 0 && !iguales}
               placeholder="repítela" value={repetir}
               onChange={e => setRepetir(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter') guardar() }}
-              style={campo(repetir.length > 0 && !iguales)} />
+              onKeyDown={e => { if (e.key === 'Enter') guardar() }} />
 
-            <div style={{ font: `400 12px/1.6 ${FUENTE.mono}`, color: repetir.length > 0 && !iguales ? COLOR.acento : COLOR.textoApagado }}>
+            <div style={{ font: `400 12px/1.6 ${FUENTE.mono}`, color: repetir.length > 0 && !iguales ? '#FF7BE6' : COLOR.textoSuave }}>
               {repetir.length > 0 && !iguales
                 ? 'Las dos contraseñas no son iguales.'
                 : 'Mínimo 6 caracteres.'}
             </div>
 
             {estado === 'error' && (
-              <div style={{ font: `400 13px/1.45 ${FUENTE.ui}`, color: COLOR.acento }}>{detalle}</div>
+              <div role="alert" style={{ font: `400 14px/1.45 ${FUENTE.ui}`, color: '#FF7BE6' }}>{detalle}</div>
             )}
+
+            <Pulsable al={guardar} activo={puede}
+              className={`miami-boton miami-boton-magenta${puede ? '' : ' miami-boton-apagado'}`}>
+              {estado === 'guardando' ? 'Guardando…' : 'Guardar contraseña'}
+            </Pulsable>
           </>
         )}
       </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {estado === 'hecho' ? (
-          <Pulsable al={() => nav('/clip', { replace: true })} style={boton(true)}>Entrar</Pulsable>
-        ) : haySesion === false ? (
-          <Pulsable al={() => { sessionStorage.removeItem('rawstudio.recuperando'); nav('/acceso', { replace: true }) }}
-            style={boton(true)}>Pedir otro enlace</Pulsable>
-        ) : (
-          <Pulsable al={guardar} activo={puede} style={boton(puede)}>
-            {estado === 'guardando' ? 'Guardando…' : 'Guardar contraseña'}
-          </Pulsable>
-        )}
-      </div>
-    </div>
+    </PaginaMiami>
   )
 }
-
-const campo = (mal: boolean): React.CSSProperties => ({
-  width: '100%', boxSizing: 'border-box', background: COLOR.superficie,
-  border: `1px solid ${mal ? COLOR.acento : LINEA.media}`,
-  color: COLOR.texto, font: `400 16px/1 ${FUENTE.ui}`, padding: '17px 15px',
-  paddingRight: 62, outline: 'none',
-})
-
-const boton = (activo: boolean): React.CSSProperties => ({
-  background: activo ? COLOR.acento : COLOR.superficieAlta,
-  color: activo ? COLOR.fondo : COLOR.textoApagado,
-  textAlign: 'center', padding: 19,
-  font: `700 13px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
-  boxShadow: activo ? '0 0 34px rgba(255,43,209,.42)' : 'none',
-  cursor: activo ? 'pointer' : 'default',
-})

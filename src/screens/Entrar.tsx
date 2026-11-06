@@ -5,9 +5,9 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
-import Wordmark from '../components/Wordmark'
+import PaginaMiami from '../components/PaginaMiami'
 import Portada from '../components/Portada'
-import { COLOR, TINTE, FUENTE } from '../lib/diseño'
+import { COLOR, FUENTE } from '../lib/diseño'
 import { Enlace } from '../components/Pulsable'
 
 
@@ -22,25 +22,18 @@ export default function Entrar() {
   }, [cargando, sesion, nav])
 
   return (
-    <div style={{
-      minHeight: '100%', boxSizing: 'border-box', padding: '64px 26px 44px',
-      background: COLOR.fondo, color: COLOR.texto, fontFamily: FUENTE.ui,
-      display: 'flex', flexDirection: 'column',
-    }}>
-      <Wordmark ancho={150} glow={16} />
-
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 22, padding: '30px 0' }}>
-        <div style={{ width: 64, height: 3, background: COLOR.acento }} />
+    <PaginaMiami>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 18, padding: '18px 0 4px' }}>
         {/* Interlineado 1 y no .9 como el deck: en español los titulares llevan
             mayusculas acentuadas (CÓMO) y con el interlineado apretado el acento
             queda tapado por la linea de arriba. El deck no lo sufre por estar
             en ingles. */}
-        <div style={{ fontFamily: FUENTE.display, fontSize: 52, lineHeight: 1, textTransform: 'uppercase' }}>
-          Elige<br />cómo<br /><span style={{ color: COLOR.dinero }}>entras.</span>
-        </div>
-        <div style={{ fontFamily: FUENTE.ui, fontSize: 22, lineHeight: 1.3, color: COLOR.textoSuave }}>
+        <h1 className="acceso-titulo">
+          Elige<br />cómo<br /><span className="neon-lima">entras.</span>
+        </h1>
+        <p className="acceso-bajada">
           Con tu correo y una contraseña. El acceso por liga también sigue ahí.
-        </div>
+        </p>
 
         {/* Gancho para creadoras. Va aqui y no despues del registro porque este
             es el momento en que alguien decide de que lado de la plataforma
@@ -50,49 +43,35 @@ export default function Entrar() {
           a="/creadoras"
           style={{
             display: 'block', boxSizing: 'border-box', width: '100%',
-            marginTop: 6, padding: '18px 16px', cursor: 'pointer',
-            border: '1.5px dashed rgba(200,255,61,.45)',
-            background: TINTE.dinero,
+            marginTop: 6, padding: '18px 16px', cursor: 'pointer', borderRadius: 14,
+            border: '1.5px solid #C8FF3D', background: 'rgba(8,8,10,.72)',
+            boxShadow: '0 0 10px rgba(200,255,61,.35), 0 0 28px rgba(200,255,61,.14), inset 0 0 18px rgba(200,255,61,.06)',
           }}>
-          <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', color: COLOR.dinero, marginBottom: 9 }}>
+          <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase', color: COLOR.dinero, marginBottom: 9 }}>
             ¿Vas a publicar tú?
           </div>
           <div style={{ font: `400 16px/1.45 ${FUENTE.ui}`, color: COLOR.texto, marginBottom: 10 }}>
             El <b style={{ fontWeight: 700 }}>80% de cada dólar</b> es tuyo, pagos por SPEI y sin exclusividad.
           </div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
-            <span style={{ font: `400 10px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
+            <span style={{ font: `400 11px/1.45 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
               Nadie ve tu nombre real
             </span>
-            <span style={{ font: `700 13px/1 ${FUENTE.ui}`, color: COLOR.dinero }}>&#8594;</span>
+            <span aria-hidden style={{ font: `700 16px/1 ${FUENTE.ui}`, color: COLOR.dinero }}>&#8594;</span>
           </div>
         </Enlace>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <Enlace
-          a="/registro"
-          style={{
-            display: 'block', boxSizing: 'border-box', width: '100%',
-            background: COLOR.acento, color: COLOR.fondo, textAlign: 'center', padding: 19,
-            font: `700 13px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
-            boxShadow: '0 0 34px rgba(255,43,209,.42)', cursor: 'pointer',
-          }}>
-          Crear mi cuenta
-        </Enlace>
-        <Enlace
-          a="/acceso"
-          style={{
-            display: 'block', boxSizing: 'border-box', width: '100%',
-            border: '1px solid rgba(255,255,255,.16)', color: COLOR.textoSuave,
-            textAlign: 'center', padding: 18,
-            font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', cursor: 'pointer',
-          }}>
-          Ya tengo cuenta
-        </Enlace>
+      <div style={{ display: 'grid', gap: 12, marginTop: 6 }}>
+        <Enlace a="/registro" className="miami-boton miami-boton-magenta">Crear mi cuenta</Enlace>
+        <Enlace a="/acceso" className="miami-boton miami-boton-suave">Ya tengo cuenta</Enlace>
       </div>
 
-      <Portada />
-    </div>
+      {/* La portada informativa va debajo, a todo el ancho y sobre fondo
+          solido: es texto largo y no debe pelear con la escena. */}
+      <div style={{ margin: '34px -22px -40px', padding: '0 22px 44px', background: COLOR.fondo }}>
+        <Portada />
+      </div>
+    </PaginaMiami>
   )
 }

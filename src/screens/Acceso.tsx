@@ -10,10 +10,10 @@
 import { useEffect, useId, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
-import Wordmark from '../components/Wordmark'
+import PaginaMiami from '../components/PaginaMiami'
 import { supabase } from '../lib/supabase'
 import { VERSION_LEGAL } from '../content/legal'
-import { COLOR, LINEA, FUENTE } from '../lib/diseño'
+import { COLOR, FUENTE } from '../lib/diseño'
 import { Pulsable, Enlace } from '../components/Pulsable'
 
 
@@ -83,13 +83,13 @@ function Casilla({ marcada, onCambio, obligatoria, children }: {
         checked={marcada} onChange={e => onCambio(e.target.checked)}
         required={obligatoria}
         style={{
-          width: 20, height: 20, flex: '0 0 auto', marginTop: 1,
-          border: `1.5px solid ${marcada ? COLOR.dinero : 'rgba(255,255,255,.28)'}`,
+          width: 22, height: 22, flex: '0 0 auto', marginTop: 1, borderRadius: 6,
+          border: `1.5px solid ${marcada ? COLOR.dinero : 'rgba(255,255,255,.4)'}`,
           background: marcada ? COLOR.dinero : 'transparent',
           color: COLOR.fondo, cursor: 'pointer',
         }} />
       <label htmlFor={id} style={{
-        font: `400 12px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave, cursor: 'pointer',
+        font: `400 13px/1.5 ${FUENTE.ui}`, color: '#CFCAD3', cursor: 'pointer',
       }}>
         {children}
         {obligatoria && <span style={{ color: COLOR.acento }}> *</span>}
@@ -228,82 +228,72 @@ export default function Acceso({ modo }: { modo: Modo }) {
   }
   const aviso = avisos[estado]
 
-  const campo: React.CSSProperties = {
-    width: '100%', boxSizing: 'border-box', background: COLOR.superficie,
-    border: `1px solid ${estado === 'error' ? COLOR.acento : LINEA.media}`,
-    color: COLOR.texto, font: `400 16px/1 ${FUENTE.ui}`, padding: '17px 15px', outline: 'none',
-  }
+  const malo = estado === 'error'
 
+  /* Una sola tarjeta con todo: el titulo, los campos, las casillas y los
+   * botones. En modo marca (DESIGN-BRIEF.md): la puerta de entrada es lo
+   * primero que se ve, asi que lleva la escena de la portada detras. */
   return (
-    <div style={{
-      minHeight: '100%', boxSizing: 'border-box', padding: '64px 26px 44px',
-      background: COLOR.fondo, color: COLOR.texto, fontFamily: FUENTE.ui,
-      display: 'flex', flexDirection: 'column',
-    }}>
-      <Wordmark ancho={150} glow={16} />
-
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 18, padding: '30px 0' }}>
-        <div style={{ width: 64, height: 3, background: COLOR.acento }} />
-
+    <PaginaMiami>
+      <div className="tarjeta-acceso">
         {aviso ? (
           <>
-            <div style={{ fontFamily: FUENTE.display, fontSize: 46, lineHeight: 1, textTransform: 'uppercase' }}>
+            <h1 className="acceso-titulo">
               {aviso.titulo[0]}<br />{aviso.titulo[1]}<br />
-              <span style={{ color: COLOR.dinero }}>{aviso.titulo[2]}</span>
-            </div>
-            <div style={{ fontFamily: FUENTE.ui, fontSize: 19, lineHeight: 1.3, color: COLOR.textoSuave }}>
-              {aviso.texto}
-            </div>
-            <div style={{ font: `400 12px/1.6 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
+              <span className="neon-lima">{aviso.titulo[2]}</span>
+            </h1>
+            <p className="acceso-bajada">{aviso.texto}</p>
+            <div style={{ font: `400 12px/1.6 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
               Si no llega en un minuto, revisa la carpeta de no deseados.
             </div>
+            <Pulsable al={() => { setEstado('listo'); nav('/entrar') }} className="miami-boton miami-boton-suave">Volver</Pulsable>
           </>
         ) : (
           <>
-            <div style={{ fontFamily: FUENTE.display, fontSize: 46, lineHeight: 1, textTransform: 'uppercase' }}>
+            <h1 className="acceso-titulo">
               {t.titulo[0]}<br />{t.titulo[1]}<br />
-              <span style={{ color: COLOR.dinero }}>{t.titulo[2]}</span>
-            </div>
-            <div style={{ fontFamily: FUENTE.ui, fontSize: 19, lineHeight: 1.3, color: COLOR.textoSuave }}>
-              {t.bajada}
-            </div>
+              <span className="neon-lima">{t.titulo[2]}</span>
+            </h1>
+            <p className="acceso-bajada">{t.bajada}</p>
 
             <input
-              type="email" inputMode="email" autoComplete="email"
+              type="email" inputMode="email" autoComplete="email" className="campo-neon"
+              aria-label="Correo" aria-invalid={malo}
               placeholder="tu@correo.com" value={correo}
               onChange={e => { setCorreo(e.target.value); if (estado === 'error') setEstado('listo') }}
-              style={campo}
             />
 
             <div style={{ position: 'relative' }}>
               <input
-                type={verClave ? 'text' : 'password'}
+                type={verClave ? 'text' : 'password'} className="campo-neon"
+                aria-label="Contraseña" aria-invalid={malo}
                 autoComplete={modo === 'registro' ? 'new-password' : 'current-password'}
                 placeholder="tu contraseña" value={clave}
                 onChange={e => { setClave(e.target.value); if (estado === 'error') setEstado('listo') }}
                 onKeyDown={e => { if (e.key === 'Enter') enviar() }}
-                style={{ ...campo, paddingRight: 62 }}
+                style={{ paddingRight: 74 }}
               />
               <Pulsable
                 al={() => setVerClave(v => !v)}
                 activado={verClave}
                 style={{
-                  position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)',
-                  font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
-                  color: COLOR.textoTenue, cursor: 'pointer', padding: 6,
+                  position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)',
+                  minWidth: 56, minHeight: 44, display: 'grid', placeItems: 'center',
+                  font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
+                  color: COLOR.textoSuave, cursor: 'pointer',
                 }}>
                 {verClave ? 'Ocultar' : 'Ver'}
               </Pulsable>
             </div>
 
             {modo === 'registro' && !claveOk && clave.length > 0 && (
-              <div style={{ font: `400 12px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue }}>
+              <div style={{ font: `400 12px/1.45 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
                 Mínimo 6 caracteres.
               </div>
             )}
 
             {modo === 'registro' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 4 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 4 }}>
                 <Casilla marcada={aceptaLegal} onCambio={setAceptaLegal} obligatoria>
                   He leído y acepto los{' '}
                   <Enlace a="/terminos" al={e => e.stopPropagation()}
@@ -326,64 +316,33 @@ export default function Acceso({ modo }: { modo: Modo }) {
             )}
 
             {estado === 'error' && (
-              <div style={{ font: `400 13px/1.45 ${FUENTE.ui}`, color: COLOR.acento }}>{detalle}</div>
+              <div role="alert" style={{ font: `400 14px/1.45 ${FUENTE.ui}`, color: '#FF7BE6' }}>{detalle}</div>
             )}
-          </>
-        )}
-      </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {aviso ? (
-          <Pulsable al={() => { setEstado('listo'); nav('/entrar') }} style={{
-            boxSizing: 'border-box', width: '100%',
-            border: '1px solid rgba(255,255,255,.16)', color: COLOR.textoSuave, textAlign: 'center',
-            padding: 18, font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', cursor: 'pointer',
-          }}>Volver</Pulsable>
-        ) : (
-          <>
-            <Pulsable al={enviar} activo={listo} style={{
-              boxSizing: 'border-box', width: '100%',
-              background: listo ? COLOR.acento : COLOR.superficieAlta,
-              color: listo ? COLOR.fondo : COLOR.textoApagado,
-              textAlign: 'center', padding: 19,
-              font: `700 13px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
-              boxShadow: listo ? '0 0 34px rgba(255,43,209,.42)' : 'none',
-              cursor: listo ? 'pointer' : 'default',
-            }}>
-              {estado === 'enviando' ? 'Un momento…' : t.boton}
-            </Pulsable>
-
-            {conGoogle && (
-              <Pulsable al={entrarGoogle} style={{
-                boxSizing: 'border-box', width: '100%',
-                background: COLOR.texto, color: COLOR.fondo, textAlign: 'center', padding: 17,
-                font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase', cursor: 'pointer',
-              }}>
-                Continuar con Google
+            <div style={{ display: 'grid', gap: 12, marginTop: 4 }}>
+              <Pulsable al={enviar} activo={listo}
+                className={`miami-boton miami-boton-magenta${listo ? '' : ' miami-boton-apagado'}`}>
+                {estado === 'enviando' ? 'Un momento…' : t.boton}
               </Pulsable>
-            )}
 
-            <Enlace a={t.rutaAlterna} style={{
-              display: 'block', boxSizing: 'border-box', width: '100%',
-              border: '1px solid rgba(255,255,255,.16)', color: COLOR.textoSuave, textAlign: 'center',
-              padding: 18, font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase', cursor: 'pointer',
-            }}>{t.alterno}</Enlace>
+              {conGoogle && (
+                <Pulsable al={entrarGoogle} className="miami-boton miami-boton-google">
+                  Continuar con Google
+                </Pulsable>
+              )}
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginTop: 4, paddingRight: 58 }}>
-              <Pulsable al={ligaAlCorreo} style={{
-                font: `400 12px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue,
-                textDecoration: 'underline', cursor: 'pointer',
-              }}>Entrar con liga</Pulsable>
+              <Enlace a={t.rutaAlterna} className="miami-boton miami-boton-suave">{t.alterno}</Enlace>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 4 }}>
+              <Pulsable al={ligaAlCorreo} className="acceso-enlace">Entrar con liga</Pulsable>
               {modo === 'acceso' && (
-                <Pulsable al={olvide} style={{
-                  font: `400 12px/1.45 ${FUENTE.mono}`, color: COLOR.textoTenue,
-                  textDecoration: 'underline', cursor: 'pointer', textAlign: 'right',
-                }}>Olvidé mi clave</Pulsable>
+                <Pulsable al={olvide} className="acceso-enlace">Olvidé mi clave</Pulsable>
               )}
             </div>
           </>
         )}
       </div>
-    </div>
+    </PaginaMiami>
   )
 }
