@@ -210,9 +210,12 @@ export async function publicarPara(
   //    normal de varios minutos era indistinguible de una atorada.
   const subidos: { bucket: string; ruta: string }[] = []
 
-  const subir = async (bucket: string, f: File, etapa: string) => {
+  // `rutaFija` existe para la portada: sus dos copias tienen que ir a la MISMA
+  // ruta en los dos buckets, porque la base guarda una sola y lo que decide
+  // cuanto se ve es de cual bucket se lee.
+  const subir = async (bucket: string, f: File, etapa: string, rutaFija?: string) => {
     const ext = (f.name.split('.').pop() || 'bin').toLowerCase()
-    const ruta = `${datos.creadora}/${crypto.randomUUID()}.${ext}`
+    const ruta = rutaFija ?? `${datos.creadora}/${crypto.randomUUID()}.${ext}`
     const { data, error } = await supabase.storage.from(bucket).createSignedUploadUrl(ruta)
     if (error) throw new Error(error.message)
 
@@ -254,15 +257,29 @@ export async function publicarPara(
       portada = await miniaturaDeVideo(datos.video)
     }
 
-    // La tira sale del mismo archivo y antes de subir nada: si el formato no
-    // se puede decodificar, se sabe ya y no despues de mandar 200 MB.
+    // La tira de seis cuadros solo en los GRATIS, igual que en la subida de
+    // la propia creadora: en uno de pago era regalar seis fotogramas del
+    // contenido a cualquiera que pasara el mouse. Sale del mismo archivo y
+    // antes de subir nada: si el formato no se puede decodificar, se sabe ya
+    // y no despues de mandar 200 MB.
     alAvanzar?.('portada', 0)
-    const tira = await tiraDeVideo(datos.video)
+    const tira = datos.visibilidad === 'gratis' ? await tiraDeVideo(datos.video) : null
+
+    // La portada publica se ENCOGE aqui, antes de salir de esta maquina, y la
+    // nitida va al bucket privado. Esta funcion subia la nitida al publico:
+    // cada clip que administracion subia por una creadora —la subida masiva
+    // entera— quedaba con la portada a la vista de cualquiera, mientras que
+    // los que subia ella misma ya salian a 32 px.
+    const { achicar } = await import('./miniatura')
+    const chica = portada ? await achicar(portada) : null
 
     const rutaVideo = await subir('clips', datos.video, 'video')
-    const rutaPortada = portada
-      ? await subir('clip-covers', portada, 'portada')
-      : null
+    let rutaPortada: string | null = null
+    if (portada && chica) {
+      rutaPortada = `${datos.creadora}/${crypto.randomUUID()}.jpg`
+      await subir('clip-covers-full', portada, 'portada', rutaPortada)
+      await subir('clip-covers', chica, 'portada', rutaPortada)
+    }
     const rutaTira = tira ? await subir('clip-covers', tira, 'portada') : null
 
     alAvanzar?.('guardando', 0)
@@ -1552,4 +1569,82 @@ export function agruparExpedientesDeTabla(
              fecha, estado, detalle }
   })
   .sort((a, b) => a.carpeta.localeCompare(b.carpeta))
+}
+
+
+/* ==================== Censurar las portadas que ya estaban ==================== */
+
+export type ResultadoCensura = {
+  revisadas: number
+  encogidas: number
+  yaEstaban: number
+  fallos: string[]
+}
+
+/** Encoge a 32 px la portada publica de cada clip que todavia la tenga grande.
+ *
+ *  Desde el 3 de noviembre las subidas nuevas salen con dos copias: 32 px en el
+ *  bucket publico y la nitida en el privado. Pero 187 clips se publicaron
+ *  antes, con una unica copia de 160 px en el publico: lo bastante nitida para
+ *  verlo todo en una tarjeta. Esto las deja como a las nuevas.
+ *
+ *  Por cada clip:
+ *    1. se baja la publica actual;
+ *    2. si ya mide 32 o menos, se salta: ya esta como debe;
+ *    3. si no, se guarda ESA copia en el bucket privado —es la mejor que existe
+ *       de ese clip, y quien compro tiene que seguir viendola— y SOLO despues
+ *       se sobrescribe la publica con la de 32 px.
+ *
+ *  El orden importa: si se encogiera primero y el guardado privado fallara,
+ *  la de 160 se habria perdido para siempre. Al reves, el peor caso es un
+ *  clip que sigue sin censurar y se reintenta.
+ *
+ *  Corre en el navegador y en fila, uno por uno. Son 187 imagenes de 4 KB;
+ *  en paralelo no se gana nada y se pierde saber cual fallo. */
+export async function censurarPortadasAntiguas(
+  alAvanzar?: (hechas: number, total: number) => void,
+): Promise<ResultadoCensura> {
+  const { achicar, ANCHO_PUBLICO } = await import('./miniatura')
+  const r: ResultadoCensura = { revisadas: 0, encogidas: 0, yaEstaban: 0, fallos: [] }
+
+  const { data, error } = await supabase.from('clips')
+    .select('id,cover_path').not('cover_path', 'is', null).limit(2000)
+  if (error) { r.fallos.push(`no pude listar los clips: ${error.message}`); return r }
+  const clips = (data ?? []) as { id: string; cover_path: string }[]
+
+  for (const c of clips) {
+    r.revisadas++
+    alAvanzar?.(r.revisadas, clips.length)
+    try {
+      const url = supabase.storage.from('clip-covers').getPublicUrl(c.cover_path).data.publicUrl
+      // Sin cache: la URL publica es la misma antes y despues, y la copia del
+      // navegador diria que sigue grande cuando ya se encogio.
+      const res = await fetch(url, { cache: 'no-store' })
+      if (!res.ok) throw new Error(`HTTP ${res.status} al bajar la portada`)
+      const blob = await res.blob()
+      const mapa = await createImageBitmap(blob)
+      const ancho = mapa.width; mapa.close()
+      if (ancho <= ANCHO_PUBLICO) { r.yaEstaban++; continue }
+
+      const original = new File([blob], 'portada.jpg', { type: blob.type || 'image/jpeg' })
+      const chica = await achicar(original)
+      if (!chica) throw new Error('no pude encoger la imagen')
+
+      // Primero la copia buena al privado. `upsert` porque la pasada tiene que
+      // poder repetirse: si se corto a la mitad, la segunda vuelta no debe
+      // tropezar con lo que la primera ya dejo.
+      const n = await supabase.storage.from('clip-covers-full')
+        .upload(c.cover_path, original, { contentType: original.type, upsert: true })
+      if (n.error) throw new Error(`privado: ${n.error.message}`)
+
+      const p = await supabase.storage.from('clip-covers')
+        .upload(c.cover_path, chica, { contentType: 'image/jpeg', upsert: true })
+      if (p.error) throw new Error(`publico: ${p.error.message}`)
+
+      r.encogidas++
+    } catch (e) {
+      r.fallos.push(`${c.id.slice(0, 8)}: ${(e as Error).message}`)
+    }
+  }
+  return r
 }
