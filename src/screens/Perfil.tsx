@@ -348,8 +348,8 @@ export default function Perfil() {
             padding: '15px 16px', borderRadius: RADIO.neon, border: `1px solid ${COLOR.admin}`,
             font: `400 14px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave,
           }}>
-            Ya puedes entrar al estudio y subir, pero <b style={{ color: COLOR.texto }}>
-            nada se publica</b> hasta que verifiquemos tu identidad y tu edad.
+            Puedes entrar al estudio, pero <b style={{ color: COLOR.texto }}>
+            no podrás subir ni publicar</b> hasta que verifiquemos tu identidad y tu edad.
             <Enlace a="/verificar" className="boton-principal" style={{ marginTop: 14 }}>
               Verificar mi identidad
             </Enlace>

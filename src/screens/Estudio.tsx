@@ -17,7 +17,7 @@
 // segundo va despues y en voz mas baja. Y dentro de `ajustar`, la cuenta para
 // cobrar solo aparece MIENTRAS NO EXISTA: lo que ya esta hecho se esconde, lo
 // que falta y bloquea dinero se queda a la vista.
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import { resumen, canales, type Canal, type ResumenEstudio } from '../lib/estudio'
@@ -45,7 +45,15 @@ const LEYENDA: Record<Canal['estado'], string> = {
 
 export default function Estudio() {
   const nav = useNavigate()
-  const { sesion, perfil, trato, cargando } = useSesion()
+  const { sesion, perfil, trato, cargando, refrescarPerfil } = useSesion()
+  // Si la identidad se aprobo con esta sesion abierta, el perfil en memoria
+  // sigue diciendo «sin verificar»: se vuelve a leer UNA vez al entrar.
+  const yaRefresco = useRef(false)
+  useEffect(() => {
+    if (yaRefresco.current || !perfil || perfil.identidad_verificada) return
+    yaRefresco.current = true
+    refrescarPerfil()
+  }, [perfil, refrescarPerfil])
   const [r, setR] = useState<ResumenEstudio | null>(null)
 
   useEffect(() => {

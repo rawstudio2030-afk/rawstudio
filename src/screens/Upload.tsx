@@ -42,6 +42,15 @@ export default function Upload() {
   const refVideo = useRef<HTMLInputElement>(null)
   const refPortada = useRef<HTMLInputElement>(null)
 
+  // Si la identidad se aprobo mientras esta sesion seguia abierta, el perfil en
+  // memoria sigue diciendo «sin verificar». Se vuelve a leer UNA vez al entrar.
+  const yaRefresco = useRef(false)
+  useEffect(() => {
+    if (yaRefresco.current || !perfil || perfil.identidad_verificada) return
+    yaRefresco.current = true
+    refrescarPerfil()
+  }, [perfil, refrescarPerfil])
+
   const [video, setVideo] = useState<File | null>(null)
   const [portada, setPortada] = useState<File | null>(null)
   const [suya, setSuya] = useState<string | null>(null)   // vista de la portada propia
@@ -123,7 +132,10 @@ export default function Upload() {
 
   // 'sin-portada' cuenta como no-listo: el clip YA se publico, y volver a
   // pulsar publicaria un duplicado con el mismo video.
-  const listo = !!video && titulo.trim().length > 0
+  // Sin identidad verificada el servidor rechaza guardar el clip, asi que ni se
+  // ofrece: subir un video grande para recibir un error al final no sirve.
+  const verificada = !!perfil?.identidad_verificada
+  const listo = verificada && !!video && titulo.trim().length > 0
     && estado !== 'subiendo' && estado !== 'sin-portada'
   const gana = modo === 'pago' ? Math.round(precio * 0.8) : 0
 
@@ -193,7 +205,14 @@ export default function Upload() {
       preview_path: previewPath,
       published: true,
     })
-    if (r.error) { setEstado('error'); setDetalle(r.error); return }
+    if (r.error) {
+      setEstado('error')
+      // El servidor responde con un texto de permisos que no explica nada.
+      setDetalle(/row-level security|pol[ií]tica de seguridad/i.test(r.error)
+        ? `Tu cuenta todavía no puede publicar. Revisa que tu identidad esté verificada y que tu ${perfilParaPublicar(trato)} esté activo.`
+        : r.error)
+      return
+    }
 
     // Sin foto de perfil, el avatar sale de este mismo video (el cuadro mas
     // limpio de los primeros segundos). Nunca pisa una foto que ya exista, y si
@@ -233,9 +252,9 @@ export default function Upload() {
       {!perfil.identidad_verificada && (
         <div style={{ padding: '15px 16px', borderRadius: RADIO.neon, border: `1px solid ${COLOR.admin}` }}>
           <div style={{ font: `400 14px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
-            Puedes subir desde ahora. Tu clip queda guardado y{' '}
-            <b style={{ color: COLOR.texto }}>se publica en cuanto verifiquemos tu
-            identidad</b> — no tienes que volver a subirlo.
+            Para subir y publicar, primero tenemos que{' '}
+            <b style={{ color: COLOR.texto }}>verificar tu identidad y tu edad</b>.
+            Cuando la aprobemos, este formulario se activa.
           </div>
           <Enlace a="/verificar" className="boton-principal" style={{ marginTop: 14 }}>
             Verificar mi identidad
