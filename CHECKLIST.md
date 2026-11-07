@@ -16,9 +16,10 @@ Fuente de verdad para el coordinador y Claude Code.
 | Recortar landing al hero (eager loading §2.1–2.2) | **1 / 10** | **Hecha y verificada** (`4e15d81`) | 2026-11-06 ~08:22 | §2.1 y §2.2 → `pass`. |
 | Reproductor: cromo propio + velocidad (+ PiP explícito) | **2 / 10** | **Hecha y verificada** (`24a0a78`) | 2026-11-06 ~10:20 | Velocidad y UX tipo YouTube → `pass`; PiP → `pass` con nota. Calidad auto y captions fuera. |
 | Marca en ventanas (`VENTANAS_SIN_MARCA=false`) + comentarios y reseñas (§4) | **3 / 10** | **Hecha** (código + lectura anónima en ficha real) | 2026-11-06 ~11:10 | §4 → `partial` hasta probar escribir/calificar con clip desbloqueado. |
-| Recortar Portada duplicada bajo el hero y en `/entrar` | **4 / 10** | **Asignada** — esperando código | 2026-11-06 ~14:35 | Ver `bridge-response.md` id `20261106-04`. Tope 1 h. |
-| Consultas pagadas por Telegram (página pública) | **5 / 10** | **Asignada** — esperando código | 2026-11-06 ~15:00 | Ver `bridge-response.md` id `20261106-05`. Después de la 4 si esta sigue pendiente. Tope 1 h. |
-| Avatares automáticos (frame o inicial/silueta) | **6 / 10** | **Asignada** — esperando código | 2026-11-06 ~15:15 | Ver `bridge-response.md` id `20261106-06`. Después de la 4 y la 5. Tope 1 h. |
+| Recortar Portada duplicada bajo el hero y en `/entrar` | **4 / 10** | **Hecha** (`b7a7ec4`, reporte en `653c989`) — pendiente de verificación del coordinador | 2026-11-06 ~14:35 | Ver `bridge-response.md` id `20261106-04`. Tope 1 h. |
+| Consultas pagadas por Telegram (página pública) | **5 / 10** | **Hecha** (`3b88b30`, reporte en `653c989`) — pendiente de verificación del coordinador | 2026-11-06 ~15:00 | Ver `bridge-response.md` id `20261106-05`. Después de la 4 si esta sigue pendiente. Tope 1 h. |
+| Avatares automáticos (frame o inicial/silueta) | **6 / 10** | **Hecha** (`bc5edf6`, reporte en `653c989`) — pendiente de verificación del coordinador | 2026-11-06 ~15:15 | Ver `bridge-response.md` id `20261106-06`. Después de la 4 y la 5. Tope 1 h. |
+| Trato de género desde el alta | **7 / 10** | **Asignada** — esperando código | 2026-11-06 ~17:56 | Ver `bridge-response.md` id `20261106-07`. Tope 1 h. |
 
 ---
 
@@ -29,10 +30,10 @@ Fuente de verdad para el coordinador y Claude Code.
 | pass | 13 |
 | partial | 9 |
 | fail | 2 |
-| not_started | 4 |
-| **Total ítems** | **28** |
+| not_started | 5 |
+| **Total ítems** | **29** |
 
-_(Ronda 1 y 2 verificadas. Ronda 3: §4 `not_started`→`partial`. Fails que quedan: §6.1 legales y §7.5 CLAUDE.md. Not started que quedan: calidad auto, captions, Telegram, avatares.)_
+_(Ronda 1 y 2 verificadas. Ronda 3: §4 `not_started`→`partial`. Fails que quedan: §6.1 legales y §7.5 CLAUDE.md. Not started que quedan: calidad auto, captions, Telegram, avatares, trato de género (§10, ronda 7). §5 y §9 siguen `not_started` hasta que el coordinador verifique las rondas 5 y 6.)_
 
 ---
 
@@ -142,6 +143,9 @@ React 19 · Vite 8 · HashRouter · Supabase · GitHub Pages · comisión 20% / 
 ## 9. Avatares de creadoras
 - **Estado:** `not_started` — **en ronda 6** (`20261106-06`). Hoy 4 creadoras tienen `avatar_path`; 51 sin foto tienen video publicado (candidatas a un frame); 1 (`@lumen`) no tiene video y vería un avatar neutro (inicial o silueta). El fallback actual es un círculo rayado o de color sólido, no un balón. Esta ronda cubre el componente unificado, la heurística sobre `cuadrosDeVideo`, la asignación solo si `avatar_path` es null (al publicar y/o con acción admin) y el fallback de inicial o silueta. No se pisan fotos existentes ni se usa la portada de 32 px.
 
+## 10. Trato de género
+- **Estado:** `not_started` — **en ronda 7** (`20261106-07`). Registrar mujer / hombre / neutro / no_decir desde el alta (obligatorio, sin preselección); helper único de trato (`src/lib/trato.ts`); cuentas existentes en neutro hasta que elijan (aviso en Perfil, sin bloquear); no publicar el valor en la ficha pública; no renombrar `/creadoras`.
+
 ## Decisiones
 
 ### Arranque
@@ -208,3 +212,10 @@ React 19 · Vite 8 · HashRouter · Supabase · GitHub Pages · comisión 20% / 
 ### Qué sigue decidiendo Sergio (no bloquea el texto ni la página informativa)
 - El usuario del bot de Telegram (el dueño lo va a crear).
 - Cómo se cobra el mensaje y qué pasa si la creadora no responde en 2 días.
+
+### Ronda 7 (2026-11-06 ~17:56) — trato de género desde el alta
+1. **Por qué:** Sergio vio que el sitio dice «creadora» en general aunque la persona puede ser creador, y pidió registrar el trato desde el principio.
+2. **Qué:** columna `trato` en `profiles` (`mujer | hombre | neutro | no_decir`, nullable para existentes); elección obligatoria en el registro, sin preselección; editable en Perfil; helper único de trato (mujer → creadora/usuaria; hombre → creador/usuario; neutro y no_decir → sin asumir género, sin «creadore» ni «elle»); cuentas sin valor tratadas como neutro con aviso en Perfil; sustituir solo el trato personal hardcodeado.
+3. **Qué no:** mostrar el valor en la ficha pública (admin sí lo ve), renombrar `/creadoras`, tocar `/privacidad`/`/terminos` o inventar texto legal, copy 20%/SPEI/18+, botón de borrado duro o cambio de Anonimizar, Telegram, reproductor, avatares, landing.
+4. Este commit de docs no implementa el trato; Claude Code debe seguir `bridge-response.md` `[id: 20261106-07]`. Rondas 4, 5 y 6 no se reabren.
+5. Ítems ya `pass` permanecen inmutables.

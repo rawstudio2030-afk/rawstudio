@@ -30,6 +30,59 @@
 
 ## Respuestas activas
 
+### Respuesta a [id: 20261106-07] — Ronda 7/10 · Trato de género desde el alta
+- **fecha:** 2026-11-06 17:56 (America/Mexico_City)
+- **estado:** lista-para-claude
+- **responde a:** Sergio vio que el sitio habla de «creadora» en general aunque la persona puede ser creador, y pidió registrar desde el principio el trato: hombre, mujer, neutro o prefiere no decirlo.
+- **ronda:** 7 de 10 · **tope:** 1 hora · **tarea:** §10 de `CHECKLIST.md` (trato de género)
+- **checklist afectados (NO marques pass tú):** §10 `not_started` → el coordinador lo verifica. No rompas ítems `pass` ni el trabajo de las rondas 4, 5 y 6.
+
+#### Orden respecto a rondas anteriores
+Si `[id: 20261106-04]`, `[id: 20261106-05]` o `[id: 20261106-06]` todavía aparecen como pendientes (no deberían: ya fueron hechas), no las reabras. Esta ronda va en su propio commit. No mezcles este recorte con otros en un solo commit.
+
+#### Reglas de producto (Sergio — no las «mejores»)
+1. El trato se registra desde el principio (al crear la cuenta), no se adivina después.
+2. Las opciones son exactamente cuatro: mujer, hombre, neutro, prefiere no decirlo.
+
+#### Decisión de UI/técnica (coordinador — no preguntar a Sergio)
+1. Columna nueva en `public.profiles`, p. ej. `trato text`, con check `mujer | hombre | neutro | no_decir`. Nullable para cuentas que ya existen.
+2. En el registro (`Acceso` modo registro) las cuatro opciones son obligatorias; ninguna viene preseleccionada. Sin elegir una, no se crea la cuenta.
+3. Se puede cambiar después en Perfil / Ajustes.
+4. El valor NO se muestra en el perfil público (nadie más ve «hombre» o «mujer» como dato de la ficha). Solo sirve para generar el trato en la copia. En el panel admin sí puede verse en la ficha de la cuenta.
+5. Helper único (p. ej. `src/lib/trato.ts`) que, dado el `trato` de esa persona, devuelve las palabras para dirigirse a ella:
+   - mujer → creadora, usuaria
+   - hombre → creador, usuario
+   - neutro y no_decir → el mismo trato, sin asumir género: «tú», «tu perfil», «quien publica», «esta cuenta». No uses «creadore» ni «elle».
+6. Cuentas existentes con `trato` null: trátalas como neutro hasta que elijan. En Perfil, un aviso corto una vez: «¿Cómo prefieres que te tratemos?» con las cuatro opciones. No bloquees el resto de la app.
+7. Sustituye el trato personal hardcodeado («Eres creadora», insignia «Creadora» cuando se refiere a ESA persona, el admin que dice «esta usuaria» de alguien concreto) usando el helper. No hagas un buscar-y-reemplazar ciego de la palabra «creadora» en todo el repo.
+8. NO renombres la ruta ni la página pública `/creadoras`: es el nombre de la oferta para quien quiere publicar. Sergio no pidió cambiar esa sección.
+9. NO reescribas `/privacidad` ni `/terminos`. No inventes texto legal sobre recoger este dato.
+10. No toques el copy fijo de comisión 20%, SPEI ni 18+.
+11. En esta ronda NO agregues un botón nuevo de borrado duro ni cambies el de Anonimizar (eso es otra conversación).
+12. Migración + permisos: cada quien actualiza su propio `trato`; admin puede leerlo.
+
+#### Qué no tocar
+Textos legales, bot/cobro de Telegram, reproductor, esquema RPC de comentarios (sí puedes cambiar el texto de una insignia si usa el helper), avatares, landing/hero, rondas 4–6 de producto.
+
+#### Criterios de aceptación
+1. El alta nueva no termina sin elegir una de las cuatro opciones.
+2. En Perfil se puede cambiar.
+3. Quien eligió hombre ve «creador» (no «creadora») en el trato que se le dirige.
+4. Neutro y «prefiere no decirlo» no reciben «creadora» por defecto.
+5. Cuentas viejas sin valor ven trato neutro y el aviso para elegir, sin quedar bloqueadas.
+6. `/creadoras` sigue siendo esa ruta y esa página de oferta.
+7. El `trato` no se publica como dato visible en la ficha pública.
+
+#### Cómo demostrar (obligatorio en bridge-query.md)
+SHA, diff resumido, verificación: captura o recorrido del registro con las cuatro opciones; del helper; de una cuenta hombre vs mujer vs neutro en un texto de trato personal; de que `/creadoras` no se renombró.
+
+#### Siguiente paso para Claude Code
+1. `git pull` de `origin/main`.
+2. Implementa esta ronda, un commit de producto (`feat: trato de genero desde el alta`) y `git push origin main`.
+3. Marca `bridge-query.md` `[id: 20261106-07]` como `respondida` con SHA, diff y verificación. **No** marques `CHECKLIST.md` como pass.
+
+---
+
 ### Respuesta a [id: 20261106-06] — Ronda 6/10 · Avatares automáticos para creadoras sin foto
 - **fecha:** 2026-11-06 15:15 (America/Mexico_City)
 - **estado:** lista-para-claude
@@ -236,341 +289,4 @@ Cobro del mensaje (pasarela, SPEI, retención), qué pasa si la creadora no resp
 - `src/content/consultas.ts` (nuevo): constante de precio `20 pesos`, bot vacío, textos de las reglas, del checklist de privacidad mutua y de la capa de validación (DeepSeek solo valida, no escribe).
 - `src/screens/Consultas.tsx` (nuevo) o export en `Ayuda.tsx` si encaja mejor; regístralo en `App.tsx`.
 - `src/lib/rutas.ts` (`SIN_PUERTA_DE_EDAD`).
-- `src/content/portada.ts` (`FORMAS_NEON`) y el componente que pinte esas tarjetas si hay que volver una de ellas `Enlace`.
-- `src/screens/Creators.tsx` (bloque corto + enlace).
-
-#### Criterios de aceptación (verificables)
-1. `/#/consultas` se abre sin sesión y sin age gate, muestra las seis reglas (precio de 20 pesos, 20 palabras, pertinencia, brújula, 2 días, guía de tres puntos) y el checklist de privacidad mutua (el cliente no ve el teléfono ni la cuenta personal de la creadora, solo el nombre del bot; la creadora no ve el teléfono del cliente; modo de privacidad al crear el bot; usuario dedicado, no una cuenta personal). También muestra la capa de validación: DeepSeek (opción económica) solo valida apoyo; no genera respuestas; si el mensaje del cliente no cumple (menos de 20 palabras o no pertinente) no se envía y se explica por qué; si cumple, pasa a la creadora; si la respuesta de la creadora no cumple los lineamientos, se le avisa sin reescribirla. No muestra un enlace a un bot inventado. El usuario del bot sigue pendiente: el dueño lo va a crear.
-2. En `/#/`, primer paint sin cambios respecto a lo ya verificado (no aparece la tarjeta nueva hasta abrir «Precios»).
-3. Al abrir «Precios», hay una tarjeta «Consultas por Telegram» que lleva a `/consultas`.
-4. En `/#/creadoras` se lee el recuadro corto y el enlace a `/consultas`. El resto de esa página no cambia de sentido.
-5. `/#/chat` sigue siendo encargos, no Telegram.
-6. `npm run typecheck` (o `tsc -b`), lint y `npm run build` sin errores.
-
-#### Cómo demostrar (obligatorio en el reporte de `bridge-query.md`)
-- SHA completo y mensaje del commit.
-- Diff resumido por archivo.
-- Recorrido: `/consultas`, «Precios» → la tarjeta, `/creadoras` → el recuadro; primer paint de `/` intacto; `/chat` intacto.
-- Confirmar que no hay `t.me/` ni username inventado.
-- Salida de typecheck, lint y build.
-- Lo que no pudiste verificar, dicho sin rodeos.
-
-#### Límites anti-bucle
-Máx 10 rondas por tarea; solo iterar si mejora el checklist; parar tras 2 rondas seguidas sin mejora; tope 1 hora.
-
-#### Siguiente paso para Claude Code
-1. `git pull`.
-2. Si `20261106-04` no está empujada, hazla primero (otro commit).
-3. Implementa esta ronda, un commit de producto (`feat: pagina de consultas pagadas por Telegram`) y `git push origin main`.
-4. Marca `bridge-query.md` `[id: 20261106-05]` como `respondida` con SHA, diff y verificación. **No** marques `CHECKLIST.md` como pass.
-
----
-
-### Respuesta a [id: 20261106-04] — Ronda 4/10 · Recortar la Portada duplicada bajo el hero
-- **fecha:** 2026-11-06 14:35 (America/Mexico_City)
-- **estado:** lista-para-claude
-- **responde a:** Asignación del coordinador. Sergio pidió el recorte («vamos con el recorte de la portada duplicada debajo del hero»).
-- **ronda:** 4 de 10 · **tope:** 1 hora · **tarea:** quitar la segunda página que se pega bajo el hero y en `/entrar`
-- **checklist afectados (NO marques pass tú):** §2.1 y §2.2 ya son `pass` **inmutables** — no los rompas (el primer paint sigue siendo solo el hero; contacto, privacidad y FAQ siguen saliendo solo con un click). §6.4 idioma puede mejorar al desaparecer «Join us» y «All rights reserved» del recorrido visible; el coordinador lo verifica. No toques §4, §3 ni §6.1.
-
-#### Estado de la ronda 3 (hecha)
-Producto verificado por el coordinador: marca en ventanas [`1a1536f`](https://github.com/rawstudio2030-afk/rawstudio/commit/1a1536f76b9f3724788a72247f9b2b1e3ba3b152) y comentarios/reseñas [`fb594f1`](https://github.com/rawstudio2030-afk/rawstudio/commit/fb594f1817891010d730b088f2536c1e87bcfc1a), migración aplicada (`65eefbf`). En una ficha real anónima (2026-11-06 ~13:00 hora de México) se vieron «Comentarios», «Entra para comentar» y «Todavía no hay comentarios.» Escritura y calificación con cuenta que ya desbloqueó el clip aún no se probaron: §4 queda `partial`. No reabras esa tarea.
-
-#### Qué hay hoy (revisado por el coordinador en `65eefbf`)
-El hero ya cuenta la historia («Graba. Ponle precio. Cobra.» / «El 80% de cada dólar es tuyo.» / «Crear mi cuenta» / «Ya tengo cuenta»). Al bajar se pega casi otra página completa, y eso se siente redundante.
-
-- `src/screens/Portal.tsx`: «Sobre nosotros» monta el `Portada` completo (lazy) dentro de `#sobre-nosotros`. Cualquier sección abierta (`alguna`) también monta `Cintillo` (otra franja de «80% para ti»). «Cómo funciona» (`ComoFunciona`) y «Precios» (`FormasDeGanar`) sí aportan y **se quedan**.
-- `src/components/Portada.tsx` trae, en este orden: «¿Qué es RAWstudio?» + `QUE_ES` + titular «Tu contenido. Tu precio. Tu decisión.»; banda del 80%; `Botones` («Crear mi cuenta» / «Ya tengo una cuenta»); Seguridad + `VALORES` (títulos en inglés); bloque «Join us» + «Un sitio nuevo, desde acá.» y dos párrafos sobre creadoras latinas; enlace a `/preguntas`; pie con otro par de `Botones`, redes y «© 2026 RAWstudio · All rights reserved».
-- `src/screens/Entrar.tsx`: debajo de la puerta (título, bajada, gancho «¿Vas a publicar tú?», «Crear mi cuenta», «Ya tengo cuenta») vuelve a montar el mismo `<Portada />` lazy. Es la misma segunda página, otra vez.
-- `src/content/portada.ts`: `QUE_ES` ya tiene las dos frases que hacen falta («qué es» y «nació en México…»). No inventes copy de marketing nuevo.
-
-#### Decisión de UI (coordinador — no preguntar a Sergio)
-
-**1. Landing (`Portal.tsx`) — «Sobre nosotros» pasa a un bloque corto**
-- Deja de montar el `Portada` completo.
-- Al tocar «Sobre nosotros» monta un bloque corto con `id="sobre-nosotros"` (el ancla del scroll se queda) que incluya solo:
-  1. El rótulo «¿Qué es RAWstudio?» y los dos párrafos de `QUE_ES` (reúsalos; no reescribas).
-  2. Los dos párrafos que hoy viven bajo «Join us» en `Portada.tsx` (creadoras latinas, amateurs e independientes; «somos pocas todavía…»). Sin el rótulo inglés «Join us». Puedes conservar el titular en español «Un sitio nuevo, desde acá.»
-  3. El enlace existente a `/preguntas` («Ver las preguntas frecuentes →»).
-  4. Un pie corto con los cuatro enlaces que ya están en español: Contacto, Preguntas frecuentes, Privacidad, Términos. Crédito `© 2026 RAWstudio` (sin «All rights reserved»).
-- **No incluyas:** la banda del 80%, `Botones` («Crear mi cuenta» / «Ya tengo una cuenta»), la grilla de Seguridad, `VALORES`, el segundo par de botones del pie, redes.
-- No hace falta el titular «Tu contenido. Tu precio. Tu decisión.»: el hero ya dice eso.
-- El bloque sigue siendo `React.lazy` + `Suspense` y solo se pide al click, igual que hoy. Puedes extraer un componente nuevo chico (p. ej. `src/components/SobreNosotros.tsx`) o recortar lo que monta Portal; no conviertas `Portada.tsx` en este bloque *y* lo sigas importando desde Entrar.
-- Tipografía, tokens de `diseño.ts`, `Enlace`/`Pulsable`, modo marca. Todo en español. No inventes una ruta `/sobre`.
-
-**2. `Entrar.tsx` — solo la puerta**
-- Quita el `lazy` de `Portada` y el `<div>` que lo monta al final.
-- Déjalo como está: título «Elige cómo entras.», bajada, gancho de publicar hacia `/creadoras`, «Crear mi cuenta», «Ya tengo cuenta».
-- Añade un solo enlace de texto a `/preguntas` (p. ej. «Preguntas frecuentes →»), con `Enlace`. No pegues otra página abajo ni crees una ruta nueva.
-
-**3. Cintillo — no se monta en la landing**
-- En `Portal.tsx`, deja de montar `<Cintillo />` cuando `alguna` es verdadero (el hero ya dice el 80% y «sin exclusividad»). Si `alguna` queda sin uso, límpiala.
-- No borres `src/components/Cintillo.tsx` en esta ronda (aunque nadie lo importe, anótalo en el reporte).
-
-**4. No tocar**
-- El hero (copy, botones, opciones, iris, primer paint).
-- «Cómo funciona» y «Precios» (contenido y comportamiento, salvo que al abrirlos ya no salga el Cintillo).
-- Reproductor, comentarios/reseñas, fichas, age gate, Wordmark, páginas `/privacidad` `/terminos` `/contacto` `/preguntas` (el contenido legal no se reescribe), Telegram, Admin, Supabase, copy 20%/SPEI/18+ del hero y del gancho de Entrar, `CLAUDE.md`.
-- Si `Portada.tsx` queda sin importadores, no lo borres en esta ronda; anótalo.
-
-#### Archivos concretos a tocar (esperados)
-- `src/screens/Portal.tsx` (dejar de montar `Portada` y `Cintillo`; montar el bloque corto lazy).
-- `src/screens/Entrar.tsx` (quitar `Portada`; añadir enlace a `/preguntas`).
-- Un componente nuevo chico para el bloque corto, si lo extraes.
-- `src/components/Portada.tsx` y `src/components/Cintillo.tsx` no se borran.
-- `src/content/portada.ts` solo si reexportas `QUE_ES` sin cambiar el texto.
-
-#### Criterios de aceptación (verificables)
-1. Primer paint de `/#/` igual que en la ronda 1: en `#root` no están «¿Qué es RAWstudio?», «Join us», «Precios y formas de ganar» / «Formas de ganar», «80% para ti» del Cintillo, `#como-funciona`, `#precios`, `#sobre-nosotros`, «Privacidad», «Términos», «Contacto». Sí están el wordmark, el titular, el 80% del hero, «Crear mi cuenta», «Ver cómo funciona», las opciones, «Ya tengo cuenta», «Solo vengo a ver» y 18+. Sin petición de `Portada`, `Cintillo` ni `SeccionesNeon`.
-2. «Ver cómo funciona» / «Cómo funciona» abre `#como-funciona` y **no** monta Cintillo ni el bloque de Sobre nosotros.
-3. «Precios» abre `#precios` y **no** monta Cintillo.
-4. «Sobre nosotros» abre `#sobre-nosotros` con `QUE_ES`, el origen (párrafos de creadoras latinas, sin «Join us»), el enlace a `/preguntas` y el pie de cuatro enlaces. **No** aparecen la banda «De cada dólar que te pagan, ochenta centavos son tuyos», ni «Crear mi cuenta» / «Ya tengo una cuenta» debajo del hero, ni Seguridad, ni los títulos en inglés de `VALORES`, ni «Join us», ni «All rights reserved».
-5. `/#/entrar` ya no pinta `Portada`: no salen «¿Qué es RAWstudio?», la banda del 80%, «Join us» ni `VALORES`. Siguen el título, la bajada, el gancho de publicar y los dos botones. Hay un enlace a `/preguntas`.
-6. `npm run typecheck` (o `tsc -b`), lint y `npm run build` sin errores. El paquete principal no debe crecer; si baja un poco al no arrastrar `Portada` desde Entrar, mejor.
-
-#### Cómo demostrar (obligatorio en el reporte de `bridge-query.md`)
-- SHA completo y mensaje del commit.
-- Diff resumido por archivo.
-- Primer paint y cada click (escritorio y 390×844), como en la ronda 1: qué hay y qué no hay en el DOM.
-- `/#/entrar` antes/después: que ya no se pide ni se pinta `Portada`.
-- Salida de typecheck, lint y build (tamaño del paquete).
-- Lo que no pudiste verificar, dicho sin rodeos.
-
-#### Límites anti-bucle
-Máx 10 rondas por tarea; solo iterar si mejora el checklist; parar tras 2 rondas seguidas sin mejora; tope 1 hora. Si algo no cabe, súbelo hecho a medias pero honesto y anótalo.
-
-#### Siguiente paso para Claude Code
-1. `git pull` (el último cambio remoto solo toca los archivos del puente).
-2. Implementa, un commit de producto (`fix: landing — recortar portada duplicada bajo el hero`) y `git push origin main`.
-3. Marca `bridge-query.md` `[id: 20261106-04]` como `respondida` con SHA, diff resumido y verificación. **No** marques `CHECKLIST.md` como pass: eso lo hace el coordinador.
-
----
-
-### Respuesta a [id: 20261106-03] — Ronda 3/10 · Marca en ventanas + comentarios y reseñas
-- **fecha:** 2026-11-06 11:10 (America/Mexico_City)
-- **estado:** hecha — producto `1a1536f` + `fb594f1`, verificada por el coordinador 2026-11-06 ~13:00 (lectura anónima en ficha real)
-- **responde a:** Asignación del coordinador. Sergio aprobó cerrar la fuga de marca y seguir con comentarios («vamos con eso»).
-- **ronda:** 3 de 10 · **tope:** 1 hora · **tarea:** §3 (ajuste de seguridad) + §4 de `CHECKLIST.md`
-- **checklist afectados (NO marques pass tú):** §4 Reseñas/comentarios `not_started` → el coordinador lo verifica en código. §3 PiP queda `pass` con la nota de que con marca se esconde. Los `pass` de §2 y §3 son inmutables: no los rompas.
-
-#### Estado de la ronda 2 (hecha)
-Producto [`24a0a78`](https://github.com/rawstudio2030-afk/rawstudio/commit/24a0a7844ec194090af20dbbb65bcbab4dadc78b) verificado en código por el coordinador: sin `controls` nativo, cromo propio con `Pulsable` de 44 px, velocidad 0.5–2× en `localStorage` (`rawstudio.velocidad`), ocultar a 2.5 s, teclado, doble toque ±10 s, marca dentro del reproductor, URL firmada intacta. Velocidad y UX tipo YouTube pasan a `pass`. Pendiente de prueba manual: pantalla completa y PiP reales (tu entorno rechazó `requestFullscreen`).
-
-#### Qué hay hoy (revisado por el coordinador en `1b9f73c`)
-- **No existe nada de comentarios ni reseñas.** Ninguna migración tiene tabla, RPC ni tipos de comentarios, reseñas, ratings o reviews. Lo único con «comentario» es la columna `comentario` de los reportes (`reportar`, `src/lib/reportes.ts`, `src/admin/Reportes.tsx`): no es esto y no se toca. `DESIGN-BRIEF.md` no habla de comentarios. Es MVP desde cero.
-- `src/components/Reproductor.tsx` línea 37: `const VENTANAS_SIN_MARCA = true`. Líneas 91–92: `puedePip = caps.pip && (VENTANAS_SIN_MARCA || !conMarca)` y `puedeCompleta = caps.elemento || (caps.nativo && (VENTANAS_SIN_MARCA || !conMarca))`.
-- `src/screens/ClipDetail.tsx`: `useSesion()` da `sesion` y `perfilPropio`; `mio = sesion?.user.id === clip.creator_id`; `marca = !mio && perfilPropio ? '@handle' : null`; `desbloqueado = !!video` (URL firmada de `ver-clip`); `bloqueo?.motivo === 'geobloqueo'`; `<Reportar clip={id} etiqueta="Reportar este clip" />` cerca del final (≈ línea 378).
-- Patrones del repo que debes seguir:
-  - Acceso: `public.tiene_acceso(clip uuid, uid uuid default auth.uid())` (`security definer`, última versión en `20260929000000_caducidad.sql`): dueña, gratis vigente, compra, renta, suscripción; excluye `borrado_at` y retiro total. **Úsala para decidir quién escribe.** No dupliques la lógica.
-  - Admin: `public.es_admin(uid default auth.uid())` (`20260822000000_admin.sql`).
-  - Escrituras por RPC `security definer set search_path = ''`, con `revoke all … from public, anon; grant execute … to authenticated` (ver `admin_fijar_preview`, `reportar`). Errores en español con `raise exception`.
-  - Borrado blando con `borrado_at` (como `clips`). Mayoría de edad y suspensión/veto se exigen en servidor desde `6435c27` y `20261118000000_veto_y_suspension.sql`: reutiliza esas comprobaciones al publicar.
-  - Atribución pública: `profiles.handle`, `display_name`, `avatar_path`, `verified` (como `CON_AUTORA` en `src/lib/clips.ts`). Nunca email ni id visible.
-  - Cliente: un módulo en `src/lib/` por dominio (como `reportes.ts`), UI con `Pulsable`, tokens de `src/lib/diseño.ts`, modo consumo en la ficha.
-
-#### Entregable 1 — Marca en ventanas (primero, commit chico)
-1. En `src/components/Reproductor.tsx`: `const VENTANAS_SIN_MARCA = false`. Nada más en ese archivo salvo ajustar el comentario de la línea 20 si queda desactualizado.
-2. Resultado: con `marca` no hay botón PiP y no se llama `webkitEnterFullscreen`; la pantalla completa de elemento (`requestFullscreen` sobre el contenedor, con marca y barra) sigue si el navegador la da. Sin marca (la dueña viendo lo suyo) PiP y la nativa de iPhone se ofrecen si hay API.
-3. No toques `MarcaDeAgua.tsx` ni la regla de a quién se le pone marca.
-4. Commit sugerido: `fix: reproductor — no abrir ventanas sin marca de agua`.
-
-#### Entregable 2 — Comentarios y reseñas en la ficha del clip
-**Modelo (migración nueva, p. ej. `supabase/migrations/20261123000000_comentarios.sql`)**
-- Tabla `public.comentarios_clip`: `id uuid pk default gen_random_uuid()`, `clip_id uuid not null references public.clips(id)`, `autora_id uuid not null references public.profiles(id)` (o `auth.users`, como hagan las demás), `texto text not null check (char_length(texto) between 1 and 500)`, `created_at timestamptz not null default now()`, `borrado_at timestamptz`, `borrado_por uuid`. Índice `(clip_id, created_at desc) where borrado_at is null`.
-- Tabla `public.resenas_clip`: `clip_id`, `autora_id`, `calificacion smallint not null check (calificacion between 1 and 5)`, `created_at`, `updated_at`; **`primary key (clip_id, autora_id)`** (una por persona y clip, se actualiza).
-- RLS activado en las dos. **Sin** políticas de insert/update/delete para `authenticated`/`anon`: todo lo que escribe va por RPC. Select directo no hace falta si la lectura va por RPC; si das select, que no exponga `autora_id` de más de lo necesario.
-- RPCs (`security definer`, `set search_path = ''`, `revoke … from public, anon`, `grant … to authenticated`; la de lectura también a `anon` si la ficha se ve sin sesión):
-  - `comentarios_de(clip uuid, antes timestamptz default null, cuantos int default 20)` → filas no borradas de ese clip, más recientes primero, paginadas por `created_at < antes`; devuelve `id, texto, created_at, handle, display_name, avatar_path, verified, es_creadora (autora = creator_id), es_mio (autora = auth.uid()), puede_borrar (mío o dueña o es_admin())`. Solo si el clip existe, no está borrado y es visible para quien pregunta (el mismo criterio que la ficha). Tope duro de `cuantos` (máx 50).
-  - `resumen_resenas(clip uuid)` → `promedio numeric(2,1)`, `cantidad int`, `mi_calificacion smallint|null`.
-  - `comentar(clip uuid, texto text)` → exige `auth.uid()`, `tiene_acceso(clip)`, mayoría de edad y cuenta no suspendida/vetada (reutiliza lo existente); `btrim`, no vacío, ≤500; rate-limit simple: máx 5 comentarios por cuenta por minuto (o 30 por hora) contando en la tabla → `raise exception 'Vas demasiado rápido; intenta en un momento'`.
-  - `calificar(clip uuid, calificacion smallint)` → mismas comprobaciones; `insert … on conflict (clip_id, autora_id) do update`. La dueña **no** califica su propio clip (sí puede comentar). Opcional `quitar_calificacion(clip)`.
-  - `borrar_comentario(id uuid)` → soft delete (`borrado_at = now()`, `borrado_por = auth.uid()`) solo si es la autora, la dueña del clip o `es_admin()`; si no, error.
-- Si `admin_anonimizar_cuenta` (de `1b9f73c`) debe tocar algo, que sea mínimo: los comentarios de una cuenta anonimizada se muestran sin handle real (p. ej. «cuenta eliminada»). Si no es trivial, anótalo en el reporte y no lo hagas.
-
-**Cliente**
-- `src/lib/comentarios.ts`: `comentariosDe`, `resumenResenas`, `comentar`, `calificar`, `borrarComentario`, envolviendo las RPC como `reportes.ts`.
-- Componente nuevo (p. ej. `src/components/Comentarios.tsx`) montado en `ClipDetail.tsx` debajo de la descripción/compra y **antes** de «Reportar este clip». No toques paywall, geobloqueo, portada borrosa, compra/renta/reembolso, `Reportar` ni `Reproductor`.
-- Cabecera: si `cantidad > 0`, «★ 4.3 · 12 reseñas» (plural con `src/lib/plural.ts`). Si 0, no muestres estrellas ni promedio.
-- Si puede escribir (`sesion && desbloqueado`): selector de 1–5 estrellas (5 `Pulsable` con `aria-label` «Calificar con N estrellas», `aria-pressed`) —oculto para la dueña— y caja de texto con contador `n/500`, botón «Publicar». Al publicar, el comentario aparece arriba sin recargar.
-- Si no puede: sin sesión → «Entra para comentar» (lleva a `/entrar`); con sesión pero bloqueado → «Desbloquea el video para comentar». Sobrio, sin copy de precios ni comisión.
-- Lista: más recientes primero; handle `@handle` + insignia «Creadora» si `es_creadora`; fecha relativa; botón «Borrar» solo si `puede_borrar` (con confirmación). Vacío: «Todavía no hay comentarios». «Cargar más» con `Pulsable` cuando la página vino llena.
-- Texto como nodo de texto de React (nunca `dangerouslySetInnerHTML`), `white-space: pre-wrap`, `overflow-wrap: anywhere`.
-- Modo consumo: fondo sobrio, tokens de `diseño.ts`; neon solo en lo que se actúa. Áreas táctiles ~44 px. Todo en español.
-- Commit sugerido: `feat: comentarios y reseñas en la ficha del clip`.
-
-#### Archivos concretos a tocar (esperados)
-- `src/components/Reproductor.tsx` (solo la constante y su comentario).
-- `supabase/migrations/2026112300000x_comentarios.sql` (nuevo).
-- `src/lib/comentarios.ts` (nuevo), `src/components/Comentarios.tsx` (nuevo), `src/screens/ClipDetail.tsx` (montarlo).
-- `src/index.css` solo si hace falta algo que no cabe en línea.
-- Tipos generados de Supabase si el repo los mantiene.
-
-#### Qué no tocar
-Portal/landing, age gate, consultas Telegram, textos legales, `CLAUDE.md`, `ver-clip`/URLs firmadas, `MarcaDeAgua.tsx`, calidad/captions del reproductor, copy 20%/SPEI/18+, Admin (salvo que el borrado de admin salga gratis por `es_admin()` en la RPC, sin pantalla nueva). No construyas cola de moderación, notificaciones (email/Telegram), hilos/respuestas ni reportes de comentarios.
-
-#### Criterios de aceptación (verificables)
-**A. Marca en ventanas**
-1. `Reproductor.tsx`: `VENTANAS_SIN_MARCA = false`.
-2. Con `marca` truthy: no se renderiza el botón PiP y no hay llamada a `webkitEnterFullscreen`.
-3. `requestFullscreen` del contenedor sigue disponible si el navegador lo permite (botón de pantalla completa visible en escritorio con marca).
-4. Sin marca: PiP y webkit fullscreen se ofrecen si la API existe.
-
-**B. Comentarios / reseñas**
-1. Los comentarios se ven en la ficha para quien puede abrirla, aun sin desbloquear.
-2. Con sesión y clip desbloqueado (compra, renta, suscripción, gratis o dueña) se publica; sin sesión o sin acceso la RPC rechaza (probado llamando la RPC directo, no solo ocultando el botón).
-3. Texto vacío o de solo espacios se rechaza; >500 se rechaza; HTML se muestra literal.
-4. Una sola calificación por persona y clip; calificar de nuevo la actualiza. Promedio y cantidad visibles solo si hay ≥1. La dueña no califica lo suyo.
-5. Borrar: la autora y la dueña pueden; un tercero no (error de la RPC); admin sí. El borrado es blando y desaparece de la lista.
-6. Más recientes primero; «Cargar más» trae la siguiente página sin repetir.
-7. Insignia «Creadora» cuando comenta la dueña. Nunca aparece email ni id.
-8. RLS activado; ninguna política permite insert/update/delete directo a `anon`/`authenticated`.
-9. `npm run typecheck` (o `tsc -b`), lint y `npm run build` sin errores.
-
-#### Cómo demostrar (obligatorio en el reporte de `bridge-query.md`)
-- SHA(s) completos y mensaje de cada commit.
-- Diff resumido por archivo.
-- Para A: qué controles aparecen con y sin marca (escritorio y celular emulado).
-- Para B: tabla de quién puede `select`/`comentar`/`calificar`/`borrar` y la evidencia (llamadas a RPC con cada rol: anónimo, sesión sin acceso, con acceso, dueña, admin si puedes), más capturas o descripción del estado vacío, la lista y «Cargar más».
-- Salida de typecheck, lint y build.
-- Lo que no pudiste verificar, dicho sin rodeos.
-
-#### Límites anti-bucle
-Máx 10 rondas por tarea; solo iterar si mejora el checklist; parar tras 2 rondas seguidas sin mejora; tope 1 hora. Si algo no cabe, súbelo hecho a medias pero honesto y anótalo.
-
-#### Siguiente paso para Claude Code
-1. `git pull` (el último cambio remoto solo toca los archivos del puente).
-2. Entregable 1 → commit → entregable 2 → commit → `git push origin main`.
-3. Marca `bridge-query.md` `[id: 20261106-03]` como `respondida` con SHA(s), diff resumido y verificación. **No** marques `CHECKLIST.md` como pass: eso lo hace el coordinador.
-
----
-
-### Respuesta a [id: 20261106-02] — Ronda 2/10 · Reproductor (controles propios + velocidad)
-- **fecha:** 2026-11-06 10:20 (America/Mexico_City)
-- **estado:** hecha — producto `24a0a78`, verificada por el coordinador 2026-11-06 ~11:08
-- **responde a:** Asignación del coordinador (Sergio pidió «viene lo del reproductor» tras cerrar la landing).
-- **ronda:** 2 de 10 · **tope:** 1 hora · **tarea:** Reproductor de clip
-- **checklist afectados (aún NO marcar pass tú):** Velocidad `fail` → debe pasar a `pass` tras verificación; UX tipo YouTube `fail` → `pass` o `partial` si queda pulido; Minimizar/PiP `partial` → `pass` si hay botón explícito cuando la API existe. Play/pause, seek, volumen y pantalla completa ya son `pass` **inmutables**: no los rompas. Calidad auto y captions **no** se marcan en esta ronda.
-
-#### Urgente — 2026-11-06 10:32 (America/Mexico_City)
-El coordinador revisó `origin/main` a las 10:29 hora de México: el HEAD sigue en `bde08ad` (solo las instrucciones). No existe `src/components/Reproductor.tsx` en el remoto y `ClipDetail.tsx` no tiene commit nuevo. Sergio confirma que el trabajo local ya debería estar listo.
-
-**Haz commit de producto y `git push origin main` ahora.** No esperes otra ronda de docs.
-- Mensaje sugerido: `fix: reproductor — controles propios y velocidad`
-- Si el reproductor ya está implementado en el working tree, súbelo (un commit, o los que hagan falta si ya particionaste) y empuja.
-- Si aún no está implementado, implementa [id: 20261106-02] y acto seguido commit + push.
-- Después marca `bridge-query.md` [id: 20261106-02] como `respondida` con el SHA y la evidencia pedida.
-- El coordinador no puede ver commits que no hayan llegado a GitHub.
-
-
-#### Contexto y por qué
-En `src/screens/ClipDetail.tsx` el clip desbloqueado se reproduce así:
-
-```tsx
-<video src={video!} controls playsInline poster={poster ?? undefined}
-  style={{ width: '100%', height: '100%', objectFit: 'cover', background: '#000' }} />
-{marca && <MarcaDeAgua texto={marca} />}
-```
-
-`video` sale de `urlVideoFirmada` (edge `ver-clip`: URL firmada del archivo privado). La marca de agua es el handle de quien mira, en `src/components/MarcaDeAgua.tsx` (se mueve cada 7 s, `pointer-events: none`, `z-index: 3`).
-
-Lo que ya funciona (vía cromo nativo del navegador) y **debe seguir funcionando**: play/pause, seek, volumen/mute, pantalla completa. Lo que falta: no hay control de `playbackRate` (velocidad `fail`); no hay cromo propio (UX tipo YouTube `fail`); PiP solo si el navegador lo ofrece en el menú nativo (`partial`); no hay varias resoluciones del mismo clip (calidad auto `not_started`); no hay pistas VTT (captions `not_started`).
-
-#### Decisión de UI/técnica (coordinador — no preguntar a Sergio)
-
-**Hacer en esta ronda**
-
-1. Extrae un componente `src/components/Reproductor.tsx` (nombre cercano está bien) y úsalo desde `ClipDetail` cuando el clip está desbloqueado. Props mínimas: `src`, `poster`, `marca` (string | null). `ClipDetail` sigue decidiendo si hay marca (`!mio && handle`).
-2. Quita el atributo nativo `controls` para no tener dos barras. Conserva `playsInline`, el `poster` nítido y `object-fit: cover` en el mismo contenedor (aspect-ratio 4/3, `maxHeight: 62vh`, radio neon).
-3. Cromo propio, modo consumo (fondo plano, tipografía de interfaz, tokens de `diseño.ts`; el neon solo en lo que se actúa — p. ej. la barra de progreso o el control enfocado). Controles con `Pulsable`, nunca un `div` con `onClick`. Etiquetas y `aria-label` en español. Alto táctil mínimo ~44 px.
-4. Barra inferior: play/pause, tiempo actual, seek (`input type="range"` o equivalente accesible), duración, volumen + mute, menú de velocidad, pantalla completa, y PiP **solo si** `document.pictureInPictureEnabled` (o la API que use el navegador). Centro: botón grande de play/pause al estar pausado o al mostrar controles.
-5. Los controles se ocultan tras ~2.5 s de inactividad mientras reproduce; reaparecen con pointer/touch/focus/teclado. Clic en el vídeo (fuera de la barra) alterna play/pause.
-6. **Velocidad:** menú con al menos `0.5`, `0.75`, `1`, `1.25`, `1.5`, `2`. Aplica `video.playbackRate`. Persiste en `localStorage` (p. ej. `rawstudio.velocidad`) y se reaplica al cambiar de clip o de `src`. Por defecto `1`.
-7. **Teclado** cuando el reproductor tiene foco: `Espacio` o `k` play/pause; `j` / `l` −10 s / +10 s; flechas izquierda/derecha −5 s / +5 s; `m` mute; `f` pantalla completa. En iOS, si `requestFullscreen` no basta, usa `webkitEnterFullscreen` sobre el elemento `<video>`.
-8. Doble toque a la izquierda / derecha del vídeo: −10 s / +10 s (gesto tipo móvil). No pelees con el clic simple de play/pause (umbral de doble toque estándar).
-9. **Marca de agua:** se queda. `pointer-events: none`. La barra de controles debe tener `z-index` mayor que la marca para no volverse intocable cuando la marca pasa por abajo. No cambies el texto ni la lógica de a quién se le pone.
-10. **Seguridad:** sigue usando la URL firmada de `urlVideoFirmada`. No subas el archivo a un bucket público, no añadas botón de descarga, no facilites «guardar vídeo». El paywall / geobloqueo / portada borrosa de `ClipDetail` no se toca.
-
-**No hacer en esta ronda (y no fingir que está hecho)**
-
-- **Calidad automática.** Hoy hay un solo archivo por clip (una URL firmada). Un selector de 720p/1080p o un ABR sin transcodificar sería mentira. No añadas menú de calidad. En el reporte del puente deja constancia: queda fuera hasta que existan varias pistas o HLS. El ítem sigue `not_started`.
-- **Captions / subtítulos.** No hay pistas VTT. Fuera de ronda. Sigue `not_started`.
-- Chromecast, AirPlay extra, mini-reproductor flotante propio (además de PiP nativo), comentarios, Telegram, landing, age gate, Admin, Supabase, copy de comisión/SPEI/18+.
-
-#### Archivos concretos a tocar (esperados)
-- `src/components/Reproductor.tsx` — nuevo.
-- `src/screens/ClipDetail.tsx` — sustituir el `<video controls>` desbloqueado por `<Reproductor … />`. No reescribir compra, renta, reembolso, reportar ni ficha de autora.
-- CSS mínimo si hace falta (`index.css` o clases del reproductor). Tokens desde `diseño.ts`.
-- `src/components/MarcaDeAgua.tsx` — solo si el `z-index` o el solapamiento con la barra lo exige; no cambies el comportamiento de rotación.
-- **No** tocar `Portal.tsx`, `AgeGate`, edge functions, migraciones, `ver-clip` (salvo un bug que impida reproducir, y entonces documéntalo).
-
-#### Criterios de aceptación (verificables)
-1. Clip desbloqueado: el `<video>` **no** lleva `controls` nativo. Se ven controles propios.
-2. Play/pause, seek, volumen/mute y pantalla completa siguen funcionando (escritorio y móvil).
-3. Se puede poner la velocidad en al menos 0.5, 1, 1.5 y 2; `video.playbackRate` cambia de verdad; al abrir otro clip se recuerda la última velocidad.
-4. Si el navegador soporta PiP, hay un control explícito que lo activa; si no, el control no se muestra (no un botón muerto).
-5. La marca de agua sigue apareciendo para quien mira y no es la autora; los controles se pueden pulsar aunque la marca cruce la barra.
-6. Sigue habiendo URL firmada (la petición a `ver-clip` / `urlVideoFirmada` no desaparece). Sin acceso, el candado/portada borrosa no cambia.
-7. Atajos de teclado del punto 7 funcionan con el reproductor enfocado.
-8. En móvil el vídeo no se dispara a pantalla completa solo por darle play (`playsInline`); los controles se pueden usar con el dedo.
-9. `npm run typecheck` y `npm run lint` pasan (sin introducir avisos nuevos en estos archivos).
-10. Español en toda la UI del reproductor. Modo consumo, no portada Miami de marca.
-
-#### Cómo demostrar (obligatorio en el reporte de `bridge-query.md`)
-- Abrir un clip desbloqueado (el de la autora o uno ya comprado) en escritorio (~1280×800) y en vista estrecha (~390×844).
-- Confirmar en el DOM que el `<video>` no tiene `controls`.
-- Cambiar velocidad a 1.5 y 2 y leer `document.querySelector('video').playbackRate`.
-- Recargar y confirmar que la velocidad se conserva.
-- Probar seek, mute, fullscreen y, si aplica, PiP.
-- Confirmar que la marca de agua sigue visible para una cuenta que no es la autora (o explicar cómo lo verificaste).
-- Pegar SHA + lista breve de lo comprobado. **No** marques tú el checklist como `pass`.
-
-#### Qué no tocar
-Landing (`Portal.tsx` y chunks de la ronda 1), age gate, reseñas/comentarios, Telegram, textos legales de contenido, Admin, copy 80%/SPEI/18+, pipeline de transcodificación.
-
-#### Siguiente paso para Claude Code
-1. Implementar en **un commit de producto** (mensaje claro, p. ej. `fix: reproductor — controles propios y velocidad`).
-2. Verificar criterios 1–10.
-3. Actualizar `bridge-query.md` [id: 20261106-02] → `respondida` con SHA + evidencia.
-4. **No** marques tú solo el checklist como `pass`; el coordinador lo hará al verificar el código.
-5. Si bloqueas >15 min en un detalle de UI (posición de la barra, iconos, gesto de doble toque), elige lo más cercano a YouTube móvil y documenta; no preguntes a Sergio.
-
-- **razonamiento:** Pedido explícito del usuario. Velocidad y cromo propio son UI estándar y no requieren negocio nuevo. Calidad automática SÍ exigiría transcodificar varias pistas: inventar el menú empeoraría el checklist al fingir una función, así que se deja fuera a propósito.
-- **siguiente paso para Claude Code:** Ejecutar esta respuesta ahora.
-
----
-
-### Respuesta a [id: 20261106-01] — Ronda 1/10 · Recortar landing al hero
-- **fecha:** 2026-11-06 08:22 (America/Mexico_City)
-- **estado:** aplicada
-- **verificación del coordinador:** 2026-11-06 ~10:06 America/Mexico_City. Commit de producto [`4e15d81`](https://github.com/rawstudio2030-afk/rawstudio/commit/4e15d81c7155d446fa52d941678fb5cfe3a6e018); puente cerrado en [`d958580`](https://github.com/rawstudio2030-afk/rawstudio/commit/d9585800b4f0b313b34bbe9f02279bae8187148a). §2.1 y §2.2 pasan a `pass`. No reabrir ni reimplementar.
-- **responde a:** Asignación del coordinador (Sergio pidió prioridad 1: landing solo hero / sin eager loading).
-- **ronda:** 1 de 10 · **tarea:** Recortar landing al hero · **resultado:** HECHA.
-
-El cuerpo original de la asignación 20261106-01 queda como historial: primer paint = hero; diferir Cintillo / ComoFunciona / FormasDeGanar / Portada / `launch.mp4`; FAQ → `/preguntas`. Claude Code lo implementó con `React.lazy`, gradiente en el iris (opción A) y `Entrar.tsx` también diferiendo `Portada`.
-
----
-
-## Ejemplo (no es una respuesta operativa)
-
-### Respuesta a [id: 20261106-00]
-- **fecha:** 2026-11-06 08:05 (America/Mexico_City)
-- **estado:** ejemplo
-- **responde a:** ¿lazy-load de secciones bajo el hero en `/`?
-- **decisión:** Sí. Primer paint = hero; resto lazy/click. Rutas legales ya existen.
-- **razonamiento:** Criterio checklist eager loading.
-- **checklist afectados:** §2.1 trabajo en curso (código aún no cambiado en el ejemplo).
-- **siguiente paso para Claude Code:** Separar hero; no tocar copy de negocio.
-
----
-
-## Diario de decisiones
-
-| Fecha | Qué | Por qué |
-|-------|-----|--------|
-| 2026-11-06 | Se crean bridge + CHECKLIST | Arranque coordinación. Sin cambio de producto. |
-| 2026-11-06 ~08:22 | Ronda 1: instrucciones recortar landing al hero | Usuario pidió prioridad 1; §2.1 fail. Hero = wordmark+titular+sub+CTA crear cuenta; diferir SeccionesNeon/Portada/cintillo/mp4 al click. FAQ/legales solo por rutas. |
-| 2026-11-06 ~10:06 | Ronda 1 verificada (4e15d81) | Código cumple: lazy por sección, sin mp4, FAQ a `/preguntas`. §2.1 y §2.2 a `pass`. |
-| 2026-11-06 ~10:20 | Ronda 2: reproductor con cromo propio y velocidad | Pedido del usuario. Calidad auto y captions fuera: un solo archivo y sin VTT. |
-| 2026-11-06 ~11:08 | Ronda 2 verificada en código (`24a0a78`) | Velocidad y UX tipo YouTube a `pass`; PiP a `pass` con nota. Pantalla completa/PiP reales sin prueba manual. |
-| 2026-11-06 ~11:10 | `VENTANAS_SIN_MARCA = false` | PiP y `webkitEnterFullscreen` sacan el video sin marca de agua. Con marca se esconden; `requestFullscreen` del contenedor se queda. |
-| 2026-11-06 ~11:10 | Ronda 3: comentarios y reseñas (`20261106-03`) | §4 `not_started`; no existe modelo. Leer: quien abre la ficha. Escribir: sesión + `tiene_acceso`. Planos, recientes primero, paginados, ≤500, soft delete autora/dueña/admin, calificación 1–5 una por persona. Sin moderación ni notificaciones. |
+- `src/content/portada.ts` [+35847 bytes at .content[1].resource.text]
