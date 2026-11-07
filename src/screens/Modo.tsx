@@ -18,10 +18,11 @@ import { elegirModo, type Modo as TipoModo } from '../lib/modo'
 import PaginaMiami from '../components/PaginaMiami'
 import { COLOR, FUENTE } from '../lib/diseño'
 import { Pulsable } from '../components/Pulsable'
+import { comoCreador, type Trato } from '../lib/trato'
 
 export default function Modo() {
   const nav = useNavigate()
-  const { sesion, cargando } = useSesion()
+  const { sesion, trato, cargando } = useSesion()
   const { papel, esAdmin, cargando: cargandoPapel } = usePapel()
 
   // Quien no administra no tiene nada que elegir: para esa persona la
@@ -46,11 +47,13 @@ export default function Modo() {
     )
   }
 
-  return <VistaModo papel={papel} alIr={ir} />
+  return <VistaModo papel={papel} trato={trato} alIr={ir} />
 }
 
 /** Lo que se ve. No sabe quien eres: recibe el papel y avisa a donde se va. */
-export function VistaModo({ papel, alIr }: { papel: string; alIr: (m: TipoModo) => void }) {
+export function VistaModo({ papel, trato, alIr }: {
+  papel: string; trato?: Trato | null; alIr: (m: TipoModo) => void
+}) {
   /* Modo marca: es una puerta, y el cian de la segunda es el de siempre para
    * lo que es de administracion. */
   return (
@@ -65,7 +68,7 @@ export function VistaModo({ papel, alIr }: { papel: string; alIr: (m: TipoModo) 
       <div style={{ display: 'grid', gap: 14, marginTop: 6 }}>
         <Puerta
           tono="m"
-          titulo={papel === 'creadora' ? 'Como creadora' : 'A la aplicación'}
+          titulo={papel === 'creadora' ? comoCreador(trato) : 'A la aplicación'}
           que={papel === 'creadora'
             ? 'Tu estudio, tus clips, tus ganancias y el catálogo.'
             : 'El catálogo, tu biblioteca y tus mensajes.'}

@@ -26,6 +26,7 @@ import { COLOR, FUENTE, RADIO } from '../lib/diseño'
 import Icono from '../components/Iconos'
 import { Pulsable, Enlace } from '../components/Pulsable'
 import Centro from '../components/Centro'
+import { perfilParaPublicar } from '../lib/trato'
 import VincularTelegram from '../components/VincularTelegram'
 
 
@@ -44,7 +45,7 @@ const LEYENDA: Record<Canal['estado'], string> = {
 
 export default function Estudio() {
   const nav = useNavigate()
-  const { sesion, perfil, cargando } = useSesion()
+  const { sesion, perfil, trato, cargando } = useSesion()
   const [r, setR] = useState<ResumenEstudio | null>(null)
 
   useEffect(() => {
@@ -57,7 +58,7 @@ export default function Estudio() {
   if (cargando) return <Centro texto="Cargando…" />
   if (!perfil?.is_creator) return (
     <Centro
-      texto="Activa tu perfil de creadora para abrir el estudio."
+      texto={`Activa tu ${perfilParaPublicar(trato)} para abrir el estudio.`}
       accion={{ texto: 'Ir a mi perfil', al: () => nav('/perfil') }}
     />
   )

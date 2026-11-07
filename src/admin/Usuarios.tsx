@@ -16,6 +16,8 @@ import {
   type Columna,
 } from './piezas'
 import { Pulsable } from '../components/Pulsable'
+import { tratoDe } from '../lib/admin'
+import { OPCIONES_TRATO, type Trato } from '../lib/trato'
 import { useEscape } from '../lib/teclado'
 
 const POR_PAGINA = 25
@@ -233,7 +235,13 @@ function Ficha({ fila, ficha, cierra, pide }: {
   cierra: () => void; pide: (d: Dialogo) => void
 }) {
   const [pestana, setPestana] = useState<'clips' | 'movimientos' | 'acciones'>('clips')
+  const [trato, setTrato] = useState<Trato | null>(null)
   useEscape(true, cierra)
+  useEffect(() => {
+    let vivo = true
+    tratoDe(fila.id).then(t => { if (vivo) setTrato(t) })
+    return () => { vivo = false }
+  }, [fila.id])
 
   return (
     <div onClick={cierra} style={{
@@ -252,6 +260,9 @@ function Ficha({ fila, ficha, cierra, pide }: {
             </div>
             <div style={{ marginTop: 4, font: `400 12px/1 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
               @{fila.handle} · {fila.email}
+            </div>
+            <div style={{ marginTop: 4, font: `400 12px/1 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
+              Trato: {OPCIONES_TRATO.find(o => o.valor === trato)?.rotulo ?? 'sin elegir (neutro)'}
             </div>
           </div>
           <Boton chico al={cierra}>Cerrar</Boton>

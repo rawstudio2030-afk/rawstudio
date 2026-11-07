@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { esTrato, type Trato } from './trato'
 import type { MotivoReporte } from './reportes'
 
 /* `soyAdmin` y el reporte de contenido vivian aqui y se mudaron a
@@ -1700,4 +1701,11 @@ export async function censurarPortadasAntiguas(
     }
   }
   return r
+}
+
+
+/** Como prefiere que se le trate esta cuenta (privado; solo administracion). */
+export async function tratoDe(uid: string): Promise<Trato | null> {
+  const { data, error } = await supabase.rpc('admin_trato_de', { p_uid: uid })
+  return !error && esTrato(data) ? data : null
 }

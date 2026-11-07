@@ -24,6 +24,8 @@ import { miTelefono, guardarTelefono, limpiarTelefono } from '../lib/contacto'
 import Telefono, { valorValido, pistaDe } from '../components/Telefono'
 import { COLOR, FUENTE, RADIO } from '../lib/diseño'
 import Icono from '../components/Iconos'
+import ElegirTrato from '../components/ElegirTrato'
+import { perfilParaPublicar } from '../lib/trato'
 import { Pulsable, Enlace } from '../components/Pulsable'
 
 
@@ -41,7 +43,9 @@ const campo: React.CSSProperties = {
 
 export default function Perfil() {
   const nav = useNavigate()
-  const { sesion, perfil, cargando, refrescarPerfil, salir } = useSesion()
+  const { sesion, perfil, trato, cambiarTrato, cargando, refrescarPerfil, salir } = useSesion()
+  const [guardandoTrato, setGuardandoTrato] = useState(false)
+  const [errorTrato, setErrorTrato] = useState('')
   const archivo = useRef<HTMLInputElement>(null)
   const { papel } = usePapel()
 
@@ -271,6 +275,32 @@ export default function Perfil() {
         </Campo>
       </Seccion>
 
+      {/* ---------- Trato ---------- */}
+      <Seccion titulo="Cómo te tratamos"
+        nota={trato === null
+          ? undefined
+          : 'Solo sirve para escribirte con las palabras que prefieres. Nadie más lo ve en tu perfil.'}>
+        {trato === null && (
+          <div style={{
+            padding: '15px 16px', borderRadius: RADIO.neon, border: `1px solid ${COLOR.admin}`,
+            font: `400 14px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave,
+          }}>
+            Elige una opción; mientras tanto te hablamos sin asumir nada. No se publica
+            en tu perfil.
+          </div>
+        )}
+        <ElegirTrato valor={trato} bloqueado={guardandoTrato}
+          alElegir={async t => {
+            setErrorTrato(''); setGuardandoTrato(true)
+            const m = await cambiarTrato(t)
+            setGuardandoTrato(false)
+            if (m) setErrorTrato(m)
+          }} />
+        {errorTrato && (
+          <div role="alert" style={{ font: `400 13px/1.4 ${FUENTE.ui}`, color: '#FF7BE6' }}>{errorTrato}</div>
+        )}
+      </Seccion>
+
       {/* ---------- Publicar ---------- */}
       <Seccion titulo="Publicar"
         nota="Lo que decide si puedes subir contenido y quién puede verlo.">
@@ -292,9 +322,9 @@ export default function Perfil() {
             <div style={{ font: `400 13px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave, marginTop: 5 }}>
               {creadora
                 ? (perfil?.identidad_verificada
-                    ? 'Tu perfil de creadora está activo'
+                    ? `Tu ${perfilParaPublicar(trato)} está activo`
                     : 'Falta verificar tu identidad para poder publicar')
-                : 'Habilita tu perfil de creadora'}
+                : `Habilita tu ${perfilParaPublicar(trato)}`}
             </div>
           </div>
           <div aria-hidden style={{

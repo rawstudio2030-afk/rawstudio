@@ -15,6 +15,8 @@ import { supabase } from '../lib/supabase'
 import { VERSION_LEGAL } from '../content/legal'
 import { COLOR, FUENTE } from '../lib/diseño'
 import { Pulsable, Enlace } from '../components/Pulsable'
+import ElegirTrato from '../components/ElegirTrato'
+import type { Trato } from '../lib/trato'
 
 
 export type Modo = 'registro' | 'acceso'
@@ -120,6 +122,8 @@ export default function Acceso({ modo }: { modo: Modo }) {
   const [aceptaBio, setAceptaBio] = useState(false)
   const [quiereRecs, setQuiereRecs] = useState(false)
   const [quierePromos, setQuierePromos] = useState(false)
+  // Sin preseleccion: sin elegir, no se crea la cuenta.
+  const [trato, setTrato] = useState<Trato | null>(null)
 
   // El boton de Google solo aparece si el proveedor esta realmente configurado.
   // Mostrarlo sin configurar lleva a una pantalla de error de Google, que es
@@ -139,7 +143,7 @@ export default function Acceso({ modo }: { modo: Modo }) {
   const correoOk = /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(correo.trim())
   const claveOk = clave.length >= 6
   // Las opcionales pueden quedarse en blanco y aun asi permitir el registro.
-  const consiente = modo === 'acceso' || (aceptaLegal && aceptaBio)
+  const consiente = modo === 'acceso' || (aceptaLegal && aceptaBio && trato !== null)
   const listo = correoOk && claveOk && consiente
 
   const fallar = (msg: string) => { setEstado('error'); setDetalle(mensajeUtil(msg, modo)) }
@@ -152,7 +156,9 @@ export default function Acceso({ modo }: { modo: Modo }) {
     if (modo === 'registro') {
       const { data, error } = await supabase.auth.signUp({
         email, password: clave,
-        options: { emailRedirectTo: window.location.origin },
+        // El trato viaja en los metadatos del registro: el servidor lo guarda al
+        // crear el perfil, aunque aun no haya sesion (confirmacion por correo).
+        options: { emailRedirectTo: window.location.origin, data: { trato } },
       })
       if (error) return fallar(error.message)
 
@@ -294,6 +300,7 @@ export default function Acceso({ modo }: { modo: Modo }) {
 
             {modo === 'registro' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 4 }}>
+                <ElegirTrato valor={trato} alElegir={setTrato} obligatorio />
                 <Casilla marcada={aceptaLegal} onCambio={setAceptaLegal} obligatoria>
                   He leído y acepto los{' '}
                   <Enlace a="/terminos" al={e => e.stopPropagation()}

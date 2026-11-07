@@ -16,6 +16,7 @@ import MisClips from '../components/MisClips'
 import { usd } from '../lib/dinero'
 import { Pulsable, Enlace } from '../components/Pulsable'
 import Centro from '../components/Centro'
+import { perfilParaPublicar } from '../lib/trato'
 
 
 /* Modo consumo: rotulos en `textoSuave` (eran textoTenue, 3.78:1, bajo AA) y
@@ -37,7 +38,7 @@ const MODOS: { v: Visibilidad; t: string }[] = [
 
 export default function Upload() {
   const nav = useNavigate()
-  const { sesion, perfil, cargando, refrescarPerfil } = useSesion()
+  const { sesion, perfil, trato, cargando, refrescarPerfil } = useSesion()
   const refVideo = useRef<HTMLInputElement>(null)
   const refPortada = useRef<HTMLInputElement>(null)
 
@@ -97,7 +98,7 @@ export default function Upload() {
   if (!sesion) return <Centro texto="Necesitas entrar para publicar." accion={{ texto: 'Entrar', al: () => nav('/acceso') }} />
   if (!perfil?.is_creator) return (
     <Centro
-      texto="Activa tu perfil de creadora para poder publicar."
+      texto={`Activa tu ${perfilParaPublicar(trato)} para poder publicar.`}
       accion={{ texto: 'Ir a mi perfil', al: () => nav('/perfil') }}
     />
   )
