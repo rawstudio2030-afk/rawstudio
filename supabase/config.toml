@@ -456,3 +456,10 @@ verify_jwt = false
 # llama el disparador de profiles con `x-cron-secret`.
 [functions.avisar-bienvenida]
 verify_jwt = false
+
+# `telegram-bot` es el webhook que llama Telegram, no una persona con sesion:
+# no hay JWT. Se protege con el secreto TELEGRAM_WEBHOOK_SECRET, que Telegram
+# manda en la cabecera `x-telegram-bot-api-secret-token` (se fija al registrar
+# el webhook con `setWebhook`). Sin el, responde 401 y no toca la base.
+[functions.telegram-bot]
+verify_jwt = false

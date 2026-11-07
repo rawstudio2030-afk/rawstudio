@@ -26,6 +26,7 @@ import { COLOR, FUENTE, RADIO } from '../lib/diseño'
 import Icono from '../components/Iconos'
 import { Pulsable, Enlace } from '../components/Pulsable'
 import Centro from '../components/Centro'
+import VincularTelegram from '../components/VincularTelegram'
 
 
 const COLOR_ESTADO: Record<Canal['estado'], string> = {
@@ -156,6 +157,8 @@ export default function Estudio() {
           <Lista canales={ajustar} nav={nav} />
         </>
       )}
+
+      <VincularTelegram />
     </div>
   )
 }

@@ -13,6 +13,7 @@ import { clipPorId, urlPortada, urlVideoFirmada, clipsPublicados, type ClipConAu
 import { comprarClip, saldo } from '../lib/monedero'
 import { rentarClip, reembolsoDisponible, reclamarReembolso } from '../lib/canales'
 import Reportar from '../components/Reportar'
+import ConsultarPorTelegram from '../components/ConsultarPorTelegram'
 import Comentarios from '../components/Comentarios'
 import Reproductor from '../components/Reproductor'
 import { COLOR, VELO, TINTE, FUENTE, RADIO } from '../lib/diseño'
@@ -367,6 +368,12 @@ export default function ClipDetail() {
               </div>
             )}
           </div>
+        )}
+
+        {/* Solo se pinta si la creadora ya vinculo su Telegram. */}
+        {!mio && (
+          <ConsultarPorTelegram key={clip.id} clip={clip.id} creadora={clip.creator_id}
+            haySesion={!!sesion} />
         )}
 
         {/* Quien puede ver la ficha lee; quien puede abrir el video comenta y

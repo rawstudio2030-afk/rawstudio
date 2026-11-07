@@ -14,6 +14,11 @@ import { cuantos } from '../lib/plural'
  *  dolares. */
 export const PRECIO_CONSULTA_TELEGRAM = '20 pesos'
 
+/** ¿Ya se cobra el mensaje? Mientras sea falso, la web no promete ni muestra
+ *  precio en el boton: el cobro espera a que se defina la equivalencia
+ *  coins <-> pesos (ver la migracion 20261124000000). */
+export const COBRO_CONSULTAS_ACTIVO = false
+
 /** Usuario del bot de Telegram, sin la arroba. */
 export const BOT_TELEGRAM = 'RawStudios_bot'
 
