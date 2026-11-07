@@ -392,7 +392,7 @@ export default function ClipDetail() {
         {/* Solo se pinta si la creadora ya vinculo su Telegram. */}
         {!mio && (
           <ConsultarPorTelegram key={clip.id} clip={clip.id} creadora={clip.creator_id}
-            haySesion={!!sesion} />
+            haySesion={!!sesion} handle={autora?.handle} />
         )}
 
         {/* Quien puede ver la ficha lee; quien puede abrir el video comenta y

@@ -244,7 +244,11 @@ async function alRecibirTexto(chat: number, texto: string, respondeA: number | n
     const { data: reg } = await db.rpc('bot_registrar_creadora', { p_mensaje: r.mensaje, p_cuerpo: texto })
     if (!reg?.ok) { await decir(chat, 'Ese mensaje ya no esta pendiente.'); return }
     if (r.cliente_chat) {
-      await decir(r.cliente_chat, `${r.creadora} respondio sobre «${r.clip}»:\n\n${texto}`)
+      // La consulta es para preguntar; si ya sabe lo que quiere, lo que sigue es
+      // un encargo a la medida, que se hace en el perfil de la creadora.
+      await decir(r.cliente_chat,
+        `${r.creadora} respondio sobre «${r.clip}»:\n\n${texto}\n\n` +
+        `¿Quieres que lo grabe para ti? Pidele un encargo a la medida: https://rawstudio.biz/#/creator/${r.creadora}`)
     }
     await decir(chat, 'Enviado.')
     return

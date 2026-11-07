@@ -17,8 +17,10 @@ import {
 import { COBRO_CONSULTAS_ACTIVO, PRECIO_CONSULTA_TELEGRAM, MIN_PALABRAS } from '../content/consultas'
 import { COLOR, FUENTE, LINEA } from '../lib/diseño'
 
-export default function ConsultarPorTelegram({ clip, creadora, haySesion }: {
+export default function ConsultarPorTelegram({ clip, creadora, haySesion, handle }: {
   clip: string; creadora: string; haySesion: boolean
+  /** Usuario de la creadora, para enlazar a su perfil (donde se hace el encargo). */
+  handle?: string
 }) {
   const [acepta, setAcepta] = useState(false)
   const [url, setUrl] = useState('')
@@ -56,6 +58,15 @@ export default function ConsultarPorTelegram({ clip, creadora, haySesion }: {
           este clip o con ella. Si no cumple, el bot te dice por qué.</li>
         <li>Ella te responde por ese mismo chat, en un máximo de 2 días.</li>
       </ol>
+      {/* La consulta es para PREGUNTAR; lo que se pide grabado es un encargo. */}
+      {handle && (
+        <p style={{ margin: '10px 0 0', font: `400 13px/1.55 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
+          ¿Ya sabes lo que quieres que grabe para ti? No hace falta preguntar:{' '}
+          <Enlace a={`/creator/${handle}`} style={{ color: COLOR.acento, textDecoration: 'underline' }}>
+            pídele un encargo a la medida
+          </Enlace>.
+        </p>
+      )}
       <p style={{ margin: '10px 0 0', font: `400 12px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
         Ni ella ve tu número ni tú el suyo: el puente es el bot.{' '}
         {COBRO_CONSULTAS_ACTIVO ? `${PRECIO_CONSULTA_TELEGRAM} por mensaje.` : 'Por ahora sin costo.'}
