@@ -504,6 +504,8 @@ export type ClipEnCola = {
   creadora: string; creadora_handle: string; creadora_nombre: string
   creadora_verificada: boolean; creadora_estado: string
   reportes: number; gravedad: number; total_filas: number
+  /** `album` = fotos; `video` = lo de siempre. */
+  formato: 'video' | 'album'; num_fotos: number
 }
 
 export async function colaModeracion(
@@ -741,6 +743,9 @@ export type PorPurgar = {
   id: string; titulo: string; storage_path: string | null
   cover_path: string | null; creadora_handle: string
   borrado_at: string; purgar_despues_de: string
+  formato: 'video' | 'album'
+  /** Las fotos y miniaturas de un album (rutas en el bucket «albumes»); vacio en un video. */
+  archivos_album: string[]
 }
 
 export async function porPurgar() {
@@ -756,6 +761,12 @@ export async function porPurgar() {
  *  sea invisibles para siempre. */
 export async function purgar(c: PorPurgar) {
   const errores: string[] = []
+  // Un album: sus fotos y miniaturas. Se verifica que DE VERDAD desaparecieron antes de
+  // marcarlo purgado (`marcar_purgado` borra las filas que los mencionan).
+  if (c.formato === 'album' && c.archivos_album?.length) {
+    const siguen = await borrarArchivos(supabase.storage, 'albumes', c.archivos_album)
+    if (siguen.length) errores.push(`album: siguen sin borrarse ${siguen.length} de ${c.archivos_album.length}`)
+  }
   if (c.storage_path) {
     const siguen = await borrarArchivos(supabase.storage, 'clips', [c.storage_path])
     if (siguen.length) errores.push('video: el archivo sigue en el almacenamiento')
@@ -789,6 +800,7 @@ export type ClipAdmin = {
   borrado_at: string | null; borrado_motivo: string | null
   purgar_despues_de: string | null
   created_at: string
+  formato?: 'video' | 'album'; num_fotos?: number
   profiles: { handle: string; display_name: string } | null
 }
 
@@ -802,7 +814,7 @@ export async function clipsAdmin(
   let q = supabase.from('clips')
     .select('id,creator_id,title,estado,published,tipo,price_coins,visibility,cover_path,' +
             'storage_path,destacado_orden,borrado_at,borrado_motivo,' +
-            'purgar_despues_de,created_at,' +
+            'purgar_despues_de,created_at,formato,num_fotos,' +
             'profiles!clips_creator_id_fkey(handle,display_name)')
     .limit(100)
 

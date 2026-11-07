@@ -7,6 +7,7 @@ import {
   banearCuenta, type ClipEnCola, type EstadoClip,
 } from '../lib/admin'
 import { urlPortada, urlVideoFirmada } from '../lib/clips'
+import VisorAlbum from '../components/VisorAlbum'
 import { Boton, Confirmar, Paginador, Insignia, fecha, desde } from './piezas'
 import { usd } from '../lib/dinero'
 import { Pulsable } from '../components/Pulsable'
@@ -138,7 +139,13 @@ function Tarjeta({ clip, al }: { clip: ClipEnCola; al: () => void }) {
               color={alerta ? '#FF4444' : '#FFB020'} />
           </div>
         )}
-        {clip.duracion != null && (
+        {clip.formato === 'album' && (
+          <div style={{
+            position: 'absolute', bottom: 8, right: 8, padding: '2px 6px',
+            background: 'rgba(8,8,10,.8)', font: `400 11px/1.45 ${FUENTE.mono}`, color: COLOR.admin,
+          }}>Álbum · {cuantos(clip.num_fotos, 'foto')}</div>
+        )}
+        {clip.formato !== 'album' && clip.duracion != null && (
           <div style={{
             position: 'absolute', bottom: 8, right: 8, padding: '2px 6px',
             background: 'rgba(8,8,10,.8)', font: `400 11px/1.45 ${FUENTE.mono}`,
@@ -179,13 +186,15 @@ function Revisor({ clip, cierra, listo }: {
     let vivo = true
     // La administracion ve cualquier clip sin pagar ni suscribirse: el bypass
     // vive en tiene_acceso() y en la funcion de borde, no aqui.
+    // Un album no tiene video: se abre como cuadricula de fotos (mas abajo).
+    if (clip.formato === 'album') return
     urlVideoFirmada(clip.id).then(r => {
       if (!vivo) return
       if ('url' in r && r.url) setUrl(r.url)
       else setFallo(('error' in r && r.error) || 'No se pudo abrir el video')
     })
     return () => { vivo = false }
-  }, [clip.id])
+  }, [clip.id, clip.formato])
 
   return (
     <div onClick={cierra} style={{
@@ -197,9 +206,16 @@ function Revisor({ clip, cierra, listo }: {
         maxHeight: '90vh', background: COLOR.superficie,
         border: `1px solid ${LINEA.fuerte}`,
       }}>
-        {/* Reproductor */}
-        <div style={{ background: COLOR.fondo, display: 'grid', placeItems: 'center' }}>
-          {url ? (
+        {/* Reproductor, o las fotos si es un album */}
+        <div style={{ background: COLOR.fondo, display: 'grid', placeItems: clip.formato === 'album' ? 'start stretch' : 'center',
+          overflowY: clip.formato === 'album' ? 'auto' : undefined, maxHeight: '90vh' }}>
+          {clip.formato === 'album' ? (
+            // Administracion ve cualquier album sin comprarlo (lo decide `tiene_acceso` y la
+            // funcion de entrega). Sin marca: quien modera no es a quien se delata.
+            <div style={{ padding: 10 }}>
+              <VisorAlbum clip={clip.id} marca={null} titulo={clip.titulo} />
+            </div>
+          ) : url ? (
             <video src={url} controls autoPlay style={{ width: '100%', maxHeight: '90vh' }} />
           ) : (
             <div style={{ padding: 40, textAlign: 'center',

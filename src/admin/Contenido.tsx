@@ -92,6 +92,7 @@ export default function Contenido() {
     } },
     { clave: 'estado', titulo: 'Estado', ancho: 150, pinta: c => (
       <div style={{ display: 'flex', gap: 5 }}>
+        {c.formato === 'album' && <Insignia texto={`álbum · ${c.num_fotos ?? 0}`} color={COLOR.admin} />}
         {c.borrado_at
           ? <Insignia texto="borrado" color="#FF4444" />
           : <Insignia texto={c.estado} color={
@@ -143,7 +144,7 @@ export default function Contenido() {
             {pendientes.length} archivo{pendientes.length > 1 ? 's' : ''} cumplió los 30 días
           </div>
           <div style={{ margin: '8px 0 12px', font: `400 11px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
-            Siguen ocupando espacio. Purgarlos borra el video y la portada de forma
+            Siguen ocupando espacio. Purgarlos borra el video (o las fotos de un álbum) y la portada de forma
             irreversible; la ficha del clip se conserva para la bitácora.
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
