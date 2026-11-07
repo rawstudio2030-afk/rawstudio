@@ -29,6 +29,7 @@ import Centro from '../components/Centro'
 import { perfilParaPublicar } from '../lib/trato'
 import VincularTelegram from '../components/VincularTelegram'
 import BandejaConsultas from '../components/BandejaConsultas'
+import { configAlbumes, type ConfigAlbumes } from '../lib/albumes'
 
 
 const COLOR_ESTADO: Record<Canal['estado'], string> = {
@@ -49,6 +50,15 @@ export default function Estudio() {
   const { sesion, perfil, trato, cargando, refrescarPerfil } = useSesion()
   // Si la identidad se aprobo con esta sesion abierta, el perfil en memoria
   // sigue diciendo «sin verificar»: se vuelve a leer UNA vez al entrar.
+  // Las reglas de los albumes, solo si estan encendidos: de ahi sale la tarjeta.
+  const [albumes, setAlbumes] = useState<ConfigAlbumes | null>(null)
+  useEffect(() => {
+    if (!sesion) return
+    let vivo = true
+    configAlbumes().then(c => { if (vivo) setAlbumes(c.activos ? c : null) })
+    return () => { vivo = false }
+  }, [sesion])
+
   const yaRefresco = useRef(false)
   useEffect(() => {
     if (yaRefresco.current || !perfil || perfil.identidad_verificada) return
@@ -73,7 +83,7 @@ export default function Estudio() {
   )
   if (!r) return <Centro texto="Cargando…" />
 
-  const lista = canales(r)
+  const lista = canales(r, albumes)
   const hacer = lista.filter(c => c.grupo === 'hacer')
   const ajustar = lista.filter(c => c.grupo === 'ajustar')
 

@@ -1768,3 +1768,83 @@ export async function tratoDe(uid: string): Promise<Trato | null> {
   const { data, error } = await supabase.rpc('admin_trato_de', { p_uid: uid })
   return !error && esTrato(data) ? data : null
 }
+
+
+/* ==================== Albumes de fotos: lanzamiento ==================== */
+
+export type AjustesAlbumes = {
+  activos: boolean
+  /** Precio fijo, en CENTAVOS DE DOLAR. */
+  precio: number
+  min: number
+  max: number
+}
+
+export type ResumenAlbumes = {
+  total: number; publicados: number; en_revision: number
+  abandonados: number; subiendo: number
+}
+
+export async function ajustesAlbumes(): Promise<AjustesAlbumes | null> {
+  const { data, error } = await supabase.from('ajustes').select('clave,valor')
+    .in('clave', ['albumes_activos', 'album_precio_coins', 'album_min_fotos', 'album_max_fotos'])
+  if (error || !data) return null
+  const v = Object.fromEntries((data as { clave: string; valor: unknown }[]).map(f => [f.clave, f.valor]))
+  const num = (x: unknown, d: number) => (typeof x === 'number' ? x : d)
+  return {
+    activos: v['albumes_activos'] === true,
+    precio: num(v['album_precio_coins'], 500),
+    min: num(v['album_min_fotos'], 10),
+    max: num(v['album_max_fotos'], 40),
+  }
+}
+
+/** Enciende o apaga los albumes para TODAS las creadoras. */
+export async function fijarAlbumesActivos(valor: boolean) {
+  const { error } = await supabase.rpc('admin_ajustar_bandera', { p_clave: 'albumes_activos', p_valor: valor })
+  return error?.message ?? ''
+}
+
+/** Precio (centavos de dolar), minimo o maximo de fotos. Valida antes de mandar:
+ *  el servidor solo rechaza negativos. */
+export async function fijarAjusteAlbum(
+  clave: 'album_precio_coins' | 'album_min_fotos' | 'album_max_fotos', valor: number,
+) {
+  const { error } = await supabase.rpc('admin_ajustar_bandera_num', { p_clave: clave, p_valor: Math.round(valor) })
+  return error?.message ?? ''
+}
+
+export async function resumenAlbumes(): Promise<ResumenAlbumes | null> {
+  const { data, error } = await supabase.rpc('admin_resumen_albumes')
+  if (error || !data) return null
+  return data as ResumenAlbumes
+}
+
+export type AlbumAbandonado = {
+  id: string; titulo: string; creadora_handle: string; created_at: string; num_fotos: number
+}
+
+export async function albumesAbandonados(): Promise<AlbumAbandonado[]> {
+  const { data, error } = await supabase.rpc('admin_albumes_abandonados')
+  if (error) return []
+  return (data ?? []) as AlbumAbandonado[]
+}
+
+/** Borra los albumes abandonados Y purga sus archivos (incluidas las fotos sin
+ *  fila). Devuelve cuantos limpio y los fallos. */
+export async function limpiarAlbumesAbandonados(lista: AlbumAbandonado[]) {
+  const fallos: string[] = []
+  let limpios = 0
+  for (const a of lista) {
+    const { error } = await supabase.rpc('admin_borrar_album_abandonado', { p_clip: a.id })
+    if (error) { fallos.push(`${a.titulo}: ${error.message}`); continue }
+  }
+  // Ya estan marcados para purgar: se buscan en la lista de purga y se borran sus
+  // archivos de verdad (con verificacion).
+  const ids = new Set(lista.map(a => a.id))
+  for (const c of (await porPurgar()).filter(c => ids.has(c.id))) {
+    const e = await purgar(c)
+    if (e) fallos.push(`${c.titulo}: ${e}`); else limpios++
+  }
+  return { limpios, fallos }
+}

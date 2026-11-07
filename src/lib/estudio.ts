@@ -85,7 +85,11 @@ export async function resumen(uid: string): Promise<ResumenEstudio> {
  *    canal aparte. Eran lo mismo visto por dos lados. Ahora es un solo
  *    renglon, y existe de verdad.
  */
-export function canales(r: ResumenEstudio): Canal[] {
+export function canales(
+  r: ResumenEstudio,
+  /** Reglas de los albumes, si estan ENCENDIDOS (si no, no hay tarjeta). */
+  albumes?: { precio: number; min: number; max: number } | null,
+): Canal[] {
   const lista: Canal[] = [
     {
       clave: 'clips', titulo: 'Videos de pago', icono: 'play', ruta: '/upload',
@@ -96,6 +100,12 @@ export function canales(r: ResumenEstudio): Canal[] {
       estado: 'listo',
       nota: 'Al subir eliges tambien si se puede rentar por 48 o 72 horas',
     },
+    ...(albumes ? [{
+      clave: 'albumes', titulo: 'Álbumes de fotos', icono: 'estudio', ruta: '/upload/album',
+      grupo: 'hacer' as const,
+      descripcion: `De ${albumes.min} a ${cuantos(albumes.max, 'foto')} por un precio fijo`,
+      estado: 'listo' as const,
+    }] : []),
     {
       clave: 'encargos', titulo: 'Encargos', icono: 'sobre', ruta: '/chat',
       grupo: 'hacer',

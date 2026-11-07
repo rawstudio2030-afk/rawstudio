@@ -10,6 +10,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Almacenamiento from './Almacenamiento'
 import AvatarAuto from './AvatarAuto'
+import Albumes from './Albumes'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 import { sembrarDemo, borrarDemo, censurarPortadasAntiguas, type ResultadoCensura } from '../lib/admin'
 import { Boton, Confirmar } from './piezas'
@@ -29,6 +30,7 @@ export default function Herramientas() {
       </div>
 
       <div style={{ display: 'grid', gap: 14, maxWidth: 620 }}>
+      <Albumes />
       <Tarjeta titulo="Alta de creadora"
         texto="Da de alta a una creadora, carga su expediente (identificación y consentimiento firmado) y publica sus primeros clips por ella. Sin expediente completo, la base rechaza la publicación."
         accion={<Boton tono="primario" al={() => nav('/alta-creadora')}>Abrir el alta</Boton>} />
