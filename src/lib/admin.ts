@@ -406,6 +406,35 @@ export async function anonimizarCuenta(id: string, motivo: string) {
   return error?.message ?? ''
 }
 
+/** Elimina la cuenta DE VERDAD. El servidor solo lo permite si no tiene
+ *  historial que se conserva (si lo tiene, se niega y hay que anonimizar), y
+ *  devuelve los archivos que la cuenta tenia: SQL no puede borrarlos del
+ *  almacenamiento, asi que se quitan aqui, ya con la cuenta borrada.
+ *
+ *  `eliminada` y `error` son independientes: la cuenta puede haberse borrado y
+ *  aun asi haber quedado archivos, y eso hay que decirlo. */
+export async function eliminarCuenta(id: string, motivo: string, confirmar: string):
+  Promise<{ eliminada: boolean; error: string }> {
+  const { data, error } = await supabase.rpc('admin_eliminar_cuenta', {
+    objetivo: id, motivo, confirmar,
+  })
+  if (error) return { eliminada: false, error: error.message }
+  const archivos = ((data as { archivos?: { bucket: string; ruta: string }[] } | null)?.archivos) ?? []
+  const porBucket = new Map<string, string[]>()
+  for (const a of archivos) porBucket.set(a.bucket, [...(porBucket.get(a.bucket) ?? []), a.ruta])
+  const fallos: string[] = []
+  for (const [bucket, rutas] of porBucket) {
+    const { error: e } = await supabase.storage.from(bucket).remove(rutas)
+    if (e) fallos.push(`${bucket}: ${e.message}`)
+  }
+  return {
+    eliminada: true,
+    error: fallos.length
+      ? `La cuenta se eliminó, pero quedaron archivos sin borrar (${fallos.join(' · ')}). Bórralos desde Almacenamiento.`
+      : '',
+  }
+}
+
 export async function reactivarCuenta(id: string) {
   const { error } = await supabase.rpc('admin_reactivar', { objetivo: id })
   return error?.message ?? ''

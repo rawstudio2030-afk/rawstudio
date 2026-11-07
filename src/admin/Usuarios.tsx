@@ -5,7 +5,7 @@ import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 import { usd, aCentavos } from '../lib/dinero'
 import {
   listarUsuarios, fichaUsuario, suspenderCuenta, banearCuenta, reactivarCuenta, cambiarCorreo,
-  anonimizarCuenta,
+  anonimizarCuenta, eliminarCuenta,
   ajustarSaldo, otorgarAdmin, revocarAdmin, marcarCreadora,
   type FilaUsuario, type FichaUsuario, type OrdenUsuarios,
   type RolUsuario, type EstadoCuenta,
@@ -24,7 +24,7 @@ const POR_PAGINA = 25
 
 /** Que confirmacion esta abierta. Cada accion destructiva o de dinero tiene
  *  la suya; ninguna se ejecuta con un solo clic desde la tabla. */
-type Dialogo = 'suspender' | 'banear' | 'reactivar' | 'saldo' | 'rol' | 'correo' | 'anonimizar' | null
+type Dialogo = 'suspender' | 'banear' | 'reactivar' | 'saldo' | 'rol' | 'correo' | 'anonimizar' | 'eliminar' | null
 
 export default function Usuarios() {
   const [filas, setFilas]   = useState<FilaUsuario[]>([])
@@ -208,6 +208,16 @@ export default function Usuarios() {
           cancela={() => setDialogo(null)}
           al={m => anonimizarCuenta(abierta.id, m).then(tras)} />
       )}
+      {dialogo === 'eliminar' && abierta && (
+        <EliminarDialogo fila={abierta} cancela={() => setDialogo(null)}
+          falla={msg => setError(msg)}
+          eliminada={async aviso => {
+            // La cuenta ya no existe: se cierra la ficha y se recarga la tabla.
+            setDialogo(null); setAbierta(null)
+            await cargar()
+            setError(aviso)
+          }} />
+      )}
       {dialogo === 'reactivar' && abierta && (
         <Confirmar titulo="Reactivar cuenta" tono="primario" etiqueta="Reactivar"
           cuerpo={<>Se levanta el castigo de <b style={{ color: COLOR.texto }}>@{abierta.handle}</b> y
@@ -318,6 +328,7 @@ function Ficha({ fila, ficha, cierra, pide }: {
           <Boton al={() => pide('rol')}>Cambiar rol</Boton>
           <Boton al={() => pide('correo')}>Corregir correo</Boton>
           <Boton tono="peligro" al={() => pide('anonimizar')}>Anonimizar</Boton>
+          <Boton tono="peligro" al={() => pide('eliminar')}>Eliminar definitivamente</Boton>
         </div>
 
         <div style={{ marginTop: 12, font: `400 11px/1.45 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
@@ -425,6 +436,42 @@ function SuspenderDialogo({ fila, cancela, listo }: {
  *  el suyo se lo invento la plataforma —@alta.rawstudio.biz— asi que no les
  *  llega nada, ni siquiera «olvidé mi contraseña». Sin esto se quedan
  *  incomunicadas para siempre. */
+/** Borrado de verdad. Pide el usuario escrito a mano: es lo unico que impide
+ *  borrar la cuenta equivocada con un par de clics seguidos. El servidor lo
+ *  vuelve a comprobar y se niega si la cuenta tiene historial que se conserva. */
+function EliminarDialogo({ fila, cancela, falla, eliminada }: {
+  fila: FilaUsuario; cancela: () => void
+  falla: (m: string) => void; eliminada: (aviso: string) => void | Promise<void>
+}) {
+  const [escrito, setEscrito] = useState('')
+  const ok = escrito.trim().toLowerCase() === fila.handle.toLowerCase()
+  return (
+    <Confirmar titulo="Eliminar la cuenta definitivamente" tono="peligro"
+      etiqueta={ok ? 'Eliminar para siempre' : 'Escribe el usuario'}
+      exigeMotivo
+      cuerpo={<>Se borra <b style={{ color: COLOR.texto }}>@{fila.handle}</b> de verdad: su
+        perfil, su acceso, sus clips y sus archivos. <b style={{ color: COLOR.texto }}>No se puede
+        deshacer.</b> Solo funciona con cuentas que no tienen historial que se conserva; si tiene
+        movimientos, compras, retiros, consentimientos, expediente o clips con compras o
+        reportes, el servidor se niega y hay que usar <b style={{ color: COLOR.texto }}>Anonimizar</b>.
+        Queda constancia en la bitácora.</>}
+      extra={() => (
+        <div style={{ marginTop: 14 }}>
+          <Etiquetado texto={`Escribe ${fila.handle} para confirmar`} hijo={
+            <Campo valor={escrito} cambia={setEscrito} mono autoFoco marcador={fila.handle} />
+          } />
+        </div>
+      )}
+      cancela={cancela}
+      al={async m => {
+        if (!ok) { falla('Escribe el usuario de la cuenta para confirmar.'); return }
+        const r = await eliminarCuenta(fila.id, m, escrito.trim())
+        if (!r.eliminada) { falla(r.error); return }
+        await eliminada(r.error)
+      }} />
+  )
+}
+
 function CorreoDialogo({ fila, cancela, listo }: {
   fila: FilaUsuario; cancela: () => void; listo: (m: string) => void
 }) {
