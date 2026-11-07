@@ -5,17 +5,19 @@
 // El candado NO es visual: el video vive en un bucket privado y solo se obtiene
 // una URL firmada si las politicas de storage dejan leerlo. Sin acceso, aqui no
 // hay archivo que reproducir aunque alguien edite el JavaScript.
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import Avatar from '../components/Avatar'
-import { clipPorId, urlPortada, urlVideoFirmada, clipsPublicados, type ClipConAutora } from '../lib/clips'
+import { clipPorId, urlPortada, urlVideoFirmada, fotosDeAlbum, clipsPublicados, type ClipConAutora, type FotoFirmada } from '../lib/clips'
+import { cuantos } from '../lib/plural'
 import { comprarClip, saldo } from '../lib/monedero'
 import { rentarClip, reembolsoDisponible, reclamarReembolso } from '../lib/canales'
 import Reportar from '../components/Reportar'
 import ConsultarPorTelegram from '../components/ConsultarPorTelegram'
 import Comentarios from '../components/Comentarios'
 import Reproductor from '../components/Reproductor'
+import VisorAlbum from '../components/VisorAlbum'
 import { COLOR, VELO, TINTE, FUENTE, RADIO } from '../lib/diseño'
 import { usd, usdYPesos, limpiarMensajeDinero } from '../lib/dinero'
 import { useMoneda } from '../lib/moneda'
@@ -45,13 +47,25 @@ export default function ClipDetail() {
   const [coins, setCoins] = useState<number | null>(null)
   const [comprando, setComprando] = useState(false)
   const [recienComprado, setRecienComprado] = useState(false)
+  // Un album no tiene una sola URL: la ficha pide las fotos firmadas UNA vez (eso
+  // tambien le dice si hay acceso) y se las pasa al visor.
+  const [albumInicial, setAlbumInicial] = useState<{ fotos: FotoFirmada[]; expira_en: number } | null>(null)
+  // La sesion llega en varias pasadas y el efecto de carga corre cada vez: un
+  // album que ya se abrio no se vuelve a pedir (firmar 24 URLs no es gratis).
+  const albumPedido = useRef<string | null>(null)
   const [rentando, setRentando] = useState(false)
   const [devolucion, setDevolucion] = useState(0)
   const [errorCompra, setErrorCompra] = useState('')
 
+  // El efecto vuelve a correr cada vez que llega la sesion (varias veces al
+  // abrir, y al volver a la pestana). Poner «Cargando…» en cada pasada desmontaba
+  // el reproductor o el visor, y quien miraba perdia su sitio. Solo se muestra
+  // cuando CAMBIA el clip.
+  const idMostrado = useRef<string | undefined>(undefined)
   useEffect(() => {
     let vivo = true
-    setCargando(true)
+    if (idMostrado.current !== id) setCargando(true)
+    idMostrado.current = id
     const traer = async () => {
       // Sin id en la ruta se muestra el mas reciente, que es lo util al entrar
       // desde el age gate mientras no exista una pantalla de descubrimiento.
@@ -59,7 +73,13 @@ export default function ClipDetail() {
       if (!vivo) return
       const c = Array.isArray(r.datos) ? r.datos[0] ?? null : r.datos
       setClip(c); setFallo(r.fallo); setCargando(false)
-      if (c?.tiene_video && sesion) {
+      if (c?.formato === 'album' && sesion) {
+        if (albumPedido.current === c.id) return
+        const a = await fotosDeAlbum(c.id)
+        if (!vivo) return
+        if ('fotos' in a) { albumPedido.current = c.id; setAlbumInicial({ fotos: a.fotos, expira_en: a.expira_en }); setBloqueo(null) }
+        else setBloqueo({ motivo: a.motivo, pais: a.pais })
+      } else if (c?.tiene_video && sesion) {
         const a = await urlVideoFirmada(c.id)
         if (!vivo) return
         if ('url' in a) { setVideo(a.url); setPortadaNitida(a.portada); setBloqueo(null) }
@@ -85,7 +105,6 @@ export default function ClipDetail() {
     // Igual que al comprar: hay que volver a pedir la URL firmada, porque
     // hasta ahora la funcion de borde la estaba negando.
     setCoins(r.saldo ?? null)
-    setRecienComprado(true)
     const a = await urlVideoFirmada(clip.id)
     if ('url' in a) { setVideo(a.url); setPortadaNitida(a.portada) }
   }
@@ -98,8 +117,15 @@ export default function ClipDetail() {
     const r = await comprarClip(clip.id)
     if (!r.ok) { setErrorCompra(limpiarMensajeDinero(r.error ?? 'No se pudo completar')); setComprando(false); return }
     setCoins(r.saldo ?? null)
-    const a = await urlVideoFirmada(clip.id)
-    if ('url' in a) { setVideo(a.url); setPortadaNitida(a.portada) }
+    // Comprar (no rentar) deja el clip en la Biblioteca: se le dice donde queda.
+    setRecienComprado(true)
+    if (clip.formato === 'album') {
+      const f = await fotosDeAlbum(clip.id)
+      if ('fotos' in f) { albumPedido.current = clip.id; setAlbumInicial({ fotos: f.fotos, expira_en: f.expira_en }) }
+    } else {
+      const a = await urlVideoFirmada(clip.id)
+      if ('url' in a) { setVideo(a.url); setPortadaNitida(a.portada) }
+    }
     setComprando(false)
   }
 
@@ -131,7 +157,8 @@ export default function ClipDetail() {
   const marca = !mio && perfilPropio ? `@${perfilPropio.handle}` : null
   // Hoy solo la autora y un admin pueden abrir el archivo. Cuando existan las
   // compras, video llegara tambien a quien pago, sin cambiar nada aqui.
-  const desbloqueado = !!video
+  const esAlbum = clip.formato === 'album'
+  const desbloqueado = esAlbum ? albumInicial !== null : !!video
 
   const dur = clip.duration_s && clip.duration_s > 0
     ? `${Math.floor(clip.duration_s / 60)}:${String(Math.round(clip.duration_s % 60)).padStart(2, '0')}`
@@ -164,8 +191,18 @@ export default function ClipDetail() {
         position: 'relative', margin: '14px 14px 0', aspectRatio: '4 / 3', maxHeight: '62vh',
         borderRadius: RADIO.neon, overflow: 'hidden', background: COLOR.superficie,
         border: '1px solid rgba(255,255,255,.12)',
+        // Un album desbloqueado NO muestra aqui su portada: la nitida es la primera
+        // foto SIN marca, y las fotos solo se ven en el visor, con la marca puesta.
+        display: esAlbum && desbloqueado ? 'none' : undefined,
       }}>
-        {desbloqueado ? (
+        {esAlbum && (
+          <span style={{ position: 'absolute', top: 10, left: 10, zIndex: 2, padding: '5px 8px', borderRadius: 6,
+            background: 'rgba(8,8,10,.78)', border: `1px solid ${COLOR.admin}`, color: COLOR.admin,
+            font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.4, textTransform: 'uppercase' }}>
+            Álbum · {cuantos(clip.num_fotos, 'foto')}
+          </span>
+        )}
+        {desbloqueado && !esAlbum ? (
           <>
             {/* El identificador de quien mira (`marca`) va encima del video, dentro
                 del reproductor para que siga puesto en pantalla completa. Se usa
@@ -212,6 +249,7 @@ export default function ClipDetail() {
 
         <div style={{ font: `400 12px/1.6 ${FUENTE.mono}`, color: COLOR.textoTenue, marginTop: 8 }}>
           {dur && <>{dur} &middot; </>}
+          {esAlbum && <>{cuantos(clip.num_fotos, 'foto')} &middot; </>}
           publicado {clip.published_at ? new Date(clip.published_at).toLocaleDateString('es-MX') : '—'}
           {!clip.published && ' · borrador'}
         </div>
@@ -219,6 +257,13 @@ export default function ClipDetail() {
         {clip.description && (
           <div style={{ font: `400 16px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave, marginTop: 14 }}>
             {clip.description}
+          </div>
+        )}
+
+        {/* Las fotos de un album, ya desbloqueado, con la marca de quien mira. */}
+        {esAlbum && desbloqueado && (
+          <div style={{ marginTop: 18 }}>
+            <VisorAlbum key={clip.id} clip={clip.id} marca={marca} titulo={clip.title} inicial={albumInicial} />
           </div>
         )}
 
@@ -294,7 +339,9 @@ export default function ClipDetail() {
               Lo ves completo porque lo publicaste tú.
             </div>
           </div>
-        ) : clip.visibility === 'gratis' ? null : (
+        // Un album ya desbloqueado no vuelve a ofrecer comprarse (no se renta, asi que
+        // no hay un «mejor comprarlo» que ofrecer).
+        ) : clip.visibility === 'gratis' || (esAlbum && desbloqueado) ? null : (
           <div style={{
             marginTop: 22, padding: 18, borderRadius: RADIO.neon,
             border: '1px solid rgba(255,255,255,.14)', background: COLOR.superficie,
@@ -346,7 +393,7 @@ export default function ClipDetail() {
                     }}>
                     {comprando ? 'Desbloqueando…'
                       : !sesion ? 'Entra para desbloquear'
-                      : alcanza ? <>Desbloquear este clip <span aria-hidden>&#8250;</span></>
+                      : alcanza ? <>Desbloquear este {esAlbum ? 'álbum' : 'clip'} <span aria-hidden>&#8250;</span></>
                       : `Te faltan ${usd(falta)}`}
                   </Pulsable>
                   {sesion && (

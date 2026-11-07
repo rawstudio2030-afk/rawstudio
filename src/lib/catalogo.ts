@@ -23,12 +23,13 @@ export type Rotulo = { tono: Tono; texto: string; icono?: string }
 /** Que insignia lleva un clip. Un clip de pago se puede comprar y, si la
  *  creadora lo permite, rentar: la insignia dice PAGO y, aparte, RENTA. */
 export function insignias(
-  c: Pick<Clip, 'visibility' | 'renta_coins' | 'renta_horas'>,
+  c: Pick<Clip, 'visibility' | 'renta_coins' | 'renta_horas'> & Partial<Pick<Clip, 'formato'>>,
 ): Rotulo[] {
   if (c.visibility === 'gratis') return [{ tono: 'l', texto: 'Gratis' }]
   if (c.visibility === 'suscriptores') return [{ tono: 'c', texto: 'Suscriptores', icono: 'estrella' }]
   const r: Rotulo[] = [{ tono: 'm', texto: 'Pago', icono: 'candado' }]
   if (c.renta_coins != null && c.renta_horas != null) r.push({ tono: 'm', texto: `Renta ${c.renta_horas} h` })
+  if (c.formato === 'album') r.push({ tono: 'c', texto: 'Álbum' })
   return r
 }
 

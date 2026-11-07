@@ -116,6 +116,7 @@ export type Comprado = {
   created_at: string
   clips: {
     id: string; title: string; cover_path: string | null; duration_s: number | null
+    formato: 'video' | 'album'; num_fotos: number
     profiles: { handle: string; display_name: string } | null
   } | null
 }
@@ -125,7 +126,7 @@ export type Comprado = {
  *  pago, y encima parece que nunca lo pago. */
 export async function misCompras(): Promise<Lectura<Comprado[]>> {
   const { data, error } = await supabase.from('purchases')
-    .select('id,clip_id,price_coins,created_at,clips(id,title,cover_path,duration_s,profiles!clips_creator_id_fkey(handle,display_name))')
+    .select('id,clip_id,price_coins,created_at,clips(id,title,cover_path,duration_s,formato,num_fotos,profiles!clips_creator_id_fkey(handle,display_name))')
     .order('created_at', { ascending: false })
   if (error) return noSePudo([], error)
   return leido((data ?? []) as unknown as Comprado[])

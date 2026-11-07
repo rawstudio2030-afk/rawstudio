@@ -286,6 +286,13 @@ export default function CreatorProfile() {
                             <Icono nombre={marca[0].icono} tam={14} />
                           </span>
                         )}
+                        {c.formato === 'album' && (
+                          <span style={{
+                            position: 'absolute', left: 5, bottom: 5, borderRadius: 5, padding: '3px 5px',
+                            background: 'rgba(8,8,10,.78)', border: `1px solid ${COLOR.admin}`, color: COLOR.admin,
+                            font: `700 8px/1 ${FUENTE.ui}`, letterSpacing: 1, textTransform: 'uppercase',
+                          }}>Álbum · {c.num_fotos}</span>
+                        )}
                         {!c.published && (
                           <span style={{
                             position: 'absolute', top: 5, left: 5, right: 5, textAlign: 'center',

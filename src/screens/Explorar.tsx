@@ -11,6 +11,7 @@ import { creadoras, type FichaCreadora } from '../lib/perfiles'
 import Avatar from '../components/Avatar'
 import { portadaDe } from '../lib/portadas'
 import { TONO, insignias, duracion } from '../lib/catalogo'
+import { cuantos } from '../lib/plural'
 import { usd } from '../lib/dinero'
 import TarjetaClip from '../components/TarjetaClip'
 import Wordmark from '../components/Wordmark'
@@ -221,7 +222,12 @@ export default function Explorar() {
                           </span>
                         ))}
                       </div>
-                      {dur && (
+                      {c.formato === 'album' ? (
+                        <span style={{
+                          position: 'absolute', right: 7, bottom: 7, background: 'rgba(8,8,10,.72)',
+                          borderRadius: 6, padding: '4px 6px', font: `700 10px/1 ${FUENTE.mono}`, color: COLOR.texto,
+                        }}>{cuantos(c.num_fotos, 'foto')}</span>
+                      ) : dur && (
                         <span style={{
                           position: 'absolute', right: 7, bottom: 7, display: 'inline-flex', alignItems: 'center', gap: 4,
                           background: 'rgba(8,8,10,.72)', borderRadius: 6, padding: '4px 6px',

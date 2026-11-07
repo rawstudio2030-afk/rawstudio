@@ -24,6 +24,10 @@ export type Clip = {
   renta_horas: number | null
   renta_coins: number | null
   es_demo: boolean
+  /** `album` = de 10 a 40 fotos y precio fijo; `video` = lo de siempre. */
+  formato: 'video' | 'album'
+  /** Fotos del album (0 en un video). */
+  num_fotos: number
   created_at: string
 }
 
@@ -48,9 +52,9 @@ export type ClipConAutora = Clip & {
  * o armarla con plantilla la convierte en `string` y el tipo se cae. Es feo a
  * proposito; lo alternativo es un `as unknown as` que apaga la unica
  * comprobacion que avisa si esta lista y el tipo `Clip` dejan de coincidir. */
-const COLUMNAS = 'id,creator_id,title,description,cover_path,preview_path,tiene_video,duration_s,visibility,price_coins,renta_horas,renta_coins,published,published_at,created_at,es_demo,caduca_at,caduca_modo' as const
+const COLUMNAS = 'id,creator_id,title,description,cover_path,preview_path,tiene_video,duration_s,visibility,price_coins,renta_horas,renta_coins,published,published_at,created_at,es_demo,caduca_at,caduca_modo,formato,num_fotos' as const
 
-const CON_AUTORA = 'id,creator_id,title,description,cover_path,preview_path,tiene_video,duration_s,visibility,price_coins,renta_horas,renta_coins,published,published_at,created_at,es_demo,caduca_at,caduca_modo,profiles!clips_creator_id_fkey(handle,display_name,avatar_path,verified)' as const
+const CON_AUTORA = 'id,creator_id,title,description,cover_path,preview_path,tiene_video,duration_s,visibility,price_coins,renta_horas,renta_coins,published,published_at,created_at,es_demo,caduca_at,caduca_modo,formato,num_fotos,profiles!clips_creator_id_fkey(handle,display_name,avatar_path,verified)' as const
 
 /** La portada que ve cualquiera: la de 32 px del bucket publico.
  *

@@ -7,6 +7,7 @@ import { misCompras, type Comprado } from '../lib/monedero'
 import { urlPortada } from '../lib/clips'
 import { COLOR, FUENTE, RADIO } from '../lib/diseño'
 import { usd } from '../lib/dinero'
+import { cuantos } from '../lib/plural'
 import { Pulsable, Enlace } from '../components/Pulsable'
 import Centro from '../components/Centro'
 
@@ -107,6 +108,7 @@ export function VistaBiblioteca({ compras, fallo, alReintentar }: {
                     }}>Desbloqueado</span>
                     <span style={{ font: `400 12px/1.45 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
                       {new Date(c.created_at).toLocaleDateString('es-MX')} · {usd(c.price_coins)}
+                      {c.clips?.formato === 'album' && ` · Álbum de ${cuantos(c.clips.num_fotos, 'foto')}`}
                     </span>
                   </div>
                 </div>

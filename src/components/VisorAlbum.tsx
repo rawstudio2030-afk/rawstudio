@@ -45,13 +45,17 @@ type Estado =
   | { tipo: 'error'; mensaje: string }
   | { tipo: 'listo'; fotos: FotoFirmada[]; obtenidoEn: number; expiraEn: number }
 
-export default function VisorAlbum({ clip, marca, titulo }: {
+export default function VisorAlbum({ clip, marca, titulo, inicial }: {
   clip: string
+  /** Las fotos que la ficha ya pidio para saber si habia acceso: asi no se piden dos veces. */
+  inicial?: { fotos: FotoFirmada[]; expira_en: number } | null
   /** El usuario de quien mira, p. ej. «@juanpedro». `null` para la autora. */
   marca: string | null
   titulo: string
 }) {
-  const [estado, setEstado] = useState<Estado>({ tipo: 'cargando' })
+  const [estado, setEstado] = useState<Estado>(inicial
+    ? { tipo: 'listo', fotos: inicial.fotos, obtenidoEn: Date.now(), expiraEn: inicial.expira_en }
+    : { tipo: 'cargando' })
   const [abierta, setAbierta] = useState<number | null>(null)
 
   const cargar = useCallback(async (silencioso: boolean) => {
@@ -65,6 +69,7 @@ export default function VisorAlbum({ clip, marca, titulo }: {
   }, [clip])
 
   useEffect(() => {
+    if (inicial) return
     let vivo = true
     fotosDeAlbum(clip).then(r => {
       if (!vivo) return
@@ -72,6 +77,8 @@ export default function VisorAlbum({ clip, marca, titulo }: {
       else setEstado({ tipo: 'listo', fotos: r.fotos, obtenidoEn: Date.now(), expiraEn: r.expira_en })
     })
     return () => { vivo = false }
+  // `inicial` solo cuenta al montar: si despues cambia, no hay que volver a pedir.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clip])
 
   // Renovar las URLs antes de que venzan, y al volver a la pestaña si ya casi vencen.
