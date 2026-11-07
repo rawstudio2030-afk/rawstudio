@@ -38,12 +38,29 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 
 ## Consultas activas
 
-### [id: 20261106-07] Ronda 7 asignada — trato de género desde el alta
-- **fecha:** 2026-11-06 17:56 (America/Mexico_City)
-- **estado:** asignada
+### [id: 20261106-07] Ronda 7 hecha — trato de género desde el alta
+- **fecha:** 2026-11-06 (America/Mexico_City)
+- **estado:** respondida
 - **tarea:** §10 de `CHECKLIST.md` — trato de género (mujer / hombre / neutro / prefiere no decirlo) registrado desde el alta.
-- **instrucciones:** lee `bridge-response.md` `[id: 20261106-07]` y ejecútala en su propio commit. No reabras las rondas 4, 5 ni 6.
-- **al terminar:** cambia esta entrada a `estado: respondida` con SHA, diff resumido y verificación.
+- **resultado:** HECHA y en `origin/main`. Commit `4154e0498b91df6c711636fa0d78913cff827e1c` — `feat: trato de genero desde el alta`. Migración `20261125000000_trato.sql` aplicada en producción antes del push.
+- **diff resumido:**
+  - `supabase/migrations/20261125000000_trato.sql` (nuevo): `profiles.trato` con check `mujer | hombre | neutro | no_decir`, nullable. **No** está en ningún permiso de lectura por columna (la política de filas de `profiles` es pública, así que concederlo habría expuesto el dato a todos): se lee con `mi_trato()` (propio) y `admin_trato_de(uid)` (solo admin); se cambia con `guardar_trato()` o con el UPDATE propio de siempre (el check frena valores inválidos). El disparador de alta lo toma de los metadatos del registro y solo acepta los cuatro valores. Al anonimizar una cuenta se borra.
+  - `src/lib/trato.ts` (nuevo): helper único. mujer → creadora / usuaria; hombre → creador / usuario; neutro, no_decir y sin elegir → «quien publica», «esta cuenta», «perfil para publicar» (sin «creadore» ni «elle»).
+  - `src/components/ElegirTrato.tsx` (nuevo): radios nativos, ninguno preseleccionado.
+  - `src/screens/Acceso.tsx`: en el registro las cuatro opciones son obligatorias; sin elegir una el botón queda apagado. El valor viaja en `options.data` del `signUp`, así se guarda aunque no haya sesión todavía.
+  - `src/screens/Perfil.tsx`: sección «Cómo te tratamos» (cambia al elegir) y, con `trato` nulo, un aviso corto que no bloquea nada. «Tu perfil de creadora» y «Habilita tu perfil de creadora» pasan por el helper.
+  - `src/lib/sesion.tsx`: expone `trato` y `cambiarTrato`. `Estudio.tsx`, `Upload.tsx` y `Modo.tsx` usan el helper en el trato personal. `Usuarios.tsx` + `lib/admin.ts`: la ficha admin muestra «Trato: …».
+  - Sin tocar: `/creadoras`, `/privacidad`, `/terminos`, copy 20%/SPEI/18+, Anonimizar (solo se añadió el borrado del trato), Telegram, reproductor, comentarios, avatares, landing.
+- **verificación:**
+  - SQL local (14 pruebas, `pruebas-seguridad-p0/trato_prueba.sql`): alta con cada valor, valor inventado y sin metadatos → nulo; cuenta anterior nula; `SELECT trato` denegado a `authenticated` y a `anon`; `mi_trato` denegado a anon; `guardar_trato` rechaza inválido y nulo; UPDATE directo inválido rechazado por el check; un usuario no cambia el de otra cuenta; no admin no lee el ajeno y admin sí; anonimizar lo borra.
+  - Producción tras aplicar (solo lectura): columna creada, 0 lectores directos, 61 perfiles todos con `trato` nulo (se tratan como neutro).
+  - Helper ejecutado con los 4 valores, `null` y `undefined`: la tabla de arriba se cumple.
+  - Navegador, `/#/registro` en 375 px: cuatro opciones (Mujer, Hombre, Neutro, Prefiero no decirlo), ninguna marcada, `required`. Con correo, contraseña y las dos casillas obligatorias pero SIN trato, el botón «Crear cuenta» sigue deshabilitado; al elegir una, se habilita.
+  - `/creadoras` sigue siendo esa ruta y esa página (`App.tsx`, sin cambios).
+  - Typecheck, build y lint limpios (solo las advertencias que ya existían).
+- **NO verificado:** el aviso y el guardado en Perfil con una sesión real, el trato de una cuenta hombre/mujer/neutra pintado en la pantalla, y el alta enviada de punta a punta (habría creado una cuenta real en producción). Tampoco se revisó cada aparición de «creadora» en el sitio: solo el trato personal (Perfil, Estudio, Subir, Modo); los textos generales y los del panel admin quedaron como estaban a propósito.
+- **¿Debería subir el checklist?** §10: de `not_started` a `partial`; lo decide el coordinador.
+- **urgencia:** baja
 
 ### [id: 20261106-06] Ronda 6 hecha — avatares automáticos para creadoras sin foto
 - **fecha:** 2026-11-06 (America/Mexico_City)
