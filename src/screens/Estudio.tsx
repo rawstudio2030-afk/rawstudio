@@ -28,6 +28,7 @@ import { Pulsable, Enlace } from '../components/Pulsable'
 import Centro from '../components/Centro'
 import { perfilParaPublicar } from '../lib/trato'
 import VincularTelegram from '../components/VincularTelegram'
+import BandejaConsultas from '../components/BandejaConsultas'
 
 
 const COLOR_ESTADO: Record<Canal['estado'], string> = {
@@ -152,6 +153,7 @@ export default function Estudio() {
       {/* Los mensajes de quien consulta llegan por Telegram: aqui se vincula.
           Va arriba, a la vista; al final de la pagina nadie lo encontraba. */}
       <VincularTelegram />
+      <BandejaConsultas />
 
       <Lista canales={hacer} nav={nav} />
 

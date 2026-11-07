@@ -48,3 +48,44 @@ export async function desvincularTelegram(): Promise<string> {
   const { error } = await supabase.rpc('telegram_desvincular')
   return error?.message ?? ''
 }
+
+/* ---------- Bandeja ---------- */
+
+export type Consulta = {
+  id: string
+  soy_creadora: boolean
+  /** `null` cuando la otra cuenta se anonimizo. */
+  otra_handle: string | null
+  otra_avatar: string | null
+  clip_id: string
+  clip_titulo: string
+  ultimo_at: string
+  ultimo_de: 'cliente' | 'creadora'
+  ultimo_texto: string
+  sin_responder: number
+  vencen_at: string | null
+  vencidos: number
+}
+
+export type MensajeConsulta = {
+  id: string
+  de: 'cliente' | 'creadora'
+  cuerpo: string
+  created_at: string
+  estado: 'enviado' | 'respondido' | 'vencido'
+  vence_at: string | null
+  es_mio: boolean
+}
+
+/** Mis conversaciones (como creadora y como cliente). Solo lectura. */
+export async function misConsultas(): Promise<{ filas: Consulta[] } | { error: string }> {
+  const { data, error } = await supabase.rpc('mis_consultas')
+  if (error) return { error: error.message }
+  return { filas: (data ?? []) as Consulta[] }
+}
+
+export async function mensajesDe(consulta: string): Promise<{ filas: MensajeConsulta[] } | { error: string }> {
+  const { data, error } = await supabase.rpc('consulta_mensajes_de', { p_consulta: consulta })
+  if (error) return { error: error.message }
+  return { filas: (data ?? []) as MensajeConsulta[] }
+}
