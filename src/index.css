@@ -604,3 +604,7 @@ details[open] > summary > .faq-signo {
 .trato-opcion { position: relative }
 .trato-opcion input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: inherit }
 .trato-opcion:has(input:focus-visible) { outline: 2px solid #00E5FF; outline-offset: 2px }
+
+/* El visor de albumes no sale al imprimir ni al guardar como PDF: es contenido
+   de pago y no debe poder sacarse sin la marca de quien lo miro. */
+@media print { .visor-album { display: none !important } }
