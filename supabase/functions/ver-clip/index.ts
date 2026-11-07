@@ -102,15 +102,16 @@ Deno.serve(async (req) => {
   // `album_fotos` repiten la regla de `tiene_acceso`, asi que aunque este codigo
   // se equivocara, quien no compro no obtendria nada. Dura 30 minutos porque
   // mirar un album lleva mas que abrir un video y cada foto se pide al abrirla.
-  const fotos: { orden: number; url: string; ancho: number | null; alto: number | null }[] = []
+  const fotos: { orden: number; url: string; mini: string | null; ancho: number | null; alto: number | null }[] = []
 
   if (esAlbum) {
     const { data: filas, error: e4 } = await comoUsuario
-      .from('album_fotos').select('orden,ruta,ancho,alto').eq('clip_id', clip).order('orden')
+      .from('album_fotos').select('orden,ruta,ruta_mini,ancho,alto').eq('clip_id', clip).order('orden')
     if (e4) return responder({ error: e4.message }, 500)
     if (!filas?.length) return responder({ error: 'Ese album no tiene fotos' }, 404)
     const { data: firmadas, error: e5 } = await comoUsuario
-      .storage.from('albumes').createSignedUrls(filas.map(f => f.ruta), 1800)
+      .storage.from('albumes').createSignedUrls(
+        filas.flatMap(f => f.ruta_mini ? [f.ruta, f.ruta_mini] : [f.ruta]), 1800)
     if (e5) return responder({ error: e5.message }, 500)
     const porRuta = new Map((firmadas ?? []).map(f => [f.path, f]))
     for (const f of filas) {
@@ -118,7 +119,10 @@ Deno.serve(async (req) => {
       // Una foto sin firma NO se omite en silencio: un album incompleto se
       // veria como completo. Se falla entero y se dice.
       if (!firmada?.signedUrl) return responder({ error: 'No se pudieron firmar las fotos del album' }, 500)
-      fotos.push({ orden: f.orden, url: firmada.signedUrl, ancho: f.ancho ?? null, alto: f.alto ?? null })
+      // La miniatura es una MEJORA: si no esta o no se pudo firmar, la vista cae
+      // a la foto grande. La foto grande, en cambio, no es opcional.
+      const chica = f.ruta_mini ? porRuta.get(f.ruta_mini)?.signedUrl ?? null : null
+      fotos.push({ orden: f.orden, url: firmada.signedUrl, mini: chica, ancho: f.ancho ?? null, alto: f.alto ?? null })
     }
   } else {
     if (!fila.storage_path) return responder({ error: 'Ese clip no tiene archivo' }, 404)

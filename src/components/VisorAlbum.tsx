@@ -142,7 +142,7 @@ function Mosaico({ foto, indice, marca, alAbrir }: {
       }}>
       {cerca && (
         <div aria-hidden style={{ position: 'absolute', inset: 0,
-          backgroundImage: `url("${foto.url}")`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+          backgroundImage: `url("${foto.mini ?? foto.url}")`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
       )}
       {marca && <div aria-hidden style={{ position: 'absolute', inset: 0, backgroundImage: mosaicoDeMarca(marca, false) }} />}
     </button>
@@ -217,7 +217,10 @@ function Ampliada({ fotos, inicio, marca, titulo, alCerrar }: {
         width: `min(100vw, calc((100vh - 110px) * ${ratio}))`, maxHeight: 'calc(100vh - 110px)',
       }}>
         <div role="img" aria-label={`${titulo}, foto ${i + 1}`} style={{
-          position: 'absolute', inset: 0, backgroundImage: `url("${f.url}")`,
+          // Dos capas: la grande encima y, debajo, la miniatura, que ya esta en
+          // cache de la cuadricula y se ve al instante mientras la grande llega.
+          position: 'absolute', inset: 0,
+          backgroundImage: f.mini ? `url("${f.url}"), url("${f.mini}")` : `url("${f.url}")`,
           backgroundSize: 'contain', backgroundRepeat: 'no-repeat', backgroundPosition: 'center',
         }} />
         {marca && <div aria-hidden style={{ position: 'absolute', inset: 0, backgroundImage: mosaicoDeMarca(marca, true) }} />}

@@ -111,7 +111,12 @@ export async function urlVideoFirmada(clipId: string): Promise<Acceso> {
   return { url: r.url, portada: r.portada ?? null, pais: r.pais ?? null }
 }
 
-export type FotoFirmada = { orden: number; url: string; ancho: number | null; alto: number | null }
+export type FotoFirmada = {
+  orden: number; url: string
+  /** Miniatura firmada de ~480 px; `null` si el album es de antes de las miniaturas. */
+  mini: string | null
+  ancho: number | null; alto: number | null
+}
 
 export type AccesoAlbum =
   | { fotos: FotoFirmada[]; portada: string | null; pais: string | null; expira_en: number }

@@ -35,6 +35,9 @@ export async function configAlbumes(): Promise<ConfigAlbumes> {
  *  mantiene cada archivo en ~1 MB (el limite del bucket es 10 MB). */
 export const LADO_MAXIMO = 2400
 const CALIDAD = 0.88
+/** La miniatura de la cuadricula: ~480 px de lado largo, decenas de KB. */
+export const LADO_MINIATURA = 480
+const CALIDAD_MINIATURA = 0.72
 /** Lo que se acepta de entrada, antes de volver a codificar. */
 export const TIPOS_ACEPTADOS = ['image/jpeg', 'image/png', 'image/webp']
 export const MAX_BYTES_ENTRADA = 30 * 1024 * 1024
@@ -42,9 +45,12 @@ export const MAX_BYTES_ENTRADA = 30 * 1024 * 1024
 export type FotoLista = {
   /** La foto ya limpia, en JPEG. */
   archivo: File
+  /** La miniatura de la cuadricula, tambien limpia. */
+  mini: File
   ancho: number
   alto: number
-  /** Para la vista previa. Hay que soltarla con `URL.revokeObjectURL`. */
+  /** Para la vista previa (sale de la miniatura, que pesa mucho menos). Hay que
+   *  soltarla con `URL.revokeObjectURL`. */
   vista: string
 }
 
@@ -64,21 +70,29 @@ export async function limpiarFoto(original: File): Promise<FotoLista | null> {
     // `imageOrientation: 'from-image'` aplica la rotacion del EXIF a los pixeles
     // ANTES de tirar el EXIF: si no, una foto vertical saldria de lado.
     const mapa = await createImageBitmap(original, { imageOrientation: 'from-image' })
-    const escala = Math.min(1, LADO_MAXIMO / Math.max(mapa.width, mapa.height))
-    const ancho = Math.max(1, Math.round(mapa.width * escala))
-    const alto = Math.max(1, Math.round(mapa.height * escala))
-    const c = document.createElement('canvas')
-    c.width = ancho; c.height = alto
-    const ctx = c.getContext('2d')
-    if (!ctx) { mapa.close(); return null }
-    // Fondo blanco: un PNG con transparencia saldria negro en JPEG.
-    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, ancho, alto)
-    ctx.drawImage(mapa, 0, 0, ancho, alto)
+    // Una sola lectura del archivo para las dos copias.
+    const dibujar = async (lado: number, calidad: number) => {
+      const e = Math.min(1, lado / Math.max(mapa.width, mapa.height))
+      const w = Math.max(1, Math.round(mapa.width * e)), h = Math.max(1, Math.round(mapa.height * e))
+      const c = document.createElement('canvas')
+      c.width = w; c.height = h
+      const ctx = c.getContext('2d')
+      if (!ctx) return null
+      // Fondo blanco: un PNG con transparencia saldria negro en JPEG.
+      ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h)
+      ctx.drawImage(mapa, 0, 0, w, h)
+      const b = await new Promise<Blob | null>(res => c.toBlob(res, 'image/jpeg', calidad))
+      return b && (await sinMetadata(b)) ? { b, w, h } : null
+    }
+    const grande = await dibujar(LADO_MAXIMO, CALIDAD)
+    const chica = await dibujar(LADO_MINIATURA, CALIDAD_MINIATURA)
     mapa.close()
-    const blob = await new Promise<Blob | null>(res => c.toBlob(res, 'image/jpeg', CALIDAD))
-    if (!blob || !(await sinMetadata(blob))) return null
-    const archivo = new File([blob], 'foto.jpg', { type: 'image/jpeg' })
-    return { archivo, ancho, alto, vista: URL.createObjectURL(blob) }
+    if (!grande || !chica) return null
+    return {
+      archivo: new File([grande.b], 'foto.jpg', { type: 'image/jpeg' }),
+      mini: new File([chica.b], 'mini.jpg', { type: 'image/jpeg' }),
+      ancho: grande.w, alto: grande.h, vista: URL.createObjectURL(chica.b),
+    }
   } catch {
     return null
   }
@@ -134,7 +148,7 @@ export async function subirAlbum(args: {
     // Las fotos, de tres en tres: una por una tarda mucho y todas a la vez
     // revienta la conexion del celular.
     let hechas = 0
-    const filas: { clip_id: string; orden: number; ruta: string; ancho: number; alto: number; bytes: number }[] = []
+    const filas: { clip_id: string; orden: number; ruta: string; ruta_mini: string; ancho: number; alto: number; bytes: number }[] = []
     let siguiente = 0
     let fallo: string | null = null
     const trabajador = async () => {
@@ -143,10 +157,14 @@ export async function subirAlbum(args: {
         if (i >= total) return
         const f = fotos[i]
         const ruta = `${uid}/${clipId}/${i + 1}.jpg`
+        const rutaMini = `${uid}/${clipId}/mini/${i + 1}.jpg`
         const r = await subirArchivo('albumes', uid, f.archivo, ruta)
         if (r.error) { fallo = `La foto ${i + 1} no se pudo subir: ${r.error}`; return }
         subidas.push(ruta)
-        filas.push({ clip_id: clipId!, orden: i + 1, ruta, ancho: f.ancho, alto: f.alto, bytes: f.archivo.size })
+        const m = await subirArchivo('albumes', uid, f.mini, rutaMini)
+        if (m.error) { fallo = `La miniatura de la foto ${i + 1} no se pudo subir: ${m.error}`; return }
+        subidas.push(rutaMini)
+        filas.push({ clip_id: clipId!, orden: i + 1, ruta, ruta_mini: rutaMini, ancho: f.ancho, alto: f.alto, bytes: f.archivo.size })
         hechas++
         alAvanzar({ paso: 'Subiendo las fotos…', hechas, total })
       }
