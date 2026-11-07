@@ -97,7 +97,7 @@ export function canales(r: ResumenEstudio): Canal[] {
       nota: 'Al subir eliges tambien si se puede rentar por 48 o 72 horas',
     },
     {
-      clave: 'encargos', titulo: 'Mensajes y encargos', icono: 'sobre', ruta: '/chat',
+      clave: 'encargos', titulo: 'Encargos', icono: 'sobre', ruta: '/chat',
       grupo: 'hacer',
       descripcion: r.encargosAbiertos > 0
         ? `${cuantos(r.encargosAbiertos, 'solicitud', 'solicitudes')} ${palabra(r.encargosAbiertos, 'abierta')}`

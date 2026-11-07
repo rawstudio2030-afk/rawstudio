@@ -71,7 +71,7 @@ export function VistaModo({ papel, trato, alIr }: {
           titulo={papel === 'creadora' ? comoCreador(trato) : 'A la aplicación'}
           que={papel === 'creadora'
             ? 'Tu estudio, tus clips, tus ganancias y el catálogo.'
-            : 'El catálogo, tu biblioteca y tus mensajes.'}
+            : 'El catálogo, tu biblioteca y tus encargos.'}
           al={() => alIr('app')} />
 
         <Puerta

@@ -79,7 +79,7 @@ export const SCREENS = [
   { path: '/upload',    n: '05', title: 'Upload',         el: <Upload /> },
   { path: '/earnings',  n: '06', title: 'Earnings',       el: <Earnings /> },
   { path: '/library',   n: '07', title: 'Library',        el: <Library /> },
-  { path: '/chat',      n: '08', title: 'Mensajes',       el: <Chat /> },
+  { path: '/chat',      n: '08', title: 'Encargos',       el: <Chat /> },
   { path: '/creadoras', n: '09', title: 'Para creadoras', el: <Creators /> },
   { path: '/entrar',    n: '10', title: 'La puerta',      el: <Entrar /> },
   { path: '/registro',  n: '11', title: 'Crear cuenta',   el: <Acceso modo="registro" /> },

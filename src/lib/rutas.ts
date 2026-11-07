@@ -89,7 +89,7 @@ export const BARRA: Destino[] = [
   { path: '/library',   titulo: 'Biblioteca', icono: 'biblioteca', papeles: ['usuaria'] },
   { path: '/estudio',   titulo: 'Estudio',    icono: 'estudio', papeles: ['creadora'] },
   { path: '/creadoras', titulo: 'Publicar',   icono: 'chispa', papeles: ['visitante'] },
-  { path: '/chat',      titulo: 'Mensajes',   icono: 'sobre', papeles: ['usuaria', 'creadora'] },
+  { path: '/chat',      titulo: 'Encargos',   icono: 'sobre', papeles: ['usuaria', 'creadora'] },
   { path: '/wallet',    titulo: 'Dinero',     icono: 'dinero', papeles: ['usuaria', 'creadora'] },
   /* «Yo» muestra el perfil, no los ajustes. Apuntaba a /perfil, que es un
      formulario: nombre, foto, contacto, cerrar sesion. Una pestaña que se

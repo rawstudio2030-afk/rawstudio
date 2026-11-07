@@ -52,7 +52,7 @@ export default function Encargos() {
   if (abierto) return <Detalle e={abierto} cierra={() => setAbierto(null)} recarga={cargar} />
 
   return (
-    <Marco titulo="Mensajes" volverA="/clip">
+    <Marco titulo="Encargos" volverA="/clip">
       <div style={{ font: `400 14px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave, marginBottom: 20 }}>
         {esCreadora ? (
           <>Alguien te pide algo concreto y propone un precio. Negocias, aceptas, te paga —
@@ -71,9 +71,10 @@ export default function Encargos() {
       <div style={{ marginTop: 26, padding: '15px 16px', borderRadius: RADIO.neon,
         border: `1.5px dashed ${LINEA.marcada}` }}>
         <div style={{ font: `400 13px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
-          <b style={{ color: COLOR.texto }}>La conversación libre</b>, con
-          propinas y contenido de pago dentro del mensaje, todavía no existe.
-          Por ahora Mensajes son los encargos.
+          Aquí solo van los encargos. Para preguntarle algo a una creadora,
+          usa <b style={{ color: COLOR.texto }}>«Consultar por Telegram»</b> en la ficha de
+          sus clips. La conversación libre, con propinas y contenido de pago dentro del
+          mensaje, todavía no existe.
         </div>
       </div>
     </Marco>
