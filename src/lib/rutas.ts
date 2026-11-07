@@ -32,7 +32,7 @@ export const REDIRIGE_SI_HAY_SESION = ['/entrar', '/registro', '/acceso']
 export const RUTAS_PANEL = ['/admin', '/alta-creadora']
 
 export const EXIGE_SESION = [
-  '/library', '/chat', '/avisos', '/perfil', '/yo', '/upload', '/earnings', '/admin', '/wallet',
+  '/library', '/chat', '/avisos', '/perfil', '/yo', '/upload', '/upload/album', '/earnings', '/admin', '/wallet',
   '/estudio', '/estudio/niveles', '/estudio/encargos', '/estudio/blog',
   '/estudio/cobro', '/estudio/retirar',
 ]

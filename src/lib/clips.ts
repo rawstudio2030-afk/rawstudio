@@ -169,7 +169,7 @@ export async function clipsDe(creatorId: string): Promise<Lectura<Clip[]>> {
   return leido((data ?? []) as Clip[])
 }
 
-export type Bucket = 'clips' | 'clip-covers' | 'clip-covers-full'
+export type Bucket = 'clips' | 'clip-covers' | 'clip-covers-full' | 'albumes'
 
 export async function subirArchivo(
   bucket: Bucket, uid: string, archivo: File, ruta?: string,
@@ -215,6 +215,8 @@ export async function crearClip(c: {
   renta_horas?: number | null; renta_coins?: number | null
   preview_path?: string | null
   caduca_at?: string | null
+  /** `album` para un album de fotos; sin esto es un video. */
+  formato?: 'video' | 'album'
 }): Promise<{ id?: string; error?: string }> {
   const { data, error } = await supabase.from('clips').insert(c).select('id').single()
   if (error) return { error: error.message }

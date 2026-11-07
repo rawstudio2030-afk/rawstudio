@@ -19,6 +19,7 @@ import Equivalente from '../components/Equivalente'
 import { Pulsable, Enlace } from '../components/Pulsable'
 import Centro from '../components/Centro'
 import { perfilParaPublicar } from '../lib/trato'
+import { configAlbumes } from '../lib/albumes'
 
 
 /* Modo consumo: rotulos en `textoSuave` (eran textoTenue, 3.78:1, bajo AA) y
@@ -47,6 +48,15 @@ export default function Upload() {
 
   // Si la identidad se aprobo mientras esta sesion seguia abierta, el perfil en
   // memoria sigue diciendo «sin verificar». Se vuelve a leer UNA vez al entrar.
+  // ¿Se ofrecen los albumes de fotos? Solo si el interruptor del panel esta encendido.
+  const [hayAlbumes, setHayAlbumes] = useState(false)
+  useEffect(() => {
+    if (!sesion) return
+    let vivo = true
+    configAlbumes().then(c => { if (vivo) setHayAlbumes(c.activos) })
+    return () => { vivo = false }
+  }, [sesion])
+
   const yaRefresco = useRef(false)
   useEffect(() => {
     if (yaRefresco.current || !perfil || perfil.identidad_verificada) return
@@ -262,6 +272,13 @@ export default function Upload() {
           <Enlace a="/verificar" className="boton-principal" style={{ marginTop: 14 }}>
             Verificar mi identidad
           </Enlace>
+        </div>
+      )}
+
+      {hayAlbumes && (
+        <div style={{ font: `400 14px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
+          ¿Quieres vender fotos en vez de un video?{' '}
+          <Enlace a="/upload/album" style={{ color: COLOR.acento, textDecoration: 'underline' }}>Subir un álbum de fotos</Enlace>
         </div>
       )}
 

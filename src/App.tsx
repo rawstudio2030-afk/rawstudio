@@ -37,6 +37,7 @@ import { Privacidad, Terminos } from './screens/Legal'
 import { Contacto, Preguntas } from './screens/Ayuda'
 import Consultas from './screens/Consultas'
 import Avisos from './screens/Avisos'
+import UploadAlbum from './screens/UploadAlbum'
 import CampanaAvisos from './components/CampanaAvisos'
 /* Tambien solo para administracion, y tambien se lleva medio `lib/admin`
    consigo: dar de alta una creadora sube expediente, publica por ella y le
@@ -71,6 +72,7 @@ export const SCREENS = [
   { path: '/terminos',  n: '19', title: 'Términos',        el: <Terminos /> },
   { path: '/contacto',  n: '26', title: 'Contacto',        el: <Contacto /> },
   { path: '/preguntas', n: '27', title: 'Preguntas frecuentes', el: <Preguntas /> },
+  { path: '/upload/album', n: '30', title: 'Nuevo álbum',    el: <UploadAlbum /> },
   { path: '/avisos',    n: '29', title: 'Avisos',         el: <Avisos /> },
   { path: '/consultas', n: '28', title: 'Consultas por Telegram', el: <Consultas /> },
   { path: '/alta-creadora', n: '20', title: 'Alta de creadora', el: <AltaCreadora /> },
