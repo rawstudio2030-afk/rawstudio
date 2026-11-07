@@ -42,11 +42,11 @@ export default function VincularTelegram() {
 
   return (
     <section aria-label="Consultas por Telegram" style={{
-      marginTop: 30, padding: 16, border: `1px solid ${LINEA.suave}`, borderRadius: 12,
+      margin: '0 0 22px', padding: 16, border: `1px solid ${LINEA.suave}`, borderRadius: 12,
     }}>
       <h2 style={{ margin: 0, font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 2,
         textTransform: 'uppercase', color: COLOR.textoSuave }}>
-        Consultas por Telegram
+        Mensajes · Consultas por Telegram
       </h2>
       <p style={{ margin: '10px 0 0', font: `400 14px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
         {vinculada

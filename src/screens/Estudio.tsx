@@ -149,6 +149,10 @@ export default function Estudio() {
         <span aria-hidden style={{ color: COLOR.textoSuave, font: `400 22px/1 ${FUENTE.ui}` }}>›</span>
       </Enlace>
 
+      {/* Los mensajes de quien consulta llegan por Telegram: aqui se vincula.
+          Va arriba, a la vista; al final de la pagina nadie lo encontraba. */}
+      <VincularTelegram />
+
       <Lista canales={hacer} nav={nav} />
 
       {ajustar.length > 0 && (
@@ -167,7 +171,6 @@ export default function Estudio() {
         </>
       )}
 
-      <VincularTelegram />
     </div>
   )
 }
