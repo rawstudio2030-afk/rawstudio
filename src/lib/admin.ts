@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { borrarArchivos } from './archivos'
 import { esTrato, type Trato } from './trato'
 import type { MotivoReporte } from './reportes'
 
@@ -424,8 +425,10 @@ export async function eliminarCuenta(id: string, motivo: string, confirmar: stri
   for (const a of archivos) porBucket.set(a.bucket, [...(porBucket.get(a.bucket) ?? []), a.ruta])
   const fallos: string[] = []
   for (const [bucket, rutas] of porBucket) {
-    const { error: e } = await supabase.storage.from(bucket).remove(rutas)
-    if (e) fallos.push(`${bucket}: ${e.message}`)
+    // Se comprueba que de verdad se borraron: `remove` no da error cuando la
+    // politica no lo deja, solo devuelve menos archivos.
+    const siguen = await borrarArchivos(supabase.storage, bucket, rutas)
+    if (siguen.length) fallos.push(`${bucket}: ${siguen.length} de ${rutas.length}`)
   }
   return {
     eliminada: true,
@@ -754,8 +757,8 @@ export async function porPurgar() {
 export async function purgar(c: PorPurgar) {
   const errores: string[] = []
   if (c.storage_path) {
-    const { error } = await supabase.storage.from('clips').remove([c.storage_path])
-    if (error) errores.push(`video: ${error.message}`)
+    const siguen = await borrarArchivos(supabase.storage, 'clips', [c.storage_path])
+    if (siguen.length) errores.push('video: el archivo sigue en el almacenamiento')
   }
   if (c.cover_path) {
     // La portada vive en DOS buckets con la MISMA ruta: la de 32 px en el
@@ -769,8 +772,8 @@ export async function purgar(c: PorPurgar) {
     // privado, pero habria empezado a acumular copias con el primer clip
     // nuevo que se borrara.
     for (const bucket of ['clip-covers', 'clip-covers-full'] as const) {
-      const { error } = await supabase.storage.from(bucket).remove([c.cover_path])
-      if (error) errores.push(`portada (${bucket}): ${error.message}`)
+      const siguen = await borrarArchivos(supabase.storage, bucket, [c.cover_path])
+      if (siguen.length) errores.push(`portada (${bucket}): el archivo sigue en el almacenamiento`)
     }
   }
   if (errores.length) return errores.join(' · ')
