@@ -31,11 +31,13 @@ import {
 } from '../lib/canales'
 import { clipsDe } from '../lib/clips'
 import { Marco, Boton, Campo, Etiqueta, Aviso, Vacio } from './piezas'
-import { usd } from '../lib/dinero'
+import { usdYPesos } from '../lib/dinero'
+import { useMoneda } from '../lib/moneda'
 import { Pulsable } from '../components/Pulsable'
 
 export default function Encargos() {
   const { perfil } = useSesion()
+  useMoneda()
   const esCreadora = !!perfil?.is_creator
   const [lista, setLista] = useState<Encargo[]>([])
   const [abierto, setAbierto] = useState<Encargo | null>(null)
@@ -85,6 +87,7 @@ function Detalle({ e, cierra, recarga }: {
   e: Encargo; cierra: () => void; recarga: () => Promise<void>
 }) {
   const { sesion } = useSesion()
+  useMoneda()
   const nav = useNavigate()
   const [msgs, setMsgs] = useState<Awaited<ReturnType<typeof mensajesEncargo>>>([])
   const [texto, setTexto] = useState('')
@@ -120,7 +123,7 @@ function Detalle({ e, cierra, recarga }: {
       </div>
 
       <div style={{ marginTop: 14, font: `700 30px/1 ${FUENTE.mono}`, color: COLOR.dinero }}>
-        {usd(e.coins)}
+        {usdYPesos(e.coins)}
       </div>
 
       <Aviso texto={error} />
@@ -142,7 +145,7 @@ function Detalle({ e, cierra, recarga }: {
               oferta ? parseInt(oferta, 10) : undefined).then(tras)}>Responder</Boton>
             {e.soy_creadora && (
               <Boton tono="primario" al={() => aceptarEncargo(e.id).then(tras)}>
-                Aceptar por {usd(e.coins)}
+                Aceptar por {usdYPesos(e.coins)}
               </Boton>
             )}
           </div>
@@ -151,7 +154,7 @@ function Detalle({ e, cierra, recarga }: {
 
       {e.estado === 'aceptado' && !e.soy_creadora && (
         <Boton tono="primario" al={() => pagarEncargo(e.id).then(tras)}>
-          Pagar {usd(e.coins)}
+          Pagar {usdYPesos(e.coins)}
         </Boton>
       )}
       {e.estado === 'aceptado' && e.soy_creadora && (
@@ -193,7 +196,7 @@ function Detalle({ e, cierra, recarga }: {
               <div style={{ marginBottom: 14, padding: '14px 16px', borderRadius: RADIO.neon,
                 border: `1px solid ${COLOR.dinero}`, font: `400 14px/1.6 ${FUENTE.ui}`,
                 color: COLOR.textoSuave }}>
-                Ya pagó. Sus <b style={{ color: COLOR.dinero }}>{usd(e.coins)}</b> están retenidos
+                Ya pagó. Sus <b style={{ color: COLOR.dinero }}>{usdYPesos(e.coins)}</b> están retenidos
                 y se te abonan en cuanto entregues.
               </div>
               <Boton tono="primario" al={async () => {
@@ -252,7 +255,7 @@ export function ListaEncargos({ lista, esCreadora, alAbrir }: {
                   overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box',
                   WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{e.descripcion}</div>
                 <div style={{ marginTop: 8, font: `700 18px/1 ${FUENTE.mono}`, color: COLOR.dinero }}>
-                  {usd(e.coins)}
+                  {usdYPesos(e.coins)}
                 </div>
               </Pulsable>
             )
@@ -285,7 +288,7 @@ export function Burbujas({ msgs, yo }: {
               )}
               {m.oferta_coins != null && (
                 <div style={{ marginTop: 6, font: `700 14px/1 ${FUENTE.mono}`, color: COLOR.dinero }}>
-                  Ofrece {usd(m.oferta_coins)}
+                  Ofrece {usdYPesos(m.oferta_coins)}
                 </div>
               )}
             </div>

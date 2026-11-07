@@ -13,7 +13,9 @@ import {
 import { COLOR, LINEA, FUENTE, RADIO } from '../lib/diseño'
 import Icono from '../components/Iconos'
 import MisClips from '../components/MisClips'
-import { usd } from '../lib/dinero'
+import { usd, usdYPesos } from '../lib/dinero'
+import { useMoneda } from '../lib/moneda'
+import Equivalente from '../components/Equivalente'
 import { Pulsable, Enlace } from '../components/Pulsable'
 import Centro from '../components/Centro'
 import { perfilParaPublicar } from '../lib/trato'
@@ -39,6 +41,7 @@ const MODOS: { v: Visibilidad; t: string }[] = [
 export default function Upload() {
   const nav = useNavigate()
   const { sesion, perfil, trato, cargando, refrescarPerfil } = useSesion()
+  useMoneda()
   const refVideo = useRef<HTMLInputElement>(null)
   const refPortada = useRef<HTMLInputElement>(null)
 
@@ -388,8 +391,9 @@ export default function Upload() {
               <Paso t="+" al={() => setPrecio(p => p + 50)} />
             </div>
           </div>
+          <Equivalente centavos={precio} estilo={{ textAlign: 'right', marginTop: 6 }} />
           <div style={{ ...ayuda, marginTop: 14, borderTop: '1px solid rgba(255,255,255,.1)', paddingTop: 14 }}>
-            plataforma 20% · <span style={{ color: COLOR.texto }}>tú recibes {usd(gana)}</span>
+            plataforma 20% · <span style={{ color: COLOR.texto }}>tú recibes {usdYPesos(gana)}</span>
           </div>
         </div>
       )}

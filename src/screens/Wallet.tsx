@@ -20,6 +20,8 @@ import {
   type Movimiento, type Cara,
 } from '../lib/monedero'
 import { usd } from '../lib/dinero'
+import { useMoneda } from '../lib/moneda'
+import Equivalente from '../components/Equivalente'
 import { COLOR, LINEA, FUENTE, RADIO, GLOW } from '../lib/diseño'
 import Icono from '../components/Iconos'
 import { Pulsable } from '../components/Pulsable'
@@ -36,6 +38,7 @@ type Pestana = 'todo' | Cara
 export default function Dinero() {
   const nav = useNavigate()
   const { sesion, perfil, cargando: cargandoSesion } = useSesion()
+  useMoneda()
   const [centavos, setCentavos] = useState<number | null>(null)
   const [movs, setMovs] = useState<Movimiento[]>([])
   const [pestana, setPestana] = useState<Pestana>('todo')
@@ -118,6 +121,7 @@ export function VistaDinero({
       }}>
         {fallo ? '—' : usd(centavos)}
       </div>
+      {!fallo && <Equivalente centavos={centavos} estilo={{ fontSize: 14, marginTop: 8 }} />}
       {fallo ? (
         <div style={{ marginTop: 10 }}>
           <div style={{ font: `400 13px/1.5 ${FUENTE.mono}`, color: COLOR.acento }}>

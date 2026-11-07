@@ -17,7 +17,9 @@ import ConsultarPorTelegram from '../components/ConsultarPorTelegram'
 import Comentarios from '../components/Comentarios'
 import Reproductor from '../components/Reproductor'
 import { COLOR, VELO, TINTE, FUENTE, RADIO } from '../lib/diseño'
-import { usd } from '../lib/dinero'
+import { usd, usdYPesos, limpiarMensajeDinero } from '../lib/dinero'
+import { useMoneda } from '../lib/moneda'
+import Equivalente from '../components/Equivalente'
 import { Pulsable, Enlace } from '../components/Pulsable'
 import Centro from '../components/Centro'
 import Icono from '../components/Iconos'
@@ -28,6 +30,7 @@ export default function ClipDetail() {
   const nav = useNavigate()
   const { id } = useParams()
   const { sesion, perfil: perfilPropio } = useSesion()
+  useMoneda()
   const [clip, setClip] = useState<ClipConAutora | null>(null)
   const [cargando, setCargando] = useState(true)
   // «Este clip ya no existe» es definitivo: quien llega por un enlace
@@ -78,7 +81,7 @@ export default function ClipDetail() {
     setRentando(true); setErrorCompra('')
     const r = await rentarClip(clip.id)
     setRentando(false)
-    if ('error' in r) { setErrorCompra(r.error!); return }
+    if ('error' in r) { setErrorCompra(limpiarMensajeDinero(r.error!)); return }
     // Igual que al comprar: hay que volver a pedir la URL firmada, porque
     // hasta ahora la funcion de borde la estaba negando.
     setCoins(r.saldo ?? null)
@@ -93,7 +96,7 @@ export default function ClipDetail() {
     if (!clip || comprando) return
     setComprando(true); setErrorCompra('')
     const r = await comprarClip(clip.id)
-    if (!r.ok) { setErrorCompra(r.error ?? 'No se pudo completar'); setComprando(false); return }
+    if (!r.ok) { setErrorCompra(limpiarMensajeDinero(r.error ?? 'No se pudo completar')); setComprando(false); return }
     setCoins(r.saldo ?? null)
     const a = await urlVideoFirmada(clip.id)
     if ('url' in a) { setVideo(a.url); setPortadaNitida(a.portada) }
@@ -305,11 +308,13 @@ export default function ClipDetail() {
                 <div style={{ flex: 1 }}>
                   <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase', color: '#FF5BDC' }}>Comprar</div>
                   <div style={{ font: `700 30px/1 ${FUENTE.mono}`, color: COLOR.dinero, marginTop: 8 }}>{usd(clip.price_coins)}</div>
+                  <Equivalente centavos={clip.price_coins} />
                 </div>
                 {clip.renta_coins != null && clip.renta_horas != null && (
                   <div style={{ flex: 1, paddingLeft: 16, borderLeft: '1px solid rgba(255,255,255,.14)' }}>
                     <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase', color: '#FF5BDC' }}>Rentar</div>
                     <div style={{ font: `700 30px/1 ${FUENTE.mono}`, color: COLOR.dinero, marginTop: 8 }}>{usd(clip.renta_coins)}</div>
+                    <Equivalente centavos={clip.renta_coins} />
                     <div style={{ font: `400 12px/1.3 ${FUENTE.ui}`, color: COLOR.textoTenue, marginTop: 6 }}>{clip.renta_horas} h para ver</div>
                   </div>
                 )}
@@ -350,7 +355,7 @@ export default function ClipDetail() {
                       font: `400 11px/1.6 ${FUENTE.mono}`, color: COLOR.textoTenue, marginTop: 10,
                       textAlign: 'center', cursor: 'pointer', textDecoration: 'underline',
                     }}>
-                      Tu saldo: {coins !== null ? usd(coins) : '…'}
+                      Tu saldo: {coins !== null ? usdYPesos(coins) : '…'}
                     </Enlace>
                   )}
                   {/* Renta: mas barata y por tiempo. Se ofrece DEBAJO de la
@@ -364,7 +369,7 @@ export default function ClipDetail() {
                       font: `700 12px/1 ${FUENTE.ui}`,
                     }}>
                       {rentando ? 'Rentando…'
-                        : `O réntalo ${clip.renta_horas} h por ${usd(clip.renta_coins)}`}
+                        : `O réntalo ${clip.renta_horas} h por ${usdYPesos(clip.renta_coins)}`}
                     </Pulsable>
                   )}
                   {errorCompra && (

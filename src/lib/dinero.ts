@@ -45,3 +45,46 @@ export function aCentavos(texto: string): number | null {
   if (!isFinite(n) || n < 0) return null
   return Math.round(n * 100)
 }
+
+
+/* ---------- Equivalente en pesos (solo informativo) ----------
+ *
+ * Todo se guarda y se cobra en dolares. Junto al monto puede salir el
+ * equivalente aproximado en pesos, con el mismo tipo de cambio que convierte los
+ * retiros. Un interruptor del panel lo apaga; sin tipo de cambio no se muestra
+ * (nunca se inventa una cifra).
+ *
+ * La configuracion vive aqui, como variable del modulo, y la carga
+ * `ProveedorMoneda` (src/lib/moneda.tsx), que ademas vuelve a pintar las
+ * pantallas cuando llega. */
+
+export type ConfigMoneda = {
+  mostrarPesos: boolean
+  /** Centavos de peso por dolar (1850 = 18.50 MXN por USD). */
+  cambio: number | null
+}
+
+let config: ConfigMoneda = { mostrarPesos: false, cambio: null }
+
+export function configurarMoneda(c: ConfigMoneda) { config = c }
+
+/** Pesos aproximados de unos centavos de dolar, como texto: «≈ $44.40 MXN».
+ *  `null` si esta apagado o falta el tipo de cambio. */
+export function equivalentePesos(centavosUsd: number | null | undefined): string | null {
+  if (!config.mostrarPesos || !config.cambio || centavosUsd == null) return null
+  return `≈ ${mxn(Math.round(Number(centavosUsd) * config.cambio / 100))} MXN`
+}
+
+/** «$2.40» o, con el equivalente encendido, «$2.40 (≈ $44.40 MXN)». */
+export function usdYPesos(centavos: number | null | undefined): string {
+  const eq = equivalentePesos(centavos)
+  return eq ? `${usd(centavos)} (${eq})` : usd(centavos)
+}
+
+/** Algunos mensajes del servidor todavia dicen «coins», la unidad de antes. Una
+ *  persona no debe verlos: se reescriben con la moneda de verdad. */
+export function limpiarMensajeDinero(msg: string): string {
+  return msg
+    .replace(/Te faltan (\d+) coins?/g, (_, n) => `Te faltan ${usd(Number(n))}`)
+    .replace(/precio en coins/g, 'precio')
+}

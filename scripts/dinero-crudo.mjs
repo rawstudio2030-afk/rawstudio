@@ -27,7 +27,7 @@
 import { readFileSync, globSync } from 'node:fs'
 
 const DINERO = /\b(?:\w*_coins|precios?|saldos?|montos?|importes?|brutos?|comisiones?|comision|ganado|total_ganado|rentaCoins|gana)\b/
-const FORMATEA = /\b(?:usd|usdPlano|mxn|pesos|aCentavos|toLocaleString)\s*\(/
+const FORMATEA = /\b(?:usd|usdYPesos|usdPlano|mxn|pesos|aCentavos|toLocaleString)\s*\(/
 const CLAVE_VISIBLE = /\b(?:v|valor|texto|dato)\s*:\s*([^,}\n]+)/g
 
 /** Deja el codigo en pie y vacia solo el texto:

@@ -1031,6 +1031,21 @@ export async function tipoCambio(): Promise<number | null> {
   return typeof v === 'number' ? v : null
 }
 
+/** ¿Se muestra a las personas el equivalente aproximado en pesos junto a los
+ *  montos en dolares? Es solo informativo; lo que se cobra son los dolares. */
+export async function mostrarPesos(): Promise<boolean> {
+  const { data } = await supabase.from('ajustes')
+    .select('valor').eq('clave', 'mostrar_equivalente_pesos').maybeSingle()
+  return data?.valor === true
+}
+
+export async function fijarMostrarPesos(valor: boolean) {
+  const { error } = await supabase.rpc('admin_ajustar_bandera', {
+    p_clave: 'mostrar_equivalente_pesos', p_valor: valor,
+  })
+  return error?.message ?? ''
+}
+
 export async function fijarTipoCambio(centavosPorDolar: number) {
   const { error } = await supabase.rpc('admin_ajustar_bandera_num', {
     p_clave: 'tipo_cambio_usd_mxn', p_valor: centavosPorDolar,

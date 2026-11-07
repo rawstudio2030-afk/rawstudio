@@ -11,7 +11,7 @@ import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 import { usd, aCentavos } from '../lib/dinero'
 import {
   listarRetiros, resolverRetiro, marcarPagado, encargosEnDisputa,
-  reembolsar, tipoCambio, fijarTipoCambio,
+  reembolsar, tipoCambio, fijarTipoCambio, mostrarPesos, fijarMostrarPesos,
   tasasConfirmadas, confirmarTasas,
   ajustesPendientes, aprobarAjuste, rechazarAjuste, type AjustePendiente,
   type Retiro, type EstadoRetiro, type EncargoDisputa,
@@ -42,6 +42,7 @@ export default function Retiros() {
   const [error, setError] = useState('')
   const [aviso, setAviso] = useState('')
   const [coin, setCoin] = useState<number | null>(null)
+  const [verPesos, setVerPesos] = useState(false)
   const [editandoCoin, setEditandoCoin] = useState(false)
   const [nuevoCoin, setNuevoCoin] = useState('')
   const [disputas, setDisputas] = useState<EncargoDisputa[]>([])
@@ -58,6 +59,7 @@ export default function Retiros() {
     const r = await listarRetiros(estado, pagina, POR_PAGINA)
     setFilas(r.filas); setTotal(r.total); setError(r.error); setCargando(false)
     setCoin(await tipoCambio())
+    setVerPesos(await mostrarPesos())
     setDisputas(await encargosEnDisputa())
     setTasas(await tasasConfirmadas())
     setPend(await ajustesPendientes())
@@ -150,6 +152,29 @@ export default function Retiros() {
               {coin ? 'Cambiar' : 'Definirlo'}
             </Boton>
           )}
+        </div>
+      </div>
+
+      {/* ---- Equivalente en pesos para quien ve el sitio ---- */}
+      <div style={{ marginBottom: 16, padding: '12px 14px', border: `1px solid ${LINEA.tenue}` }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
+              textTransform: 'uppercase', color: COLOR.texto }}>
+              Equivalente en pesos en el sitio: {verPesos ? 'encendido' : 'apagado'}
+            </div>
+            <div style={{ marginTop: 6, font: `400 11px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
+              {verPesos
+                ? `Junto a cada monto en dólares se muestra su equivalente aproximado en pesos${coin ? ` (por ejemplo, $2.40 ≈ ${pesos(Math.round(240 * coin / 100))})` : ', pero NO se ve mientras falte el tipo de cambio'}. Es solo informativo: lo que se cobra son los dólares. Mantén el tipo de cambio al día.`
+                : 'Los montos se ven solo en dólares. Al encenderlo se agrega el equivalente aproximado en pesos junto a cada monto.'}
+            </div>
+          </div>
+          <Boton tono={verPesos ? 'normal' : 'primario'}
+            al={async () => {
+              const m = await fijarMostrarPesos(!verPesos)
+              if (m) setError(m)
+              else { setAviso(verPesos ? 'Equivalente en pesos apagado.' : 'Equivalente en pesos encendido.'); await cargar() }
+            }}>{verPesos ? 'Apagar' : 'Encender'}</Boton>
         </div>
       </div>
 

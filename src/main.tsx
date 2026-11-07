@@ -5,15 +5,18 @@ import './deck.css'
 import './index.css'
 import App from './App'
 import { ProveedorSesion } from './lib/sesion'
+import { ProveedorMoneda } from './lib/moneda'
 
 // HashRouter y no BrowserRouter: GitHub Pages sirve estatico, sin reescritura
 // de rutas, asi que /clip daria 404 al recargar o al abrir el enlace directo.
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ProveedorSesion>
-      <HashRouter>
-        <App />
-      </HashRouter>
+      <ProveedorMoneda>
+        <HashRouter>
+          <App />
+        </HashRouter>
+      </ProveedorMoneda>
     </ProveedorSesion>
   </StrictMode>,
 )

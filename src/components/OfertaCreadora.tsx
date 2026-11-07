@@ -7,7 +7,8 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { COLOR, LINEA, FUENTE, RADIO } from '../lib/diseño'
 import { useSesion } from '../lib/sesion'
-import { usd } from '../lib/dinero'
+import { usdYPesos } from '../lib/dinero'
+import { useMoneda } from '../lib/moneda'
 import {
   nivelesDe, suscribirse, miSuscripcion, cancelarSuscripcion,
   crearEncargo, postsDe, type Nivel, type Post,
@@ -36,6 +37,7 @@ export default function OfertaCreadora({ creadora, handle }: {
   creadora: string; handle: string
 }) {
   const { sesion } = useSesion()
+  useMoneda()
   const nav = useNavigate()
   const [niveles, setNiveles] = useState<Nivel[]>([])
   const [posts, setPosts] = useState<Post[]>([])
@@ -107,7 +109,7 @@ export default function OfertaCreadora({ creadora, handle }: {
                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
                     <span style={{ font: `700 16px/1.3 ${FUENTE.ui}` }}>{t.nombre}</span>
                     <span style={{ font: `700 20px/1 ${FUENTE.mono}`, color: COLOR.dinero,
-                      whiteSpace: 'nowrap' }}>{usd(t.precio_coins)}</span>
+                      whiteSpace: 'nowrap' }}>{usdYPesos(t.precio_coins)}</span>
                   </div>
                   {t.descripcion && (
                     <div style={{ marginTop: 7, font: `400 13px/1.6 ${FUENTE.ui}`,
