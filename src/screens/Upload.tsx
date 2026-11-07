@@ -20,6 +20,7 @@ import { Pulsable, Enlace } from '../components/Pulsable'
 import Centro from '../components/Centro'
 import { perfilParaPublicar } from '../lib/trato'
 import { configAlbumes } from '../lib/albumes'
+import SelectorSubida from '../components/SelectorSubida'
 
 
 /* Modo consumo: rotulos en `textoSuave` (eran textoTenue, 3.78:1, bajo AA) y
@@ -275,12 +276,7 @@ export default function Upload() {
         </div>
       )}
 
-      {hayAlbumes && (
-        <div style={{ font: `400 14px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
-          ¿Quieres vender fotos en vez de un video?{' '}
-          <Enlace a="/upload/album" style={{ color: COLOR.acento, textDecoration: 'underline' }}>Subir un álbum de fotos</Enlace>
-        </div>
-      )}
+      {hayAlbumes && <SelectorSubida actual="video" />}
 
       {/* video */}
       <Pulsable al={() => refVideo.current?.click()} style={{

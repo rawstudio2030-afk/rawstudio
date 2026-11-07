@@ -16,6 +16,7 @@ import { COLOR, LINEA, FUENTE, DEGRADADO } from '../lib/diseño'
 import Icono from './Iconos'
 import Wordmark from './Wordmark'
 import { elegirModo } from '../lib/modo'
+import { useAlbumes } from '../lib/useAlbumes'
 
 
 /** El papel y el permiso de administrar se resuelven una vez y se comparten;
@@ -225,6 +226,7 @@ export function HuecoBarra() {
 export function BarraLateral() {
   const aqui = useLocation().pathname
   const { papel, esAdmin } = usePapel()
+  const albumes = useAlbumes()
 
   const fuera = RUTAS_ENTRADA.includes(aqui) || RUTAS_PANEL.some(r => aqui.startsWith(r))
 
@@ -241,6 +243,11 @@ export function BarraLateral() {
   // Quien publica tambien compra: en el riel hay sitio para su Biblioteca.
   if (papel === 'creadora') principales.splice(1, 0, BIBLIOTECA_DE_CREADORA)
   const estudio = visiblesPara(ESTUDIO, papel, esAdmin)
+  // Con los albumes encendidos, «Subir fotos» va justo debajo de «Subir un clip».
+  if (albumes?.activos && papel === 'creadora') {
+    const i = estudio.findIndex(d => d.path === '/upload')
+    estudio.splice(i + 1, 0, { path: '/upload/album', titulo: 'Subir fotos', icono: 'subir', papeles: ['creadora'] })
+  }
   const panel = visiblesPara(BARRA, papel, esAdmin).find(d => d.path === '/admin')
   const entradaEstudio = visiblesPara(BARRA, papel, esAdmin).find(d => d.path === '/estudio')
 

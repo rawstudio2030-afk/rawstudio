@@ -18,6 +18,7 @@ import { cuantos } from '../lib/plural'
 import { perfilParaPublicar } from '../lib/trato'
 import { Pulsable, Enlace } from '../components/Pulsable'
 import Centro from '../components/Centro'
+import SelectorSubida from '../components/SelectorSubida'
 
 const etiqueta: React.CSSProperties = {
   font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase', color: COLOR.textoSuave,
@@ -148,10 +149,10 @@ export default function UploadAlbum() {
         </div>
       )}
 
+      <SelectorSubida actual="fotos" />
+
       <div style={{ font: `400 14px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
-        Un álbum son de <b style={{ color: COLOR.texto }}>{min} a {max} fotos</b> por un precio fijo.
-        ¿Prefieres un video?{' '}
-        <Enlace a="/upload" style={{ color: COLOR.acento, textDecoration: 'underline' }}>Subir un video</Enlace>
+        Un álbum son de <b style={{ color: COLOR.texto }}>{min} a {cuantos(max, 'foto')}</b> por un precio fijo.
       </div>
 
       {/* fotos */}
