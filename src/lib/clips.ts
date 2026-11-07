@@ -104,6 +104,38 @@ export type Acceso =
  *
  *  La URL que devuelve dura 15 minutos: si se filtrara, expira pronto. */
 export async function urlVideoFirmada(clipId: string): Promise<Acceso> {
+  const r = await pedirAcceso(clipId)
+  if ('error' in r) return r
+  // Un album no tiene una sola URL: se abre con `fotosDeAlbum`.
+  if (r.tipo === 'album') return { error: 'Este contenido es un álbum de fotos' }
+  return { url: r.url, portada: r.portada ?? null, pais: r.pais ?? null }
+}
+
+export type FotoFirmada = { orden: number; url: string; ancho: number | null; alto: number | null }
+
+export type AccesoAlbum =
+  | { fotos: FotoFirmada[]; portada: string | null; pais: string | null; expira_en: number }
+  | { error: string; motivo?: 'sin_acceso' | 'geobloqueo'; pais?: string }
+
+/** Las fotos de un album, ya firmadas por la funcion de borde (con las mismas
+ *  comprobaciones de acceso, edad, cuenta y pais que el video). Las URLs duran
+ *  30 minutos (`expira_en`, en segundos): quien mire mas que eso tiene que volver
+ *  a pedirlas. */
+export async function fotosDeAlbum(clipId: string): Promise<AccesoAlbum> {
+  const r = await pedirAcceso(clipId)
+  if ('error' in r) return r
+  if (r.tipo !== 'album') return { error: 'Este contenido no es un álbum' }
+  return { fotos: r.fotos, portada: r.portada ?? null, pais: r.pais ?? null, expira_en: r.expira_en ?? 1800 }
+}
+
+type RespuestaAcceso =
+  | { tipo: 'video'; url: string; portada: string | null; pais: string | null; expira_en?: number }
+  | { tipo: 'album'; fotos: FotoFirmada[]; portada: string | null; pais: string | null; expira_en?: number }
+  | { error: string; motivo?: 'sin_acceso' | 'geobloqueo'; pais?: string }
+
+/** Una sola puerta a la funcion de borde. Una respuesta anterior a los albumes
+ *  no trae `tipo`: se toma por video. */
+async function pedirAcceso(clipId: string): Promise<RespuestaAcceso> {
   const base = import.meta.env.VITE_SUPABASE_URL
   const { data } = await supabase.auth.getSession()
   const token = data.session?.access_token
@@ -117,7 +149,8 @@ export async function urlVideoFirmada(clipId: string): Promise<Acceso> {
     })
     const j = await r.json()
     if (!r.ok) return { error: j.error ?? 'No se pudo abrir el clip', motivo: j.motivo, pais: j.pais }
-    return { url: j.url, portada: j.portada ?? null, pais: j.pais ?? null }
+    if (j.tipo === 'album') return { tipo: 'album', fotos: j.fotos ?? [], portada: j.portada ?? null, pais: j.pais ?? null, expira_en: j.expira_en }
+    return { tipo: 'video', url: j.url, portada: j.portada ?? null, pais: j.pais ?? null, expira_en: j.expira_en }
   } catch {
     return { error: 'No pudimos contactar el servidor. Revisa tu conexión.' }
   }

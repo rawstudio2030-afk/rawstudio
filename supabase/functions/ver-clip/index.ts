@@ -90,12 +90,43 @@ Deno.serve(async (req) => {
   // 3 · Recién ahora se emite la URL, y de vida corta: si se filtrara, expira
   //     antes de servir de mucho.
   const { data: fila, error: e2 } = await comoUsuario
-    .from('clips').select('storage_path,cover_path').eq('id', clip).single()
-  if (e2 || !fila?.storage_path) return responder({ error: 'Ese clip no tiene archivo' }, 404)
+    .from('clips').select('formato,storage_path,cover_path').eq('id', clip).single()
+  if (e2 || !fila) return responder({ error: 'Ese clip no existe' }, 404)
 
-  const { data: firmada, error: e3 } = await comoUsuario
-    .storage.from('clips').createSignedUrl(fila.storage_path, 900)   // 15 min
-  if (e3) return responder({ error: e3.message }, 500)
+  const esAlbum = fila.formato === 'album'
+
+  // Un VIDEO: una URL firmada de 15 minutos.
+  let firmadaVideo: string | null = null
+  // Un ALBUM: una URL firmada por foto. Se firman con el token de quien llama,
+  // igual que el video: la politica de lectura de `albumes` y la de
+  // `album_fotos` repiten la regla de `tiene_acceso`, asi que aunque este codigo
+  // se equivocara, quien no compro no obtendria nada. Dura 30 minutos porque
+  // mirar un album lleva mas que abrir un video y cada foto se pide al abrirla.
+  const fotos: { orden: number; url: string; ancho: number | null; alto: number | null }[] = []
+
+  if (esAlbum) {
+    const { data: filas, error: e4 } = await comoUsuario
+      .from('album_fotos').select('orden,ruta,ancho,alto').eq('clip_id', clip).order('orden')
+    if (e4) return responder({ error: e4.message }, 500)
+    if (!filas?.length) return responder({ error: 'Ese album no tiene fotos' }, 404)
+    const { data: firmadas, error: e5 } = await comoUsuario
+      .storage.from('albumes').createSignedUrls(filas.map(f => f.ruta), 1800)
+    if (e5) return responder({ error: e5.message }, 500)
+    const porRuta = new Map((firmadas ?? []).map(f => [f.path, f]))
+    for (const f of filas) {
+      const firmada = porRuta.get(f.ruta)
+      // Una foto sin firma NO se omite en silencio: un album incompleto se
+      // veria como completo. Se falla entero y se dice.
+      if (!firmada?.signedUrl) return responder({ error: 'No se pudieron firmar las fotos del album' }, 500)
+      fotos.push({ orden: f.orden, url: firmada.signedUrl, ancho: f.ancho ?? null, alto: f.alto ?? null })
+    }
+  } else {
+    if (!fila.storage_path) return responder({ error: 'Ese clip no tiene archivo' }, 404)
+    const { data: firmada, error: e3 } = await comoUsuario
+      .storage.from('clips').createSignedUrl(fila.storage_path, 900)   // 15 min
+    if (e3) return responder({ error: e3.message }, 500)
+    firmadaVideo = firmada.signedUrl
+  }
 
   // 4 · Y la portada NÍTIDA, que es lo único que se firma con la llave de
   //     servicio en toda esta función.
@@ -108,8 +139,8 @@ Deno.serve(async (req) => {
   // después se firma.
   //
   // EL LIMITE, ESCRITO PARA QUE NO SE AMPLIE SIN DARSE CUENTA
-  // Esta llave firma UNA cosa: la portada del clip que los pasos 1 y 2 ya
-  // autorizaron, con `cover_path` leído con el token de quien llama, no con la
+  // Esta llave firma UNA cosa —tambien en un album—: la portada del clip que los
+  // pasos 1 y 2 ya autorizaron, con `cover_path` leído con el token de quien llama, no con la
   // llave. Nada más debe pasar por `conServicio`: todo lo demás tiene que
   // seguir sujeto a las políticas, que es lo que hace que un fallo aquí sea un
   // fallo de una imagen y no un agujero.
@@ -131,5 +162,8 @@ Deno.serve(async (req) => {
     }
   }
 
-  return responder({ url: firmada.signedUrl, portada, expira_en: 900, pais })
+  // `tipo` le dice al cliente que recibio. Un video conserva su forma de
+  // siempre (`url`), asi que ningun cliente anterior se rompe.
+  if (esAlbum) return responder({ tipo: 'album', fotos, portada, expira_en: 1800, pais })
+  return responder({ tipo: 'video', url: firmadaVideo, portada, expira_en: 900, pais })
 })
