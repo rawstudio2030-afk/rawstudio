@@ -14,7 +14,7 @@ import { Pulsable, Enlace } from './Pulsable'
 import {
   creadoraAceptaConsultas, iniciarConsulta,
 } from '../lib/consultas'
-import { COBRO_CONSULTAS_ACTIVO, PRECIO_CONSULTA_TELEGRAM } from '../content/consultas'
+import { COBRO_CONSULTAS_ACTIVO, PRECIO_CONSULTA_TELEGRAM, MIN_PALABRAS } from '../content/consultas'
 import { COLOR, FUENTE, LINEA } from '../lib/diseño'
 
 export default function ConsultarPorTelegram({ clip, creadora, haySesion }: {
@@ -46,9 +46,18 @@ export default function ConsultarPorTelegram({ clip, creadora, haySesion }: {
       marginTop: 30, padding: 16, border: `1px solid ${LINEA.suave}`, borderRadius: 12,
     }}>
       <h2 style={{ margin: 0, font: `700 18px/1.2 ${FUENTE.ui}` }}>Consultar por Telegram</h2>
-      <p style={{ margin: '8px 0 0', font: `400 14px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
-        Escríbele a la creadora a través del bot. Ninguna de las dos partes ve el teléfono ni la
-        cuenta de la otra. Ella responde en un máximo de 2 días.{' '}
+      <p style={{ margin: '8px 0 0', font: `400 14px/1.5 ${FUENTE.ui}`, color: COLOR.texto }}>
+        ¿Quieres preguntarle algo a esta creadora? Escríbele por mensaje privado.
+      </p>
+      <ol style={{ margin: '10px 0 0', paddingLeft: 20, font: `400 13px/1.55 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
+        <li>Pulsa el botón: se abre Telegram con el bot de RAWstudio (necesitas tener Telegram).
+          Toca «Iniciar».</li>
+        <li>Escribe tu mensaje ahí mismo: mínimo {MIN_PALABRAS} palabras y que tenga que ver con
+          este clip o con ella. Si no cumple, el bot te dice por qué.</li>
+        <li>Ella te responde por ese mismo chat, en un máximo de 2 días.</li>
+      </ol>
+      <p style={{ margin: '10px 0 0', font: `400 12px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
+        Ni ella ve tu número ni tú el suyo: el puente es el bot.{' '}
         {COBRO_CONSULTAS_ACTIVO ? `${PRECIO_CONSULTA_TELEGRAM} por mensaje.` : 'Por ahora sin costo.'}
       </p>
 

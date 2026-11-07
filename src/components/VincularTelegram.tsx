@@ -9,7 +9,12 @@ import { Pulsable, Enlace } from './Pulsable'
 import {
   vincularTelegram, telegramVinculado, desvincularTelegram,
 } from '../lib/consultas'
+import { MIN_PALABRAS, COBRO_CONSULTAS_ACTIVO, PRECIO_CONSULTA_TELEGRAM } from '../content/consultas'
 import { COLOR, FUENTE, LINEA } from '../lib/diseño'
+
+const mini: React.CSSProperties = {
+  font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
+}
 
 export default function VincularTelegram() {
   const [vinculada, setVinculada] = useState<boolean | null>(null)
@@ -48,10 +53,24 @@ export default function VincularTelegram() {
         textTransform: 'uppercase', color: COLOR.textoSuave }}>
         Mensajes · Consultas por Telegram
       </h2>
-      <p style={{ margin: '10px 0 0', font: `400 14px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
+      <p style={{ margin: '10px 0 0', font: `400 14px/1.5 ${FUENTE.ui}`, color: COLOR.texto }}>
         {vinculada
-          ? 'Tu Telegram está vinculado. Las consultas te llegan por el bot, sin que nadie vea tu número ni tu cuenta. Responde con «Responder» sobre el mensaje, en un máximo de 2 días.'
-          : 'Vincula tu Telegram para recibir consultas pagadas de quien vea tus clips. Nadie verá tu número ni tu cuenta personal: el puente es el bot.'}
+          ? 'Tu Telegram está vinculado: ya pueden consultarte desde la ficha de tus clips.'
+          : 'Deja que quien vea tus clips te haga preguntas por mensaje privado. Primero vincula tu Telegram (un toque).'}
+      </p>
+
+      <div style={{ ...mini, marginTop: 14, color: COLOR.textoSuave }}>Cómo funciona</div>
+      <ol style={{ margin: '8px 0 0', paddingLeft: 20, font: `400 13px/1.55 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
+        <li>Vinculas tu Telegram con el botón de abajo. Se abre nuestro bot y le das «Iniciar».</li>
+        <li>Quien vea uno de tus clips toca «Consultar por Telegram» y te escribe a través del bot
+          (mínimo {MIN_PALABRAS} palabras, sobre ese clip o sobre ti).</li>
+        <li>El mensaje te llega a Telegram. Contéstalo con «Responder» sobre ese mensaje, en un
+          máximo de 2 días. Tu respuesta tiene que avanzar algo: una pregunta, un dato o una oferta.</li>
+        <li>Aquí abajo, en la bandeja, ves todas tus conversaciones y cuánto falta para cada plazo.</li>
+      </ol>
+      <p style={{ margin: '10px 0 0', font: `400 12px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
+        Nadie ve tu número ni tu cuenta de Telegram, ni tú los de quien te escribe: el puente es el bot.{' '}
+        {COBRO_CONSULTAS_ACTIVO ? `Cada mensaje cuesta ${PRECIO_CONSULTA_TELEGRAM}.` : 'Por ahora el servicio es sin costo.'}
       </p>
 
       {url ? (

@@ -240,6 +240,7 @@ export function BarraLateral() {
     .filter(d => d.path !== '/estudio' && d.path !== '/admin')
   const estudio = visiblesPara(ESTUDIO, papel, esAdmin)
   const panel = visiblesPara(BARRA, papel, esAdmin).find(d => d.path === '/admin')
+  const entradaEstudio = visiblesPara(BARRA, papel, esAdmin).find(d => d.path === '/estudio')
 
   return (
     <nav className="barra-lado" style={{
@@ -264,20 +265,19 @@ export function BarraLateral() {
       </div>
 
       {estudio.length > 0 && (
-        <>
-          {/* El rotulo es el enlace al estudio completo: ahi siguen estando las
-              descripciones y el estado de cada canal, que en el riel no caben. */}
-          <Enlace a="/estudio" style={{
-            display: 'block', padding: '14px 18px 8px', cursor: 'pointer',
-            borderTop: `1px solid ${LINEA.tenue}`, marginTop: 4,
-            font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 2.2,
-            textTransform: 'uppercase',
-            color: aqui.startsWith('/estudio') ? COLOR.dinero : COLOR.textoTenue,
-          }}>Estudio</Enlace>
-          <div style={{ paddingBottom: 10 }}>
+        <div style={{ borderTop: `1px solid ${LINEA.tenue}`, marginTop: 4, paddingTop: 8 }}>
+          {/* «Estudio» era un rotulo de 9 px casi apagado: se leia como un
+              titulo, no como algo que se pulsa, y en el telefono SI es un
+              boton con icono. Ahora es un renglon igual que los demas. Lleva al
+              estudio completo, donde siguen las descripciones y el estado de
+              cada canal, que en el riel no caben. */}
+          {entradaEstudio && (
+            <Renglon d={entradaEstudio} aqui={aqui} tono={COLOR.dinero} exacto />
+          )}
+          <div style={{ paddingBottom: 10, paddingLeft: 16 }}>
             {estudio.map(d => <Renglon key={d.path} d={d} aqui={aqui} tono={COLOR.dinero} />)}
           </div>
-        </>
+        </div>
       )}
 
       <div style={{ flex: 1 }} />
@@ -293,10 +293,12 @@ export function BarraLateral() {
 
 const ANCHO_RIEL = 228
 
-function Renglon({ d, aqui, tono = COLOR.acento }: {
+function Renglon({ d, aqui, tono = COLOR.acento, exacto }: {
   d: Destino; aqui: string; tono?: string
+  /** Solo se enciende en la ruta misma, no en las de abajo (el Estudio y sus hijos). */
+  exacto?: boolean
 }) {
-  const activo = aqui === d.path || aqui.startsWith(d.path + '/')
+  const activo = exacto ? aqui === d.path : aqui === d.path || aqui.startsWith(d.path + '/')
   return (
     <Enlace a={d.path} al={() => elegirModo(d.soloAdmin ? 'panel' : 'app')} style={{
       display: 'flex', alignItems: 'center', gap: 12, padding: '11px 18px',
