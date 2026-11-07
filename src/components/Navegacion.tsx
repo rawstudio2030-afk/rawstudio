@@ -9,7 +9,7 @@ import { useSesion } from '../lib/sesion'
 import { soyAdmin } from '../lib/papel'
 import type { Destino } from '../lib/rutas'
 import {
-  BARRA, ESTUDIO, RUTAS_ENTRADA, RUTAS_PANEL, REDIRIGE_SI_HAY_SESION, EXIGE_SESION,
+  BARRA, ESTUDIO, BIBLIOTECA_DE_CREADORA, RUTAS_ENTRADA, RUTAS_PANEL, REDIRIGE_SI_HAY_SESION, EXIGE_SESION,
   papelDe, visiblesPara, type Papel,
 } from '../lib/rutas'
 import { COLOR, LINEA, FUENTE, DEGRADADO } from '../lib/diseño'
@@ -238,6 +238,8 @@ export function BarraLateral() {
 
   const principales = visiblesPara(BARRA, papel, esAdmin)
     .filter(d => d.path !== '/estudio' && d.path !== '/admin')
+  // Quien publica tambien compra: en el riel hay sitio para su Biblioteca.
+  if (papel === 'creadora') principales.splice(1, 0, BIBLIOTECA_DE_CREADORA)
   const estudio = visiblesPara(ESTUDIO, papel, esAdmin)
   const panel = visiblesPara(BARRA, papel, esAdmin).find(d => d.path === '/admin')
   const entradaEstudio = visiblesPara(BARRA, papel, esAdmin).find(d => d.path === '/estudio')

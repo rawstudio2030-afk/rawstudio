@@ -32,7 +32,7 @@ export const REDIRIGE_SI_HAY_SESION = ['/entrar', '/registro', '/acceso']
 export const RUTAS_PANEL = ['/admin', '/alta-creadora']
 
 export const EXIGE_SESION = [
-  '/library', '/chat', '/perfil', '/yo', '/upload', '/earnings', '/admin', '/wallet',
+  '/library', '/chat', '/avisos', '/perfil', '/yo', '/upload', '/earnings', '/admin', '/wallet',
   '/estudio', '/estudio/niveles', '/estudio/encargos', '/estudio/blog',
   '/estudio/cobro', '/estudio/retirar',
 ]
@@ -105,6 +105,13 @@ export const BARRA: Destino[] = [
      «mi monedero». */
   { path: '/admin',     titulo: 'Panel',      icono: 'engrane', papeles: [], soloAdmin: true },
 ]
+
+/** Biblioteca para quien PUBLICA tambien compra. La barra de abajo tiene cinco
+ *  lugares y a una creadora ya se le van en Estudio, Encargos y Dinero, asi que
+ *  aqui no cabe; en el riel de pantalla ancha si, y en el telefono vive en «Yo»
+ *  (boton «Mis compras») y en los avisos de compra. */
+export const BIBLIOTECA_DE_CREADORA: Destino =
+  { path: '/library', titulo: 'Biblioteca', icono: 'biblioteca', papeles: ['creadora'] }
 
 /** Accesos que viven dentro de "Yo", segun quien seas. */
 /** Las opciones del estudio, para el riel de la izquierda en pantalla ancha.

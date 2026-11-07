@@ -41,6 +41,7 @@ export default function ClipDetail() {
   const [bloqueo, setBloqueo] = useState<{ motivo?: string; pais?: string } | null>(null)
   const [coins, setCoins] = useState<number | null>(null)
   const [comprando, setComprando] = useState(false)
+  const [recienComprado, setRecienComprado] = useState(false)
   const [rentando, setRentando] = useState(false)
   const [devolucion, setDevolucion] = useState(0)
   const [errorCompra, setErrorCompra] = useState('')
@@ -81,6 +82,7 @@ export default function ClipDetail() {
     // Igual que al comprar: hay que volver a pedir la URL firmada, porque
     // hasta ahora la funcion de borde la estaba negando.
     setCoins(r.saldo ?? null)
+    setRecienComprado(true)
     const a = await urlVideoFirmada(clip.id)
     if ('url' in a) { setVideo(a.url); setPortadaNitida(a.portada) }
   }
@@ -191,6 +193,18 @@ export default function ClipDetail() {
       </div>
 
       <div style={{ padding: '20px 18px 40px' }}>
+        {/* Comprar solo desbloquea el video; sin esto nadie sabe donde queda. */}
+        {recienComprado && desbloqueado && (
+          <Enlace a="/library" style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
+            padding: '13px 14px', marginBottom: 16, borderRadius: 10, cursor: 'pointer',
+            border: `1px solid ${COLOR.dinero}`, background: 'rgba(200,255,61,.07)',
+            font: `400 14px/1.45 ${FUENTE.ui}`, color: COLOR.texto,
+          }}>
+            <span><b style={{ color: COLOR.dinero }}>Comprado.</b> Lo encuentras siempre en tu Biblioteca.</span>
+            <span aria-hidden style={{ color: COLOR.dinero }}>→</span>
+          </Enlace>
+        )}
         <h1 style={{ margin: 0, font: `700 26px/1.15 ${FUENTE.ui}` }}>{clip.title}</h1>
 
         <div style={{ font: `400 12px/1.6 ${FUENTE.mono}`, color: COLOR.textoTenue, marginTop: 8 }}>

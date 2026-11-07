@@ -53,6 +53,8 @@ const TRAZOS: Record<string, string> = {
   estudio: 'M3.5 9h17v11h-17zM3.5 9l2-4.5h14l1 4.5M8.5 4.5l2 4.5M13 4.5l2 4.5',
   /** Publicar: la chispa. */
   chispa: 'M12 3c.6 4.5 3.5 7.4 8 8-4.5.6-7.4 3.5-8 8-.6-4.5-3.5-7.4-8-8 4.5-.6 7.4-3.5 8-8Z',
+  /** Avisos: la campana. */
+  campana: 'M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15ZM9.5 20.5a2.5 2.5 0 0 0 5 0',
   /** Mensajes. */
   sobre: 'M3 6.5h18v11H3zM3 7l9 6.5L21 7',
   /** Yo. */

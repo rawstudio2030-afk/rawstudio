@@ -215,7 +215,12 @@ export default function CreatorProfile() {
             hacer. Dos significados en el mismo sitio es peor que un boton
             que se lee. */}
         {esMio && (
-          <div style={{ display: 'flex', marginTop: 18 }}>
+          <div style={{ display: 'flex', gap: 10, marginTop: 18, flexWrap: 'wrap' }}>
+            {/* Lo que compraste. A quien publica tambien le toca comprar, y la
+                barra de abajo no tiene sitio para su Biblioteca. */}
+            <Enlace a="/library" style={{
+              ...boton, border: '1.5px solid rgba(255,255,255,.3)', background: 'rgba(255,255,255,.04)',
+            }}><Icono nombre="biblioteca" tam={20} />Mis compras</Enlace>
             <Enlace a="/perfil" style={{
               ...boton,
               border: '2px solid #FF4FE0', background: 'linear-gradient(180deg, rgba(255,43,209,.2), rgba(255,43,209,.06))',
