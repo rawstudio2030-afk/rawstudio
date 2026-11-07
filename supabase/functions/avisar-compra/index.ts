@@ -59,6 +59,8 @@ export type Aviso = {
   tipo: 'compra' | 'renta'
   id: string
   clip: string
+  /** `album` si lo comprado son fotos; un aviso anterior a los albumes no lo trae (= video). */
+  formato?: 'video' | 'album'
   precio: number
   neto: number
   vence: string | null
@@ -120,8 +122,9 @@ export function recibo(a: Aviso): string {
     ${renglon('Se descontó de tu saldo', usd(a.precio), '#FF2BD1')}
   </table>
   <p style="margin:14px 0 0;font:400 12px/1.6 system-ui;color:${APAGADO}">
-    El video lleva tu nombre encima mientras lo ves. Si aparece en otro lado,
-    esa marca dice de qué cuenta salió.
+    ${a.formato === 'album'
+      ? 'Las fotos llevan tu nombre encima mientras las ves. Si aparecen en otro lado, esa marca dice de qué cuenta salieron.'
+      : 'El video lleva tu nombre encima mientras lo ves. Si aparece en otro lado, esa marca dice de qué cuenta salió.'}
   </p>`
   return documento('#FF2BD1', a.tipo === 'renta' ? 'Tu renta está lista' : 'Tu compra está lista',
                    hola, texto, tabla, 'Ir a mi biblioteca', BIBLIOTECA)
@@ -166,6 +169,8 @@ async function muestra(admins: { correo: string }[], llave: string): Promise<Res
     { tipo: 'compra', id: 'muestra', clip: 'Window Seat', precio: 240, neto: 192, vence: null,
       comprador: 'Dani', correo_comprador: '', creadora: 'Nora Hot', correo_creadora: '' },
     { tipo: 'renta', id: 'muestra', clip: 'Quiet Room', precio: 120, neto: 96, vence,
+      comprador: 'Dani', correo_comprador: '', creadora: 'Nora Hot', correo_creadora: '' },
+    { tipo: 'compra', id: 'muestra', clip: 'Golden Hour', formato: 'album', precio: 500, neto: 400, vence: null,
       comprador: 'Dani', correo_comprador: '', creadora: 'Nora Hot', correo_creadora: '' },
   ]
   let ok = 0; const fallos: string[] = []

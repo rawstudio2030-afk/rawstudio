@@ -445,7 +445,7 @@ export default function ClipDetail() {
         {/* Quien puede ver la ficha lee; quien puede abrir el video comenta y
             califica (lo decide el servidor). Va antes de «Reportar». */}
         <Comentarios key={clip.id} clip={clip.id} esDuenia={mio}
-          haySesion={!!sesion} desbloqueado={desbloqueado} />
+          haySesion={!!sesion} desbloqueado={desbloqueado} album={esAlbum} />
 
         {/* Discreto y al pie: reportar no es una accion que haya que invitar
             a hacer, pero tiene que estar cuando hace falta. */}

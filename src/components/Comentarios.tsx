@@ -49,8 +49,10 @@ const mini: React.CSSProperties = {
   color: COLOR.textoSuave, cursor: 'pointer', padding: '14px 4px',
 }
 
-export default function Comentarios({ clip, esDuenia, haySesion, desbloqueado }: {
+export default function Comentarios({ clip, esDuenia, haySesion, desbloqueado, album }: {
   clip: string; esDuenia: boolean; haySesion: boolean; desbloqueado: boolean
+  /** Un album se «desbloquea» igual que un video, pero el texto dice album. */
+  album?: boolean
 }) {
   const [filas, setFilas] = useState<Comentario[]>([])
   const [hayMas, setHayMas] = useState(false)
@@ -199,7 +201,7 @@ export default function Comentarios({ clip, esDuenia, haySesion, desbloqueado }:
       ) : (
         <div style={{ marginTop: 14, font: `400 14px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
           {haySesion
-            ? 'Desbloquea el video para comentar.'
+            ? `Desbloquea el ${album ? 'álbum' : 'video'} para comentar.`
             : <Enlace a="/entrar" style={{ color: COLOR.admin, textDecoration: 'underline', textUnderlineOffset: 3 }}>
                 Entra para comentar
               </Enlace>}
