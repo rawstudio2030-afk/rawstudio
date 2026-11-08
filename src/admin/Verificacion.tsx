@@ -16,6 +16,7 @@ import {
   type Verificacion, type EstadoVerificacion,
 } from '../lib/admin'
 import { Boton, Confirmar, Paginador, Insignia, fecha, fechaHora, desde } from './piezas'
+import { usePendientes } from './pendientes'
 import { Pulsable } from '../components/Pulsable'
 import { useEscape } from '../lib/teclado'
 
@@ -29,6 +30,8 @@ const PESTANAS: { v: EstadoVerificacion; t: string }[] = [
 ]
 
 export default function Verificacion() {
+  // Lo que se resuelve aqui cambia los avisos del menu y del Resumen: se piden de nuevo.
+  const { refrescar } = usePendientes()
   const [estado, setEstado] = useState<EstadoVerificacion>('pendiente_revision')
   const [filas, setFilas] = useState<Verificacion[]>([])
   const [total, setTotal] = useState(0)
@@ -43,7 +46,8 @@ export default function Verificacion() {
     const r = await listarVerificaciones(estado, pagina, POR_PAGINA)
     setFilas(r.filas); setTotal(r.total); setError(r.error); setCargando(false)
     setConteo(await conteoVerificaciones())
-  }, [estado, pagina])
+    refrescar()
+  }, [estado, pagina, refrescar])
 
   useEffect(() => { cargar() }, [cargar])
 

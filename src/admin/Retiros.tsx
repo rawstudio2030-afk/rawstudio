@@ -20,6 +20,7 @@ import {
   Tabla, Boton, Campo, Confirmar, Etiquetado, Paginador,
   desde, type Columna,
 } from './piezas'
+import { usePendientes } from './pendientes'
 import { Pulsable } from '../components/Pulsable'
 
 const POR_PAGINA = 30
@@ -34,6 +35,8 @@ const PESTANAS: { v: EstadoRetiro; t: string }[] = [
 ]
 
 export default function Retiros() {
+  // Lo que se resuelve aqui cambia los avisos del menu y del Resumen: se piden de nuevo.
+  const { refrescar } = usePendientes()
   const [estado, setEstado] = useState<EstadoRetiro>('pendiente')
   const [filas, setFilas] = useState<Retiro[]>([])
   const [total, setTotal] = useState(0)
@@ -63,7 +66,8 @@ export default function Retiros() {
     setDisputas(await encargosEnDisputa())
     setTasas(await tasasConfirmadas())
     setPend(await ajustesPendientes())
-  }, [estado, pagina])
+    refrescar()
+  }, [estado, pagina, refrescar])
 
   useEffect(() => { cargar() }, [cargar])
 

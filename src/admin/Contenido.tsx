@@ -23,6 +23,7 @@ import {
   Tabla, Boton, Campo, Confirmar, Etiquetado, Insignia,
   desde, type Columna,
 } from './piezas'
+import { usePendientes } from './pendientes'
 import { Pulsable } from '../components/Pulsable'
 
 type Filtro = 'todos' | 'destacados' | 'borrados' | 'plataforma' | 'subir' | 'masiva'
@@ -37,6 +38,8 @@ const PESTANAS: { v: Filtro; t: string }[] = [
 ]
 
 export default function Contenido() {
+  // Lo que se resuelve aqui cambia los avisos del menu y del Resumen: se piden de nuevo.
+  const { refrescar } = usePendientes()
   const nav = useNavigate()
   const [filtro, setFiltro] = useState<Filtro>('todos')
   const [texto, setTexto] = useState('')
@@ -61,7 +64,8 @@ export default function Contenido() {
     const r = await clipsAdmin(filtro, busqueda)
     setFilas(r.filas); setError(r.error); setCargando(false)
     setPendientes(await porPurgar())
-  }, [filtro, busqueda])
+    refrescar()
+  }, [filtro, busqueda, refrescar])
 
   useEffect(() => { cargar() }, [cargar])
 

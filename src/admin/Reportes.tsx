@@ -18,6 +18,7 @@ import {
   Boton, Confirmar, Paginador, Selector, Etiquetado, Insignia,
   fechaHora, desde,
 } from './piezas'
+import { usePendientes } from './pendientes'
 import { Pulsable } from '../components/Pulsable'
 
 const POR_PAGINA = 30
@@ -32,6 +33,8 @@ const PESTANAS: { v: EstadoReporte; t: string }[] = [
 const TEXTO_MOTIVO = Object.fromEntries(MOTIVOS.map(m => [m.v, m.t]))
 
 export default function Reportes() {
+  // Lo que se resuelve aqui cambia los avisos del menu y del Resumen: se piden de nuevo.
+  const { refrescar } = usePendientes()
   const [estado, setEstado] = useState<EstadoReporte>('nuevo')
   const [motivo, setMotivo] = useState<MotivoReporte | ''>('')
   const [filas, setFilas] = useState<Reporte[]>([])
@@ -47,7 +50,8 @@ export default function Reportes() {
     const r = await listarReportes(estado, motivo, pagina, POR_PAGINA)
     setFilas(r.filas); setTotal(r.total); setError(r.error); setCargando(false)
     setConteo(await conteoReportes())
-  }, [estado, motivo, pagina])
+    refrescar()
+  }, [estado, motivo, pagina, refrescar])
 
   useEffect(() => { cargar() }, [cargar])
 

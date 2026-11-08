@@ -9,6 +9,7 @@ import {
 import { urlPortada, urlVideoFirmada } from '../lib/clips'
 import VisorAlbum from '../components/VisorAlbum'
 import { Boton, Confirmar, Paginador, Insignia, fecha, desde } from './piezas'
+import { usePendientes } from './pendientes'
 import { usd } from '../lib/dinero'
 import { Pulsable } from '../components/Pulsable'
 import { useEscape } from '../lib/teclado'
@@ -23,6 +24,8 @@ const PESTANAS: { v: EstadoClip; t: string }[] = [
 ]
 
 export default function Moderacion() {
+  // Lo que se resuelve aqui cambia los avisos del menu y del Resumen: se piden de nuevo.
+  const { refrescar } = usePendientes()
   const [estado, setEstado] = useState<EstadoClip>('pendiente')
   const [filas, setFilas] = useState<ClipEnCola[]>([])
   const [total, setTotal] = useState(0)
@@ -38,7 +41,8 @@ export default function Moderacion() {
     const r = await colaModeracion(estado, pagina, POR_PAGINA)
     setFilas(r.filas); setTotal(r.total); setError(r.error); setCargando(false)
     setConteo(await conteoModeracion())
-  }, [estado, pagina])
+    refrescar()
+  }, [estado, pagina, refrescar])
 
   useEffect(() => { cargar() }, [cargar])
   useEffect(() => { leerBandera().then(setBandera) }, [])
