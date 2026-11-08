@@ -30,6 +30,50 @@
 
 ## Respuestas activas
 
+### Respuesta a [id: 20261107-03] — Precio de las consultas en portada y avatar solo tras revisión
+- **fecha:** 2026-11-07 20:50 (America/Mexico_City)
+- **estado:** lista-para-claude
+- **responde a:** Sergio pidió atacar lo que falta ahora mismo. De lo inmediato, esto sí se puede hacer sin inventar textos legales ni reglas de reembolso: que se vea el precio de 20 pesos donde ya se anuncian las consultas, y que un cuadro del video no se vuelva foto de perfil pública antes de una revisión.
+- **ronda:** 1 de 10 de esta tarea · **tope:** 1 hora
+- **checklist afectados (NO marques pass tú):** convenciones de UI si tocas la portada. No rompas ítems `pass` ni el trabajo de las rondas 4, 5, 6, 7, `20261107-01` ni `20261107-02`.
+
+#### Orden respecto a rondas anteriores
+No reabras `[id: 20261106-04]`, `[id: 20261106-05]`, `[id: 20261106-06]`, `[id: 20261106-07]`, `[id: 20261107-01]` ni `[id: 20261107-02]`. Esta ronda va en su propio commit. No mezcles legales, cobro de consultas, reproductor, dominio ni panel de administración.
+
+#### Diagnóstico (no lo reescribas: úsalo)
+1. **Precio de consultas.** Sergio fijó 20 pesos por mensaje del cliente. Vive en `PRECIO_CONSULTA_TELEGRAM` (`src/content/consultas.ts`) y ya se lee en `/consultas`. En «Precios y formas de ganar» la tarjeta dice solo: «Pagas por cada mensaje y la creadora responde en un máximo de 2 días.» (`FORMAS_NEON` en `src/content/portada.ts`). En `/creadoras` el recuadro habla de «mensaje pagado» y del tope de 2 días, y el comentario del archivo dice que el precio vive en `/consultas` (`src/screens/Creators.tsx`). Quien solo mira la portada o la oferta no ve cuánto cuesta.
+2. **«El 80% de cada dólar»** (hero de `Portal.tsx`, gancho de `/entrar`) NO se cambia: las ventas de clips son la economía en dólares de la app; el SPEI se dispersa en pesos. Mezclar eso con los 20 pesos de una consulta sería mentir. No lo reescribas a «pesos».
+3. **`/entrar` no está roto.** Es la puerta a propósito (`Entrar.tsx`): no pide datos. Los campos de correo, contraseña y «Entrar con liga» están en `/acceso` y `/registro` (`Acceso.tsx`). No muevas el formulario a `/entrar`.
+4. **Avatar al subir.** Si la creadora no tiene `avatar_path`, `Upload.tsx` llama `asignarAvatarSiFalta` (`src/lib/avatarAuto.ts`) justo después de `crearClip` (que inserta con `published: true`). El cuadro más limpio del video se sube al bucket público `avatars` y se escribe en el perfil **antes** de que administración modere el clip. La heurística no sabe si el cuadro es explícito. El relleno viejo de Herramientas (`AvatarAuto.tsx`) sí exige confirmación humana; el atajo al subir se la salta. No se tocan fotos que la persona ya subió a propósito (`avatar_path` no nulo).
+
+#### 1. Mostrar los 20 pesos
+1. En la tarjeta «Consultas por Telegram» de `FORMAS_NEON`, incluye el precio usando `PRECIO_CONSULTA_TELEGRAM` (impórtalo; no lo copies como texto suelto). Una frase natural, por ejemplo que cada mensaje del cliente cuesta 20 pesos y ella responde en un máximo de 2 días. Conserva el enlace a `/consultas`.
+2. En el recuadro de consultas de `/creadoras`, menciona el mismo precio con la misma constante (p. ej. junto a «mensaje pagado» o al tope de 2 días). No reescribas las reglas ni inventes reembolsos.
+3. `COBRO_CONSULTAS_ACTIVO` sigue en `false`. No lo enciendas. No pongas el precio en el botón de consultar de una ficha si ese botón, por esa bandera, todavía no debe prometer cobro (`consultas.ts` lo dice). No inventes copy de pago, cargo ni devolución.
+
+#### 2. No publicar el avatar automático antes de revisarlo
+1. Quita de `Upload.tsx` la llamada a `asignarAvatarSiFalta` (y el paso «Preparando tu foto de perfil…» que solo existía por eso). Al terminar de subir, si no tenía foto, se queda la inicial. El clip se crea igual.
+2. No asignes el avatar en automático al aprobar el clip en Moderación: sería el mismo riesgo, solo más tarde. La revisión sigue en Herramientas → avatares faltantes (`AvatarAuto.tsx`), que ya no publica nada hasta confirmar.
+3. No borres avatares que ya estén puestos. No corras el relleno masivo. No subas un cuadro «en espera» a un bucket público. Si `asignarAvatarSiFalta` queda sin usos, puedes dejarlo o retirarlo; no lo llames desde otro sitio.
+4. Los álbumes no llaman esta función hoy: no la agregues ahí.
+
+#### Qué no tocar
+Textos legales, comisión 20% / SPEI / 18+, el hero del 80% ni «dólar», el formulario de `/acceso` y `/registro`, token o secretos de Telegram, el cobro de consultas, el dominio (`public/CNAME` y rawstudio.mx), reproductor, trato, panel de administración, redes sociales.
+
+#### Criterios de aceptación
+1. En Precios (tarjeta de consultas) y en el recuadro de `/creadoras` se lee que cada mensaje cuesta 20 pesos, salido de `PRECIO_CONSULTA_TELEGRAM`.
+2. Subir un video ya no escribe `avatar_path` ni sube un jpg al bucket `avatars`.
+3. `COBRO_CONSULTAS_ACTIVO` sigue en `false`. El 80% / dólar no cambió.
+4. Typecheck, build y lint limpios (solo advertencias que ya existían).
+
+#### Cómo demostrar (obligatorio en bridge-query.md)
+SHA, diff resumido, y verificación: texto de la tarjeta y del recuadro; que `Upload.tsx` ya no llama `asignarAvatarSiFalta`; que no hay un nuevo llamado automático al aprobar; que no se encendió el cobro. No marques `CHECKLIST.md` como pass.
+
+#### Siguiente paso para Claude Code
+1. `git pull` de `origin/main`.
+2. Implementa esta ronda. Commit de producto, p. ej. `fix: precio de consultas visible y avatar automatico solo tras revision`; `git push origin main`.
+3. Marca `bridge-query.md` `[id: 20261107-03]` como `respondida` con SHA, diff y verificación. **No** marques `CHECKLIST.md` como pass.
+
 ### Respuesta a [id: 20261107-02] — Ronda 2/10 · Panel de administración: búsqueda, urgencia, bitácora reciente, avatares y exportar
 - **fecha:** 2026-11-07 20:26 (America/Mexico_City)
 - **estado:** lista-para-claude

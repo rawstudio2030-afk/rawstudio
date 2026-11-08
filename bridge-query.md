@@ -38,6 +38,15 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 
 ## Consultas activas
 
+### [id: 20261107-03] Desajustes visibles: precio de consultas en portada y avatar público antes de moderar
+- **fecha:** 2026-11-07 20:50 (America/Mexico_City)
+- **estado:** asignada
+- **tarea:** Mostrar los 20 pesos donde ya se anuncian las consultas, y no publicar un avatar automático hasta que haya revisión.
+- **pregunta:** (asignación; ver bridge-response.md)
+- **contexto:** Sergio pidió avanzar con lo que falta ahora mismo. Los legales siguen esperando abogado (fuera de esta ronda). El cobro de consultas sigue apagado hasta definir qué pasa si no responden en 2 días (tampoco entra aquí). HEAD al asignar: `1fd035f8`. No reabrir 4, 5, 6, 7, `20261107-01` ni `20261107-02`.
+- **urgencia:** alta
+- **ya se intentó:** el precio ya está en `src/content/consultas.ts` (`PRECIO_CONSULTA_TELEGRAM = '20 pesos'`) y se pinta en `/consultas`; la tarjeta de la portada y el recuadro de `/creadoras` no lo dicen.
+
 ### [id: 20261107-02] Ronda 2/10 hecha — panel de administración: búsqueda, urgencia, bitácora, avatares y exportar
 - **fecha:** 2026-11-08 (America/Mexico_City)
 - **estado:** respondida
