@@ -29,6 +29,7 @@ import Centro from '../components/Centro'
 import { perfilParaPublicar } from '../lib/trato'
 import VincularTelegram from '../components/VincularTelegram'
 import BandejaConsultas from '../components/BandejaConsultas'
+import DesempenoClips from '../components/DesempenoClips'
 import { configAlbumes, type ConfigAlbumes } from '../lib/albumes'
 
 
@@ -159,6 +160,10 @@ export default function Estudio() {
         </div>
         <span aria-hidden style={{ color: COLOR.textoSuave, font: `400 22px/1 ${FUENTE.ui}` }}>›</span>
       </Enlace>
+
+      {/* Lo que dejo cada publicacion: debajo de «Has ganado», donde se mira lo
+          ganado, y encima de Telegram y la bandeja. */}
+      <DesempenoClips />
 
       {/* Los mensajes de quien consulta llegan por Telegram: aqui se vincula.
           Va arriba, a la vista; al final de la pagina nadie lo encontraba. */}

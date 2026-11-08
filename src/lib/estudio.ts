@@ -1,5 +1,6 @@
 import { supabase } from './supabase'
 import { cuantos, palabra } from './plural'
+import { leido, noSePudo, type Lectura } from './lectura'
 
 /** Los seis canales de ingreso de la plataforma, con su estado real.
  *
@@ -151,4 +152,41 @@ export function canales(
   }
 
   return lista
+}
+
+
+/** Lo que dejo UNA publicacion propia, en centavos de dolar (lo que llego a la
+ *  cuenta, ya sin la comision). Ver `estudio_desempeno_clips` en la base.
+ *
+ *  Una suscripcion, un encargo y una propina del perfil NO estan aqui: no van
+ *  atados a un clip, y por eso la suma de esta lista no cuadra con «Has ganado». */
+export type DesempenoClip = {
+  id: string
+  title: string
+  cover_path: string | null
+  formato: 'video' | 'album'
+  published: boolean
+  price_coins: number
+  desbloqueos: number
+  rentas: number
+  ganado_ventas: number
+  ganado_propinas: number
+  ganado_consultas: number
+  consultas_pagadas: number
+  ganado_total: number
+}
+
+export async function desempenoClips(): Promise<Lectura<DesempenoClip[]>> {
+  const { data, error } = await supabase.rpc('estudio_desempeno_clips')
+  if (error) return noSePudo([], error)
+  // Los conteos y sumas llegan como bigint: se pasan a numero para no
+  // encontrarse con un texto al sumar o comparar.
+  const filas = ((data ?? []) as Record<string, unknown>[]).map(f => ({
+    ...f,
+    price_coins: Number(f.price_coins), desbloqueos: Number(f.desbloqueos), rentas: Number(f.rentas),
+    ganado_ventas: Number(f.ganado_ventas), ganado_propinas: Number(f.ganado_propinas),
+    ganado_consultas: Number(f.ganado_consultas), consultas_pagadas: Number(f.consultas_pagadas),
+    ganado_total: Number(f.ganado_total),
+  })) as DesempenoClip[]
+  return leido(filas)
 }
