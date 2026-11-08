@@ -1,5 +1,10 @@
 /* Avatar automatico al publicar.
  *
+ * ¡NO SE LLAMA DESDE NINGUN SITIO, A PROPOSITO! Publicaba un cuadro del video como
+ * foto de perfil (bucket publico) antes de que nadie lo revisara. Si se vuelve a
+ * usar, tiene que ser despues de una revision humana (ver Herramientas ->
+ * avatares faltantes, `src/admin/AvatarAuto.tsx`).
+ *
  * Si la creadora todavia no tiene foto de perfil, el cuadro mas limpio de SU
  * video (ver `avatarDeVideo`) pasa a ser su avatar. Solo cuando `avatar_path`
  * es null: nunca se pisa una foto que alguien puso a proposito.

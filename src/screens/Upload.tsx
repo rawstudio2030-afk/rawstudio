@@ -5,7 +5,6 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import { subirArchivo, subirPortada, crearClip, type Visibilidad } from '../lib/clips'
-import { asignarAvatarSiFalta } from '../lib/avatarAuto'
 import {
   miniaturaDeVideo, tiraDeVideo, cuadrosDeVideo, achicar,
   ANCHO_PUBLICO, type Cuadro,
@@ -228,16 +227,11 @@ export default function Upload() {
       return
     }
 
-    // Sin foto de perfil, el avatar sale de este mismo video (el cuadro mas
-    // limpio de los primeros segundos). Nunca pisa una foto que ya exista, y si
-    // algo falla se queda la inicial: el clip ya esta publicado y esto no lo
-    // detiene.
-    if (!perfil?.avatar_path) {
-      setPaso('Preparando tu foto de perfil…')
-      try {
-        if (await asignarAvatarSiFalta(sesion.user.id, video) === 'asignado') await refrescarPerfil()
-      } catch { /* la inicial sigue ahi */ }
-    }
+    // NO se asigna avatar aqui. Antes, sin foto de perfil, un cuadro del video se
+    // subia al bucket publico `avatars` y pasaba a ser la foto de perfil ANTES de
+    // que administracion moderara el clip, y la heuristica no sabe si el cuadro es
+    // explicito. Ahora se queda la inicial; el relleno es manual, con revision
+    // humana, en Herramientas -> avatares faltantes.
 
     // El clip SI se publico. Si la portada se quedo fuera no se navega: se
     // dice, con el clip ya a salvo y una liga para ir a verlo. Irse en

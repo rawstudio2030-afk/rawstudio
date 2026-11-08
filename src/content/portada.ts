@@ -8,6 +8,8 @@
  * peor que no tener enlace, asi que si estan vacias no se pintan.
  */
 
+import { PRECIO_CONSULTA_TELEGRAM } from './consultas'
+
 export const REDES = {
   x: '',        // ej. 'https://x.com/rawstudio'
   tiktok: '',   // ej. 'https://tiktok.com/@rawstudio'
@@ -90,7 +92,7 @@ export const FORMAS_NEON: { i: string; t: string; d: string; a?: string }[] = [
   { i: 'corazon', t: 'Propinas', d: 'Sin pedir nada a cambio.' },
   { i: 'texto', t: 'Blog', d: 'Texto para tus suscriptoras, sin tener que grabar.' },
   // La unica tarjeta que lleva a otra pagina: las reglas completas viven en /consultas.
-  { i: 'sobre', t: 'Consultas por Telegram', d: 'Pagas por cada mensaje y la creadora responde en un máximo de 2 días.', a: '/consultas' },
+  { i: 'sobre', t: 'Consultas por Telegram', d: `Pagas ${PRECIO_CONSULTA_TELEGRAM} por cada mensaje y la creadora responde en un máximo de 2 días.`, a: '/consultas' },
 ]
 
 export const PREGUNTAS = [

@@ -13,6 +13,7 @@ import {
   SECCIONES, FAQ, NO_PROMETEMOS, ICONS,
   PINK, LIME, CYAN, PAPER, MUTED, LINE,
 } from '../content/creators'
+import { PRECIO_CONSULTA_TELEGRAM } from '../content/consultas'
 import { FUENTE, RADIO, GLOW } from '../lib/diseño'
 import { Pulsable, Enlace } from '../components/Pulsable'
 
@@ -215,13 +216,15 @@ export default function Creators() {
         ))}
 
         {/* ---------- consultas por Telegram ----------
-            Un recuadro corto: lo que le toca a la creadora. Las reglas completas
-            (precio, privacidad, validacion) viven en /consultas. */}
+            Un recuadro corto: lo que le toca a la creadora. El precio sale de la
+            misma constante que /consultas; las reglas completas (privacidad,
+            validacion) viven alli. */}
         <div id="consultas" style={{ marginTop: 30, paddingTop: 40, borderTop: `1px solid ${LINE}` }}>
           <div style={{ ...etiqueta(CYAN), marginBottom: 14 }}>Consultas por Telegram</div>
           <div style={{ ...tarjeta, padding: '20px 18px' }}>
             <p style={{ margin: 0, font: `400 16px/1.55 ${FUENTE.ui}`, color: PAPER }}>
               <b style={{ fontWeight: 700 }}>Tienes un máximo de 2 días</b> para responder un mensaje pagado.
+              Cada mensaje del cliente cuesta {PRECIO_CONSULTA_TELEGRAM}.
             </p>
             <p style={{ margin: '10px 0 0', font: `400 16px/1.55 ${FUENTE.ui}`, color: '#CFCAD3' }}>
               No hay guion rígido: cada contestación debe avanzar algo. Una pregunta de vuelta,
