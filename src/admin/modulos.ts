@@ -20,6 +20,7 @@ export const GRUPOS: { titulo: string; modulos: Modulo[] }[] = [
     { clave: 'moderacion',   titulo: 'Moderación',   listo: true },
     { clave: 'verificacion', titulo: 'Verificación', listo: true },
     { clave: 'reportes',     titulo: 'Denuncias',    listo: true },
+    { clave: 'consultas',    titulo: 'Consultas',    listo: true },
   ] },
   { titulo: 'Personas', modulos: [
     { clave: 'usuarios',     titulo: 'Usuarios',     listo: true },

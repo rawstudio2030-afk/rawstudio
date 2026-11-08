@@ -76,6 +76,7 @@ function avisoDe(clave: string, p: Pendientes): { n: number; texto: string } | n
       const n = p.retirosPorAprobar + p.retirosPorPagar
       return hay(n, `${n} ${n === 1 ? 'retiro' : 'retiros'} por atender`)
     }
+    case 'consultas':    return hay(p.consultasEsperando, `${p.consultasEsperando} ${p.consultasEsperando === 1 ? 'mensaje esperando respuesta' : 'mensajes esperando respuesta'}`)
     case 'contenido':    return hay(p.purga, `${p.purga} ${p.purga === 1 ? 'archivo vencido' : 'archivos vencidos'} por purgar`)
     default:             return null
   }

@@ -21,6 +21,7 @@ import Finanzas from '../admin/Finanzas'
 import Bitacora from '../admin/Bitacora'
 import Herramientas from '../admin/Herramientas'
 import Resumen from '../admin/Resumen'
+import Consultas from '../admin/Consultas'
 
 export default function Admin() {
   const nav = useNavigate()
@@ -50,6 +51,7 @@ export default function Admin() {
       {modulo.clave === 'retiros'      && <Retiros />}
       {modulo.clave === 'reportes'     && <Reportes />}
       {modulo.clave === 'verificacion' && <Verificacion />}
+      {modulo.clave === 'consultas'    && <Consultas />}
       {modulo.clave === 'finanzas'     && <Finanzas />}
       {modulo.clave === 'bitacora'     && <Bitacora />}
       {modulo.clave === 'herramientas' && <Herramientas />}

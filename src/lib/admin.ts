@@ -995,6 +995,64 @@ export type Retiro = {
   total_filas: number
 }
 
+/* ---------- Consultas por Telegram (solo lectura) ----------
+ *
+ * Ninguna de estas funciones devuelve chat_id, telefono ni token: de cada parte
+ * solo el usuario publico (o null si la cuenta se anonimizo). */
+
+export type FiltroConsultas = 'todas' | 'esperando' | 'vencidas'
+
+export type FilaConsulta = {
+  id: string
+  creadora_handle: string | null
+  otra_handle: string | null
+  clip_id: string
+  clip_titulo: string
+  ultimo_at: string
+  ultimo_de: 'cliente' | 'creadora'
+  ultimo_texto: string
+  mensajes: number
+  sin_responder: number
+  vencen_at: string | null
+  vencidos: number
+}
+
+export type MensajeConsulta = {
+  id: string
+  de: 'cliente' | 'creadora'
+  cuerpo: string
+  palabras: number
+  created_at: string
+  estado: 'enviado' | 'respondido' | 'vencido'
+  vence_at: string | null
+  respondido_at: string | null
+}
+
+export async function listarConsultas(
+  filtro: FiltroConsultas, busqueda: string, pagina: number, porPagina = 25,
+): Promise<{ filas: FilaConsulta[]; total: number; error: string }> {
+  const { data, error } = await supabase.rpc('admin_consultas', {
+    p_filtro: filtro, p_busqueda: busqueda, p_pagina: pagina, p_por_pagina: porPagina,
+  })
+  if (error) return { filas: [], total: 0, error: error.message }
+  const filas = (data ?? []) as (FilaConsulta & { total_filas: number })[]
+  return { filas, total: Number(filas[0]?.total_filas ?? 0), error: '' }
+}
+
+export async function mensajesDeConsulta(id: string): Promise<{ mensajes: MensajeConsulta[]; error: string }> {
+  const { data, error } = await supabase.rpc('admin_consulta_mensajes', { p_consulta: id })
+  if (error) return { mensajes: [], error: error.message }
+  return { mensajes: (data ?? []) as MensajeConsulta[], error: '' }
+}
+
+/** Para el menu y el Resumen: esperando respuesta ahora, y vencidas en 30 dias. */
+export async function conteoConsultas() {
+  const { data, error } = await supabase.rpc('admin_conteo_consultas')
+  const f = ((data ?? []) as { esperando: number; vencidas: number }[])[0]
+  if (error || !f) return { esperando: 0, vencidas: 0 }
+  return { esperando: Number(f.esperando), vencidas: Number(f.vencidas) }
+}
+
 /** Retiros por estado (todos, no solo la pagina visible): para el menu y el Resumen. */
 export async function conteoRetiros() {
   const { data, error } = await supabase.rpc('admin_conteo_retiros')

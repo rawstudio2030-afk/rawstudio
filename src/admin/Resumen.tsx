@@ -86,6 +86,11 @@ export default function Resumen() {
         <Tarjeta a="/admin/retiros" n={p.retirosPorAprobar + p.retirosPorPagar} cargando={!p.listo}
           titulo="Retiros por atender" vacio="Ningún retiro pendiente"
           texto={`${p.retirosPorAprobar} por aprobar · ${p.retirosPorPagar} por pagar`} />
+        <Tarjeta a="/admin/consultas" n={p.consultasEsperando} cargando={!p.listo}
+          titulo="Consultas por Telegram" vacio={p.consultasVencidas > 0
+            ? `Nada esperando · ${cuantos(p.consultasVencidas, 'vencida')} en 30 días`
+            : 'Ningún mensaje esperando respuesta'}
+          texto={`${cuantos(p.consultasEsperando, 'mensaje')} esperando respuesta · ${cuantos(p.consultasVencidas, 'vencida')} en 30 días`} />
         <Tarjeta a="/admin/contenido" n={p.purga} cargando={!p.listo}
           titulo="Archivos por purgar" vacio="Ningún archivo vencido"
           texto={`${cuantos(p.purga, 'archivo')} cumplió${p.purga === 1 ? '' : 'eron'} los 30 días`} />

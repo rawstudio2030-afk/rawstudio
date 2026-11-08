@@ -8,7 +8,7 @@
  * nunca se suma «lo que se ve en la pagina», que cambia con el filtro. */
 import { createContext, useContext } from 'react'
 import {
-  conteoModeracion, conteoVerificaciones, conteoReportes, conteoRetiros, porPurgar,
+  conteoModeracion, conteoVerificaciones, conteoReportes, conteoRetiros, conteoConsultas, porPurgar,
 } from '../lib/admin'
 
 export type Pendientes = {
@@ -21,16 +21,21 @@ export type Pendientes = {
   retirosPorPagar: number
   /** Archivos vencidos esperando a que alguien pulse «Purgar». */
   purga: number
+  /** Mensajes de Telegram esperando respuesta de la creadora (dentro de su plazo). */
+  consultasEsperando: number
+  /** Mensajes que vencieron sin respuesta en los ultimos 30 dias. */
+  consultasVencidas: number
 }
 
 export const SIN_DATOS: Pendientes = {
   listo: false, moderacion: 0, verificacion: 0, denuncias: 0,
   retirosPorAprobar: 0, retirosPorPagar: 0, purga: 0,
+  consultasEsperando: 0, consultasVencidas: 0,
 }
 
 export async function cargarPendientes(): Promise<Pendientes> {
-  const [mod, ver, rep, ret, purga] = await Promise.all([
-    conteoModeracion(), conteoVerificaciones(), conteoReportes(), conteoRetiros(), porPurgar(),
+  const [mod, ver, rep, ret, purga, con] = await Promise.all([
+    conteoModeracion(), conteoVerificaciones(), conteoReportes(), conteoRetiros(), porPurgar(), conteoConsultas(),
   ])
   return {
     listo: true,
@@ -40,6 +45,8 @@ export async function cargarPendientes(): Promise<Pendientes> {
     retirosPorAprobar: ret['pendiente'] ?? 0,
     retirosPorPagar: ret['aprobada'] ?? 0,
     purga: purga.length,
+    consultasEsperando: con.esperando,
+    consultasVencidas: con.vencidas,
   }
 }
 
@@ -51,4 +58,4 @@ export const usePendientes = () => useContext(PendientesCtx)
 
 /** Total de cosas por atender, para decir «todo al dia» solo cuando es cierto. */
 export const totalPendientes = (p: Pendientes) =>
-  p.moderacion + p.verificacion + p.denuncias + p.retirosPorAprobar + p.retirosPorPagar + p.purga
+  p.moderacion + p.verificacion + p.denuncias + p.retirosPorAprobar + p.retirosPorPagar + p.purga + p.consultasEsperando
