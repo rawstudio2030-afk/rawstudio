@@ -8,7 +8,7 @@
  */
 import { useCallback, useEffect, useState } from 'react'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
-import { usd, aCentavos } from '../lib/dinero'
+import { usd, usdPlano, aCentavos } from '../lib/dinero'
 import {
   listarRetiros, resolverRetiro, marcarPagado, encargosEnDisputa,
   reembolsar, tipoCambio, fijarTipoCambio, mostrarPesos, fijarMostrarPesos,
@@ -20,10 +20,13 @@ import {
   Tabla, Boton, Campo, Confirmar, Etiquetado, Paginador,
   desde, type Columna,
 } from './piezas'
+import { descargarCSV } from './csv'
 import { usePendientes } from './pendientes'
 import { Pulsable } from '../components/Pulsable'
 
 const POR_PAGINA = 30
+/** Centavos de peso a «123.45», sin simbolo, para el CSV. */
+const mxnPlano = (c: number) => (c / 100).toFixed(2)
 const pesos = (c: number | null) => c == null ? '—'
   : (c / 100).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })
 
@@ -38,6 +41,7 @@ export default function Retiros() {
   // Lo que se resuelve aqui cambia los avisos del menu y del Resumen: se piden de nuevo.
   const { refrescar } = usePendientes()
   const [estado, setEstado] = useState<EstadoRetiro>('pendiente')
+  const [exportando, setExportando] = useState(false)
   const [filas, setFilas] = useState<Retiro[]>([])
   const [total, setTotal] = useState(0)
   const [pagina, setPagina] = useState(0)
@@ -75,6 +79,33 @@ export default function Retiros() {
     if (m) { setError(m); return }
     setError(''); setDialogo(null); setReembolso(null); setFirma(null)
     setConfirmaTasas(false); await cargar()
+  }
+
+  // Todas las solicitudes de la pestana visible (no solo la pagina), con las
+  // columnas de la tabla mas el estado. NO se recalcula ningun monto: «Bruto en
+  // pesos» es el que quedo fijado al aprobar (vacio mientras no lo esta; la tabla
+  // muestra ahi una estimacion con el tipo de cambio del momento). Sin CLABE, RFC
+  // ni titular: la tabla no los muestra y no tienen por que salir en un archivo.
+  const exportar = async () => {
+    setExportando(true); setError('')
+    const todas: Retiro[] = []
+    for (let pag = 0; pag < 50; pag++) {
+      const r = await listarRetiros(estado, pag, 100)
+      if (r.error) { setError(r.error); setExportando(false); return }
+      todas.push(...r.filas)
+      if (todas.length >= r.total || r.filas.length === 0) break
+    }
+    descargarCSV(`retiros-${estado}-${new Date().toISOString().slice(0, 10)}.csv`, [
+      'Creadora', 'Usuario (sin @)', 'Estado', 'Pide (USD)', 'Bruto en pesos (MXN, si ya está fijado)',
+      'Neto (MXN)', 'Saldo actual (USD)', 'Identidad verificada', 'Pedido (UTC)', 'Resuelto (UTC)', 'Referencia SPEI',
+    ], todas.map(r => [
+      r.nombre, r.handle, r.estado, usdPlano(r.coins),
+      r.bruto_mxn == null ? '' : mxnPlano(r.bruto_mxn),
+      r.neto_mxn == null ? '' : mxnPlano(r.neto_mxn),
+      usdPlano(r.saldo_actual), r.verificada ? 'Sí' : 'No',
+      r.created_at, r.resuelta_at ?? '', r.spei_ref ?? '',
+    ]))
+    setExportando(false)
   }
 
   const columnas: Columna<Retiro>[] = [
@@ -274,6 +305,12 @@ export default function Retiros() {
             borderBottom: `2px solid ${estado === p.v ? COLOR.admin : 'transparent'}`,
           }}>{p.t}</Pulsable>
         ))}
+        <div style={{ flex: 1 }} />
+        <div style={{ paddingBottom: 6 }}>
+          <Boton chico activo={!exportando && total > 0} al={exportar}>
+            {exportando ? 'Preparando…' : 'Descargar CSV'}
+          </Boton>
+        </div>
       </div>
 
       {error && (

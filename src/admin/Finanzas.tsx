@@ -18,6 +18,7 @@ import {
 } from '../lib/admin'
 import { Boton, Campo, Etiquetado, Tabla, Cifra, fecha, type Columna } from './piezas'
 import { usd, usdPlano } from '../lib/dinero'
+import { descargarCSV, type Celda } from './csv'
 
 const NOMBRE: Record<string, string> = {
   venta_clip: 'Venta de clips', renta: 'Rentas', propina: 'Propinas',
@@ -57,17 +58,23 @@ export default function Finanzas() {
   const ops = filas.reduce((s, f) => s + f.operaciones, 0)
   const ventas = filas.find(f => f.fuente === 'venta_clip')
 
+  // Lo que se ve en pantalla, en un archivo: las mismas cifras del rango elegido.
+  // Dolares y pesos NUNCA comparten columna: la economia interna va en USD y lo
+  // realmente transferido por SPEI, en MXN. El reparto a creadoras es lo que les
+  // corresponde por sus ventas, no una transferencia hecha.
+  const hayReal = !!real && (real.ordenes_pagadas > 0 || real.ordenes_pendientes > 0 || real.dispersado_mxn > 0)
   const csv = () => {
-    const cab = 'fuente,operaciones,bruto_usd,comision_usd,para_creadoras_usd'
-    const cuerpo = filas.map(f =>
-      [NOMBRE[f.fuente] ?? f.fuente, f.operaciones, usdPlano(f.bruto_coins),
-       usdPlano(f.comision_coins), usdPlano(f.para_creadoras)].join(',')).join('\n')
-    const blob = new Blob([`${cab}\n${cuerpo}\n`], { type: 'text/csv;charset=utf-8' })
-    const a = document.createElement('a')
-    a.href = URL.createObjectURL(blob)
-    a.download = `finanzas-${desde || 'inicio'}-a-${hasta || 'hoy'}.csv`
-    a.click()
-    URL.revokeObjectURL(a.href)
+    const cab = [
+      'Fuente', 'Operaciones', 'Bruto (USD)', 'Comisión de la plataforma (USD)',
+      'Reparto a creadoras (USD, no es una transferencia)', 'Dispersado a creadoras por SPEI (MXN)',
+    ]
+    const cuerpo: Celda[][] = filas.map(f => [
+      NOMBRE[f.fuente] ?? f.fuente, f.operaciones, usdPlano(f.bruto_coins),
+      usdPlano(f.comision_coins), usdPlano(f.para_creadoras), '',
+    ])
+    cuerpo.push(['Total', ops, usdPlano(bruto), usdPlano(comision), usdPlano(paraEllas), ''])
+    if (hayReal && real) cuerpo.push(['Dinero real: dispersado a creadoras', '', '', '', '', (real.dispersado_mxn / 100).toFixed(2)])
+    descargarCSV(`finanzas-${desde || 'inicio'}-a-${hasta || 'hoy'}.csv`, cab, cuerpo)
   }
 
   const columnas: Columna<FilaFinanzas>[] = [
@@ -104,7 +111,7 @@ export default function Finanzas() {
           <Boton al={() => { setDesde(''); setHasta('') }}>Todo el histórico</Boton>
         )}
         <div style={{ flex: 1 }} />
-        <Boton activo={filas.length > 0} al={csv}>Exportar CSV</Boton>
+        <Boton activo={filas.length > 0 || hayReal} al={csv}>Descargar CSV del rango</Boton>
       </div>
 
       {error && (
