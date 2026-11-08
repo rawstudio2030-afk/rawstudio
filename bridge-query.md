@@ -38,6 +38,14 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 
 ## Consultas activas
 
+### [id: 20261107-01] Ronda asignada — panel de administración: resumen, menú y consola de consultas
+- **fecha:** 2026-11-07 18:56 (America/Mexico_City)
+- **estado:** asignada
+- **tarea:** Portada Resumen del panel admin, menú agrupado con avisos, correcciones puntuales y consola administrativa de consultas por Telegram.
+- **instrucciones:** lee `bridge-response.md` `[id: 20261107-01]` y ejecútala en commit(s) de esta ronda. No reabras las rondas 4, 5, 6 ni 7. No mezcles este trabajo con otras tareas.
+- **urgencia:** media
+- **contexto:** `src/screens/Admin.tsx`, `src/admin/Marco.tsx`, `src/admin/piezas.tsx`, módulos actuales del panel, `src/lib/admin.ts`, bandeja de la creadora en `src/components/BandejaConsultas.tsx` y `supabase/migrations/20261128000000_bandeja_consultas.sql`. El cobro de consultas sigue apagado.
+
 ### [id: 20261106-07] Ronda 7 hecha — trato de género desde el alta
 - **fecha:** 2026-11-06 (America/Mexico_City)
 - **estado:** respondida

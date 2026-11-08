@@ -30,6 +30,79 @@
 
 ## Respuestas activas
 
+### Respuesta a [id: 20261107-01] — Ronda 1/10 · Panel de administración: resumen, menú y consola de consultas
+- **fecha:** 2026-11-07 18:56 (America/Mexico_City)
+- **estado:** lista-para-claude
+- **responde a:** Sergio pidió que el panel de administración se sienta como una consola profesional: más amigable, con estadísticas/dashboard y fácil de ver lo de usuarios, moderación, contenido, comunicación, finanzas y bitácoras. Eligió el paquete completo: portada Resumen, menú ordenado, correcciones puntuales y una consola administrativa de consultas por Telegram.
+- **ronda:** 1 de 10 de esta tarea · **tope:** 1 hora · si el tope se queda corto, deja dos commits de ESTA misma ronda (primero resumen + menú + correcciones; después la consola de consultas). No dejes la consola a medias ni la pases a otra ronda.
+- **checklist afectados (NO marques pass tú):** convenciones de UI si tocas el marco del panel. No rompas ítems `pass` ni el trabajo de las rondas 4, 5, 6 y 7.
+
+#### Orden respecto a rondas anteriores
+No reabras `[id: 20261106-04]`, `[id: 20261106-05]`, `[id: 20261106-06]` ni `[id: 20261106-07]`. Esta ronda va en su propio commit (o en los dos de arriba). No mezcles este trabajo con álbumes, avatares, trato, landing, reproductor ni legales.
+
+#### Diagnóstico (no lo reescribas: úsalo)
+El panel YA tiene las pantallas: Usuarios, Moderación, Contenido, Comunicación, Finanzas, Bitácora, Reportes (son denuncias, no analítica), Retiros, Verificación y Herramientas. Lo que falta es orientación, no CRUD. `/admin` aterriza en Usuarios. `src/admin/Marco.tsx` lista diez destinos al mismo nivel (`MODULOS`), numerados 01–09, sin agrupación. El único badge global es el de archivos vencidos por purgar, en Contenido. Finanzas ya tiene indicadores (`admin_finanzas`, `admin_dinero_real`, `admin_finanzas_serie`, `admin_ranking_creadoras`) pero están enterrados en esa sección. Moderación, Verificación y Reportes ya tienen conteos locales (`admin_conteo_moderacion`, `admin_conteo_verificaciones`, `admin_conteo_reportes`) que no se ven desde el menú ni desde una portada. Reutiliza `src/admin/piezas.tsx`; no rehagas tablas, paginadores ni confirmaciones.
+
+#### 1. Portada «Resumen»
+1. Nuevo módulo `resumen` (título «Resumen»). `/admin` y `/admin/resumen` abren esta portada. Una URL de módulo desconocida también cae aquí (hoy `useModulo()` cae en Usuarios y parece una sección válida).
+2. Arriba, lo que necesita atención, cada tarjeta con el número y un enlace al módulo:
+   - clips pendientes de moderación (`admin_conteo_moderacion`)
+   - identidades pendientes (`admin_conteo_verificaciones`)
+   - denuncias abiertas / por resolver (`admin_conteo_reportes`)
+   - retiros pendientes (si no hay RPC de conteo, crea `admin_conteo_retiros` al estilo de las otras; NO sumes solo la página visible de una lista)
+   - archivos vencidos por purgar (`admin_por_purgar`)
+   - consultas por Telegram esperando respuesta o vencidas (la RPC nueva de la consola, más abajo)
+3. Debajo, indicadores que YA existen: de Finanzas (bruto movido, comisión, pagado a creadoras, operaciones; y/o dinero real) y de almacenamiento (`admin_uso_almacenamiento`). Un clic lleva a Finanzas o Herramientas.
+4. **NO inventes métricas.** No pongas visitas, conversión, embudo ni «usuarios nuevos hoy» salvo que exista una RPC agregada de verdad. `Finanzas.tsx` declara que no se registran vistas.
+5. Vacíos útiles: si no hay pendientes, dilo claro («Nada esperando revisión»), no dejes tarjetas en cero sin contexto.
+
+#### 2. Menú agrupado y avisos
+1. Agrupa la lateral, sin hacerla responsiva (el comentario de `Marco.tsx` se queda: es herramienta de escritorio, `ANCHO_MINIMO = 1280`).
+   - **Por atender:** Resumen, Moderación, Verificación, Denuncias, Consultas
+   - **Personas:** Usuarios
+   - **Contenido:** Contenido
+   - **Dinero:** Finanzas, Retiros
+   - **Comunicación:** Comunicación
+   - **Sistema:** Bitácora, Herramientas
+2. Renombra la etiqueta «Reportes» a **«Denuncias»**. Conserva la clave/ruta `/admin/reportes` para no romper enlaces.
+3. Badges en el menú (como el de purgar) para Moderación, Verificación, Denuncias, Retiros y Consultas, con el conteo que corresponde. No dispares una query por ítem cada segundo; un lote al montar el marco (y al volver a la ventana) basta.
+4. No hace falta seguir numerando 01–09 si los grupos ya ordenan.
+
+#### 3. Correcciones
+1. **Herramientas / demo:** `sembrarDemo()` y `borrarDemo()` en `src/lib/admin.ts` devuelven `{ error: ... }`, pero `Herramientas.tsx` solo comprueba `typeof r === 'string'`. Un error puede mostrar «Contenido de demostración creado.» o «… borrado.» Corrige el chequeo y muestra el error.
+2. **Finanzas / gráfica:** el filtro Desde/Hasta afecta el resumen y el ranking, pero la gráfica llama siempre `serieFinanzas(30)`. Haz que la serie siga el rango elegido (si la RPC solo acepta un número de días, pásale el rango real o amplíala). No inventes puntos.
+3. **Lenguaje del dinero:** no mezcles dólares, pesos y coins como si fueran lo mismo, y no inventes el tipo de cambio coins↔pesos (sigue sin definirse). Distingue en las etiquetas el reparto interno («Pagado a creadoras» de la economía de la app) de lo realmente dispersado («Dispersado a creadoras»). No presentas devengado como transferencia bancaria hecha.
+4. **Zona de riesgo en Usuarios:** separa visualmente «Anonimizar», «Eliminar definitivamente» y «Ajustar saldo» de las acciones de todos los días (suspender, banear, reactivar). Siguen existiendo las confirmaciones; no las quites.
+
+#### 4. Consola administrativa de consultas por Telegram
+1. Nuevo módulo `consultas`, título «Consultas», ruta `/admin/consultas`. No la confundas con la página pública `/consultas` ni con `BandejaConsultas` del Estudio (esa es de la creadora, solo sus hilos).
+2. Lista todas las conversaciones: creadora (handle público), la otra parte como su handle público de la app (o «Cuenta eliminada»), clip, último mensaje, cuántos van sin responder, cuándo vence el plazo, cuántos ya vencieron. Filtros: todas / esperando respuesta / vencidas. Búsqueda y paginación al estilo del resto del panel.
+3. Al abrir un hilo: los mensajes en orden, quién escribió (cliente / creadora), fecha, estado (enviado / vencido / lo que ya exista). Si algún aviso de validación (DeepSeek o reglas) ya está guardado, muéstralo; no inventes uno.
+4. **Solo lectura.** El admin no responde, no cobra, no reembolsa ni cambia el estado del mensaje desde aquí. Las respuestas se siguen escribiendo en Telegram.
+5. **Privacidad:** las RPC nuevas son `security definer` y solo las ejecuta un admin (`es_admin`). NO devuelvas `chat_id`, teléfono, token del bot ni secretos. De cada parte solo el handle público (el mismo criterio que `mis_consultas()` / `consulta_mensajes_de()` en `20261128000000_bandeja_consultas.sql`).
+6. Reutiliza el modelo mental y, si sirve, la forma de `mis_consultas` / `consulta_mensajes_de`, ampliados a todo el sitio para admin. Añade `admin_conteo_consultas` (o el nombre que encaje) para el badge y la tarjeta del Resumen.
+7. El cobro sigue apagado (`COBRO_CONSULTAS_ACTIVO = false`). No lo enciendas. No inventes copy de pago, reembolso ni tipo de cambio.
+
+#### Qué no tocar
+Textos legales (`/privacidad`, `/terminos`, `PENDIENTES_ABOGADO`), comisión 20% / SPEI / 18+, token o secretos de Telegram, el cobro de consultas, reproductor, landing, trato de género, avatares (salvo que un enlace del Resumen lleve a Herramientas), no hagas el panel responsivo, no implementes el placeholder de Redes Sociales, no montes un monitor técnico de errores o deploys.
+
+#### Criterios de aceptación
+1. Entrar a `/admin` muestra Resumen con pendientes reales (o vacíos claros) y los indicadores financieros/de almacenamiento que ya existen.
+2. El menú está agrupado; «Denuncias» es el nombre visible de Reportes; hay badges en las colas que importan.
+3. Las cuatro correcciones de la §3 se cumplen.
+4. `/admin/consultas` lista hilos de todo el sitio, permite abrir uno y leer mensajes, sin `chat_id` ni token en el navegador, y sin acciones de escritura/cobro.
+5. Typecheck, build y lint limpios (solo advertencias que ya existían).
+
+#### Cómo demostrar (obligatorio en bridge-query.md)
+SHA, diff resumido, y verificación: recorrido de `/admin` (Resumen), del menú con grupos y badges, de Denuncias (misma ruta `/admin/reportes`), de un error de demo si puedes provocarlo en local, de la gráfica con un rango distinto de 30 días, de la zona de riesgo en una ficha de usuario, y de la consola de consultas (lista + detalle; si no hay hilos, el vacío). Confirma que ninguna RPC nueva expone `chat_id`.
+
+#### Siguiente paso para Claude Code
+1. `git pull` de `origin/main`.
+2. Implementa esta ronda. Commit(s) de producto, p. ej. `feat: resumen y menu del panel de administracion` y `feat: consola admin de consultas por Telegram`; `git push origin main`.
+3. Marca `bridge-query.md` `[id: 20261107-01]` como `respondida` con SHA, diff y verificación. **No** marques `CHECKLIST.md` como pass.
+
+---
+
 ### Respuesta a [id: 20261106-07] — Ronda 7/10 · Trato de género desde el alta
 - **fecha:** 2026-11-06 17:56 (America/Mexico_City)
 - **estado:** lista-para-claude
