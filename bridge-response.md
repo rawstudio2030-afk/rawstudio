@@ -30,6 +30,64 @@
 
 ## Respuestas activas
 
+### Respuesta a [id: 20261107-04] — Cobro de consultas y devolución del saldo si no hay respuesta en 2 días
+- **fecha:** 2026-11-07 20:57 (America/Mexico_City)
+- **estado:** lista-para-claude
+- **responde a:** Sergio decidió: si la creadora no responde un mensaje pagado en 2 días, se le devuelve el saldo al cliente. Con eso se puede encender el cobro que ya estaba reservado.
+- **ronda:** 1 de 10 de esta tarea · **tope:** 1 hora
+- **checklist afectados (NO marques pass tú):** no inventes textos legales. No rompas ítems `pass` ni el trabajo de las rondas 4, 5, 6, 7, `20261107-01`, `20261107-02` ni `20261107-03`.
+
+#### Orden respecto a rondas anteriores
+No reabras `[id: 20261106-04]`, `[id: 20261106-05]`, `[id: 20261106-06]`, `[id: 20261106-07]`, `[id: 20261107-01]` ni `[id: 20261107-02]`. Si `[id: 20261107-03]` sigue pendiente, termínala primero y no la mezcles con esta: esta ronda va después, en su propio commit. No toques legales, dominio, reproductor, trato ni el panel de administración (salvo, si hace falta, el nombre visible de un motivo nuevo en el monedero).
+
+#### Decisión de Sergio (no la reinterpretar)
+Si la creadora no responde un mensaje pagado de consulta por Telegram en 2 días, se le devuelve el saldo al cliente. El plazo de 2 días no cambia. El precio sigue siendo `PRECIO_CONSULTA_TELEGRAM` (20 pesos por mensaje del cliente).
+
+#### Diagnóstico (no lo reescribas: úsalo)
+1. La migración `20261124000000_consultas_telegram.sql` dejó el circuito listo y escribió dónde enganchar: «Cuando se decida, se engancha en `bot_registrar_cliente` (cobro) y en `consultas_vencer` (reembolso).» Hoy `cobro_coins` queda en cero y `consultas_config.cobro_activo` en falso. El comentario de `bot_registrar_cliente` dice «AQUI va el cobro»; el de `consultas_vencer` dice «Cuando exista el cobro, aqui se reembolsa.»
+2. `coin_ledger` no tenía un motivo para este gasto (el ledger solo deja gastar con ciertos motivos). Sí existe el motivo `reembolso`. `src/lib/monedero.ts` enumera: `recarga`, `compra_clip`, `venta_clip`, `propina`, `ajuste_admin`, `reembolso`, `retiro`. No reutilices `compra_clip` ni `venta_clip` para una consulta: no es un desbloqueo de clip.
+3. El tipo de cambio ya no está pendiente: `ajustes.tipo_cambio_usd_mxn` vale 1850, es decir 18.50 MXN por USD. Todo se guarda en centavos de dólar (las columnas se siguen llamando `*_coins`; ver `src/lib/dinero.ts`). 1 coin = 1 centavo de dólar. Convierte 20.00 MXN a centavos de dólar con ese tipo de cambio y el mismo redondeo al centavo más cercano que ya usa el resto del dinero. No inventes otra tasa.
+4. `bot_anular_mensaje` borra el mensaje del cliente si Telegram no pudo entregarlo (`tg_msg_id is null`). Si cobraste al registrarlo, esa anulación tiene que deshacer el cobro. Si no, cobra solo cuando el mensaje ya quedó entregado, pero entonces `consultas_vencer` y el registro tienen que saber el monto.
+5. `avisarVencidos` en `supabase/functions/telegram-bot/index.ts` hoy le dice al cliente que ella no respondió y que ya no está pendiente. No menciona devolución de saldo. `COBRO_CONSULTAS_ACTIVO` en `src/content/consultas.ts` sigue en `false` (el comentario viejo habla de la equivalencia coins↔pesos; eso ya no bloquea).
+6. Recargar saldo desde la web todavía no se puede: no hay procesador de pagos compatible con este giro. No inventes recargas, pasarela ni SPEI de entrada.
+
+#### 1. Cobrar al enviar, retener, devolver o repartir
+1. Añade los motivos que falten en el ledger (y su nombre visible en `NOMBRE_MOTIVO`) para el gasto del cliente y, si hace falta, para lo que reciba la creadora al responder. El reembolso puede usar el motivo `reembolso` que ya existe. Cada movimiento lleva `ref_id` al mensaje (o a la consulta) para poder auditarlo.
+2. Guarda en `consulta_mensajes.cobro_coins` el monto exacto que se le cobró al cliente en esa operación (centavos de dólar). El reembolso devuelve **ese** monto, no una conversión nueva si el tipo de cambio cambió después.
+3. Cobra cuando el mensaje del cliente queda registrado y se va a entregar. Si no tiene saldo suficiente, **no** se registra ni se envía: avísale con una frase corta (no tiene saldo suficiente para este mensaje). No le prometas que puede recargar: esa pantalla todavía no recarga.
+4. Entre el envío y la respuesta o el vencimiento, **retén** el cobro: no se lo acredites a la creadora ni tomes la comisión todavía. Si ya hay un patrón de retención (encargos: el dinero queda retenido hasta entregar), reúsalo; no inventes otra caja.
+5. Si ella responde a tiempo: aplica el reparto de siempre, comisión **20%** / creadora **80%**, con la misma función de reparto que ya usan las ventas (no inventes otro redondeo). El cliente no recibe nada de vuelta: pagó por ese mensaje y esa respuesta.
+6. Si vence sin respuesta (`consultas_vencer`): marca el mensaje `vencido` como hoy y **devuelve el 100%** de `cobro_coins` al saldo del cliente, una sola vez (solo filas que pasan de `enviado` a `vencido` con `cobro_coins > 0`). No le desconte nada a la creadora: nunca se lo acreditaste.
+7. Si `bot_anular_mensaje` borra un mensaje ya cobrado, deshaz el cobro (el cliente no debe perder saldo por un mensaje que no se entregó).
+8. Mensajes viejos con `cobro_coins = 0` no generan reembolso ni cargo retroactivo.
+9. Enciende `consultas_config.cobro_activo` y `COBRO_CONSULTAS_ACTIVO` (ponlos de acuerdo). Con eso, el botón de consultar de una ficha ya puede mostrar el precio, como ya preveía `consultas.ts`. No inventes otra pasarela: se cobra del saldo de la cuenta, que es lo que Sergio confirmó.
+
+#### 2. Decírselo al cliente (sin inventar legales)
+1. En `/consultas`, en la regla 5 (Plazo) o pegado a ella, añade la decisión de Sergio con sus palabras: si la creadora no responde en esos 2 días, se le devuelve el saldo al cliente. No escribas un apartado nuevo de «política de reembolsos», no toques `/privacidad` ni `/terminos`, no inventes plazos distintos ni excepciones.
+2. En `avisarVencidos`, si de verdad se devolvió saldo, díselo al cliente en la misma notificación (una frase: se le devolvió el saldo). Si el mensaje vencido no tenía cobro (`cobro_coins = 0`), deja el aviso como está. A la creadora sigue bastando saber que se venció el plazo.
+3. Si hace falta, una mención breve del mismo hecho en la tarjeta de Precios o el recuadro de `/creadoras` está bien, usando la misma idea, no un texto legal distinto.
+
+#### Qué no tocar
+Textos legales (`PENDIENTES_ABOGADO`, `/privacidad`, `/terminos`), token o secretos de Telegram (nunca en el repo, el front ni un commit), DeepSeek (sigue solo validando), el plazo de 2 días, el precio de 20 pesos, recargas o un procesador de pagos nuevo, el hero del 80% / dólar, dominio (`public/CNAME`), reproductor, trato, panel (más allá del nombre de un motivo), avatares, álbumes.
+
+#### Criterios de aceptación
+1. Un mensaje del cliente con cobro activo y saldo suficiente descuenta del saldo el equivalente de 20 pesos (tipo de cambio vigente, redondeo de siempre) y guarda ese monto en `cobro_coins`.
+2. Si no hay saldo suficiente, el mensaje no se envía y no se descuenta nada.
+3. Si ella no responde en 2 días, `consultas_vencer` le devuelve al cliente exactamente `cobro_coins`, una sola vez, y el bot se lo dice.
+4. Si ella responde a tiempo, no hay devolución; ella recibe el 80% y la plataforma el 20%, con el reparto de siempre.
+5. Si Telegram no entrega el mensaje y se anula, el cliente no pierde el saldo.
+6. En `/consultas` se lee que, si no hay respuesta en 2 días, se devuelve el saldo al cliente. No se tocaron páginas legales.
+7. Typecheck, build y lint limpios (solo advertencias que ya existían).
+
+#### Cómo demostrar (obligatorio en bridge-query.md)
+SHA, diff resumido, y verificación: la conversión 20 MXN → centavos; que el cobro, la retención, el reembolso y el reparto al responder hacen lo de arriba (prueba SQL o caso equivalente); que anular no deja el cargo; que `/consultas` menciona la devolución; que no se inventó recarga ni se tocó un secreto. No marques `CHECKLIST.md` como pass.
+
+#### Siguiente paso para Claude Code
+1. `git pull` de `origin/main`.
+2. Si `20261107-03` no está `respondida`, termínala primero.
+3. Implementa esta ronda. Commit de producto, p. ej. `feat: cobro de consultas y devolucion del saldo si no hay respuesta`; `git push origin main`. Aplica la migración en producción cuando Omar lo autorice, igual que las anteriores.
+4. Marca `bridge-query.md` `[id: 20261107-04]` como `respondida` con SHA, diff y verificación. **No** marques `CHECKLIST.md` como pass.
+
 ### Respuesta a [id: 20261107-03] — Precio de las consultas en portada y avatar solo tras revisión
 - **fecha:** 2026-11-07 20:50 (America/Mexico_City)
 - **estado:** lista-para-claude

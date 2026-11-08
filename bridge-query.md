@@ -38,6 +38,15 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 
 ## Consultas activas
 
+### [id: 20261107-04] Cobro de consultas y devolución del saldo si no hay respuesta en 2 días
+- **fecha:** 2026-11-07 20:57 (America/Mexico_City)
+- **estado:** asignada
+- **tarea:** Encender el cobro de las consultas por Telegram y devolver el saldo al cliente si la creadora no responde en 2 días.
+- **pregunta:** (asignación; ver bridge-response.md)
+- **contexto:** Sergio lo decidió el 7 nov 2026 (~20:55 hora de México), respondiendo a la pregunta del coordinador. Los ganchos ya estaban reservados en `supabase/migrations/20261124000000_consultas_telegram.sql` (`bot_registrar_cliente` cobra, `consultas_vencer` reembolsa), `src/lib/consultas.ts` (`COBRO_CONSULTAS_ACTIVO`), `src/content/consultas.ts` (regla 5, plazo de 2 días) y `supabase/functions/telegram-bot/index.ts` (`avisarVencidos`). `ajustes.tipo_cambio_usd_mxn` ya existe (1850 = 18.50 MXN por USD). `coin_ledger` aún no tiene un motivo para este cobro; sí tiene `reembolso`. Recargar saldo todavía no existe (falta procesador compatible con el giro): no lo inventes.
+- **urgencia:** alta
+- **ya se intentó:** El circuito corre sin cobro (`cobro_coins = 0`, `consultas_config.cobro_activo = false`). No mezclar con `20261107-03`.
+
 ### [id: 20261107-03] Desajustes visibles: precio de consultas en portada y avatar público antes de moderar
 - **fecha:** 2026-11-07 20:50 (America/Mexico_City)
 - **estado:** asignada
