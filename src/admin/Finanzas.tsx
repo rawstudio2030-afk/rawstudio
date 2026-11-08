@@ -23,7 +23,7 @@ import { descargarCSV, type Celda } from './csv'
 const NOMBRE: Record<string, string> = {
   venta_clip: 'Venta de clips', renta: 'Rentas', propina: 'Propinas',
   chat: 'Chat monetizado', encargo: 'Videos personalizados',
-  entrada_show: 'Entradas a shows',
+  entrada_show: 'Entradas a shows', consulta: 'Consultas por Telegram',
 }
 
 const pesos = (centavos: number) =>
