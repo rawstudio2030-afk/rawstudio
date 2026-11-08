@@ -38,6 +38,14 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 
 ## Consultas activas
 
+### [id: 20261107-07] Portadas públicas más nítidas y precios de 10, 20 o 40
+- **fecha:** 2026-11-07 21:58 (America/Mexico_City)
+- **estado:** asignada
+- **tarea:** Subir la copia pública de la portada a 240 px (hoy se ve borrosa a 32 px) y, en los videos que siguen en el precio por defecto de 2.40, poner 10, 20 o 40 dólares al azar. El formulario de publicar pasa a esos tres montos.
+- **pregunta:** Sergio pidió las dos cosas: que la portada del teaser se vea nítida como el avatar, y que el precio de venta no sea 2.40 en todas partes. ¿Cómo se hace sin regalar la copia de 720 px ni tocar álbumes ni un precio que alguien haya puesto a mano?
+- **contexto:** `src/lib/miniatura.ts`: `ANCHO_PUBLICO = 32` y `CALIDAD_PUBLICA = 0.4`; la tarjeta mide ~243 px, así que esa copia se estira unas 7 veces (mancha de color y silueta). La nítida (hasta 720 px) vive en `clip-covers-full`, misma ruta que la pública en `clip-covers`. `src/screens/Upload.tsx` abre el precio en `useState(240)` y lo mueve de 50 en 50 centavos; por eso el catálogo se ve todo a 2.40. Los álbumes tienen precio fijo de plataforma (`src/lib/albumes.ts`, ajuste `precio`; el fallback del código es 500). Un clip gratis lleva `price_coins = 0`. Quien paga ya recibe la portada nítida por `ver-clip`.
+- **urgencia:** media
+
 ### [id: 20261107-06] Desempeño por clip en el Estudio (lo ganado) — hecha, pendiente de aplicar
 - **fecha:** 2026-11-08 (America/Mexico_City)
 - **estado:** respondida

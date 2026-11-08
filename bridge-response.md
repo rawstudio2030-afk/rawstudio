@@ -30,6 +30,57 @@
 
 ## Respuestas activas
 
+### Respuesta a [id: 20261107-07] — Portadas públicas más nítidas y precios de 10, 20 o 40
+- **fecha:** 2026-11-07 21:58 (America/Mexico_City)
+- **estado:** lista-para-claude
+- **responde a:** Sergio vio las portadas del teaser borrosas (le gustó lo nítido del avatar) y que casi todos los videos dicen 2.40. Pidió las dos cosas: copia pública más clara, y precio de venta al azar entre 10, 20 y 40 dólares.
+- **ronda:** 1 de 10 de esta tarea · **tope:** 1 hora
+- **checklist afectados (NO marques pass tú):** convenciones de UI de publicar y del catálogo si tocas esas pantallas. No rompas ítems `pass` ni el trabajo de las rondas 4–7 ni `20261107-01` a `20261107-06`.
+
+#### Orden respecto a rondas anteriores
+Si `[id: 20261107-06]` sigue `asignada`, **termínala primero** (desempeño por clip en el Estudio) y márcala `respondida`. Después, y no antes, implementa esta ronda en su propio commit (o dos, si prefieres separar portadas y precios). No reabras `[id: 20261106-04]`, `[id: 20261106-05]`, `[id: 20261106-06]`, `[id: 20261106-07]`, `[id: 20261107-01]`, `[id: 20261107-02]`, `[id: 20261107-03]`, `[id: 20261107-04]`, `[id: 20261107-05]` ni `[id: 20261107-06]` una vez cerrada. No toques legales, recargas o pasarela, el precio de 20 pesos, el plazo de 2 días, `COBRO_CONSULTAS_ACTIVO` (sigue en `true`), DeepSeek, el hero del 80% / dólar, dominio, reproductor (más allá de que el póster público se vea mejor al cambiar el tamaño), trato, avatares, álbumes (precio fijo y flujo), consola de admin salvo un disparador puntual para regenerar portadas, ni «Anonimizar».
+
+#### Diagnóstico (no lo reescribas: úsalo)
+1. **La portada se ve borrosa a propósito.** El 3 de noviembre de 2026 se partió en dos copias de la misma imagen y la misma ruta: la pública, en `clip-covers`, sale de `achicar()` con `ANCHO_PUBLICO = 32` y `CALIDAD_PUBLICA = 0.4` (`src/lib/miniatura.ts`). La tarjeta mide ~243 px, así que se estira unas 7 veces: queda la mancha de color y la silueta. La nítida (hasta `ANCHO_MAXIMO = 720`) va a `clip-covers-full`, privada. `urlPortada()` lee el bucket público; quien compra recibe la nítida por `ver-clip`. En `Upload.tsx` el texto lo dice: «Sin pagar se ve borrosa, a 32 px. La nítida se guarda en privado.» En `ClipDetail.tsx`, el póster del reproductor es `portadaNitida ?? portada`: sin acceso, la misma miniatura chica, todavía más estirada.
+2. **No es lo mismo que el avatar.** El avatar público sale a 256 px (`LADO_AVATAR`) con `avatarDeVideo` (elige el cuadro más limpio de la primera mitad). Por eso se ve nítido. No copies aquí la heurística ni el recorte cuadrado: la portada ya la elige la creadora entre seis cuadros (`cuadrosDeVideo`) o sube la suya. El arreglo es el **tamaño y la calidad de la copia pública**, no otro cuadro.
+3. **El 2.40 es el valor inicial del formulario**, no una decisión de cada creadora: `const [precio, setPrecio] = useState(240)` en `src/screens/Upload.tsx`, con botones que suman o restan 50 centavos. Un clip gratis lleva `0`. Un álbum usa el precio fijo de plataforma (`configAlbumes()`, fallback 500 en `src/lib/albumes.ts`): no lo toques. La renta por defecto es 80 centavos y empieza apagada; al subir el precio de venta, una renta de 80 sigue siendo más barata, no la cambies.
+4. Quien ya desbloqueó un clip a 2.40 no se recobra ni se le quita el acceso (`purchases` es único por usuario y clip). Solo cambia lo que paga quien desbloquee a partir de ahora.
+
+#### 1. Portadas públicas a 240 px
+1. Sube `ANCHO_PUBLICO` de 32 a **240** y `CALIDAD_PUBLICA` de 0.4 a algo cercano a la nítida (p. ej. 0.82). Las subidas nuevas ya pasan por `achicar()`: saldrán a 240 px al público. No cambies `ANCHO_MAXIMO` ni subas la copia de 720 px al bucket público.
+2. Actualiza el texto de publicar que hoy dice que sin pagar se ve borrosa a 32 px. Algo fiel como: sin pagar se ve una miniatura de 240 px; la nítida se guarda en privado. No inventes copy de marketing ni textos legales.
+3. Regenera las portadas públicas **que ya existen** a partir de `clip-covers-full` (la nítida), misma ruta, y escríbelas en `clip-covers` (hace falta poder pisar esa ruta: el `upload` habitual usa `upsert: false`, no lo cambies para todas las subidas; el relleno sí tiene que poder reemplazar). Si un clip no tiene copia nítida, no intentes agrandar la pública de 32 px: déjala y cuéntala como omitida. Si no tiene `cover_path`, no inventes una.
+4. Ese relleno es de una vez. Inspecciona las políticas de Storage: el navegador de un admin quizá no pueda escribir en el prefijo de otra cuenta. Si hace falta, una función de borde autenticada como admin, con la llave de servicio **solo dentro de Supabase** (nunca en el front, el repo, un comentario ni un commit). No inventes un secreto de cron nuevo. Si lo pones en Herramientas, que sea un disparador puntual con progreso (procesadas, omitidas, errores), idempotente: correrlo dos veces deja el mismo resultado a 240 px. No pidas revisión humana cuadro a cuadro: es la misma imagen, solo más grande.
+5. No actives la tira de seis cuadros en los clips de pago (sigue siendo solo para los gratis). No empieces a registrar visitas ni mapas de reproducción.
+
+#### 2. Precios de 10, 20 o 40 dólares
+1. En los videos de pago que **siguen en 240** (`visibility = 'pago'`, `coalesce(formato, 'video') = 'video'`, `price_coins = 240`), asigna al azar uno de `1000`, `2000` o `4000` (10, 20 o 40 dólares, en centavos). Una migración SQL basta; algo equivalente a:
+   `UPDATE clips SET price_coins = (ARRAY[1000, 2000, 4000])[1 + floor(random() * 3)::int] WHERE visibility = 'pago' AND coalesce(formato, 'video') = 'video' AND price_coins = 240;`
+   Como el `WHERE` exige 240, correrla dos veces no vuelve a revolver los que ya salieron.
+2. **No toques:** álbumes (`formato = 'album'`), clips gratis (`price_coins = 0` u otra visibilidad), ni un video cuyo precio no sea 240 (eso sí lo movió alguien a mano). No toques `renta_coins` ni `renta_horas`.
+3. En el formulario de publicar un video (`Upload.tsx`): quita el valor inicial de 2.40 y los botones de 50 en 50 centavos. Deja tres botones claros — 10, 20 y 40 dólares — y abre en **20**. Ella puede cambiar entre esos tres; no hace falta un monto libre que devuelva el catálogo a 2.40. Sigue mostrando `usd()` y el equivalente en pesos si ya está. El 80% que ella se queda se calcula con el precio elegido, como ahora.
+4. No inventes recargas, pasarela ni un cambio al cobro de consultas (20 pesos). No toques el precio fijo de los álbumes ni su pantalla.
+
+#### Qué no tocar
+Textos legales, recargas o pasarela, token o secretos, el precio de 20 pesos, el plazo de 2 días, `COBRO_CONSULTAS_ACTIVO` (sigue en `true`), DeepSeek, el hero del 80% / dólar, dominio, reproductor (salvo que el póster público mejore solo al cambiar el tamaño), trato, avatares, álbumes, consola de admin más allá del disparador puntual de portadas, «Anonimizar», el desempeño por clip de la 06.
+
+#### Criterios de aceptación
+1. En el catálogo y en la ficha, sin pagar, la portada se ve clara a ~240 px, no como una mancha de 32 px. La copia de ~720 px no está en el bucket público. Quien compra sigue viendo la nítida.
+2. Las portadas que ya existían con copia nítida se regeneraron; las que no tenían nítida se omitieron sin inventar nada.
+3. Los videos que estaban en 2.40 quedaron en 10, 20 o 40 dólares, repartidos (no todos el mismo). Los álbumes, los clips gratis y cualquier precio distinto de 2.40 no se movieron. Publicar un video de pago ofrece 10 / 20 / 40 y arranca en 20.
+4. Typecheck, build y lint limpios (solo advertencias que ya existían). Ningún secreto en el repo.
+
+#### Cómo demostrar (obligatorio en bridge-query.md)
+SHA, diff resumido, y:
+- **Portadas.** `ANCHO_PUBLICO === 240`. Una portada pública nueva (o regenerada) mide ~240 px de ancho, no 32 ni 720. Un clip de prueba sin copia nítida no se inventa. `anon` sigue sin leer `clip-covers-full`.
+- **Precios.** Conteo antes/después: cuántos videos pasaron de 240 a 1000 / 2000 / 4000; cuántos álbumes, gratis u otros precios se quedaron igual (0 cambiados). El formulario muestra los tres botones y el valor inicial 20. Correr la migración otra vez no cambia filas.
+- No marques `CHECKLIST.md` como pass.
+
+#### Siguiente paso para Claude Code
+1. Si `20261107-06` sigue pendiente, `git pull` e impleméntala primero; márcala `respondida`.
+2. `git pull` de `origin/main`. Implementa esta ronda. Commit de producto, p. ej. `feat: portadas publicas mas nitidas y precios de 10 20 o 40`; `git push origin main`. Aplica la migración de precios en producción y corre el relleno de portadas con la aprobación de Omar, como en las rondas anteriores.
+3. Marca `bridge-query.md` `[id: 20261107-07]` como `respondida` con SHA, diff y verificación. **No** marques `CHECKLIST.md` como pass.
+
 ### Respuesta a [id: 20261107-06] — Desempeño por clip en el Estudio (lo ganado)
 - **fecha:** 2026-11-07 21:46 (America/Mexico_City)
 - **estado:** lista-para-claude
