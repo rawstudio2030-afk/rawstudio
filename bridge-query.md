@@ -47,14 +47,24 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 - **urgencia:** alta
 - **ya se intentó:** El circuito corre sin cobro (`cobro_coins = 0`, `consultas_config.cobro_activo = false`). No mezclar con `20261107-03`.
 
-### [id: 20261107-03] Desajustes visibles: precio de consultas en portada y avatar público antes de moderar
-- **fecha:** 2026-11-07 20:50 (America/Mexico_City)
-- **estado:** asignada
+### [id: 20261107-03] Desajustes visibles hechos: precio de consultas en portada y avatar solo tras revisión
+- **fecha:** 2026-11-08 (America/Mexico_City)
+- **estado:** respondida
 - **tarea:** Mostrar los 20 pesos donde ya se anuncian las consultas, y no publicar un avatar automático hasta que haya revisión.
-- **pregunta:** (asignación; ver bridge-response.md)
-- **contexto:** Sergio pidió avanzar con lo que falta ahora mismo. Los legales siguen esperando abogado (fuera de esta ronda). El cobro de consultas sigue apagado hasta definir qué pasa si no responden en 2 días (tampoco entra aquí). HEAD al asignar: `1fd035f8`. No reabrir 4, 5, 6, 7, `20261107-01` ni `20261107-02`.
-- **urgencia:** alta
-- **ya se intentó:** el precio ya está en `src/content/consultas.ts` (`PRECIO_CONSULTA_TELEGRAM = '20 pesos'`) y se pinta en `/consultas`; la tarjeta de la portada y el recuadro de `/creadoras` no lo dicen.
+- **resultado:** HECHA en un commit, **local: aún sin `git push`** (espera la aprobación de Omar; no lleva migración). Commit `253d567` — `fix: precio de consultas visible y avatar automatico solo tras revision`.
+- **diff resumido:**
+  - `src/content/portada.ts`: la tarjeta «Consultas por Telegram» de `FORMAS_NEON` ahora dice «Pagas 20 pesos por cada mensaje y la creadora responde en un máximo de 2 días.», con `PRECIO_CONSULTA_TELEGRAM` importado (no copiado como texto). Conserva el enlace a `/consultas`.
+  - `src/screens/Creators.tsx`: el recuadro de consultas añade «Cada mensaje del cliente cuesta 20 pesos.» con la misma constante, junto al tope de 2 días. No se reescribió ninguna regla ni se inventó reembolso.
+  - `src/screens/Upload.tsx`: se quitó la llamada a `asignarAvatarSiFalta`, su `import` y el paso «Preparando tu foto de perfil…». Al terminar de subir, sin foto se queda la inicial; el clip se crea igual.
+  - `src/lib/avatarAuto.ts`: sin cambios de lógica; solo una advertencia en la cabecera («no se llama desde ningún sitio, a propósito»). Se dejó en lugar de borrarlo.
+  - Sin tocar: `COBRO_CONSULTAS_ACTIVO` (sigue `false`), el hero del «80% de cada dólar», `/entrar` y el formulario de `/acceso`, legales, `public/CNAME`, panel, Moderación, `AvatarAuto.tsx` de Herramientas (la revisión manual sigue como estaba), fotos ya puestas, álbumes.
+- **verificación:**
+  - Navegador, `/#/creadoras`: el recuadro dice «Tienes un máximo de 2 días para responder un mensaje pagado. Cada mensaje del cliente cuesta 20 pesos.»
+  - Tarjeta de Precios: la sección se carga de forma diferida en la portada y no pude hacerla aparecer en la ventana de pruebas, así que lo comprobé en el módulo que la alimenta, cargado en el navegador: `FORMAS_NEON` → «Pagas 20 pesos por cada mensaje y la creadora responde en un máximo de 2 días.» con `a: '/consultas'`; el texto contiene `PRECIO_CONSULTA_TELEGRAM` (`'20 pesos'`) y `COBRO_CONSULTAS_ACTIVO` es `false`.
+  - `asignarAvatarSiFalta` ya no tiene ningún llamado (`grep` en `src`): solo su definición. Ninguna migración de `admin_moderar` toca `avatar_path` y `Moderacion.tsx` no menciona avatares: no hay un llamado automático al aprobar. En `src`, el bucket `avatars` solo lo usan `perfiles.ts` (la foto que sube la propia persona), `AvatarAuto.tsx` de Herramientas (con confirmación humana) y `Almacenamiento.tsx` (el panel de almacenamiento).
+  - Typecheck, build y lint limpios (solo advertencias que ya existían; lint de dinero y plurales limpios).
+- **NO verificado:** una subida real de video con una cuenta sin foto (habría escrito datos en producción): la ausencia del llamado se comprobó leyendo el código y con `grep`, no ejecutando la subida. La tarjeta de Precios renderizada en la portada (solo su texto fuente).
+- **¿Debería subir el checklist?** No marco nada: «convenciones de UI» lo decide el coordinador.
 
 ### [id: 20261107-02] Ronda 2/10 hecha — panel de administración: búsqueda, urgencia, bitácora, avatares y exportar
 - **fecha:** 2026-11-08 (America/Mexico_City)
