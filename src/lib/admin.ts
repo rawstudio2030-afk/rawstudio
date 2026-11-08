@@ -15,6 +15,7 @@ import type { MotivoReporte } from './reportes'
  * O sea: lo que decide que un modulo se pueda cargar aparte no es su tamaño,
  * es quien lo toca. Un solo import desde el tronco lo ancla entero. */
 import { miniaturaDeVideo, tiraDeVideo } from './miniatura'
+import { precioDeVideoAlAzar } from './precios'
 
 
 export type PerfilAdmin = {
@@ -1528,7 +1529,10 @@ export function agruparVideos(
       return {
         archivo: f, carpeta, ruta: rel,
         titulo: tituloDeArchivo(f.name),
-        descripcion: '', precio: 240, visibilidad: 'pago' as const,
+        // Cada video de pago sale a 10, 20 o 40 dolares AL AZAR, uno por uno (no un
+        // solo monto para todo el lote). Era 240 (2.40): el valor que llenaba el
+        // catalogo. Un precio del CSV (`aplicarCatalogo`) siempre le gana a este.
+        descripcion: '', precio: precioDeVideoAlAzar(), visibilidad: 'pago' as const,
         creadora: c?.id ?? null,
         // Sin verificar YA NO impide subir: el clip queda pendiente y se
         // publica solo en cuanto se cargue su expediente, sin volver a subirlo.
@@ -1563,17 +1567,26 @@ export function aplicarCatalogo(
     if (!f) return v
     usadas.add((f.archivo ?? '').trim().toLowerCase())
 
-    const precio = f.precio !== undefined && f.precio !== ''
-      ? Math.round(parseFloat(String(f.precio).replace(',', '.')) * 100)
-      : v.precio
+    // Un `precio` escrito en el CSV es un precio puesto a PROPOSITO y siempre gana
+    // (incluido un 2.40 o cualquier otro monto). Si la fila no trae precio, queda el
+    // que asigno `agruparVideos`.
     const vis = ['pago', 'suscriptores', 'gratis'].includes(f.visibilidad ?? '')
       ? f.visibilidad as VideoEnLote['visibilidad'] : v.visibilidad
+    // Si el video estaba como GRATIS (precio 0, por un catalogo anterior) y esta fila
+    // lo vuelve de pago sin decir precio, no puede quedar de pago a 0: recibe uno de
+    // los tres, como al agruparse.
+    const base = v.visibilidad === 'gratis' && vis !== 'gratis' ? precioDeVideoAlAzar() : v.precio
+    const precio = f.precio !== undefined && f.precio !== ''
+      ? Math.round(parseFloat(String(f.precio).replace(',', '.')) * 100)
+      : base
 
     return {
       ...v,
       titulo: (f.titulo || v.titulo).slice(0, 90),
       descripcion: (f.descripcion ?? '').slice(0, 600),
-      precio: Number.isFinite(precio) && precio >= 0 ? precio : v.precio,
+      // Un clip GRATIS vale 0 (como en el formulario de la creadora): no se publica
+      // «gratis» con 10, 20 o 40 pegados, aunque el CSV traiga un precio.
+      precio: vis === 'gratis' ? 0 : (Number.isFinite(precio) && precio >= 0 ? precio : base),
       visibilidad: vis,
     }
   })

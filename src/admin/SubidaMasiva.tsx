@@ -136,6 +136,10 @@ export default function SubidaMasiva() {
           <div style={{ marginTop: 8, font: `400 11px/1.45 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
             archivo, titulo, descripcion, precio, visibilidad
           </div>
+          <div style={{ marginTop: 8, font: `400 12px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
+            Si el catálogo no trae precio, cada video sale a 10, 20 o 40 dólares, al azar. Si lo
+            trae, se respeta tal cual; un video «gratis» queda en $0.00.
+          </div>
         </div>
       </div>
 

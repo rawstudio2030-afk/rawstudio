@@ -15,6 +15,7 @@ import MisClips from '../components/MisClips'
 import { usd, usdYPesos } from '../lib/dinero'
 import { useMoneda } from '../lib/moneda'
 import Equivalente from '../components/Equivalente'
+import { PRECIOS_VIDEO, PRECIO_INICIAL } from '../lib/precios'
 import { Pulsable, Enlace } from '../components/Pulsable'
 import Centro from '../components/Centro'
 import { perfilParaPublicar } from '../lib/trato'
@@ -38,13 +39,6 @@ const MODOS: { v: Visibilidad; t: string }[] = [
   { v: 'suscriptores', t: 'Suscriptores' },
   { v: 'gratis', t: 'Gratis' },
 ]
-
-/** Precios de venta de un video: 10, 20 o 40 dolares, en CENTAVOS (como todo el
- *  libro). Son tres botones y no un monto libre a proposito: el valor inicial era
- *  2.40 y la mayoria de los videos se quedaron ahi, sin que nadie lo decidiera. El
- *  album tiene su propio precio fijo y su propia pantalla. */
-const PRECIOS_VIDEO = [1000, 2000, 4000] as const
-const PRECIO_INICIAL = 2000
 
 export default function Upload() {
   const nav = useNavigate()
