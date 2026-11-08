@@ -13,10 +13,10 @@ import { useCallback, useEffect, useState } from 'react'
 import { cuantos, palabra } from '../lib/plural'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 import {
-  finanzas, dineroReal, serieFinanzas, rankingCreadoras,
+  finanzas, dineroReal, serieFinanzasRango, rankingCreadoras,
   type FilaFinanzas, type DineroReal, type PuntoSerie, type FilaRanking,
 } from '../lib/admin'
-import { Boton, Campo, Etiquetado, Tabla, fecha, type Columna } from './piezas'
+import { Boton, Campo, Etiquetado, Tabla, Cifra, fecha, type Columna } from './piezas'
 import { usd, usdPlano } from '../lib/dinero'
 
 const NOMBRE: Record<string, string> = {
@@ -43,7 +43,7 @@ export default function Finanzas() {
     const d = desde ? new Date(desde).toISOString() : null
     const h = hasta ? new Date(hasta + 'T23:59:59').toISOString() : null
     const [f, r, s, k] = await Promise.all([
-      finanzas(d, h), dineroReal(d, h), serieFinanzas(30), rankingCreadoras(d, h),
+      finanzas(d, h), dineroReal(d, h), serieFinanzasRango(d, h), rankingCreadoras(d, h),
     ])
     setFilas(f.filas); setError(f.error); setReal(r); setSerie(s); setRanking(k)
     setCargando(false)
@@ -77,7 +77,7 @@ export default function Finanzas() {
       pinta: f => <span style={{ color: COLOR.dinero }}>{usd(f.bruto_coins)}</span> },
     { clave: 'comision', titulo: 'Comisión', numerica: true,
       pinta: f => <span style={{ color: COLOR.admin }}>{usd(f.comision_coins)}</span> },
-    { clave: 'creadoras', titulo: 'A creadoras', numerica: true,
+    { clave: 'creadoras', titulo: 'Parte de creadoras', numerica: true,
       pinta: f => <span style={{ color: COLOR.textoSuave }}>{usd(f.para_creadoras)}</span> },
     { clave: 'ticket', titulo: 'Ticket medio', numerica: true,
       pinta: f => <span style={{ color: COLOR.textoSuave }}>
@@ -90,9 +90,11 @@ export default function Finanzas() {
         marginBottom: 16, padding: '10px 13px', border: `1px solid ${LINEA.tenue}`,
         font: `400 11px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave,
       }}>
-        Las cifras de la economía interna van en <b style={{ color: COLOR.dinero }}>dólares</b>, no
-        en pesos. Nadie ha definido cuánto vale un coin porque todavía no hay procesador de
-        pagos; convertirlos sería inventar el número. El dinero real, abajo, sí va en pesos.
+        Las cifras de la economía interna van en <b style={{ color: COLOR.dinero }}>dólares</b>: lo
+        que paga quien compra y lo que le corresponde a quien publica. Los <b style={{ color: COLOR.texto }}>pesos</b>{' '}
+        aparecen solo abajo, en «Dinero real», y son lo que de verdad se transfirió por SPEI. Una
+        cosa no se convierte en la otra aquí, y lo que se les debe a las creadoras no se presenta
+        como una transferencia hecha.
       </div>
 
       <div style={{ display: 'flex', gap: 12, alignItems: 'flex-end', marginBottom: 18 }}>
@@ -116,13 +118,14 @@ export default function Finanzas() {
         <Cifra t="Bruto movido" v={`${usd(bruto)}`} c={COLOR.dinero} />
         <Cifra t="Comisión de la plataforma" v={`${usd(comision)}`} c={COLOR.admin}
           pie={bruto ? `${Math.round(comision / bruto * 100)}% del bruto` : undefined} />
-        <Cifra t="Pagado a creadoras" v={`${usd(paraEllas)}`} c={COLOR.texto} />
+        <Cifra t="Reparto a creadoras" v={`${usd(paraEllas)}`} c={COLOR.texto}
+          pie="Su parte de las ventas, en la app · no es una transferencia" />
         <Cifra t="Operaciones" v={String(ops)} c={COLOR.texto}
           pie={ventas ? `${cuantos(ventas.operaciones, 'clip')} ${palabra(ventas.operaciones, 'vendido')}` : undefined} />
       </div>
 
       {/* ---- Gráfica ---- */}
-      <Grafica serie={serie} />
+      <Grafica serie={serie} sinRango={!desde && !hasta} />
 
       {/* ---- Desglose ---- */}
       <div style={{ margin: '22px 0 10px', font: `700 11px/1 ${FUENTE.ui}`,
@@ -137,14 +140,15 @@ export default function Finanzas() {
         letterSpacing: 1.2, textTransform: 'uppercase', color: COLOR.textoSuave }}>
         Dinero real, en pesos
       </div>
-      {real && (real.ordenes_pagadas > 0 || real.ordenes_pendientes > 0) ? (
+      {real && (real.ordenes_pagadas > 0 || real.ordenes_pendientes > 0 || real.dispersado_mxn > 0) ? (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1,
           background: LINEA.tenue, border: `1px solid ${LINEA.tenue}` }}>
           <Cifra t="Entrado" v={pesos(real.entrado_mxn)} c={COLOR.dinero}
             pie={`${cuantos(real.ordenes_pagadas, 'orden', 'órdenes')} ${palabra(real.ordenes_pagadas, 'pagada')}`} />
           <Cifra t="Pendiente de cobro" v={pesos(real.pendiente_mxn)} c="#FFB020"
             pie={cuantos(real.ordenes_pendientes, 'orden', 'órdenes')} />
-          <Cifra t="Dispersado a creadoras" v={pesos(real.dispersado_mxn)} c={COLOR.texto} />
+          <Cifra t="Dispersado a creadoras" v={pesos(real.dispersado_mxn)} c={COLOR.texto}
+            pie="Transferencias SPEI realmente hechas" />
           <Cifra t="Retenido (ISR + IVA)" v={pesos(real.isr_mxn + real.iva_ret_mxn)} c={COLOR.admin}
             pie="Se entera al SAT" />
         </div>
@@ -201,21 +205,9 @@ export default function Finanzas() {
   )
 }
 
-function Cifra({ t, v, c, pie }: { t: string; v: string; c: string; pie?: string }) {
-  return (
-    <div style={{ background: COLOR.superficie, padding: '13px 15px' }}>
-      <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
-        textTransform: 'uppercase', color: COLOR.textoSuave }}>{t}</div>
-      <div style={{ marginTop: 7, font: `400 22px/1 ${FUENTE.mono}`, color: c }}>{v}</div>
-      {pie && <div style={{ marginTop: 5, font: `400 11px/1.3 ${FUENTE.mono}`,
-        color: COLOR.textoSuave }}>{pie}</div>}
-    </div>
-  )
-}
-
 /* Grafica en SVG a mano: el proyecto no tiene libreria de graficos y meter
  * una para dibujar treinta barras seria desproporcionado. */
-function Grafica({ serie }: { serie: PuntoSerie[] }) {
+function Grafica({ serie, sinRango }: { serie: PuntoSerie[]; sinRango: boolean }) {
   const max = Math.max(1, ...serie.map(p => p.coins))
   const vacia = serie.every(p => p.coins === 0)
   const an = 900, al = 130, paso = serie.length ? an / serie.length : an
@@ -224,8 +216,8 @@ function Grafica({ serie }: { serie: PuntoSerie[] }) {
     return (
       <div style={{ padding: '30px 20px', border: `1px solid ${LINEA.tenue}`,
         font: `400 12px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
-        Sin movimiento en los últimos 30 días. No se dibuja una gráfica plana en cero
-        porque parecería que algo se rompió.
+        {sinRango ? 'Sin movimiento en los últimos 30 días.' : 'Sin movimiento en el rango elegido.'}{' '}
+        No se dibuja una gráfica plana en cero porque parecería que algo se rompió.
       </div>
     )
   }

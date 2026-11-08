@@ -20,6 +20,7 @@ import Reportes from '../admin/Reportes'
 import Finanzas from '../admin/Finanzas'
 import Bitacora from '../admin/Bitacora'
 import Herramientas from '../admin/Herramientas'
+import Resumen from '../admin/Resumen'
 
 export default function Admin() {
   const nav = useNavigate()
@@ -40,7 +41,8 @@ export default function Admin() {
   )
 
   return (
-    <Marco titulo={modulo.titulo} resumen={modulo.clave === 'usuarios' ? undefined : undefined}>
+    <Marco titulo={modulo.titulo}>
+      {modulo.clave === 'resumen'      && <Resumen />}
       {modulo.clave === 'usuarios'     && <Usuarios />}
       {modulo.clave === 'moderacion'   && <Moderacion />}
       {modulo.clave === 'contenido'    && <Contenido />}
@@ -51,13 +53,6 @@ export default function Admin() {
       {modulo.clave === 'finanzas'     && <Finanzas />}
       {modulo.clave === 'bitacora'     && <Bitacora />}
       {modulo.clave === 'herramientas' && <Herramientas />}
-      {!['usuarios', 'moderacion', 'contenido', 'comunicacion', 'retiros', 'reportes', 'verificacion', 'finanzas', 'bitacora', 'herramientas'].includes(modulo.clave) && (
-        <div style={{ padding: '70px 0', textAlign: 'center' }}>
-          <div style={{ font: `400 16px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
-            Este módulo todavía no está construido.
-          </div>
-        </div>
-      )}
     </Marco>
   )
 }

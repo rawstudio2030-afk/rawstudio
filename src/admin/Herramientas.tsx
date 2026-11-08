@@ -78,7 +78,11 @@ export default function Herramientas() {
           cancela={() => setDialogo(null)}
           al={async () => {
             const r = await sembrarDemo()
-            setAviso(typeof r === 'string' ? r : 'Contenido de demostración creado.')
+            // `sembrarDemo` devuelve `{ error }` o el resultado, no un texto: antes se
+            // comprobaba `typeof r === 'string'` y un error decia «creado».
+            setAviso('error' in r
+              ? `No se pudo crear el contenido de demostración: ${r.error}`
+              : `Contenido de demostración creado (${cuantos(r.perfiles, 'perfil', 'perfiles')} y ${cuantos(r.clips, 'clip')}).`)
             setDialogo(null)
           }} />
       )}
@@ -88,7 +92,9 @@ export default function Herramientas() {
           cancela={() => setDialogo(null)}
           al={async () => {
             const r = await borrarDemo()
-            setAviso(typeof r === 'string' ? r : 'Contenido de demostración borrado.')
+            setAviso('error' in r
+              ? `No se pudo borrar el contenido de demostración: ${r.error}`
+              : `Contenido de demostración borrado (${cuantos(r.borrados, 'registro')}).`)
             setDialogo(null)
           }} />
       )}

@@ -27,6 +27,7 @@ const PLANES = [
 
 const NOMBRE: Record<string, string> = {
   clips: 'Videos', 'clip-covers': 'Portadas y vistas previas',
+  'clip-covers-full': 'Portadas nítidas', albumes: 'Álbumes de fotos',
   avatars: 'Fotos de perfil', verificacion: 'Verificación de identidad',
   expedientes: 'Expedientes',
 }

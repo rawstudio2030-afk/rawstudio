@@ -324,11 +324,27 @@ function Ficha({ fila, ficha, cierra, pide }: {
                 <Boton tono="peligro" al={() => pide('banear')}>Banear</Boton>
               </>
             : <Boton tono="primario" al={() => pide('reactivar')}>Reactivar</Boton>}
-          <Boton al={() => pide('saldo')}>Ajustar saldo</Boton>
           <Boton al={() => pide('rol')}>Cambiar rol</Boton>
           <Boton al={() => pide('correo')}>Corregir correo</Boton>
-          <Boton tono="peligro" al={() => pide('anonimizar')}>Anonimizar</Boton>
-          <Boton tono="peligro" al={() => pide('eliminar')}>Eliminar definitivamente</Boton>
+        </div>
+
+        {/* Zona de riesgo: mueve dinero o borra datos, y varias no se deshacen. Va
+            aparte de lo de todos los dias (suspender, banear, reactivar) para que no
+            se pulse una por error al lado de la otra. Las confirmaciones siguen igual. */}
+        <div role="group" aria-label="Zona de riesgo" style={{
+          marginTop: 14, padding: '12px 14px',
+          border: '1px solid rgba(255,68,68,.45)', background: 'rgba(255,68,68,.05)',
+        }}>
+          <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.4,
+            textTransform: 'uppercase', color: '#FF4444' }}>Zona de riesgo</div>
+          <div style={{ margin: '7px 0 10px', font: `400 11px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
+            Mueven dinero o borran datos. Anonimizar y eliminar no se pueden deshacer.
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            <Boton al={() => pide('saldo')}>Ajustar saldo</Boton>
+            <Boton tono="peligro" al={() => pide('anonimizar')}>Anonimizar</Boton>
+            <Boton tono="peligro" al={() => pide('eliminar')}>Eliminar definitivamente</Boton>
+          </div>
         </div>
 
         <div style={{ marginTop: 12, font: `400 11px/1.45 ${FUENTE.mono}`, color: COLOR.textoSuave }}>

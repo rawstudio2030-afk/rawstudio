@@ -601,6 +601,16 @@ export async function dineroReal(desde?: string | null, hasta?: string | null) {
   ])
 }
 
+/** La serie diaria para un RANGO (el mismo que filtra las cifras de al lado). Sin limites,
+ *  los ultimos 30 dias. Los dias sin movimiento salen en cero: es lo que paso. */
+export async function serieFinanzasRango(desde?: string | null, hasta?: string | null) {
+  const { data, error } = await supabase.rpc('admin_finanzas_serie_rango', {
+    desde_: desde || null, hasta_: hasta || null,
+  })
+  if (error) return [] as PuntoSerie[]
+  return ((data ?? []) as PuntoSerie[]).map(p => num(p, ['operaciones', 'coins']))
+}
+
 export async function serieFinanzas(dias = 30) {
   const { data, error } = await supabase.rpc('admin_finanzas_serie', { dias })
   if (error) return [] as PuntoSerie[]
@@ -983,6 +993,14 @@ export type Retiro = {
   saldo_actual: number; verificada: boolean
   bruto_mxn: number | null; neto_mxn: number | null; spei_ref: string | null
   total_filas: number
+}
+
+/** Retiros por estado (todos, no solo la pagina visible): para el menu y el Resumen. */
+export async function conteoRetiros() {
+  const { data, error } = await supabase.rpc('admin_conteo_retiros')
+  if (error) return {} as Record<string, number>
+  return Object.fromEntries(((data ?? []) as { estado: string; cuantos: number }[])
+    .map(r => [r.estado, Number(r.cuantos)])) as Record<string, number>
 }
 
 export async function listarRetiros(

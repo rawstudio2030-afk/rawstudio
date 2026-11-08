@@ -322,3 +322,17 @@ export function desde(s: string | null): string {
   if (d < 365) return `hace ${Math.floor(d / 30)} mes${Math.floor(d / 30) > 1 ? 'es' : ''}`
   return `hace ${Math.floor(d / 365)} año${Math.floor(d / 365) > 1 ? 's' : ''}`
 }
+
+
+/** Una cifra con su rotulo, para las rejillas de indicadores (Resumen, Finanzas). */
+export function Cifra({ t, v, c, pie }: { t: string; v: string; c: string; pie?: string }) {
+  return (
+    <div style={{ background: COLOR.superficie, padding: '13px 15px' }}>
+      <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
+        textTransform: 'uppercase', color: COLOR.textoSuave }}>{t}</div>
+      <div style={{ marginTop: 7, font: `400 22px/1 ${FUENTE.mono}`, color: c }}>{v}</div>
+      {pie && <div style={{ marginTop: 5, font: `400 11px/1.3 ${FUENTE.mono}`,
+        color: COLOR.textoSuave }}>{pie}</div>}
+    </div>
+  )
+}
