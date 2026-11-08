@@ -30,6 +30,56 @@
 
 ## Respuestas activas
 
+### Respuesta a [id: 20261108-01] — Subida en lote: precios de 10, 20 o 40 (no 2.40)
+- **fecha:** 2026-11-08 07:08 (America/Mexico_City)
+- **estado:** lista-para-claude
+- **responde a:** Sergio confirmó la ronda corta: la subida en lote del panel también tiene que salir en 10, 20 o 40 dólares, para que no vuelva a llenar el catálogo de 2.40.
+- **ronda:** 1 de 10 de esta tarea · **tope:** 1 hora
+- **checklist afectados (NO marques pass tú):** convenciones de publicar / panel si tocas esa pantalla. No rompas ítems `pass` ni el trabajo de `[id: 20261106-04]` a `[id: 20261106-07]` ni `[id: 20261107-01]` a `[id: 20261107-07]`.
+
+#### Orden respecto a rondas anteriores
+`[id: 20261107-07]` ya está `respondida` y los precios de esa ronda ya están aplicados en producción. **No la reabras** (ni las anteriores). El relleno de portadas públicas lo corre Omar desde Herramientas; no forma parte de esta ronda y no tienes que esperarlo. Implementa esta ronda en su propio commit.
+
+#### Diagnóstico (no lo reescribas: úsalo)
+1. El valor inicial de 2.40 de la subida masiva está en `agruparVideos` (`src/lib/admin.ts`): `precio: 240` para cada video agrupado. No hay una función `leerLote`. `src/admin/SubidaMasiva.tsx` usa `agruparVideos`, enseña el precio con `usd(v.precio)` y no tiene selector: Omar no puede cambiarlo en pantalla.
+2. El CSV opcional (`aplicarCatalogo`) sí puede traer `precio` en dólares, convertido a centavos (`Math.round(parseFloat(...) * 100)`). Eso es un precio puesto a mano: **no lo pises**. Si la fila no trae `precio`, se conserva el de `agruparVideos`.
+3. `publicarPara` guarda `p_precio: datos.precio` tal cual. La visibilidad por defecto del lote es `pago`. El CSV puede poner `visibilidad` en `gratis`, `pago` o `suscriptores`.
+4. El formulario de la creadora (`Upload.tsx`) ya ofrece 10 / 20 / 40 y arranca en 20. No lo toques salvo que extraigas las constantes compartidas para no duplicarlas.
+5. Claude señaló además que `clips.price_coins` sigue con `default 240` en la base: cualquier inserción que omita el precio caería otra vez en 2.40.
+
+#### Qué hacer
+1. En `agruparVideos`, deja de asignar `240`. A cada video de pago así agrupado asígnale al azar uno de `1000`, `2000` o `4000` (10, 20 o 40 dólares, en centavos), **por video**, no un solo monto para todo el lote. Usa los mismos tres valores que `PRECIOS_VIDEO` en `Upload.tsx`. Si los extraes a un módulo compartido para que no se desfasen, bien; no inventes un cuarto precio ni vuelvas al paso de 50 centavos.
+2. En `aplicarCatalogo`, un `precio` presente en el CSV sigue ganando (incluido un 2.40 o cualquier otro monto que alguien haya escrito a propósito). Si la fila no trae `precio`, queda el asignado en el paso 1.
+3. Si la visibilidad queda en `gratis` (porque el CSV lo dijo), el `precio` tiene que ser `0`. No publiques un clip «gratis» con 10, 20 o 40 pegados.
+4. No hace falta un selector en cada fila: el precio asignado ya se ve con `usd(v.precio)`. Opcional: una línea en el recuadro de ayuda de `SubidaMasiva.tsx` que diga, sin marketing ni legales, que si el catálogo no trae precio cada video sale a 10, 20 o 40 dólares al azar.
+5. Si `clips.price_coins` todavía tiene `default 240`, cámbialo a `2000` (20 dólares, el mismo arranque del formulario) en una migración. Eso no reescribe filas existentes; solo evita que una inserción sin precio vuelva a 2.40. No toques el precio fijo de los álbumes.
+6. Vuelve a correr, con aprobación de Omar, el mismo `UPDATE` idempotente de la ronda 07 por si entre esa migración y este arreglo se subió algún video de pago que haya quedado en 240:
+   `UPDATE clips SET price_coins = (ARRAY[1000, 2000, 4000])[1 + floor(random() * 3)::int] WHERE visibility = 'pago' AND coalesce(formato, 'video') = 'video' AND price_coins = 240;`
+   Sigue sin tocar álbumes, clips gratis, videos con otro precio, `renta_coins` ni `renta_horas`.
+
+#### Qué no tocar
+Textos legales, recargas o pasarela, token o secretos, el precio de 20 pesos de las consultas, el plazo de 2 días, `COBRO_CONSULTAS_ACTIVO` (sigue en `true`), DeepSeek, el hero del 80% / dólar, dominio, reproductor, trato, avatares, álbumes (precio fijo y flujo), el formulario de publicar de la creadora más allá de extraer constantes si hace falta, el relleno de portadas, consola de admin más allá de la subida en lote, «Anonimizar», el desempeño por clip, visitas o mapas de reproducción.
+
+#### Criterios de aceptación
+1. `agruparVideos` no asigna `240`. Un lote de videos de pago sin CSV de precio queda en una mezcla de 1000 / 2000 / 4000 (no todos el mismo, no 240), y la lista de `SubidaMasiva` lo muestra con `usd()`.
+2. Si el CSV trae `precio`, ese valor se respeta. Si trae `visibilidad = gratis` y no trae precio, el clip queda en 0, no en 10/20/40.
+3. El formulario de la creadora sigue igual (10 / 20 / 40, arranca en 20). Los álbumes no se tocan.
+4. Si cambiaste el `default` de `clips.price_coins`, queda en 2000 y las filas que ya existían no se reescribieron por ese cambio.
+5. El `UPDATE` de los 240 que aún queden, si se corre, no mueve álbumes, gratis ni un precio distinto de 240. Correrlo otra vez no cambia filas.
+6. Typecheck, build y lint limpios (solo advertencias que ya existían). Ningún secreto en el repo.
+
+#### Cómo demostrar (obligatorio en bridge-query.md)
+SHA, diff resumido, y:
+- Una prueba de `agruparVideos` (o de la pantalla) con varios videos y sin CSV: ninguno sale a 240; salen 1000, 2000 o 4000, repartidos.
+- Un caso con CSV que pone `precio` (por ejemplo 19.40) y ese valor se conserva; un caso `visibilidad = gratis` sin precio queda en 0.
+- Conteo en producción, si corriste el `UPDATE`: cuántos videos de pago seguían en 240 y a qué quedaron; 0 álbumes / gratis / otros precios movidos.
+- No marques `CHECKLIST.md` como pass.
+
+#### Siguiente paso para Claude Code
+1. `git pull` e implementa esta ronda en su propio commit (mensaje sugerido: `feat: precios de 10 20 o 40 tambien en la subida en lote`).
+2. Aplica en producción, con la aprobación de Omar, la migración del `default` si la hiciste y el `UPDATE` de los 240 que aún queden.
+3. Deja el resultado en `bridge-query.md` (SHA, diff, verificación) y marca `[id: 20261108-01]` como `respondida`.
+
 ### Respuesta a [id: 20261107-07] — Portadas públicas más nítidas y precios de 10, 20 o 40
 - **fecha:** 2026-11-07 21:58 (America/Mexico_City)
 - **estado:** lista-para-claude

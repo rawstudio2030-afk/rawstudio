@@ -38,6 +38,14 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 
 ## Consultas activas
 
+### [id: 20261108-01] Subida en lote: precios de 10, 20 o 40 (no 2.40)
+- **fecha:** 2026-11-08 07:08 (America/Mexico_City)
+- **estado:** asignada
+- **tarea:** Que la subida masiva del panel no vuelva a crear videos a 2.40. Cada video del lote, si no trae precio en el CSV, sale a 10, 20 o 40 dólares al azar.
+- **pregunta:** Sergio confirmó que el lote también tiene que salir en 10, 20 o 40, para que el catálogo no se vuelva a llenar de 2.40. ¿Cómo se quita el `precio: 240` de `agruparVideos` sin pisar un precio que venga en el CSV, ni tocar álbumes ni el formulario de la creadora (ya tiene los tres montos)?
+- **contexto:** Claude lo señaló al cerrar `[id: 20261107-07]`: casi todos los 2.40 (184 de 189) venían de la subida en lote, y esa ronda pedía no tocar el panel, así que lo dejó. La función no se llama `leerLote`: es `agruparVideos` en `src/lib/admin.ts` (`descripcion: '', precio: 240, visibilidad: 'pago'`). `src/admin/SubidaMasiva.tsx` muestra `usd(v.precio)` y no deja cambiarlo en pantalla; el CSV opcional sí puede traer columna `precio` (dólares → centavos en `aplicarCatalogo`) y `visibilidad`. `publicarPara` manda `p_precio: datos.precio` tal cual. `src/screens/Upload.tsx` ya tiene `PRECIOS_VIDEO = [1000, 2000, 4000]` y `PRECIO_INICIAL = 2000`. La columna `clips.price_coins` puede seguir con `default 240`.
+- **urgencia:** media
+
 ### [id: 20261107-07] Portadas públicas más nítidas y precios de 10, 20 o 40 — hecha, pendiente de aplicar y correr
 - **fecha:** 2026-11-08 (America/Mexico_City)
 - **estado:** respondida
