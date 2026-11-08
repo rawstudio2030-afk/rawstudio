@@ -39,6 +39,13 @@ const MODOS: { v: Visibilidad; t: string }[] = [
   { v: 'gratis', t: 'Gratis' },
 ]
 
+/** Precios de venta de un video: 10, 20 o 40 dolares, en CENTAVOS (como todo el
+ *  libro). Son tres botones y no un monto libre a proposito: el valor inicial era
+ *  2.40 y la mayoria de los videos se quedaron ahi, sin que nadie lo decidiera. El
+ *  album tiene su propio precio fijo y su propia pantalla. */
+const PRECIOS_VIDEO = [1000, 2000, 4000] as const
+const PRECIO_INICIAL = 2000
+
 export default function Upload() {
   const nav = useNavigate()
   const { sesion, perfil, trato, cargando, refrescarPerfil } = useSesion()
@@ -73,7 +80,7 @@ export default function Upload() {
   const [titulo, setTitulo] = useState('')
   const [desc, setDesc] = useState('')
   const [modo, setModo] = useState<Visibilidad>('pago')
-  const [precio, setPrecio] = useState(240)      // 2.40 USD
+  const [precio, setPrecio] = useState<number>(PRECIO_INICIAL) // 20 USD
   const [renta, setRenta] = useState(false)
   const [rentaHoras, setRentaHoras] = useState<48 | 72>(48)
   const [rentaCoins, setRentaCoins] = useState(80) // 0.80 USD
@@ -299,7 +306,7 @@ export default function Upload() {
           <div style={{ ...ayuda, marginTop: 8 }}>
             {modo === 'gratis'
               ? 'Se ve completa: este clip es gratis.'
-              : `Sin pagar se ve borrosa, a ${ANCHO_PUBLICO} px. La nítida se guarda en privado.`}
+              : `Sin pagar se ve una miniatura de ${ANCHO_PUBLICO} px. La nítida se guarda en privado.`}
           </div>
         </div>
 
@@ -390,13 +397,17 @@ export default function Upload() {
 
       {modo === 'pago' && (
         <div className="tarjeta-sobria" style={{ padding: 16 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14 }}>
-            <span style={etiqueta}>Precio</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <Paso t="−" al={() => setPrecio(p => Math.max(0, p - 50))} />
-              <span style={{ font: `700 28px/1 ${FUENTE.mono}`, color: COLOR.dinero, minWidth: 92, textAlign: 'center' }}>{usd(precio)}</span>
-              <Paso t="+" al={() => setPrecio(p => p + 50)} />
-            </div>
+          <div style={etiqueta}>Precio</div>
+          <div role="radiogroup" aria-label="Precio de venta" style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+            {PRECIOS_VIDEO.map(v => (
+              <Pulsable key={v} al={() => setPrecio(v)} activado={precio === v} rotulo={usd(v)} style={{
+                flex: 1, minHeight: 56, display: 'grid', placeItems: 'center', cursor: 'pointer', borderRadius: 12,
+                font: `700 22px/1 ${FUENTE.mono}`,
+                background: precio === v ? COLOR.dinero : 'transparent',
+                color: precio === v ? COLOR.fondo : COLOR.dinero,
+                border: `1px solid ${precio === v ? COLOR.dinero : LINEA.fuerte}`,
+              }}>{usd(v)}</Pulsable>
+            ))}
           </div>
           <Equivalente centavos={precio} estilo={{ textAlign: 'right', marginTop: 6 }} />
           <div style={{ ...ayuda, marginTop: 14, borderTop: '1px solid rgba(255,255,255,.1)', paddingTop: 14 }}>

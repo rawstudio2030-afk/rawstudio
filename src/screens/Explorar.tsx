@@ -203,10 +203,8 @@ export default function Explorar() {
                   <div style={{ borderRadius: 9, overflow: 'hidden' }}>
                     <TarjetaClip portada={p} tira={urlPortada(c.preview_path ?? null)}
                       a={`/clip/${c.id}`}>
-                      {/* La portada publica es de 32 px a proposito (censura),
-                          asi que no se puede embellecer la imagen: se le pone
-                          encima el duotono de la casa, y la mancha de color se
-                          lee como una decision y no como un defecto. */}
+                      {/* La portada publica es una miniatura de 240 px (la nitida
+                          es privada): se le pone encima el duotono de la casa. */}
                       <div aria-hidden style={{ position: 'absolute', inset: 0, background: DEGRADADO.duotono, mixBlendMode: 'soft-light' }} />
                       <div aria-hidden style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(8,8,10,.1) 45%,rgba(8,8,10,.78) 100%)' }} />
                       <div style={{ position: 'absolute', top: 7, left: 7, right: 7, display: 'flex', flexWrap: 'wrap', gap: 4 }}>

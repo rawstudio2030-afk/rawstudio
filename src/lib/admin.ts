@@ -1820,7 +1820,10 @@ export type ResultadoCensura = {
   fallos: string[]
 }
 
-/** Encoge a 32 px la portada publica de cada clip que todavia la tenga grande.
+/** Encoge a `ANCHO_PUBLICO` la portada publica de cada clip que todavia la tenga mas grande.
+ *
+ *  (Historico: cuando se escribio, `ANCHO_PUBLICO` era 32 y las viejas medianan 160.
+ *  Para hacerlas MAS nitidas, ver `nitidizarPortadasPublicas`.)
  *
  *  Desde el 3 de noviembre las subidas nuevas salen con dos copias: 32 px en el
  *  bucket publico y la nitida en el privado. Pero 187 clips se publicaron
@@ -1881,6 +1884,91 @@ export async function censurarPortadasAntiguas(
       if (p.error) throw new Error(`publico: ${p.error.message}`)
 
       r.encogidas++
+    } catch (e) {
+      r.fallos.push(`${c.id.slice(0, 8)}: ${(e as Error).message}`)
+    }
+  }
+  return r
+}
+
+
+export type ResultadoNitidez = {
+  revisadas: number
+  /** Portadas publicas reescritas a partir de la nitida. */
+  regeneradas: number
+  /** La publica ya tenia el ancho que le toca: no se toco (por eso se puede repetir). */
+  yaEstaban: number
+  /** Sin copia nitida en el bucket privado: no se inventa nada ni se agranda la chica. */
+  omitidas: number
+  fallos: string[]
+}
+
+/** Vuelve a sacar la portada PUBLICA de cada clip a partir de su copia nitida.
+ *
+ *  Hasta ahora la publica salia a 32 px y se veia rota en el catalogo; las
+ *  subidas nuevas ya salen a `ANCHO_PUBLICO` (240). Esto arregla las que ya
+ *  existian. Es un relleno de UNA vez, pero se puede repetir sin riesgo.
+ *
+ *  Por cada clip con `cover_path`:
+ *    1. se baja la copia NITIDA del bucket privado (`clip-covers-full`, misma
+ *       ruta). Sin ella NO se hace nada y se cuenta como omitida: lo unico que
+ *       queda es la chica de 32 px, y agrandarla seria inventar pixeles;
+ *    2. el ancho objetivo es el MENOR entre `ANCHO_PUBLICO` y el de la nitida: nunca
+ *       se agranda la fuente (una nitida vieja de 160 px sale a 160, no a 240);
+ *    3. si la publica actual ya mide eso o mas, se salta: asi correrlo dos veces
+ *       deja el mismo resultado;
+ *    4. si no, se reescribe la publica, misma ruta, con `upsert`.
+ *
+ *  La nitida NUNCA sale del bucket privado hacia el publico: lo que se sube es
+ *  una copia reducida. Las politicas ya dejan a un admin leer `clip-covers-full`
+ *  y escribir en `clip-covers`, asi que corre en el navegador de quien administra,
+ *  en fila, sin funciones de borde ni llaves de servicio. No pide revision cuadro a
+ *  cuadro: es la misma imagen, solo mas grande. */
+export async function nitidizarPortadasPublicas(
+  alAvanzar?: (hechas: number, total: number) => void,
+): Promise<ResultadoNitidez> {
+  const { achicar, ANCHO_PUBLICO } = await import('./miniatura')
+  const r: ResultadoNitidez = { revisadas: 0, regeneradas: 0, yaEstaban: 0, omitidas: 0, fallos: [] }
+
+  const { data, error } = await supabase.from('clips')
+    .select('id,cover_path').not('cover_path', 'is', null).limit(2000)
+  if (error) { r.fallos.push(`no pude listar los clips: ${error.message}`); return r }
+  const clips = (data ?? []) as { id: string; cover_path: string }[]
+
+  for (const c of clips) {
+    r.revisadas++
+    alAvanzar?.(r.revisadas, clips.length)
+    try {
+      const nitida = await supabase.storage.from('clip-covers-full').download(c.cover_path)
+      if (nitida.error || !nitida.data) {
+        // «No existe» es un caso normal (clips anteriores a la copia privada);
+        // cualquier otro motivo (permisos, red) es un fallo y se cuenta como tal.
+        if (/not found|no existe|404/i.test(nitida.error?.message ?? '')) { r.omitidas++; continue }
+        throw new Error(`nitida: ${nitida.error?.message ?? 'sin datos'}`)
+      }
+
+      const mapaN = await createImageBitmap(nitida.data)
+      const objetivo = Math.min(ANCHO_PUBLICO, mapaN.width)
+      mapaN.close()
+
+      // Sin cache: la URL publica es la misma antes y despues de reescribirla.
+      const url = supabase.storage.from('clip-covers').getPublicUrl(c.cover_path).data.publicUrl
+      let actual = 0
+      const res = await fetch(url, { cache: 'no-store' })
+      if (res.ok) {
+        const mapaP = await createImageBitmap(await res.blob())
+        actual = mapaP.width; mapaP.close()
+      }
+      if (actual >= objetivo) { r.yaEstaban++; continue }
+
+      const original = new File([nitida.data], 'portada.jpg', { type: nitida.data.type || 'image/jpeg' })
+      const nueva = await achicar(original, objetivo)
+      if (!nueva) throw new Error('no pude reducir la imagen')
+
+      const p = await supabase.storage.from('clip-covers')
+        .upload(c.cover_path, nueva, { contentType: 'image/jpeg', upsert: true })
+      if (p.error) throw new Error(`publico: ${p.error.message}`)
+      r.regeneradas++
     } catch (e) {
       r.fallos.push(`${c.id.slice(0, 8)}: ${(e as Error).message}`)
     }

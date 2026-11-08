@@ -183,16 +183,21 @@ async function tiraDeFuente(url: string): Promise<File | null> {
 
 /* ---------- Las dos copias de la portada ---------- */
 
-/** Ancho de la copia PUBLICA. La tarjeta mide 243, asi que a 32 se estira
- *  unas 7 veces: queda la mancha de color y la silueta, nada mas.
+/** Ancho de la copia PUBLICA: lo que ve quien aun no ha pagado.
  *
  *  Antes del 3 de noviembre de 2026 solo habia una copia, de 720 px, en el
- *  bucket publico: el catalogo entero se podia bajar sin pagar ni entrar.
- *  Ahora salen dos de la misma imagen —la chica para el mundo y la nitida
- *  para el bucket privado, en la misma ruta— y por eso viven juntas aqui:
- *  son el mismo cuadro a dos tamaños, no dos decisiones distintas. */
-export const ANCHO_PUBLICO = 32
-const CALIDAD_PUBLICA = 0.4
+ *  bucket publico: el catalogo entero se podia bajar sin pagar ni entrar. Desde
+ *  entonces salen dos de la misma imagen —la chica para el mundo y la nitida para
+ *  el bucket privado, en la misma ruta— y por eso viven juntas aqui: son el mismo
+ *  cuadro a dos tamaños, no dos decisiones distintas.
+ *
+ *  La chica salia a 32 px con calidad 0.4. La tarjeta del catalogo mide ~243 px,
+ *  asi que se estiraba unas 7 veces y quedaba la mancha de color y la silueta: se
+ *  veia ROTA, no elegida. Ahora sale a 240 px (el ancho al que se pinta) con una
+ *  calidad cercana a la de la nitida. Sigue siendo una miniatura: la nitida, de
+ *  hasta `ANCHO_MAXIMO` (720), no llega al bucket publico. */
+export const ANCHO_PUBLICO = 240
+const CALIDAD_PUBLICA = 0.82
 
 /** Cuantos cuadros se le ofrecen a la creadora para que elija portada. */
 export const CUADROS_A_ELEGIR = 6

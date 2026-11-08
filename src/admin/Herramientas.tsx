@@ -12,13 +12,18 @@ import Almacenamiento from './Almacenamiento'
 import AvatarAuto from './AvatarAuto'
 import Albumes from './Albumes'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
-import { sembrarDemo, borrarDemo, censurarPortadasAntiguas, type ResultadoCensura } from '../lib/admin'
+import {
+  sembrarDemo, borrarDemo, censurarPortadasAntiguas, nitidizarPortadasPublicas,
+  type ResultadoCensura, type ResultadoNitidez,
+} from '../lib/admin'
+import { ANCHO_PUBLICO } from '../lib/miniatura'
 import { Boton, Confirmar } from './piezas'
 
 export default function Herramientas() {
   const nav = useNavigate()
-  const [dialogo, setDialogo] = useState<'sembrar' | 'borrar' | 'censurar' | null>(null)
+  const [dialogo, setDialogo] = useState<'sembrar' | 'borrar' | 'censurar' | 'nitidizar' | null>(null)
   const [censura, setCensura] = useState<{ hechas: number; total: number } | ResultadoCensura | null>(null)
+  const [nitidez, setNitidez] = useState<{ hechas: number; total: number } | ResultadoNitidez | null>(null)
   const [aviso, setAviso] = useState('')
 
   return (
@@ -35,15 +40,25 @@ export default function Herramientas() {
         texto="Da de alta a una creadora, carga su expediente (identificación y consentimiento firmado) y publica sus primeros clips por ella. Sin expediente completo, la base rechaza la publicación."
         accion={<Boton tono="primario" al={() => nav('/alta-creadora')}>Abrir el alta</Boton>} />
 
-      <Tarjeta titulo="Censurar las portadas de antes"
+      <Tarjeta titulo="Portadas públicas más nítidas"
+        texto={nitidez === null
+          ? `La portada pública salía a 32 px y se veía rota en el catálogo; ahora sale a ${ANCHO_PUBLICO} px. Esto arregla las que ya existían: la vuelve a sacar de la copia nítida privada, en la misma ruta. Las que no tienen copia nítida se omiten (no se agranda la chica). Se puede repetir sin riesgo: lo que ya está al ancho que le toca se salta.`
+          : 'hechas' in nitidez
+            ? `Revisando ${nitidez.hechas} de ${nitidez.total}…`
+            : `Revisadas ${nitidez.revisadas}: ${cuantos(nitidez.regeneradas, 'regenerada')}, ${nitidez.yaEstaban} ya ${nitidez.yaEstaban === 1 ? 'estaba' : 'estaban'} bien, ${cuantos(nitidez.omitidas, 'omitida')} (sin copia nítida)`
+              + (nitidez.fallos.length ? ` · ${cuantos(nitidez.fallos.length, 'error', 'errores')}: ${nitidez.fallos.slice(0, 3).join(' · ')}` : '')}
+        accion={<Boton tono="primario" al={() => setDialogo('nitidizar')}
+          activo={!(nitidez && 'hechas' in nitidez)}>Regenerar las portadas públicas</Boton>} />
+
+      <Tarjeta titulo="Encoger portadas públicas demasiado grandes"
         texto={censura === null
-          ? 'Desde el 3 de noviembre cada portada sale a 32 px en público y nítida solo para quien compró. Pero 187 clips se publicaron antes y su portada pública mide 160 px: se ve todo. Esto las encoge igual que a las nuevas. Se puede repetir sin riesgo: lo que ya está a 32 px se salta.'
+          ? `Si alguna portada pública mide más de ${ANCHO_PUBLICO} px, la encoge a ${ANCHO_PUBLICO} px y guarda antes esa copia en el bucket privado. Fue la herramienta del 3 de noviembre, cuando se encogieron 187 clips; hoy normalmente no encuentra nada. Se puede repetir sin riesgo.`
           : 'hechas' in censura
             ? `Revisando ${censura.hechas} de ${censura.total}…`
-            : `Revisadas ${censura.revisadas}: ${cuantos(censura.encogidas, 'encogida')}, ${censura.yaEstaban} ya ${censura.yaEstaban === 1 ? 'estaba' : 'estaban'} a 32 px`
+            : `Revisadas ${censura.revisadas}: ${cuantos(censura.encogidas, 'encogida')}, ${censura.yaEstaban} ya ${censura.yaEstaban === 1 ? 'estaba' : 'estaban'} a ${ANCHO_PUBLICO} px o menos`
               + (censura.fallos.length ? ` · ${censura.fallos.length} fallaron: ${censura.fallos.slice(0, 3).join(' · ')}` : '')}
-        accion={<Boton tono="primario" al={() => setDialogo('censurar')}
-          activo={!(censura && 'hechas' in censura)}>Encoger las portadas viejas</Boton>} />
+        accion={<Boton al={() => setDialogo('censurar')}
+          activo={!(censura && 'hechas' in censura)}>Encoger las portadas grandes</Boton>} />
 
       <AvatarAuto />
 
@@ -59,12 +74,26 @@ export default function Herramientas() {
           color: COLOR.dinero, font: `400 12px/1.45 ${FUENTE.ui}` }}>{aviso}</div>
       )}
 
+      {dialogo === 'nitidizar' && (
+        <Confirmar titulo="Regenerar las portadas públicas" tono="primario" etiqueta="Regenerar"
+          cuerpo={<>Por cada clip con portada: se baja la copia <b style={{ color: COLOR.texto }}>nítida
+            privada</b> y se reescribe la pública, misma ruta, a {ANCHO_PUBLICO} px como máximo
+            (nunca más grande que la nítida). La nítida no sale del bucket privado. Sin copia
+            nítida no se toca nada. Quien ya ve la portada puede tardar hasta una hora en
+            ver el cambio por la memoria del navegador. Tarda unos minutos.</>}
+          cancela={() => setDialogo(null)}
+          al={async () => {
+            setDialogo(null); setNitidez({ hechas: 0, total: 0 })
+            const r = await nitidizarPortadasPublicas((h, t) => setNitidez({ hechas: h, total: t }))
+            setNitidez(r)
+          }} />
+      )}
       {dialogo === 'censurar' && (
-        <Confirmar titulo="Encoger las portadas viejas" tono="primario" etiqueta="Encoger"
-          cuerpo={<>Por cada clip con la portada grande: se guarda esa copia en el bucket
-            privado <b style={{ color: COLOR.texto }}>primero</b>, y solo después se
-            sobrescribe la pública con una de 32 px. Quien compró sigue viendo la
-            buena; el resto deja de ver nada. Tarda un minuto.</>}
+        <Confirmar titulo="Encoger las portadas grandes" tono="primario" etiqueta="Encoger"
+          cuerpo={<>Por cada clip con la portada pública mayor que {ANCHO_PUBLICO} px: se guarda esa copia en
+            el bucket privado <b style={{ color: COLOR.texto }}>primero</b>, y solo después se
+            sobrescribe la pública con una de {ANCHO_PUBLICO} px. Quien compró sigue viendo la
+            buena. Tarda un minuto.</>}
           cancela={() => setDialogo(null)}
           al={async () => {
             setDialogo(null); setCensura({ hechas: 0, total: 0 })
