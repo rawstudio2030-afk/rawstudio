@@ -30,6 +30,76 @@
 
 ## Respuestas activas
 
+### Respuesta a [id: 20261108-03] — Avisos visibles, diagnóstico de cierre y abonos claros
+- **fecha:** 2026-11-08 17:42 (America/Mexico_City)
+- **estado:** lista-para-claude
+- **responde a:** Sergio pidió un administrador más intuitivo (verificación, aprobación de videos, cuentas, depósitos, abono directo, mensajes, estadísticas y controles que expliquen). El caso concreto: quiso eliminar una cuenta y no pudo, sin ninguna advertencia que dijera por qué.
+- **ronda:** 1 de 10 de esta tarea · **tope:** 1 hora
+- **checklist afectados (NO marques pass tú):** convenciones del panel de administración si tocas esas pantallas. No rompas ítems `pass` ni el trabajo de `[id: 20261106-04]` a `[id: 20261106-07]` ni `[id: 20261107-01]` a `[id: 20261107-07]` ni `[id: 20261108-01]` ni `[id: 20261108-02]`.
+
+#### Orden respecto a rondas anteriores
+`[id: 20261108-02]` ya está `respondida` y la migración de descripciones ya está aplicada en producción. **No la reabras** (ni las anteriores). El relleno de portadas discretas lo corre Omar desde Herramientas; no forma parte de esta ronda y no tienes que esperarlo. Implementa esta ronda en su propio commit.
+
+#### Diagnóstico (no lo reescribas: úsalo)
+1. **El error sí llega, pero queda tapado.** En `src/admin/Usuarios.tsx`, `Ficha()` ofrece Anonimizar y Eliminar definitivamente en la Zona de riesgo. `EliminarDialogo()` pide motivo y escribir el handle. `eliminarCuenta()` (`src/lib/admin.ts`) llama a `admin_eliminar_cuenta` y devuelve `error.message`. El callback `falla={msg => setError(msg)}` pinta ese texto en el **banner de la pantalla principal**, no dentro del diálogo. La ficha sigue abierta (overlay `zIndex` 80) y `Confirmar` sigue abierto (overlay `zIndex` 90, fondo oscuro). El administrador se queda mirando la confirmación y el motivo queda detrás. Eso reproduce el síntoma de Sergio («no pude y no me dijo por qué»). PostgreSQL y el wrapper sí tienen mensajes.
+2. El mismo agujero: si escribe mal el handle, `EliminarDialogo` llama `falla('Escribe el usuario...')` y también lo pinta detrás. La etiqueta puede cambiar a «Escribe el usuario», pero `Confirmar` solo mira `ocupado` y el motivo: un handle incorrecto no bloquea de verdad el envío.
+3. Anonimizar, suspender, banear y ajustar saldo pasan por `tras()` en `Usuarios()`: si hay error, `setError(msg)` y el diálogo/ficha se quedan abiertos. Mismo defecto de ubicación. `Confirmar()` en `src/admin/piezas.tsx` no tiene estado de error local ni `catch` visible para el usuario: solo `try/finally` para `ocupado`. Una excepción inesperada tampoco se presenta.
+4. **`admin_eliminar_cuenta`** (`20261127000000_eliminar_cuenta.sql`) bloquea, entre otras cosas: no admin, motivo vacío, la propia cuenta, otra cuenta admin (hay que revocar el privilegio antes), cuenta inexistente, confirmación que no coincide con el handle, imágenes de verificación todavía sin borrar, e historial protegido / dependencias (los mensajes recomiendan Anonimizar). Intenta borrar `auth.users` en transacción y devuelve archivos para limpieza posterior en Storage. Registra en `admin_log`. `eliminarCuenta()` distingue cuenta borrada de fallos posteriores de limpieza: esos avisos también tienen que verse con claridad.
+5. **`profiles_no_borrar_con_historial()`** (`20261120000000_no_borrar_el_historial.sql`) bloquea, salvo cuentas demo, cualquier historial en: `coin_ledger`, `purchases`, `rentals`, `subscriptions` (como suscriptor o creadora), `tips` en ambas direcciones, consentimientos, `payouts`, `solicitudes_retiro`, `payment_orders`, `reembolsos_retiro`, expedientes, `payout_accounts`, `custom_requests` en ambas direcciones y reportes como denunciante o perfil. `clips_no_borrar_con_historial()`: un clip con compras, rentas, reportes o reembolsos no se destruye (se marca borrado) y puede impedir la cascada. La identidad verificada, por sí sola, **no** es un bloqueo explícito de eliminar. El saldo no aparece como chequeo independiente de eliminar, pero los movimientos del ledger sí bloquean. **No sugieras borrar historial para que «pase».** Tener clips sin ese historial no equivale automáticamente al bloqueo SQL actual: comprueba el código vigente, no inventes reglas nuevas más permisivas.
+6. **`admin_anonimizar_cuenta()`** (misma migración 20261127) bloquea: no admin, motivo vacío, la propia cuenta, otra admin, inexistente o ya anonimizada, **saldo distinto de cero (incluso negativo)**, retiros `pendiente`/`aprobada`, e imágenes de verificación sin borrar. Sustituye la identidad del perfil, elimina contactos/posts, marca clips como borrados, cancela suscripciones e invalida acceso e identidades/sesiones. Conserva la fila, el ledger, las compras, los retiros, el expediente y el resto del historial. La UI ya explica consecuencias dentro de la confirmación, pero **no ofrece un diagnóstico previo de esa cuenta**.
+7. **Hueco de consultas.** `20261124000000_consultas_telegram.sql` define consultas y mensajes con cascadas. El trigger de historial de `20261120` **no incluye** esas tablas. Una cuenta cuyo único historial sean consultas (sin asientos contables) podría borrarse del todo y llevarse los hilos. Antes de considerar segura cualquier eliminación definitiva, hay que comprobarlo y proteger esas filas (mismos nombres reales de la migración: `consultas`, `consulta_mensajes` y las que correspondan). La regla es conservar también las consultas; no las borres para «limpiar» la cuenta.
+8. **Abono directo ya existe:** ficha de Usuarios → Zona de riesgo → «Ajustar saldo». `SaldoDialogo()` pide un monto en USD con signo, muestra saldo antes/después y exige motivo. `ajustarSaldo()` → `admin_ajustar_saldo`. `20261121000000_topes_de_ajuste_admin.sql`: asiento append-only y `admin_log`; topes iniciales 200 USD por movimiento y 1 000 USD acumulados en 24 h (configurables); el excedente queda **propuesto**; otra admin firma; si solo hay una, puede firmar después de 24 h. Retiros muestra «Ajustes por aprobar». `src/lib/admin.ts` convierte una propuesta aceptada en `{error: AVISO_PROPUESTA}`; `Usuarios` lo trata como **fallo** y mantiene el modal: riesgo de repetir una propuesta que ya se creó. En `Retiros.tsx`, «Aprobar» se deshabilita con `puede_aprobar` sin decir junto al botón quién debe firmar o cuándo se habilita. Los movimientos de la ficha imprimen `m.delta` crudo, sin `usd()`: pueden parecer dólares cuando son centavos.
+9. **El mismo feedback tapado** está en `Verificacion.tsx` y `Moderacion.tsx`: `tras(error)` vive en el padre y el overlay (ficha o revisor) lo tapa. En Moderación, «Sin verificar» es una insignia pero «Aprobar» sigue habilitado y deja que el servidor explique el bloqueo… explicación que hoy no se ve. En Verificación, `urlDocumento()` en error puede devolver `null` y la ficha decir «Sin archivo» cuando en realidad falló obtener la URL.
+10. No hay una pantalla de «registrar depósito bancario» ni conciliación de un SPEI entrante. Un ajuste contable no es prueba de haber recibido dinero externo. **No inventes esa pantalla ni un procesador.** El resumen, el menú agrupado, los badges, la búsqueda global y la consola de Consultas (solo lectura) ya existen: no los rehagas.
+
+#### 1. Confirmaciones con el resultado a la vista
+1. El error o el aviso tiene que verse **dentro del recuadro o lateral que ejecutó la acción** (`role="alert"`), no solo en el banner de detrás. Un patrón compartido en `Confirmar` (`src/admin/piezas.tsx`) —una zona de error local— vale para no repetir el agujero.
+2. Si la acción falla, no cierres el diálogo. Conserva el motivo, el handle escrito y el monto. Libera `ocupado`. Evita un segundo envío mientras corre el primero.
+3. Captura rechazos inesperados (red, excepción): no dejes un spinner eterno ni fingas éxito.
+4. Aplícalo a eliminar, anonimizar, suspender, banear y ajustar saldo. Reutiliza el mismo patrón en los overlays de Verificación y Moderación (aprobar / rechazar / retirar, y resolver identidad).
+5. Un éxito se nota: mensaje claro, se refresca lo que cambió, y no se finge éxito si hubo error. Los avisos de limpieza posterior de Storage, si la cuenta ya se eliminó, también tienen que verse (no como si no se hubiera borrado, ni como silencio).
+6. Un handle que no coincide se explica **dentro** de `EliminarDialogo` y no debería mandar al servidor (o, si llega, el error del servidor también se ve ahí).
+
+#### 2. Diagnóstico de cierre de cuenta
+1. En la ficha, **antes de confirmar** (al abrir la zona de riesgo o al abrir cada diálogo), muestra los bloqueos reales de **esa** cuenta, no un texto genérico: es tu propia cuenta; es otra admin (hay que revocarle el privilegio antes); ya está anonimizada; tiene historial protegido (nombra las clases que apliquen: movimientos, compras, rentas, suscripciones, propinas, retiros, reportes, encargos, consultas, etc.); saldo distinto de cero; retiro pendiente o aprobado; documentos de verificación todavía presentes.
+2. El diagnóstico es de solo lectura (un RPC o la suma de datos que el admin ya puede ver). **No sustituye** las reglas transaccionales: el servidor vuelve a validar al confirmar. Si el diagnóstico decía que se podía y el servidor rechaza, ese rechazo también se ve dentro del diálogo.
+3. **Anonimizar** es la salida normal para una cuenta con historial. **Eliminar definitivamente** queda claramente limitado a una cuenta sin historial protegido. No ofrezcas un atajo para borrar el ledger, las compras, los retiros ni las consultas «para poder eliminar».
+4. Cierra el hueco de las consultas: una cuenta cuyo único rastro sean hilos o mensajes de consulta **no** se puede eliminar definitivamente (igual que si tuviera compras o movimientos). Comprueba las cascadas reales y añade la protección equivalente a `profiles_no_borrar_con_historial` (o el chequeo dentro de `admin_eliminar_cuenta`). Anonimizar sigue conservando esa fila y ese historial.
+5. Enlaces al lugar que resuelve un bloqueo **solo si ese control existe de verdad**. Hoy los errores de eliminar/anonimizar pueden decir «bórralas desde Verificación»; la ficha de Verificación describe un borrado por pasada automática y no se vio una acción manual. Revisa el código vigente: si el servidor exige que esas imágenes ya no estén, la acción tiene que ser real y confirmable (lo que ya exijan `admin_eliminar_cuenta` / `admin_anonimizar_cuenta`). Si esa instrucción apunta a una pantalla que no puede hacerlo, no la dejes como enlace muerto. No inventes una política nueva de destrucción de expediente.
+6. No renombres «Anonimizar» a «Eliminar cuenta». Deja las dos acciones, con el diagnóstico para que se entienda cuál aplica.
+
+#### 3. Abonos (ajustar saldo) con resultado claro
+1. Distingue tres desenlaces: **Aplicado**, **Propuesto para aprobación** y **Falló**. Una propuesta aceptada por el servidor **no** es un error: no uses `AVISO_PROPUESTA` como si `ajustarSaldo()` hubiera fallado, ni invites a pulsar otra vez (se duplicaría).
+2. Si quedó propuesta, cierra o actualiza el formulario y enlaza a Retiros → Ajustes por aprobar.
+3. En Retiros, si «Aprobar» está deshabilitado, explica junto al botón quién debe firmar o cuándo se habilita (otra admin, o la misma después de 24 h si solo hay una), según las reglas que ya existen. No cambies topes, motivo obligatorio ni la segunda firma.
+4. En la ficha, formatea los movimientos con `usd()` (o el helper que ya usáis para dinero), no con el `delta` crudo en centavos.
+5. La etiqueta puede pasar a algo como «Abonar o descontar saldo», con una línea breve de que es un ajuste contable interno, no el registro de un depósito bancario recibido. No inventes una pantalla de depósitos ni una pasarela.
+
+#### Extra pequeño (mismo tema de avisos)
+En Moderación, si el video no se puede aprobar porque la identidad sigue sin resolverse, muestra esa razón junto a «Aprobar» (el servidor sigue siendo la autoridad). En Verificación, no digas «Sin archivo» si lo que falló fue obtener la URL firmada: di que no se pudo cargar.
+
+#### Qué no tocar
+Textos legales, recargas o pasarela, una pantalla nueva de «registrar depósito», token o secretos, el precio de 20 pesos, el plazo de 2 días, `COBRO_CONSULTAS_ACTIVO` (sigue en `true`), DeepSeek, el hero del 80 % / dólar, dominio, reproductor, trato, avatares, álbumes, precios de 10 / 20 / 40, portadas, el relleno de portadas discretas, consola de Consultas (sigue solo lectura: no responder, no cobrar ni reembolsar desde ahí), el resumen / menú / badges / búsqueda global (no los rehagas), visitas o mapas de reproducción, hacer el panel adaptable a móvil (`ANCHO_MINIMO` se queda), borrar historial para facilitar un eliminado, ni «Anonimizar» más allá del diagnóstico y del aviso visible.
+
+#### Criterios de aceptación
+1. Cada rechazo del SQL o del cliente (handle incorrecto, propia cuenta, otra admin, historial, saldo, retiro, documentos, motivo vacío, red) se ve **dentro** del diálogo o lateral que se usó, en un escritorio típico (p. ej. 1440×900), sin tener que cerrar el recuadro para leerlo.
+2. Una cuenta con compras, ledger o consultas no pierde ese historial al intentar eliminar. Eliminar definitivamente no pasa si hay historial protegido (consultas incluidas). Anonimizar con saldo distinto de cero, retiro pendiente/aprobado o documentos pendientes explica el bloqueo concreto.
+3. Un fallo de red no deja el botón ocupado para siempre ni simula éxito.
+4. Un abono aplicado, uno propuesto y uno fallido se distinguen. Una propuesta exitosa no se trata como error ni se duplica al «reintentar».
+5. Antes de confirmar se ve de quién es la cuenta y, en un ajuste, el monto y el saldo resultante. Los movimientos de la ficha se leen como dinero, no como centavos crudos.
+6. Typecheck, build y lint limpios (solo advertencias que ya existían). Ningún secreto en el repo.
+
+#### Cómo demostrar (obligatorio en bridge-query.md)
+SHA, diff resumido, y:
+- Reproduce (en local o con datos de prueba, **sin mutar cuentas reales de producción** para el demo) al menos: handle incorrecto; intento de eliminar una cuenta con historial (el error se ve dentro del diálogo y el historial sigue ahí); intento de anonimizar con saldo o retiro bloqueante (el motivo concreto se ve dentro); un ajuste que queda propuesto (desenlace «Propuesto», no un banner de error, y no se crea dos veces si no se vuelve a enviar).
+- Una prueba de que eliminar está bloqueado también cuando el único rastro son consultas (si ese era el hueco), sin borrar esos hilos.
+- No marques `CHECKLIST.md` como pass.
+
+#### Siguiente paso para Claude Code
+1. `git pull` e implementa esta ronda en su propio commit (mensaje sugerido: `feat: avisos visibles y diagnostico al cerrar una cuenta`).
+2. Si añadiste protección SQL para las consultas u otro chequeo de cierre, aplícalo en producción con la aprobación de Omar. No hace falta que Omar « Borre » nada a ciegas: el diagnóstico y los avisos viven en el panel.
+3. Deja el resultado en `bridge-query.md` (SHA, diff, verificación) y marca `[id: 20261108-03]` como `respondida`.
+
 ### Respuesta a [id: 20261108-02] — Portada más discreta y descripción genérica
 - **fecha:** 2026-11-08 14:22 (America/Mexico_City)
 - **estado:** lista-para-claude

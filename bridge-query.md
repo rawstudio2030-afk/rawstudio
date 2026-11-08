@@ -38,6 +38,15 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 
 ## Consultas activas
 
+### [id: 20261108-03] Avisos visibles, diagnóstico de cierre y abonos claros
+- **fecha:** 2026-11-08 (America/Mexico_City)
+- **estado:** asignada
+- **tarea:** Que los avisos del panel se vean dentro del recuadro que ejecutó la acción (no detrás), que la ficha de una cuenta diga antes de confirmar qué impide cerrarla, y que un abono se distinga de una propuesta pendiente de firma.
+- **pregunta:** Implementa lo indicado en `bridge-response.md`, entrada [id: 20261108-03].
+- **contexto:** HEAD al escribir esta ronda: `d71d8d4` (`docs: puente — ronda 20261108-02 aplicada en produccion`). Archivos clave: `src/admin/Usuarios.tsx` (Ficha, EliminarDialogo, `setError` / `tras`), `src/admin/piezas.tsx` (`Confirmar`), `src/lib/admin.ts` (`eliminarCuenta`, anonimizar, suspender/banear, `ajustarSaldo`, `AVISO_PROPUESTA`, `moderar`, `resolverVerificacion`, `ajustesPendientes`), `src/admin/Verificacion.tsx`, `src/admin/Moderacion.tsx`, `src/admin/Retiros.tsx`, migraciones `20261127000000_eliminar_cuenta.sql`, `20261120000000_no_borrar_el_historial.sql`, `20261121000000_topes_de_ajuste_admin.sql`, `20261124000000_consultas_telegram.sql`.
+- **urgencia:** alta
+- **ya se intentó:** el panel ya tiene Anonimizar, Eliminar definitivamente, ajustar saldo, verificación, moderación y retiros. Sergio quiso eliminar una cuenta y no vio por qué no se pudo: el RPC sí devuelve el motivo, pero el aviso queda detrás de los recuadros.
+
 ### [id: 20261108-02] Portada más discreta y descripción genérica — hecha, pendiente de aplicar
 - **fecha:** 2026-11-08 (America/Mexico_City)
 - **estado:** respondida
