@@ -38,6 +38,15 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 
 ## Consultas activas
 
+### [id: 20261107-02] Ronda 2/10 — panel de administración: búsqueda, urgencia, bitácora, avatares y exportar
+- **fecha:** 2026-11-07 20:26 (America/Mexico_City)
+- **estado:** asignada
+- **tarea:** Segunda pasada del panel admin, con lo más útil para el día a día (sin rehacer lo de 20261107-01).
+- **pregunta:** (asignación; ver bridge-response.md)
+- **contexto:** Sergio vio el panel ya mejorado (resumen, menú agrupado, consola de consultas) y pidió armar la lista de lo más relevante que aún falta. Eligió pasar esa lista. HEAD de docs al asignar: `1e4d0f1b` (avisos del menú se actualizan al resolver una cola). No reabrir `[id: 20261107-01]` ni las rondas 4, 5, 6 o 7.
+- **urgencia:** media
+- **ya se intentó:** la ronda 20261107-01 ya está respondida (commits `e3a8f6cc`, `57230d99`, `7112e471`, `1e4d0f1b`).
+
 ### [id: 20261107-01] Ronda 1/10 hecha — panel de administración: resumen, menú y consola de consultas
 - **fecha:** 2026-11-07 (America/Mexico_City)
 - **estado:** respondida

@@ -30,6 +30,73 @@
 
 ## Respuestas activas
 
+### Respuesta a [id: 20261107-02] — Ronda 2/10 · Panel de administración: búsqueda, urgencia, bitácora reciente, avatares y exportar
+- **fecha:** 2026-11-07 20:26 (America/Mexico_City)
+- **estado:** lista-para-claude
+- **responde a:** Sergio confirmó la lista priorizada: lo que más le sirve ahora, sin inventar visitas ni rehacer el panel, es búsqueda general, actividad reciente de la bitácora en el Resumen, urgencia (no solo el número), traer a la portada los avatares que esperan revisión, y exportar finanzas y retiros.
+- **ronda:** 2 de 10 de esta tarea · **tope:** 1 hora · si el tope se queda corto, deja dos commits de ESTA misma ronda (primero búsqueda + Resumen: urgencia, bitácora y avatares; después exportar). No dejes a medias ni pases la mitad a otra ronda.
+- **checklist afectados (NO marques pass tú):** convenciones de UI si tocas el marco del panel. No rompas ítems `pass` ni el trabajo de las rondas 4, 5, 6, 7 ni `[id: 20261107-01]`.
+
+#### Orden respecto a rondas anteriores
+No reabras `[id: 20261106-04]`, `[id: 20261106-05]`, `[id: 20261106-06]`, `[id: 20261106-07]` ni `[id: 20261107-01]` (esa ya está hecha y respondida). Esta ronda va en su propio commit (o en los dos de arriba). No mezcles este trabajo con álbumes, avatares automáticos (más allá de mostrar el conteo y el enlace), trato, landing, reproductor, legales, cobro de consultas ni analítica de vistas para creadoras.
+
+#### Diagnóstico (no lo reescribas: úsalo)
+La ronda 20261107-01 ya dejó portada Resumen (`src/admin/Resumen.tsx`), menú agrupado, badges compartidos (`pendientes.ts`), consola `/admin/consultas` y las cuatro correcciones. El Resumen muestra conteos de colas, dinero de 30 días y almacenamiento; no muestra qué pasó hace poco, ni qué lleva mucho tiempo esperando, ni los avatares sin foto. La búsqueda existe dentro de Usuarios y de Consultas, pero no hay una búsqueda general desde cualquier pantalla. Finanzas y Retiros se consultan en pantalla; no se pueden bajar como archivo. El panel sigue siendo de escritorio (`ANCHO_MINIMO = 1280`): no lo hagas responsivo. Reutiliza `piezas.tsx`, `pendientes.ts` y las RPC que ya existen; no rehagas tablas ni confirmaciones.
+
+**No inventes métricas.** Sigue sin haber registro de visitas: no pongas vistas, conversión, embudo ni «usuarios nuevos hoy». El desempeño de clips para creadoras (ventas por video, mapas de momentos vistos) NO entra en esta ronda: es una función del Estudio, aparte.
+
+Sobre dinero: ya existe `ajustes.tipo_cambio_usd_mxn` (1850 = 18.50 MXN por dólar; 1 coin = 1 centavo de dólar). Distingue siempre el reparto interno en dólares de lo realmente dispersado en pesos. No presentes devengado como transferencia hecha.
+
+#### 1. Búsqueda general
+1. Desde cualquier pantalla del panel, poder ir directo a una cuenta, un clip o una consulta. Un campo siempre visible en el marco o una paleta al estilo profesional (`Ctrl+K` / `Cmd+K`, y también un control clicable: no dependas solo del atajo).
+2. Resultados agrupados: Personas, Contenido, Consultas. Un clic lleva al destino (ficha de usuario, clip en Contenido o Moderación según encaje, hilo en `/admin/consultas`). Si la ruta actual no acepta un identificador, añade un parámetro de consulta o reutiliza la búsqueda de esa pantalla: no inventes un cuarto tipo de entidad.
+3. Busca por handle, nombre visible, correo (en personas, como ya hace Usuarios), título o id de clip, y handle o título de clip en consultas. Debounce, vacío claro («Nada coincide con …») y estado de carga.
+4. **Privacidad:** las RPC nuevas son `security definer` y solo `es_admin()`. No devuelvas `chat_id`, teléfono, token ni secretos. De consultas, el mismo criterio que la consola: handle público o «Cuenta eliminada».
+5. Un solo lote por búsqueda, no una query por grupo cada tecla.
+
+#### 2. Actividad reciente en el Resumen
+1. Debajo de «Por atender» (o justo después de las tarjetas de atención, antes o después de Dinero: que no empuje las colas fuera de la primera mirada), muestra las últimas acciones de la bitácora que YA se registran: quién, qué, cuándo (8 a 10 renglones).
+2. Reutiliza la fuente de `Bitacora.tsx` / su RPC. No inventes nombres de acciones ni completes huecos.
+3. Un enlace «Ver bitácora →» a `/admin/bitacora`. Si no hay filas: «Todavía no hay acciones registradas.»
+
+#### 3. Urgencia, no solo el número
+1. En las tarjetas del Resumen (y, si encaja sin ruido, en el texto accesible del badge) añade contexto de tiempo con timestamps reales:
+   - clips pendientes de moderación que llevan más de 24 horas;
+   - consultas esperando respuesta que se acercan al tope de 2 días (menos de 12 horas para vencer) y las que ya vencieron (eso último ya se muestra: consérvalo).
+2. Si hace falta una RPC nueva (p. ej. ampliar el lote de `pendientes.ts`), que calcule desde fechas guardadas. No adivines edades. No cambies la regla de negocio de los 2 días.
+3. Frases claras, al estilo del Resumen actual: «3 pendientes · el más antiguo lleva 2 días» o «1 se vence en menos de 12 horas». Si todo es reciente, no inventes alarma: basta el número que ya está.
+4. Identidades, denuncias y retiros: si ya tienes fecha de llegada en la misma consulta, puedes mostrar la misma idea («el más antiguo lleva…»); si no, no inventes un campo ni dispares otra query solo para eso.
+
+#### 4. Avatares que esperan revisión, en la portada
+1. Nueva tarjeta en «Por atender» que lleve a Herramientas (donde vive `AvatarAuto.tsx`): creadoras (`is_creator`, no vetadas) con `avatar_path` nulo y al menos un clip publicado con video. Ese es el lote que hoy se busca al pulsar «Buscar creadoras sin foto».
+2. Cuenta real vía el lote de pendientes o una RPC `es_admin` (no recorroas perfiles desde el Resumen ni generes cuadros aquí).
+3. **No publiques avatares, no corras el relleno automático, no apliques propuestas.** El avatar es público y la heurística no sabe qué hay en el cuadro: la revisión sigue siendo manual en Herramientas.
+4. Vacío claro: «Ninguna creadora sin foto con video publicado» (o la frase equivalente). No cuentes como pendientes a quienes no tienen video (esas se quedan con la inicial, sin propuesta).
+
+#### 5. Exportar finanzas y retiros
+1. En Finanzas: un control para descargar un CSV del rango Desde/Hasta que ya está elegido, con las mismas cifras que ves en pantalla (bruto, comisión, reparto a creadoras, operaciones; y, si ya está en esa vista, lo dispersado). UTF-8. Encabezados en español. Distingue dólares internos de pesos dispersados en el nombre de las columnas; no mezcles unidades.
+2. En Retiros: un control para descargar un CSV de las solicitudes (las de la pestaña visible, o un archivo con las mismas columnas que la tabla y una columna de estado). No recalcules montos.
+3. No inventes columnas (visitas, conversión, etc.). La descarga ocurre en el navegador de quien administra; no expongas el archivo a `anon`.
+
+#### Qué no tocar
+Textos legales (`/privacidad`, `/terminos`, `PENDIENTES_ABOGADO`), comisión 20% / SPEI / 18+, token o secretos de Telegram, el cobro de consultas (`COBRO_CONSULTAS_ACTIVO` sigue en `false`), reproductor, landing, trato de género, no hagas el panel responsivo, no implementes el placeholder de Redes Sociales, no montes un monitor técnico de errores o deploys, no implementes analítica de vistas ni mapas de momentos para creadoras, no cambies el dominio ni `public/CNAME`.
+
+#### Criterios de aceptación
+1. Desde cualquier módulo del panel se puede buscar y abrir una cuenta, un clip o una consulta, sin `chat_id` ni token en las respuestas.
+2. El Resumen muestra las últimas acciones reales de la bitácora (o el vacío claro).
+3. Las tarjetas de clips y consultas dicen si algo lleva tiempo o se vence pronto, usando fechas reales.
+4. El Resumen tiene una tarjeta de avatares por revisar que lleva a Herramientas y no aplica ningún avatar.
+5. Finanzas y Retiros permiten bajar un CSV fiel a lo que ya se consulta, sin cifras inventadas.
+6. Typecheck, build y lint limpios (solo advertencias que ya existían).
+
+#### Cómo demostrar (obligatorio en bridge-query.md)
+SHA, diff resumido, y verificación: búsqueda (coincidencia de persona, de clip y de consulta; vacío; que un no-admin o `anon` no vea resultados si hay RPC nueva), Resumen con bitácora reciente y tarjeta de avatares, frases de urgencia con un dato de prueba cuya fecha lo justifique (o explicación si en local no hay ninguno antiguo), descarga de CSV de Finanzas (rango distinto de 30 días) y de Retiros, y confirmación de que ninguna RPC nueva expone `chat_id`, teléfono o token. No marques `CHECKLIST.md` como pass.
+
+#### Siguiente paso para Claude Code
+1. `git pull` de `origin/main`.
+2. Implementa esta ronda. Commit(s) de producto, p. ej. `feat: busqueda y urgencia en el panel de administracion` y `feat: exportar finanzas y retiros del panel`; `git push origin main`.
+3. Marca `bridge-query.md` `[id: 20261107-02]` como `respondida` con SHA, diff y verificación. **No** marques `CHECKLIST.md` como pass.
+
 ### Respuesta a [id: 20261107-01] — Ronda 1/10 · Panel de administración: resumen, menú y consola de consultas
 - **fecha:** 2026-11-07 18:56 (America/Mexico_City)
 - **estado:** lista-para-claude
