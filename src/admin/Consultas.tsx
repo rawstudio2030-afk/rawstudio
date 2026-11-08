@@ -12,7 +12,8 @@
  * Solo aparece lo que SI se envio: el bot valida el mensaje (minimo de palabras,
  * pertinencia) antes de registrarlo, y los rechazados no se guardan.
  */
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 import { cuantos } from '../lib/plural'
 import {
@@ -37,8 +38,12 @@ export default function Consultas() {
   const [error, setError] = useState('')
 
   const [filtro, setFiltro] = useState<FiltroConsultas>('todas')
-  const [texto, setTexto] = useState('')
-  const [busqueda, setBusqueda] = useState('')
+  // Desde la busqueda general: ?q= llena el buscador y ?abrir= abre ese hilo.
+  const [params] = useSearchParams()
+  const inicial = params.get('q') ?? ''
+  const abrirId = useRef(params.get('abrir'))
+  const [texto, setTexto] = useState(inicial)
+  const [busqueda, setBusqueda] = useState(inicial)
   const [pagina, setPagina] = useState(0)
   const [abierta, setAbierta] = useState<FilaConsulta | null>(null)
 
@@ -52,6 +57,10 @@ export default function Consultas() {
     setCargando(true)
     const r = await listarConsultas(filtro, busqueda, pagina, POR_PAGINA)
     setFilas(r.filas); setTotal(r.total); setError(r.error); setCargando(false)
+    if (abrirId.current) {
+      const f = r.filas.find(x => x.id === abrirId.current)
+      if (f) { setAbierta(f); abrirId.current = null }
+    }
   }, [filtro, busqueda, pagina])
 
   useEffect(() => { cargar() }, [cargar])

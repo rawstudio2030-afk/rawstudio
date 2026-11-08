@@ -1053,6 +1053,56 @@ export async function conteoConsultas() {
   return { esperando: Number(f.esperando), vencidas: Number(f.vencidas) }
 }
 
+/* ---------- Busqueda general y datos de urgencia ----------
+ *
+ * Ninguna devuelve chat_id, telefono ni token: de una consulta solo el handle
+ * publico (o null si la cuenta se anonimizo) y el titulo del clip. */
+
+export type GrupoBusqueda = 'personas' | 'contenido' | 'consultas'
+
+export type ResultadoBusqueda = {
+  grupo: GrupoBusqueda
+  id: string
+  titulo: string
+  detalle: string | null
+  estado: string | null
+}
+
+/** UNA llamada por busqueda: la base ya devuelve los tres grupos. */
+export async function buscarGeneral(texto: string): Promise<{ filas: ResultadoBusqueda[]; error: string }> {
+  const { data, error } = await supabase.rpc('admin_buscar', { p_q: texto.trim() })
+  if (error) return { filas: [], error: error.message }
+  return { filas: (data ?? []) as ResultadoBusqueda[], error: '' }
+}
+
+export type Atencion = {
+  modMasDe24h: number
+  modMasAntiguo: string | null
+  consPorVencer: number
+  consProximoVence: string | null
+  avataresPorRevisar: number
+}
+
+export const SIN_ATENCION: Atencion = {
+  modMasDe24h: 0, modMasAntiguo: null, consPorVencer: 0, consProximoVence: null, avataresPorRevisar: 0,
+}
+
+/** Lo que lleva esperando de mas, con fechas guardadas, y las creadoras sin foto. */
+export async function atencion(): Promise<Atencion> {
+  const { data, error } = await supabase.rpc('admin_atencion')
+  const f = ((data ?? []) as {
+    mod_mas_de_24h: number; mod_mas_antiguo: string | null
+    cons_por_vencer: number; cons_proximo_vence: string | null
+    avatares_por_revisar: number
+  }[])[0]
+  if (error || !f) return SIN_ATENCION
+  return {
+    modMasDe24h: Number(f.mod_mas_de_24h), modMasAntiguo: f.mod_mas_antiguo,
+    consPorVencer: Number(f.cons_por_vencer), consProximoVence: f.cons_proximo_vence,
+    avataresPorRevisar: Number(f.avatares_por_revisar),
+  }
+}
+
 /** Retiros por estado (todos, no solo la pagina visible): para el menu y el Resumen. */
 export async function conteoRetiros() {
   const { data, error } = await supabase.rpc('admin_conteo_retiros')

@@ -1,5 +1,5 @@
 /* Modulo 1: usuarios. */
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Avatar from '../components/Avatar'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 import { usd, aCentavos } from '../lib/dinero'
@@ -16,6 +16,7 @@ import {
   type Columna,
 } from './piezas'
 import { Pulsable } from '../components/Pulsable'
+import { useSearchParams } from 'react-router-dom'
 import { tratoDe } from '../lib/admin'
 import { OPCIONES_TRATO, type Trato } from '../lib/trato'
 import { useEscape } from '../lib/teclado'
@@ -32,8 +33,12 @@ export default function Usuarios() {
   const [cargando, setCargando] = useState(true)
   const [error, setError]   = useState('')
 
-  const [busqueda, setBusqueda] = useState('')
-  const [texto, setTexto]       = useState('')
+  // Desde la busqueda general: ?q= llena el buscador y ?abrir= abre esa ficha.
+  const [params] = useSearchParams()
+  const inicial = params.get('q') ?? ''
+  const abrirId = useRef(params.get('abrir'))
+  const [busqueda, setBusqueda] = useState(inicial)
+  const [texto, setTexto]       = useState(inicial)
   const [rol, setRol]           = useState<RolUsuario | ''>('')
   const [estado, setEstado]     = useState<EstadoCuenta | ''>('')
   const [orden, setOrden]       = useState<OrdenUsuarios>('created_at')
@@ -57,6 +62,10 @@ export default function Usuarios() {
       busqueda, rol, estado, orden, descendente: desc, pagina, porPagina: POR_PAGINA,
     })
     setFilas(r.filas); setTotal(r.total); setError(r.error); setCargando(false)
+    if (abrirId.current) {
+      const f = r.filas.find(x => x.id === abrirId.current)
+      if (f) { setAbierta(f); abrirId.current = null }
+    }
   }, [busqueda, rol, estado, orden, desc, pagina])
 
   useEffect(() => { cargar() }, [cargar])

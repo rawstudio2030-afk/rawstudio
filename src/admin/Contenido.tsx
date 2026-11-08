@@ -9,7 +9,7 @@
  * almacenamiento—, asi que una tarea programada en la base no bastaria.
  */
 import { useCallback, useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { usd } from '../lib/dinero'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 import {
@@ -41,9 +41,12 @@ export default function Contenido() {
   // Lo que se resuelve aqui cambia los avisos del menu y del Resumen: se piden de nuevo.
   const { refrescar } = usePendientes()
   const nav = useNavigate()
-  const [filtro, setFiltro] = useState<Filtro>('todos')
-  const [texto, setTexto] = useState('')
-  const [busqueda, setBusqueda] = useState('')
+  // Desde la busqueda general: ?q= llena el buscador y ?filtro=borrados abre los borrados.
+  const [params] = useSearchParams()
+  const inicial = params.get('q') ?? ''
+  const [filtro, setFiltro] = useState<Filtro>(params.get('filtro') === 'borrados' ? 'borrados' : 'todos')
+  const [texto, setTexto] = useState(inicial)
+  const [busqueda, setBusqueda] = useState(inicial)
   const [filas, setFilas] = useState<ClipAdmin[]>([])
   const [pendientes, setPendientes] = useState<PorPurgar[]>([])
   const [cargando, setCargando] = useState(true)

@@ -14,6 +14,7 @@ import { elegirModo } from '../lib/modo'
 import { ANCHO_MINIMO } from './piezas'
 import { Pulsable, Enlace } from '../components/Pulsable'
 import { GRUPOS, MODULOS } from './modulos'
+import BuscadorGeneral from './BuscadorGeneral'
 import { PendientesCtx, SIN_DATOS, cargarPendientes, type Pendientes } from './pendientes'
 
 export function useModulo() {
@@ -69,14 +70,15 @@ function useLotePendientes() {
 function avisoDe(clave: string, p: Pendientes): { n: number; texto: string } | null {
   const hay = (n: number, texto: string) => (n > 0 ? { n, texto } : null)
   switch (clave) {
-    case 'moderacion':   return hay(p.moderacion, `${p.moderacion} ${p.moderacion === 1 ? 'clip' : 'clips'} por revisar`)
+    case 'moderacion':   return hay(p.moderacion, `${p.moderacion} ${p.moderacion === 1 ? 'clip' : 'clips'} por revisar${p.atencion.modMasDe24h > 0 ? `, ${p.atencion.modMasDe24h} con más de 24 horas` : ''}`)
     case 'verificacion': return hay(p.verificacion, `${p.verificacion} ${p.verificacion === 1 ? 'identidad' : 'identidades'} por revisar`)
     case 'reportes':     return hay(p.denuncias, `${p.denuncias} ${p.denuncias === 1 ? 'denuncia abierta' : 'denuncias abiertas'}`)
     case 'retiros': {
       const n = p.retirosPorAprobar + p.retirosPorPagar
       return hay(n, `${n} ${n === 1 ? 'retiro' : 'retiros'} por atender`)
     }
-    case 'consultas':    return hay(p.consultasEsperando, `${p.consultasEsperando} ${p.consultasEsperando === 1 ? 'mensaje esperando respuesta' : 'mensajes esperando respuesta'}`)
+    case 'consultas':    return hay(p.consultasEsperando, `${p.consultasEsperando} ${p.consultasEsperando === 1 ? 'mensaje esperando respuesta' : 'mensajes esperando respuesta'}${p.atencion.consPorVencer > 0 ? `, ${p.atencion.consPorVencer} por vencer en menos de 12 horas` : ''}`)
+    case 'herramientas': return hay(p.atencion.avataresPorRevisar, `${p.atencion.avataresPorRevisar} ${p.atencion.avataresPorRevisar === 1 ? 'creadora' : 'creadoras'} sin foto con video`)
     case 'contenido':    return hay(p.purga, `${p.purga} ${p.purga === 1 ? 'archivo vencido' : 'archivos vencidos'} por purgar`)
     default:             return null
   }
@@ -88,6 +90,21 @@ export function Marco({ children, titulo, resumen }: {
   const nav = useNavigate()
   const actual = useModulo()
   const lote = useLotePendientes()
+
+  // Busqueda general: boton de la barra y atajo Ctrl+K / Cmd+K. El boton existe
+  // para que nadie dependa del atajo.
+  const [buscando, setBuscando] = useState(false)
+  useEffect(() => {
+    const alTeclear = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault(); setBuscando(b => !b)
+      }
+    }
+    window.addEventListener('keydown', alTeclear)
+    return () => window.removeEventListener('keydown', alTeclear)
+  }, [])
+  const cierraBusqueda = useCallback(() => setBuscando(false), [])
+  const atajo = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform) ? '⌘K' : 'Ctrl K'
 
   return (
     <PendientesCtx.Provider value={lote}>
@@ -115,6 +132,17 @@ export function Marco({ children, titulo, resumen }: {
             marginTop: 9, font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.6,
             textTransform: 'uppercase', color: COLOR.admin,
           }}>Administración</div>
+          <Pulsable al={() => setBuscando(true)} rotulo={`Buscar en el panel (${atajo})`}
+            style={{
+              boxSizing: 'border-box', width: '100%', marginTop: 14, padding: '8px 10px',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
+              background: COLOR.fondo, border: `1px solid ${LINEA.suave}`, cursor: 'pointer',
+              font: `400 12px/1 ${FUENTE.ui}`, color: COLOR.textoSuave, textAlign: 'left',
+            }}>
+            <span>Buscar…</span>
+            <span aria-hidden style={{ font: `400 10px/1 ${FUENTE.mono}`, color: COLOR.textoTenue,
+              border: `1px solid ${LINEA.tenue}`, padding: '3px 5px' }}>{atajo}</span>
+          </Pulsable>
         </div>
 
         <div style={{ flex: 1, overflowY: 'auto', padding: '6px 0 10px' }}>
@@ -195,6 +223,7 @@ export function Marco({ children, titulo, resumen }: {
         <div style={{ marginTop: 20 }}>{children}</div>
       </main>
     </div>
+    <BuscadorGeneral abierto={buscando} cierra={cierraBusqueda} />
     </PendientesCtx.Provider>
   )
 }

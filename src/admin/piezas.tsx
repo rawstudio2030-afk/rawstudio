@@ -8,6 +8,7 @@
 import { useState, type ReactNode } from 'react'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 import { Pulsable } from '../components/Pulsable'
+import { cuantos } from '../lib/plural'
 import { useEscape, tecladoComoBoton } from '../lib/teclado'
 
 export const ANCHO_MINIMO = 1280
@@ -323,6 +324,20 @@ export function desde(s: string | null): string {
   return `hace ${Math.floor(d / 365)} año${Math.floor(d / 365) > 1 ? 's' : ''}`
 }
 
+
+/** «2 horas», «3 días»: cuanto lleva algo esperando, a partir de una fecha guardada. */
+export function lleva(iso: string): string {
+  const h = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 3_600_000))
+  if (h < 48) return cuantos(h, 'hora')
+  return cuantos(Math.floor(h / 24), 'día')
+}
+
+/** «5 horas», «40 min»: cuanto falta para una fecha guardada. */
+export function falta(iso: string): string {
+  const min = Math.max(0, Math.floor((new Date(iso).getTime() - Date.now()) / 60_000))
+  if (min < 60) return `${Math.max(1, min)} min`
+  return cuantos(Math.floor(min / 60), 'hora')
+}
 
 /** Una cifra con su rotulo, para las rejillas de indicadores (Resumen, Finanzas). */
 export function Cifra({ t, v, c, pie }: { t: string; v: string; c: string; pie?: string }) {

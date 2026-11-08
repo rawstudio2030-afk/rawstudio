@@ -5,7 +5,7 @@
 // seguridad esta en las politicas RLS y en las funciones security definer,
 // no en ocultar la pantalla. Lo de aqui abajo solo decide QUE DIBUJAR.
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import { soyAdmin } from '../lib/papel'
 import { COLOR, FUENTE } from '../lib/diseño'
@@ -28,6 +28,9 @@ export default function Admin() {
   const { sesion, cargando: cargandoSesion } = useSesion()
   const [admin, setAdmin] = useState<boolean | null>(null)
   const modulo = useModulo()
+  // Si cambian los parametros (?q= / ?abrir=, de la busqueda general), el modulo se
+  // monta de nuevo y toma el valor inicial de la URL.
+  const { search } = useLocation()
 
   useEffect(() => {
     if (cargandoSesion) return
@@ -44,14 +47,14 @@ export default function Admin() {
   return (
     <Marco titulo={modulo.titulo}>
       {modulo.clave === 'resumen'      && <Resumen />}
-      {modulo.clave === 'usuarios'     && <Usuarios />}
+      {modulo.clave === 'usuarios'     && <Usuarios key={search} />}
       {modulo.clave === 'moderacion'   && <Moderacion />}
-      {modulo.clave === 'contenido'    && <Contenido />}
+      {modulo.clave === 'contenido'    && <Contenido key={search} />}
       {modulo.clave === 'comunicacion' && <Comunicacion />}
       {modulo.clave === 'retiros'      && <Retiros />}
       {modulo.clave === 'reportes'     && <Reportes />}
       {modulo.clave === 'verificacion' && <Verificacion />}
-      {modulo.clave === 'consultas'    && <Consultas />}
+      {modulo.clave === 'consultas'    && <Consultas key={search} />}
       {modulo.clave === 'finanzas'     && <Finanzas />}
       {modulo.clave === 'bitacora'     && <Bitacora />}
       {modulo.clave === 'herramientas' && <Herramientas />}
