@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import { subirArchivo, subirPortada, crearClip, type Visibilidad } from '../lib/clips'
 import {
-  miniaturaDeVideo, tiraDeVideo, cuadrosDeVideo, achicar,
+  portadaAutomaticaDeVideo, tiraDeVideo, cuadrosDeVideo, achicar,
   ANCHO_PUBLICO, type Cuadro,
 } from '../lib/miniatura'
 import { COLOR, LINEA, FUENTE, RADIO } from '../lib/diseño'
@@ -16,6 +16,7 @@ import { usd, usdYPesos } from '../lib/dinero'
 import { useMoneda } from '../lib/moneda'
 import Equivalente from '../components/Equivalente'
 import { PRECIOS_VIDEO, PRECIO_INICIAL } from '../lib/precios'
+import { descripcionGenerica } from '../lib/descripcion'
 import { Pulsable, Enlace } from '../components/Pulsable'
 import Centro from '../components/Centro'
 import { perfilParaPublicar } from '../lib/trato'
@@ -164,8 +165,10 @@ export default function Upload() {
     // no se puede leer.
     let nitida: File | null = portada ?? cuadros[elegido]?.nitida ?? null
     if (!nitida) {
+      // Solo si NO hay portada subida ni cuadro elegido: se busca el cuadro mas
+      // discreto (y, si ninguno pasa el filtro, el del 10% de siempre).
       setPaso('Sacando la portada del video…')
-      nitida = await miniaturaDeVideo(video)
+      nitida = await portadaAutomaticaDeVideo(video)
     }
 
     // La copia publica se achica AQUI, antes de que la grande salga de esta
@@ -209,7 +212,9 @@ export default function Upload() {
     const r = await crearClip({
       creator_id: sesion.user.id,
       title: titulo.trim(),
-      description: desc.trim() || null,
+      // Si se deja vacia: «Video de {nombre}», neutra y sin decir de que va. Lo que ella
+      // escribio no se toca.
+      description: desc.trim() || descripcionGenerica(perfil?.display_name, perfil?.handle),
       storage_path: v.path ?? null,
       cover_path: coverPath,
       visibility: modo,

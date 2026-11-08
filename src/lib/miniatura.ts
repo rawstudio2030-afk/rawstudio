@@ -350,10 +350,23 @@ export function puntuarCuadro(rgba: Uint8ClampedArray | number[]): number {
   return exposicion * 0.5 + detalle * 0.5
 }
 
-/** Un avatar cuadrado de 256 px sacado del video, o null si no hay un cuadro
- *  aceptable o el navegador no puede con el formato. `fuente` es un archivo
- *  local o una URL (firmada) ya autorizada. */
-export async function avatarDeVideo(fuente: File | string): Promise<File | null> {
+/** El cuadro que eligio la heuristica, con lo que hace falta para rotularlo. */
+export type CuadroElegido = {
+  archivo: File
+  /** Cual de los seis (0 = el mas temprano). */
+  indice: number
+  /** Segundo del video de donde salio. */
+  segundo: number
+}
+
+/** La eleccion de cuadro que comparten el avatar y la portada discreta: los mismos
+ *  seis cuadros de la primera mitad, el mismo filtro y el mismo premio a lo temprano.
+ *  Lo UNICO que cambia es la salida:
+ *    - `completo = false` (avatar): recorta el centro a cuadrado y lo deja en 256 px;
+ *    - `completo = true` (portada): el cuadro ENTERO, sin recortar, acotado a
+ *      `ANCHO_MAXIMO` (720) para pasarlo despues por `achicar()` como cualquier portada.
+ *  Devuelve null si ningun cuadro pasa el filtro o el navegador no puede con el formato. */
+async function elegirCuadro(fuente: File | string, completo: boolean): Promise<CuadroElegido | null> {
   const local = typeof fuente !== 'string'
   const url = local ? URL.createObjectURL(fuente) : fuente
   const v = document.createElement('video')
@@ -374,33 +387,49 @@ export async function avatarDeVideo(fuente: File | string): Promise<File | null>
     const d = v.duration, vw = v.videoWidth, vh = v.videoHeight
     if (!isFinite(d) || d <= 0 || !vw || !vh) return null
 
+    // Lo que se lee del video: el centro cuadrado (avatar) o todo el cuadro (portada).
     const lado = Math.min(vw, vh)
-    const sx = (vw - lado) / 2, sy = (vh - lado) / 2
+    const sx = completo ? 0 : (vw - lado) / 2
+    const sy = completo ? 0 : (vh - lado) / 2
+    const sw = completo ? vw : lado
+    const sh = completo ? vh : lado
+
     const chico = document.createElement('canvas')
     chico.width = chico.height = LADO_PUNTAJE
     const grande = document.createElement('canvas')
-    grande.width = grande.height = LADO_AVATAR
+    if (completo) {
+      const escala = Math.min(1, ANCHO_MAXIMO / vw)
+      grande.width = Math.max(1, Math.round(vw * escala))
+      grande.height = Math.max(1, Math.round(vh * escala))
+    } else {
+      grande.width = grande.height = LADO_AVATAR
+    }
     const cc = chico.getContext('2d', { willReadFrequently: true })
     const cg = grande.getContext('2d')
     if (!cc || !cg) return null
 
-    let mejor: { puntaje: number; blob: Blob } | null = null
+    let mejor: { puntaje: number; blob: Blob; indice: number; segundo: number } | null = null
     for (let i = 0; i < CUADROS_AVATAR; i++) {
       const frac = DESDE_AVATAR + ((HASTA_AVATAR - DESDE_AVATAR) * i) / (CUADROS_AVATAR - 1)
       v.currentTime = Math.min(Math.max(d * frac, 0.05), Math.max(d - 0.05, 0.05))
       if (!await esperar('seeked', 8000)) break
 
-      cc.drawImage(v, sx, sy, lado, lado, 0, 0, LADO_PUNTAJE, LADO_PUNTAJE)
+      cc.drawImage(v, sx, sy, sw, sh, 0, 0, LADO_PUNTAJE, LADO_PUNTAJE)
       const base = puntuarCuadro(cc.getImageData(0, 0, LADO_PUNTAJE, LADO_PUNTAJE).data)
       if (base < 0) continue
       const total = base + PESO_TEMPRANO * (1 - i / (CUADROS_AVATAR - 1))
       if (mejor && total <= mejor.puntaje) continue
 
-      cg.drawImage(v, sx, sy, lado, lado, 0, 0, LADO_AVATAR, LADO_AVATAR)
-      const b = await new Promise<Blob | null>(res => grande.toBlob(res, 'image/jpeg', 0.85))
-      if (b) mejor = { puntaje: total, blob: b }
+      cg.drawImage(v, sx, sy, sw, sh, 0, 0, grande.width, grande.height)
+      const b = await new Promise<Blob | null>(res => grande.toBlob(res, 'image/jpeg', completo ? 0.82 : 0.85))
+      if (b) mejor = { puntaje: total, blob: b, indice: i, segundo: v.currentTime }
     }
-    return mejor ? new File([mejor.blob], 'avatar.jpg', { type: 'image/jpeg' }) : null
+    return mejor
+      ? {
+        archivo: new File([mejor.blob], completo ? 'portada.jpg' : 'avatar.jpg', { type: 'image/jpeg' }),
+        indice: mejor.indice, segundo: mejor.segundo,
+      }
+      : null
   } catch {
     return null
   } finally {
@@ -408,4 +437,43 @@ export async function avatarDeVideo(fuente: File | string): Promise<File | null>
     v.load()
     if (local) URL.revokeObjectURL(url)
   }
+}
+
+/** Un avatar cuadrado de 256 px sacado del video, o null si no hay un cuadro
+ *  aceptable o el navegador no puede con el formato. `fuente` es un archivo
+ *  local o una URL (firmada) ya autorizada. */
+export async function avatarDeVideo(fuente: File | string): Promise<File | null> {
+  return (await elegirCuadro(fuente, false))?.archivo ?? null
+}
+
+/* ==================== Portada discreta ====================
+ *
+ * La portada automatica salia del 10% del video (`miniaturaDeVideo`): un cuadro que
+ * solo busca no ser negro, no uno discreto. Con la copia publica a 240 px, ese
+ * mismo fotograma se veia tan nitido como era.
+ *
+ * Esto usa LA MISMA heuristica que el avatar —seis cuadros de la primera mitad,
+ * descartar lo negro/quemado/liso, premio a los mas tempranos— pero se queda con el
+ * cuadro COMPLETO: una portada recortada a cuadrado deja de ser portada.
+ *
+ * NO ES UN CLASIFICADOR DE CONTENIDO. Es una heuristica de calidad de imagen: no sabe
+ * que hay en el cuadro y no garantiza uno inocuo. No hay un detector de desnudos ni un
+ * servicio externo. Por eso donde ya existian portadas se PROPONE y se confirma
+ * (Herramientas -> «Portadas mas discretas»), igual que el retroactivo del avatar. */
+
+/** El cuadro discreto, con su segundo y su indice, o null si ninguno pasa el filtro. */
+export async function elegirCuadroDiscreto(fuente: File | string): Promise<CuadroElegido | null> {
+  return elegirCuadro(fuente, true)
+}
+
+/** La portada discreta de un video: cuadro completo, hasta 720 px, lista para `achicar()`. */
+export async function portadaDiscretaDeVideo(fuente: File | string): Promise<File | null> {
+  return (await elegirCuadro(fuente, true))?.archivo ?? null
+}
+
+/** La portada AUTOMATICA de un video (cuando nadie eligio ni subio una): la discreta
+ *  y, si ningun cuadro pasa el filtro, la de siempre (el cuadro del 10%) para no
+ *  publicar sin portada. Una portada elegida o subida a mano NUNCA pasa por aqui. */
+export async function portadaAutomaticaDeVideo(video: File): Promise<File | null> {
+  return (await portadaDiscretaDeVideo(video)) ?? (await miniaturaDeVideo(video))
 }

@@ -14,8 +14,9 @@ import type { MotivoReporte } from './reportes'
  *
  * O sea: lo que decide que un modulo se pueda cargar aparte no es su tamaño,
  * es quien lo toca. Un solo import desde el tronco lo ancla entero. */
-import { miniaturaDeVideo, tiraDeVideo } from './miniatura'
+import { portadaAutomaticaDeVideo, tiraDeVideo } from './miniatura'
 import { precioDeVideoAlAzar } from './precios'
+import { descripcionGenerica } from './descripcion'
 
 
 export type PerfilAdmin = {
@@ -199,6 +200,9 @@ export async function publicarPara(
     creadora: string; titulo: string; video: File; portada?: File | null
     precio: number; visibilidad: 'pago' | 'suscriptores' | 'gratis'
     descripcion?: string
+    /** Nombre (o, si no hay, el usuario) de la creadora, para la descripcion por
+     *  defecto cuando no viene una: «Video de {nombre}». */
+    nombreCreadora?: string | null
   },
   alAvanzar?: (etapa: string, fraccion: number) => void,
 ) {
@@ -252,12 +256,14 @@ export async function publicarPara(
   }
 
   try {
-    // Si no viene portada, se saca un cuadro del propio video. Antes se caia
-    // siempre al patron generado, que no dice nada de lo que hay dentro.
+    // Si no viene portada, se saca un cuadro del propio video: el mas discreto que
+    // encuentre la heuristica del avatar (cuadro completo, primera mitad) y, si ninguno
+    // pasa el filtro, el del 10% de siempre para no publicar sin portada. Una portada
+    // que SI viene (elegida o subida) no se toca.
     let portada = datos.portada ?? null
     if (!portada) {
       alAvanzar?.('portada', 0)
-      portada = await miniaturaDeVideo(datos.video)
+      portada = await portadaAutomaticaDeVideo(datos.video)
     }
 
     // La tira de seis cuadros solo en los GRATIS, igual que en la subida de
@@ -290,7 +296,9 @@ export async function publicarPara(
       creadora: datos.creadora, p_titulo: datos.titulo.trim(),
       p_archivo: rutaVideo, p_portada: rutaPortada,
       p_precio: datos.precio, p_visibilidad: datos.visibilidad,
-      p_descripcion: datos.descripcion?.trim() || null,
+      // Un texto escrito (del CSV o de quien sea) se respeta; solo si falta, la frase
+      // neutra «Video de {nombre}».
+      p_descripcion: datos.descripcion?.trim() || descripcionGenerica(datos.nombreCreadora),
     })
     if (error) { await limpiar(); return { error: error.message } }
     // La tira se guarda DESPUES de que el clip existe. Si falla, el clip se
@@ -1490,6 +1498,8 @@ export type VideoEnLote = {
   precio: number           // centavos de dolar
   visibilidad: 'pago' | 'suscriptores' | 'gratis'
   creadora: string | null  // id, si la carpeta empareja con alguien
+  /** Nombre (o usuario) de esa creadora: sirve para la descripcion por defecto. */
+  nombreCreadora: string | null
   estado: 'espera' | 'sin_creadora' | 'no_publica' | 'subiendo' | 'listo' | 'fallo'
   detalle: string
 }
@@ -1512,7 +1522,7 @@ function tituloDeArchivo(nombre: string) {
  *  otras seria prometer una subida que despues falla. */
 export function agruparVideos(
   archivos: File[],
-  creadoras: { id: string; handle: string; verificada: boolean }[],
+  creadoras: { id: string; handle: string; verificada: boolean; nombre?: string }[],
 ): VideoEnLote[] {
   const porHandle = new Map(creadoras.map(c => [c.handle.toLowerCase(), c]))
 
@@ -1534,6 +1544,7 @@ export function agruparVideos(
         // catalogo. Un precio del CSV (`aplicarCatalogo`) siempre le gana a este.
         descripcion: '', precio: precioDeVideoAlAzar(), visibilidad: 'pago' as const,
         creadora: c?.id ?? null,
+        nombreCreadora: c ? ((c.nombre ?? '').trim() || c.handle) : null,
         // Sin verificar YA NO impide subir: el clip queda pendiente y se
         // publica solo en cuanto se cargue su expediente, sin volver a subirlo.
         estado: !c ? 'sin_creadora' as const

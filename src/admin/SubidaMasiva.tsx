@@ -21,7 +21,7 @@ import { Boton } from './piezas'
 export default function SubidaMasiva() {
   const [lote, setLote] = useState<VideoEnLote[]>([])
   const [creadoras, setCreadoras] = useState<
-    { id: string; handle: string; verificada: boolean }[]>([])
+    { id: string; handle: string; verificada: boolean; nombre: string }[]>([])
   const [aviso, setAviso] = useState('')
   const [error, setError] = useState('')
   const [ocupado, setOcupado] = useState(false)
@@ -30,7 +30,7 @@ export default function SubidaMasiva() {
   const cargarCreadoras = useCallback(async () => {
     const r = await creadorasGestionables('')
     setCreadoras(r.filas.map(c => ({
-      id: c.id, handle: c.handle, verificada: c.verificada,
+      id: c.id, handle: c.handle, verificada: c.verificada, nombre: c.nombre,
     })))
   }, [])
   useEffect(() => { cargarCreadoras() }, [cargarCreadoras])
@@ -72,7 +72,8 @@ export default function SubidaMasiva() {
       setLote(x => x.map((y, j) => j === i ? { ...y, estado: 'subiendo' } : y))
       const r = await publicarPara(
         { creadora: v.creadora!, titulo: v.titulo, video: v.archivo, portada: null,
-          descripcion: v.descripcion, precio: v.precio, visibilidad: v.visibilidad },
+          descripcion: v.descripcion, precio: v.precio, visibilidad: v.visibilidad,
+          nombreCreadora: v.nombreCreadora },
         (etapa, f) => setAvance(
           `${++n === 1 ? '' : ''}${v.carpeta}/${v.titulo} · ` +
           (etapa === 'guardando' ? 'guardando'

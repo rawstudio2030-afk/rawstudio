@@ -10,6 +10,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Almacenamiento from './Almacenamiento'
 import AvatarAuto from './AvatarAuto'
+import PortadasDiscretas from './PortadasDiscretas'
 import Albumes from './Albumes'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 import {
@@ -61,6 +62,8 @@ export default function Herramientas() {
           activo={!(censura && 'hechas' in censura)}>Encoger las portadas grandes</Boton>} />
 
       <AvatarAuto />
+
+      <PortadasDiscretas />
 
       <Tarjeta titulo="Contenido de demostración"
         texto="Perfiles y clips falsos para que la aplicación no se vea vacía mientras se prueba. Todo queda marcado con es_demo, y hay que borrarlo antes de abrir al público."
