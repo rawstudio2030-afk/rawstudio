@@ -38,6 +38,14 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 
 ## Consultas activas
 
+### [id: 20261108-02] Portada más discreta y descripción genérica
+- **fecha:** 2026-11-08 14:22 (America/Mexico_City)
+- **estado:** asignada
+- **tarea:** Buscar un cuadro menos explícito para la portada (la misma idea del avatar, sin recortar a cuadrado) y, si el video no tiene descripción, poner una frase genérica. No inventar sinopsis ni mandar el video a una inteligencia.
+- **pregunta:** Sergio regeneró las portadas públicas a 240 px y ahora se ven demasiado explícitas. Pidió las dos cosas: un cuadro menos explícito, y una descripción genérica del video. ¿Cómo se hace sin pisar una portada o una descripción que alguien haya elegido, y sin pretender que la heurística detecte desnudos?
+- **contexto:** Casi todos los videos del catálogo salieron del lote. `publicarPara` (`src/lib/admin.ts`), si no viene portada, llama a `miniaturaDeVideo` (`src/lib/miniatura.ts`), que toma el cuadro del 10% (`FRACCION = 0.1`). La ronda 07 solo agrandó esa misma imagen a 240 px (`nitidizarPortadasPublicas` parte de `clip-covers-full`, que es el mismo fotograma). Por eso al nitidizar se ve lo explícito que antes parecía una mancha. El avatar sí busca un cuadro más limpio: `avatarDeVideo` + `puntuarCuadro` sacan seis cuadros de la primera mitad (8 %–50 %), descartan lo negro/quemado/liso y premian los más tempranos; el comentario del código deja claro que **no es un clasificador de contenido** y no garantiza un cuadro inocuo (por eso `src/admin/AvatarAuto.tsx` muestra propuestas y no publica hasta confirmar). La portada de la creadora se elige entre seis cuadros (`cuadrosDeVideo`, 8 %–88 %) o se sube a mano (`Upload.tsx`); si elige una, no se pisa. En el lote la descripción va vacía (`descripcion: ''`) salvo que el CSV traiga `descripcion`. La ficha (`ClipDetail.tsx`) solo pinta `clip.description` si hay texto; la tarjeta del catálogo muestra el título, no la descripción. El título del lote sale del nombre del archivo (`tituloDeArchivo`); **esta ronda no lo toca**.
+- **urgencia:** media
+
 ### [id: 20261108-01] Subida en lote: precios de 10, 20 o 40 (no 2.40) — hecha, pendiente de aplicar
 - **fecha:** 2026-11-08 (America/Mexico_City)
 - **estado:** respondida

@@ -30,6 +30,58 @@
 
 ## Respuestas activas
 
+### Respuesta a [id: 20261108-02] — Portada más discreta y descripción genérica
+- **fecha:** 2026-11-08 14:22 (America/Mexico_City)
+- **estado:** lista-para-claude
+- **responde a:** Sergio vio las portadas ya nitidizadas a 240 px y le parecieron demasiado explícitas. Pidió un cuadro menos explícito (como el del avatar) y una descripción genérica del video. No pidió cambiar los títulos.
+- **ronda:** 1 de 10 de esta tarea · **tope:** 1 hora
+- **checklist afectados (NO marques pass tú):** convenciones del catálogo y de publicar si tocas esas pantallas. No rompas ítems `pass` ni el trabajo de `[id: 20261106-04]` a `[id: 20261106-07]` ni `[id: 20261107-01]` a `[id: 20261107-07]` ni `[id: 20261108-01]`.
+
+#### Orden respecto a rondas anteriores
+`[id: 20261108-01]` ya está `respondida` y aplicada en producción. **No la reabras** (ni las anteriores). El «Regenerar las portadas públicas» de la 07 (agrandar la misma imagen a 240 px) se queda como está: esta ronda es otra cosa, porque hay que sacar un **fotograma distinto del video**. Implementa esta ronda en su propio commit.
+
+#### Diagnóstico (no lo reescribas: úsalo)
+1. El lote, si no trae portada, usa `miniaturaDeVideo`: el cuadro del 10 %. Eso no busca un momento discreto; busca uno que no sea negro de arranque. Al pasar la pública de 32 px a 240 px se ve ese mismo fotograma, ahora nítido.
+2. `avatarDeVideo` / `puntuarCuadro` son una heurística de **calidad de imagen** (exposición, detalle, premio a lo temprano) sobre la primera mitad. No saben qué hay en el cuadro. El código ya lo dice: en un sitio 18+ no garantizan un resultado inocuo. Por eso los avatares retroactivos se confirman uno a uno en Herramientas. Aquí vale la misma honestidad.
+3. No se puede recortar la portada a cuadrado: dejaría de ser portada. No se puede partir de `clip-covers-full` para «suavizar»: es la misma imagen explícita, solo más grande. Hay que decodificar el video (URL firmada, como `AvatarAuto` con `urlVideoFirmada`).
+4. No hay una marca de si la portada la eligió la creadora, la subió a mano o la puso el lote. Por eso el retroactivo no se aplica a ciegas: se propone y se confirma.
+5. La descripción del lote casi siempre va vacía. Solo se lee en la ficha. No se manda el video a DeepSeek ni a ningún tercero para narrarlo (es contenido 18+ y se prestaría a inventar). Los títulos que salen del nombre del archivo no se tocan en esta ronda.
+
+#### 1. Portada más discreta
+1. En `src/lib/miniatura.ts`, añade una función (p. ej. `portadaDiscretaDeVideo`) que reutilice `puntuarCuadro` y la misma ventana que el avatar (seis cuadros, ~8 %–50 %, premio a los más tempranos). La diferencia: **cuadro completo**, sin recorte cuadrado, acotado a `ANCHO_MAXIMO` (720), listo para pasar por `achicar()` a `ANCHO_PUBLICO` (240) como cualquier portada. No inventes un clasificador de desnudos ni un servicio externo.
+2. **Subidas nuevas del lote** (`publicarPara` cuando no viene `portada`): usa esa función. Si no encuentra ningún cuadro que pase el filtro, cae a `miniaturaDeVideo` (el del 10 %), para no publicar sin portada.
+3. **Formulario de la creadora** (`Upload.tsx`): si ella sube una imagen o elige uno de los seis cuadros, **esa portada se queda**. Solo si se cae al cuadro automático usa la función nueva (con el mismo respaldo al 10 % si no hay candidato).
+4. **Las que ya existen:** una herramienta nueva en Herramientas, al estilo de `src/admin/AvatarAuto.tsx`: recorre clips de video con archivo (no álbumes), pide el video con URL firmada, saca la propuesta y la muestra **junto a la portada actual**. No se escribe nada hasta que quien administra confirme (puede desmarcar). Aplica las marcadas: misma ruta en `clip-covers-full` (la nueva nítida, hasta 720) y en `clip-covers` (la pública a 240, con `achicar` y `upsert` solo en este relleno). Lotes chicos (como los 8 del avatar) para no colgar el navegador. Progreso, aplicadas, omitidas (sin video, sin cuadro aceptable, error) y sin inventar portada si el video no se puede decodificar.
+5. Eso permite no pisar a ciegas una portada que alguien eligió: se ve el antes y el después y se puede dejar sin marcar. No pidas revisión cuadro a cuadro *dentro* del video (solo la propuesta final vs. la actual).
+6. No actives la tira de seis cuadros en los de pago. No cambies `ANCHO_PUBLICO` ni `ANCHO_MAXIMO`. No empieces a registrar visitas.
+
+#### 2. Descripción genérica
+1. Si la descripción está vacía o es nula, pon una frase corta y neutra: `Video de {nombre}`, donde `{nombre}` es el `display_name` de la creadora o, si no hay, su `handle`. Sirve para cualquier trato de género (no uses «creadore» ni asumas género). Tope el de siempre (p. ej. 600 caracteres). No inventes de qué va el video, no uses adjetivos sexuales, no llames a ninguna API.
+2. **No pises** una descripción que ya tenga texto (la del formulario, la del CSV o una escrita antes).
+3. Aplica esto: (a) a los clips de video que ya existen y no tienen descripción (migración o actualización SQL equivalente, con aprobación de Omar para producción); (b) a las subidas nuevas del lote cuando el CSV no traiga `descripcion`; (c) al publicar desde `Upload.tsx` si el campo se deja vacío. Un álbum no se rellena con «Video de…»: esta ronda es de videos.
+4. No toques `title`. El título que sale del nombre del archivo se queda como está.
+
+#### Qué no tocar
+Textos legales, recargas o pasarela, token o secretos, el precio de 20 pesos, el plazo de 2 días, `COBRO_CONSULTAS_ACTIVO` (sigue en `true`), DeepSeek (sigue solo para validar consultas; no lo uses para describir videos ni para puntuar cuadros), el hero del 80 % / dólar, dominio, reproductor, trato, avatares, álbumes (precio fijo, flujo y portada de fotos), precios de 10 / 20 / 40, el default 2000, consola de admin más allá de la herramienta nueva, «Anonimizar», el desempeño por clip, visitas o mapas de reproducción, títulos.
+
+#### Criterios de aceptación
+1. El lote sin portada propia usa la función nueva (primera mitad + `puntuarCuadro`, cuadro completo). El formulario respeta la portada elegida o subida.
+2. Las portadas que ya existen no cambian hasta confirmar la propuesta en Herramientas. La propuesta se ve junto a la actual. Sin video o sin cuadro aceptable se omite, no se inventa.
+3. Tras aplicar, la pública mide ~240 px y la nítida (hasta 720) es el **mismo fotograma nuevo**, no el viejo agrandado. `anon` sigue sin leer `clip-covers-full`.
+4. Los videos sin descripción quedan en `Video de {nombre}`. Los que ya tenían texto no se mueven. Los álbumes no se rellenan con esa frase. Los títulos no cambian.
+5. Typecheck, build y lint limpios (solo advertencias que ya existían). Ningún secreto en el repo. Ninguna llamada a una IA para esto.
+
+#### Cómo demostrar (obligatorio en bridge-query.md)
+SHA, diff resumido, y:
+- **Portada.** Una prueba de la función nueva (archivo o URL simulada): elige un cuadro de la primera mitad, no recorta a cuadrado, y si todos fallan el filtro el lote/formulario cae al del 10 %. En Herramientas: propuesta vs. actual, nada se escribe sin confirmar; un clip sin video o sin cuadro aceptable se omite.
+- **Descripción.** Conteo antes/después: cuántos videos vacíos se rellenaron; cuántos con texto previo y cuántos álbumes quedaron igual (0 cambiados). Un lote sin CSV de descripción guarda `Video de {nombre}`; uno con `descripcion` en el CSV la respeta.
+- No marques `CHECKLIST.md` como pass.
+
+#### Siguiente paso para Claude Code
+1. `git pull` e implementa esta ronda en su propio commit (mensaje sugerido: `feat: portadas mas discretas y descripcion generica`).
+2. Aplica en producción, con la aprobación de Omar, la actualización de descripciones vacías. El relleno de portadas lo corre Omar desde Herramientas (revisa y confirma las propuestas).
+3. Deja el resultado en `bridge-query.md` (SHA, diff, verificación) y marca `[id: 20261108-02]` como `respondida`.
+
 ### Respuesta a [id: 20261108-01] — Subida en lote: precios de 10, 20 o 40 (no 2.40)
 - **fecha:** 2026-11-08 07:08 (America/Mexico_City)
 - **estado:** lista-para-claude
