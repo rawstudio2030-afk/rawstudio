@@ -1,6 +1,6 @@
 # Lo que tiene que pasar aunque nadie abra el panel.
 #
-# Tres avisos y un borrado, en el MISMO trabajo a proposito: cuatro tareas
+# Tres avisos, un borrado y el vencimiento de consultas, en el MISMO trabajo a proposito: cuatro tareas
 # programadas separadas invitaban a que una se desactivara sin que nadie lo
 # notara, y la que se queda callada siempre acaba siendo la que mira hacia
 # fuera.
@@ -157,5 +157,41 @@ jobs:
 
           echo "$respuesta" | grep -q '"ok":true' || {
             echo "No pude borrar las fotos vencidas."
+            exit 1
+          }
+
+      # El vencimiento de las consultas pagadas por Telegram. Un mensaje sin
+      # respuesta pasados sus 2 dias se marca vencido, se DEVUELVE el saldo al
+      # cliente y se le avisa. Antes solo ocurria cuando alguien le escribia al
+      # bot, asi que con poco trafico una devolucion podia tardar mas que el
+      # plazo. Aqui el reloj SI es el camino principal: no hay un disparador de
+      # la base que despierte cuando pasa una fecha.
+      #
+      # Es seguro correrlo las veces que sea, y a la vez que el bot: solo actua
+      # sobre mensajes que pasan de «enviado» a «vencido» en ese instante, asi
+      # que ni devuelve ni avisa dos veces. Si no hay nada vencido responde
+      # "ok":true. El secreto es el mismo CRON_SECRET; la llave de servicio y el
+      # token del bot viven solo dentro de la funcion, nunca aqui.
+      - name: Vencer consultas sin respuesta
+        if: always()
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "Falta el secreto CRON_SECRET en el repositorio."
+            exit 1
+          fi
+
+          respuesta=$(curl --silent --show-error --fail-with-body \
+            --max-time 120 \
+            --header "x-cron-secret: $CRON_SECRET" \
+            --header "Content-Type: application/json" \
+            --request POST \
+            "https://ggyubhyobobizugeknen.supabase.co/functions/v1/vencer-consultas")
+
+          echo "$respuesta"
+
+          echo "$respuesta" | grep -q '"ok":true' || {
+            echo "No pude vencer las consultas."
             exit 1
           }

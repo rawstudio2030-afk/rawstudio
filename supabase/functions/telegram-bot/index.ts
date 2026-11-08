@@ -41,6 +41,7 @@
 //   envie un mensaje pertinente-o-no, y el minimo de palabras lo exige la base.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.47.10'
+import { avisosDeVencido, sinToken, type Vencido } from '../_shared/consultas.ts'
 
 const TOKEN = Deno.env.get('TELEGRAM_BOT_TOKEN') ?? ''
 const SECRETO = Deno.env.get('TELEGRAM_WEBHOOK_SECRET') ?? ''
@@ -74,7 +75,7 @@ async function decir(chat: number, texto: string): Promise<number | null> {
     const j = await r.json()
     return j?.ok ? (j.result?.message_id as number) : null
   } catch (e) {
-    console.error('sendMessage', e)
+    console.error('sendMessage', sinToken(e, TOKEN))
     return null
   }
 }
@@ -152,29 +153,15 @@ const AYUDA =
   'Si eres creadora, vincula tu Telegram desde tu perfil en rawstudio.biz.\n\n' +
   'Las reglas del servicio: https://rawstudio.biz/#/consultas'
 
-/** Avisos de los mensajes que vencieron sin respuesta. */
+/** Avisos de los mensajes que vencieron sin respuesta. Es la red de seguridad:
+ *  el camino principal es la funcion `vencer-consultas`, que corre por reloj. */
 async function avisarVencidos() {
   const { data, error } = await db.rpc('consultas_vencer')
   if (error) { console.error('consultas_vencer', error.message); return }
-  type Vencido = {
-    chat_cliente: number | null; chat_creadora: number | null; clip: string; creadora: string
-    // Solo existe desde la migracion del cobro; antes no viene y se trata como 0.
-    devuelto_coins?: number | null
-  }
   for (const v of (data ?? []) as Vencido[]) {
-    if (v.chat_cliente) {
-      // Solo se dice que se devolvio saldo si de verdad se devolvio (mensaje cobrado).
-      const devuelto = (v.devuelto_coins ?? 0) > 0
-        ? ' Se te devolvio a tu saldo lo que pagaste por ese mensaje.'
-        : ''
-      await decir(v.chat_cliente,
-        `${v.creadora} no respondio en el plazo a tu mensaje sobre «${v.clip}». ` +
-        `Ya no esta pendiente.${devuelto}`)
-    }
-    if (v.chat_creadora) {
-      await decir(v.chat_creadora,
-        `Se vencio el plazo para responder un mensaje sobre «${v.clip}».`)
-    }
+    const t = avisosDeVencido(v)
+    if (v.chat_cliente && t.cliente) await decir(v.chat_cliente, t.cliente)
+    if (v.chat_creadora && t.creadora) await decir(v.chat_creadora, t.creadora)
   }
 }
 

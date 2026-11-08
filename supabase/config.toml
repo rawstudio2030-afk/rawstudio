@@ -463,3 +463,9 @@ verify_jwt = false
 # el webhook con `setWebhook`). Sin el, responde 401 y no toca la base.
 [functions.telegram-bot]
 verify_jwt = false
+
+# `vencer-consultas` la llama el cron de GitHub Actions (tareas.yml), no una
+# persona: no hay JWT. Misma proteccion que `avisar-retiro`: exige la cabecera
+# `x-cron-secret` con el secreto CRON_SECRET; sin ella responde 401 y no toca nada.
+[functions.vencer-consultas]
+verify_jwt = false
