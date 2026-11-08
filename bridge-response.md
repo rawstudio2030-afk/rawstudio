@@ -30,6 +30,51 @@
 
 ## Respuestas activas
 
+### Respuesta a [id: 20261107-05] — Vencimiento de consultas por reloj e ingresos de consultas en el panel
+- **fecha:** 2026-11-07 21:18 (America/Mexico_City)
+- **estado:** lista-para-claude
+- **responde a:** Al cerrar la 04, Claude avisó de dos huecos: la devolución es perezosa (solo cuando alguien le habla al bot) y el panel no ve `venta_consulta`. Sergio pidió seguir con más cosas; esto cierra el cobro que acabamos de encender, sin inventar recargas ni legales.
+- **ronda:** 1 de 10 de esta tarea · **tope:** 1 hora
+- **checklist afectados (NO marques pass tú):** no inventes textos legales. No rompas ítems `pass` ni el trabajo de las rondas 4–7 ni `20261107-01` a `20261107-04`.
+
+#### Orden respecto a rondas anteriores
+No reabras `[id: 20261106-04]`, `[id: 20261106-05]`, `[id: 20261106-06]`, `[id: 20261106-07]`, `[id: 20261107-01]`, `[id: 20261107-02]`, `[id: 20261107-03]` ni `[id: 20261107-04]`. Esta ronda va en su propio commit (o los que hagan falta: función + workflow, y la de finanzas si va aparte). No toques legales, recargas, dominio, reproductor, trato, avatares ni el cobro en sí (precio, plazo, `COBRO_CONSULTAS_ACTIVO` se queda encendido).
+
+#### Diagnóstico (no lo reescribas: úsalo)
+1. **Vencimiento perezoso.** `avisarVencidos` en `supabase/functions/telegram-bot/index.ts` llama `consultas_vencer` y avisa por Telegram, pero solo al recibir un POST válido del webhook (un mensaje privado). Si nadie le habla al bot, un mensaje puede llevar más de 2 días vencido sin devolver el saldo ni avisar, aunque la web ya lo muestre vencido. La devolución es idempotente (solo filas que pasan de `enviado` a `vencido`).
+2. **Ya hay un reloj.** `.github/workflows/tareas.yml` corre cada 2 horas, en el minuto 7, con `workflow_dispatch` para probar. Cada paso manda `POST` con la cabecera `x-cron-secret` y el secreto `CRON_SECRET` (Actions y Supabase Edge Functions -> Secrets). Ese secreto **ya existe**; las funciones `avisar-retiro`, `avisar-creadora`, `avisar-verificacion` y `borrar-verificacion` lo leen con `Deno.env.get('CRON_SECRET')` y comparan en tiempo constante. El camino principal de esos avisos es pg_net; el workflow es red de seguridad. Aquí el reloj **sí es el camino principal**, porque no hay un disparador por tiempo sobre `vence_at`.
+3. **El panel se quedó corto.** `admin_finanzas`, el ranking y «total ganado» de Usuarios enumeran a mano `venta_clip` y `propina`. No suman `venta_consulta`, así que la comisión y el reparto de las consultas no aparecen en Finanzas. El Estudio sí suma `venta_consulta` en «Has ganado» (`src/lib/estudio.ts`). El brief de la 04 pedía no tocar el panel; ahora sí.
+
+#### 1. Vencer por reloj
+1. Añade un paso al **mismo** trabajo de `tareas.yml` (no un workflow nuevo), con `if: always()` como los otros, que llame a una función de vencimiento. El minuto 7 / cada 2 horas no se cambia. Si no hay nada vencido, responde `ok: true` para que el `grep` del workflow no se ponga rojo (igual que «nada nuevo» en los avisos).
+2. Reutiliza el patrón de `avisar-retiro`: cabecera `x-cron-secret`, secreto `CRON_SECRET`. **No inventes otro secreto. No lo escribas en el repo, el front, un comentario ni un commit.** En Supabase los secretos del proyecto ya los ven todas las funciones; no pidas uno nuevo salvo que compruebes que `CRON_SECRET` no está (entonces indica a Omar que copie el que ya usa Actions, sin pegarlo en el puente).
+3. Prefiere una función nueva (p. ej. `vencer-consultas`) en vez de mezclar el cron con el webhook de Telegram: ese webhook autentica con `x-telegram-bot-api-secret-token` y no hay que cruzar los dos caminos. La función nueva hace lo mismo que `avisarVencidos`: llama `consultas_vencer` y, si hubo devolución o vencimiento, avisa por Telegram con los mismos textos que ya usa el bot (al cliente le dice que se le devolvió el saldo solo si `devuelto_coins > 0`). Para hablarle a Telegram usa `TELEGRAM_BOT_TOKEN`, que ya es secreto del proyecto; no lo registres, no lo imprimas.
+4. Deja también la llamada perezosa dentro de `telegram-bot` (red de seguridad). Como `consultas_vencer` solo actúa una vez por fila, no hay doble cobro ni doble aviso.
+5. No uses la llave de servicio fuera de Supabase. El workflow no debe llevar `SERVICE_ROLE`.
+6. Despliega la función nueva y el workflow. Prueba con «Run workflow» si puedes, o deja dicho cómo verificarlo.
+
+#### 2. Ingresos de consultas en el panel
+1. Donde Finanzas, el ranking o «total ganado» de Usuarios listen a mano `venta_clip` y `propina`, incluye también `venta_consulta`. La comisión de esas ventas debe entrar en las cifras de comisión / reparto con la misma lógica que las de un clip (el abono a la creadora ya es el 80%; la comisión es el resto, como en el resto de Finanzas).
+2. No cuentes el cargo `consulta` del cliente como ingreso de la plataforma ni como «ganado» de nadie. El `reembolso` sigue siendo movimiento de cuenta, no venta.
+3. No inventes pantallas, menús ni exportaciones nuevas. Si el CSV de Finanzas sale de las mismas cifras, quedará bien al corregir la fuente. No toques Retiros ni datos de CLABE / RFC.
+
+#### Qué no tocar
+Textos legales, recargas o pasarela, token o secretos (nunca en el repo), el precio de 20 pesos, el plazo de 2 días, `COBRO_CONSULTAS_ACTIVO` (sigue en `true`), DeepSeek, el hero del 80% / dólar, dominio, reproductor, trato, avatares, álbumes, la consola de consultas más allá de lo que ya muestra.
+
+#### Criterios de aceptación
+1. Un mensaje pagado vencido se marca, se reembolsa y se avisa aunque nadie le haya escrito al bot desde entonces; basta el paso programado (o «Run workflow»).
+2. Correr el vencimiento dos veces no devuelve dos veces ni avisa dos veces.
+3. Finanzas y «total ganado» / ranking incluyen lo de `venta_consulta` y su comisión; no incluyen el gasto `consulta` del cliente como ingreso.
+4. Ningún secreto nuevo aparece en el repo. Typecheck, build y lint limpios (solo advertencias que ya existían).
+
+#### Cómo demostrar (obligatorio en bridge-query.md)
+SHA, diff resumido, y verificación: el paso nuevo en `tareas.yml`; cómo autentica la función (sin pegar el secreto); que `consultas_vencer` + avisos corren desde ese camino; que una segunda pasada no duplica; que Finanzas / ranking / total ganado ya suman `venta_consulta`. No marques `CHECKLIST.md` como pass.
+
+#### Siguiente paso para Claude Code
+1. `git pull` de `origin/main`.
+2. Implementa esta ronda. Commit de producto, p. ej. `feat: vencer consultas por reloj y sumarlas en finanzas`; `git push origin main`. Despliega la función nueva. El workflow usa el `CRON_SECRET` que ya está en Actions.
+3. Marca `bridge-query.md` `[id: 20261107-05]` como `respondida` con SHA, diff y verificación. **No** marques `CHECKLIST.md` como pass.
+
 ### Respuesta a [id: 20261107-04] — Cobro de consultas y devolución del saldo si no hay respuesta en 2 días
 - **fecha:** 2026-11-07 20:57 (America/Mexico_City)
 - **estado:** lista-para-claude

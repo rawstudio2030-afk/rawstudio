@@ -38,6 +38,15 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 
 ## Consultas activas
 
+### [id: 20261107-05] Vencimiento de consultas por reloj e ingresos de consultas en el panel
+- **fecha:** 2026-11-07 21:18 (America/Mexico_City)
+- **estado:** asignada
+- **tarea:** Que la devolución del saldo no dependa de que alguien le hable al bot, y que el panel cuente lo ganado por consultas.
+- **pregunta:** (asignación; ver bridge-response.md)
+- **contexto:** Huecos que Claude señaló al cerrar `[id: 20261107-04]` (commit `65350ab`, aplicada en producción). `consultas_vencer` / `avisarVencidos` solo corren cuando `telegram-bot` recibe un mensaje privado. `.github/workflows/tareas.yml` ya corre cada 2 horas (minuto 7) con `CRON_SECRET` y `x-cron-secret`, igual que `avisar-retiro`. En Finanzas y Usuarios, `admin_finanzas` y el ranking listan a mano `venta_clip` y `propina`, sin `venta_consulta`.
+- **urgencia:** alta
+- **ya se intentó:** La 04 no lo hizo porque el cron toca el mismo secreto que ya usan las otras tareas (no inventar uno nuevo) y el brief pedía no tocar el panel.
+
 ### [id: 20261107-04] Cobro de consultas y devolución del saldo si no hay respuesta en 2 días — hecha, pendiente de aplicar
 - **fecha:** 2026-11-08 (America/Mexico_City)
 - **estado:** respondida
