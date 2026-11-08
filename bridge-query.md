@@ -38,6 +38,14 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 
 ## Consultas activas
 
+### [id: 20261107-06] Desempeño por clip en el Estudio (lo ganado)
+- **fecha:** 2026-11-07 21:46 (America/Mexico_City)
+- **estado:** asignada
+- **tarea:** En el Estudio, mostrar cuánto dejó cada video o álbum, con el libro de movimientos que ya existe. Sin vistas ni mapas de reproducción.
+- **pregunta:** Sergio pidió armar el desempeño por clip en el Estudio, empezando por lo ganado. ¿Cómo se implementa sin inventar visitas ni mezclar suscripciones y encargos como si fueran un clip?
+- **contexto:** `src/screens/Estudio.tsx` y `src/lib/estudio.ts` («Has ganado» suma `venta_clip` + `propina` + `venta_consulta`, un solo total). `coin_ledger.ref_id`: en `comprar_clip` y `rentar_clip` es el id del clip; en la suscripción es el nivel; en un encargo entregado es el encargo; en `venta_consulta` es el id del mensaje (`consulta_mensajes.id`), y el hilo (`consultas.clip_id`) sí apunta al clip. `consulta_mensajes` no es legible desde el cliente (`revoke` a `anon`/`authenticated`). Las propinas de un clip llevan `ref_id` = el clip; las del perfil suelen ir sin referencia.
+- **urgencia:** media
+
 ### [id: 20261107-05] Vencimiento de consultas por reloj e ingresos de consultas en el panel — hecha, pendiente de desplegar
 - **fecha:** 2026-11-08 (America/Mexico_City)
 - **estado:** respondida

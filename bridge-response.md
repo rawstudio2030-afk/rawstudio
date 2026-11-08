@@ -30,6 +30,56 @@
 
 ## Respuestas activas
 
+### Respuesta a [id: 20261107-06] — Desempeño por clip en el Estudio (lo ganado)
+- **fecha:** 2026-11-07 21:46 (America/Mexico_City)
+- **estado:** lista-para-claude
+- **responde a:** Sergio pidió armar en el Estudio el desempeño por clip, empezando por lo ganado. Las vistas y el mapa de reproducción no se graban hoy: no los inventes ni empieces a registrarlos en esta ronda.
+- **ronda:** 1 de 10 de esta tarea · **tope:** 1 hora
+- **checklist afectados (NO marques pass tú):** convenciones de UI del Estudio si tocas esa pantalla. No rompas ítems `pass` ni el trabajo de las rondas 4–7 ni `20261107-01` a `20261107-05`.
+
+#### Orden respecto a rondas anteriores
+No reabras `[id: 20261106-04]`, `[id: 20261106-05]`, `[id: 20261106-06]`, `[id: 20261106-07]`, `[id: 20261107-01]`, `[id: 20261107-02]`, `[id: 20261107-03]`, `[id: 20261107-04]` ni `[id: 20261107-05]` (esa ya está hecha, desplegada y aplicada). Esta ronda va en su propio commit. No toques legales, recargas, dominio, reproductor, trato, avatares, el cobro de consultas (precio, plazo, `COBRO_CONSULTAS_ACTIVO` se queda encendido) ni el panel de administración.
+
+#### Diagnóstico (no lo reescribas: úsalo)
+1. El Estudio (`src/screens/Estudio.tsx`) muestra un solo «Has ganado» que sale de `resumen()` en `src/lib/estudio.ts`: suma los `delta` positivos de `venta_clip`, `propina` y `venta_consulta`. No hay lista por publicación. `/earnings` solo redirige a `/wallet`.
+2. `venta_clip` no significa «venta de un clip». El mismo motivo sirve para: desbloqueo (`ref_id` = clip), renta (`ref_id` = clip, nota `Renta: …`), suscripción (`ref_id` = el nivel), y encargo entregado (`ref_id` = el encargo). Si agrupas todo `venta_clip` por `ref_id` van a aparecer filas que no son clips (un nivel o un encargo). Solo une movimientos cuyo `ref_id` sea el `id` de un clip **suyo**.
+3. `venta_consulta.ref_id` es el mensaje, no el clip. El hilo (`consultas.clip_id`) sí apunta al clip. `consulta_mensajes` está revocado para `anon` y `authenticated`: el navegador no puede hacer ese cruce. Hace falta una función de la base.
+4. Las propinas de un clip guardan `ref_id` = ese clip (`dar_propina` con la referencia). Las del perfil suelen ir sin `ref_id`: no las atribuyas a un clip.
+5. La plataforma **no registra visitas** ni progreso del reproductor. No inventes vistas, porcentaje visto ni mapa de momentos. No empieces a grabarlos.
+
+#### Qué construir
+Una sección en el **mismo** Estudio, debajo de la tarjeta «Has ganado» y encima de Telegram / la bandeja, titulada **«Lo que dejó cada publicación»**.
+
+1. **Función de la base** (p. ej. `estudio_desempeno_clips()`), `security definer`, `search_path = ''`, solo para quien está autenticado:
+   - Devuelve **únicamente** clips con `creator_id = auth.uid()`. Un admin que no sea la dueña no ve los de otra cuenta por esta función (su panel ya existe aparte).
+   - Una fila por clip propio que exista todavía (video o álbum, `formato`). Incluye los no publicados, para que vea también los que aún no salen. No inventes filas huérfanas a partir de un `ref_id` que ya no tiene clip: ese dinero sigue en «Has ganado».
+   - Columnas mínimas: `id`, `title`, `cover_path`, `formato`, `published`, `price_coins`, `desbloqueos` (conteo en `purchases` de ese clip), `rentas` (conteo en `rentals` de ese clip), `ganado_ventas` (suma de *sus* `venta_clip` con `ref_id` = el clip; entra desbloqueo y renta, no suscripciones ni encargos), `ganado_propinas` (suma de *sus* `propina` con `delta > 0` y `ref_id` = el clip), `ganado_consultas` (suma de *sus* `venta_consulta` cuyo `ref_id` es un `consulta_mensajes.id` del hilo de ese clip), `consultas_pagadas` (cuántas de esas ventas de consulta), `ganado_total` (las tres sumas). Todo en centavos, como el resto del libro.
+   - No devuelvas compradores, `user_id` ajenos, `chat_id`, teléfonos, cuerpos de mensaje, tokens ni datos de Telegram.
+   - `revoke` a `public`/`anon`; `grant execute` a `authenticated`. Comprueba que `anon` no pueda llamarla y que otra cuenta no vea clips ajenos.
+   - Orden: `ganado_total` descendente, y a igualdad los más recientes primero.
+
+2. **Front.** Un helper en `src/lib/estudio.ts` que llame esa función. En `Estudio.tsx`, la lista con el mismo aire sobrio del Estudio (fondo plano, tipografía de interfaz, `usd()` para los centavos; no el entero crudo). Cada fila: portada con el mismo recorte que ya usas en el catálogo o la ficha (`cover_path`; no inventes otro pipeline), título, si es video o álbum, si aún no está publicado, el total ganado, y debajo un desglose corto solo con lo que no sea cero (p. ej. «3 desbloqueos · 1 renta · 2 consultas» y propinas si las hay). Un toque abre `/clip/:id`.
+   - Sin clips: «Cuando publiques un video o un álbum, aquí verás cuánto dejó cada uno.» No muestres una tabla vacía.
+   - Con clips en cero: sí listarlos; sirve ver cuáles no han dejado nada.
+   - Nota corta bajo la lista, porque «Has ganado» no va a cuadrar con la suma de esta lista: «Las suscripciones, los encargos y las propinas de tu perfil no aparecen aquí porque no van atadas a un clip. Sí cuentan en “Has ganado”.»
+   - No cambies el cálculo de «Has ganado». No añadas esta lista al monedero ni al panel de administración.
+
+#### Qué no tocar
+Textos legales, recargas o pasarela, token o secretos, el precio de 20 pesos, el plazo de 2 días, `COBRO_CONSULTAS_ACTIVO` (sigue en `true`), DeepSeek, el hero del 80% / dólar, dominio, reproductor (ni un contador de progreso), trato, avatares, álbumes más allá de listarlos si ya son un clip con `formato`, consola de admin, «Anonimizar».
+
+#### Criterios de aceptación
+1. En el Estudio se ve, por cada video o álbum propio, cuánto se ganó (lo que llegó a la cuenta, ya sin la comisión) y cuántos desbloqueos, rentas y consultas pagadas respondidas le corresponden.
+2. Una suscripción o un encargo no aparecen como si fueran un clip. Una propina del perfil no se cuelga de un clip. Una consulta pagada y respondida sí se suma al clip del hilo.
+3. No hay cifras de visitas ni de reproducción. Typecheck, build y lint limpios (solo advertencias que ya existían). Nadie ve los clips ni las cifras de otra cuenta por este camino.
+
+#### Cómo demostrar (obligatorio en bridge-query.md)
+SHA, diff resumido, y verificación en SQL: una cuenta con dos clips (venta/renta/propina/consulta en el A, solo desbloqueo en el B), más una suscripción, un encargo y una propina de perfil; el A y el B cuadran y lo demás no se cuela en la lista; otra cuenta recibe 0 filas ajenas; `anon` no tiene permiso. En el front: la sección se ve, `usd()` se usa, el vacío se entiende, la nota de «Has ganado» está. No marques `CHECKLIST.md` como pass.
+
+#### Siguiente paso para Claude Code
+1. `git pull` de `origin/main`.
+2. Implementa esta ronda. Commit de producto, p. ej. `feat: desempeno por clip en el Estudio`; `git push origin main`. Aplica la migración en producción con la aprobación de Omar, como en las rondas anteriores.
+3. Marca `bridge-query.md` `[id: 20261107-06]` como `respondida` con SHA, diff y verificación. **No** marques `CHECKLIST.md` como pass.
+
 ### Respuesta a [id: 20261107-05] — Vencimiento de consultas por reloj e ingresos de consultas en el panel
 - **fecha:** 2026-11-07 21:18 (America/Mexico_City)
 - **estado:** lista-para-claude
