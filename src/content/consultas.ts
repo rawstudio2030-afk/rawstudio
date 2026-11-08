@@ -5,19 +5,21 @@ import { cuantos } from '../lib/plural'
  * Lo dicto Sergio y se pinta tal cual en /consultas, sin reescribir el sentido.
  * Este archivo es lo unico que hay que tocar si cambia una regla o el precio.
  *
- * El usuario del bot ya existe (`BOT_TELEGRAM`). El cobro del mensaje y la
- * API de validacion todavia no. El token del bot NUNCA va en este archivo
- * ni en el frontend.
+ * El usuario del bot ya existe (`BOT_TELEGRAM`). El cobro lo hace la base de
+ * datos (ver la migracion 20261211000001): se descuenta de SU SALDO, no hay
+ * pasarela de pago ni recarga desde la web todavia. El token del bot NUNCA va en
+ * este archivo ni en el frontend.
  */
 
 /** Precio fijo por mensaje del cliente. Una sola vez, aqui; en pesos, no en
  *  dolares. */
 export const PRECIO_CONSULTA_TELEGRAM = '20 pesos'
 
-/** ¿Ya se cobra el mensaje? Mientras sea falso, la web no promete ni muestra
- *  precio en el boton: el cobro espera a que se defina la equivalencia
- *  coins <-> pesos (ver la migracion 20261124000000). */
-export const COBRO_CONSULTAS_ACTIVO = false
+/** ¿Ya se cobra el mensaje? Tiene que coincidir con `consultas_config.cobro_activo`
+ *  en la base (la migracion 20261211000001 lo enciende): si la web dijera «20 pesos
+ *  por mensaje» y la base no cobrara, o al reves, alguien se llevaria una sorpresa.
+ *  El cobro se hace del saldo de la cuenta, al tipo de cambio dolar-peso vigente. */
+export const COBRO_CONSULTAS_ACTIVO = true
 
 /** Usuario del bot de Telegram, sin la arroba. */
 export const BOT_TELEGRAM = 'RawStudios_bot'
@@ -49,7 +51,10 @@ export const REGLAS: { n: number; t: string; d: string[] }[] = [
   },
   {
     n: 5, t: 'Plazo',
-    d: ['La creadora tiene un máximo de 2 días para responder un mensaje pagado.'],
+    d: [
+      'La creadora tiene un máximo de 2 días para responder un mensaje pagado.',
+      'Si no responde en esos 2 días, se te devuelve el saldo.',
+    ],
   },
   {
     n: 6, t: 'Guía corta para la creadora',

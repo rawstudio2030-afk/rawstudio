@@ -20,9 +20,13 @@
 //   DEEPSEEK_API_KEY          la clave de la API de DeepSeek.
 //   (SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY ya los pone Supabase.)
 //
-// ---------- Que NO hace todavia ----------
-// No cobra los 20 pesos ni reembolsa: eso espera a que se defina la
-// equivalencia coins<->pesos (ver la migracion 20261124000000).
+// ---------- El cobro ----------
+// Lo hace la BASE, no esta funcion (ver 20261211000001_cobro_consultas.sql): al
+// registrar el mensaje del cliente se le cobran 20 pesos de su saldo; al
+// responder a tiempo se reparte con la creadora; si vence sin respuesta se le
+// devuelve al cliente. Aqui solo se le DICE a cada quien lo que paso. Sin saldo
+// suficiente el mensaje no se registra ni se envia. No se promete recargar: esa
+// pantalla todavia no existe.
 //
 // ---------- Decisiones ----------
 // - Se contesta SIEMPRE 200 a Telegram (si no, reintenta sin parar). Los
@@ -152,11 +156,20 @@ const AYUDA =
 async function avisarVencidos() {
   const { data, error } = await db.rpc('consultas_vencer')
   if (error) { console.error('consultas_vencer', error.message); return }
-  for (const v of (data ?? []) as { chat_cliente: number | null; chat_creadora: number | null; clip: string; creadora: string }[]) {
+  type Vencido = {
+    chat_cliente: number | null; chat_creadora: number | null; clip: string; creadora: string
+    // Solo existe desde la migracion del cobro; antes no viene y se trata como 0.
+    devuelto_coins?: number | null
+  }
+  for (const v of (data ?? []) as Vencido[]) {
     if (v.chat_cliente) {
+      // Solo se dice que se devolvio saldo si de verdad se devolvio (mensaje cobrado).
+      const devuelto = (v.devuelto_coins ?? 0) > 0
+        ? ' Se te devolvio a tu saldo lo que pagaste por ese mensaje.'
+        : ''
       await decir(v.chat_cliente,
         `${v.creadora} no respondio en el plazo a tu mensaje sobre «${v.clip}». ` +
-        'Ya no esta pendiente.')
+        `Ya no esta pendiente.${devuelto}`)
     }
     if (v.chat_creadora) {
       await decir(v.chat_creadora,
@@ -217,6 +230,9 @@ async function alRecibirTexto(chat: number, texto: string, respondeA: number | n
         largo: 'Tu mensaje es demasiado largo.',
         rapido: 'Vas demasiado rapido; espera un momento.',
         cuenta: 'Esta consulta no esta disponible ahora.',
+        saldo: 'no tienes saldo suficiente para este mensaje. No se te cobro nada.',
+        creadora: 'esta creadora todavia no puede recibir mensajes pagados.',
+        precio: 'el cobro no esta disponible en este momento. Intenta mas tarde.',
       }
       await decir(chat, `No se envio: ${porque[reg?.motivo] ?? 'intenta de nuevo.'}`)
       return
@@ -225,12 +241,25 @@ async function alRecibirTexto(chat: number, texto: string, respondeA: number | n
       `Consulta sobre «${r.clip}» de ${r.cliente}:\n\n${texto}\n\n` +
       'Usa «Responder» sobre este mensaje para contestar. Tienes 2 dias.')
     if (enviado === null) {
+      // La base devuelve el cobro al anular: el cliente no pierde saldo por un
+      // mensaje que no llego.
       await db.rpc('bot_anular_mensaje', { p_mensaje: reg.mensaje })
-      await decir(chat, 'No pude entregar tu mensaje a la creadora. No se envio; intenta mas tarde.')
+      await decir(chat, (reg.cobrado ?? 0) > 0
+        ? 'No pude entregar tu mensaje a la creadora. No se envio y no se te cobro; intenta mas tarde.'
+        : 'No pude entregar tu mensaje a la creadora. No se envio; intenta mas tarde.')
       return
     }
     await db.rpc('bot_marcar_tg', { p_mensaje: reg.mensaje, p_tg: enviado })
-    await decir(chat, 'Enviado. La creadora tiene hasta 2 dias para responder; te aviso por aqui.')
+    if ((reg.cobrado ?? 0) > 0) {
+      // El precio sale de la base (`precio_mxn_centavos`), no de un numero escrito aqui.
+      const pesos = (Number(reg.precio_mxn_centavos) / 100).toLocaleString('es-MX')
+      await decir(chat,
+        `Enviado. Se descontaron de tu saldo ${pesos} pesos por este mensaje. ` +
+        'La creadora tiene hasta 2 dias para responder; si no responde, se te devuelve ese saldo. ' +
+        'Te aviso por aqui.')
+    } else {
+      await decir(chat, 'Enviado. La creadora tiene hasta 2 dias para responder; te aviso por aqui.')
+    }
     return
   }
 

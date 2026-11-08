@@ -6,6 +6,7 @@ export type Movimiento = {
   user_id: string
   delta: number
   motivo: 'recarga' | 'compra_clip' | 'venta_clip' | 'propina' | 'ajuste_admin' | 'reembolso' | 'retiro'
+    | 'consulta' | 'venta_consulta'
   ref_id: string | null
   nota: string | null
   created_at: string
@@ -19,6 +20,8 @@ export const NOMBRE_MOTIVO: Record<Movimiento['motivo'], string> = {
   ajuste_admin: 'Ajuste',
   reembolso: 'Reembolso',
   retiro: 'Retiro',
+  consulta: 'Consulta por Telegram',
+  venta_consulta: 'Consulta por Telegram',
 }
 
 /** De que lado del dinero esta cada movimiento.
@@ -33,8 +36,8 @@ export const NOMBRE_MOTIVO: Record<Movimiento['motivo'], string> = {
 export type Cara = 'gane' | 'gaste' | 'cuenta'
 
 export function caraDe(m: Movimiento): Cara {
-  if (m.motivo === 'venta_clip') return 'gane'
-  if (m.motivo === 'compra_clip') return 'gaste'
+  if (m.motivo === 'venta_clip' || m.motivo === 'venta_consulta') return 'gane'
+  if (m.motivo === 'compra_clip' || m.motivo === 'consulta') return 'gaste'
   if (m.motivo === 'propina') return m.delta > 0 ? 'gane' : 'gaste'
   return 'cuenta'
 }

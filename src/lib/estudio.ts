@@ -50,7 +50,7 @@ export async function resumen(uid: string): Promise<ResumenEstudio> {
     supabase.from('custom_requests').select('id')
       .eq('creator_id', uid).in('estado', ['propuesta', 'negociando', 'aceptado', 'pagado', 'en_proceso']),
     supabase.from('posts').select('id').eq('creator_id', uid),
-    supabase.from('coin_ledger').select('delta').in('motivo', ['venta_clip', 'propina']),
+    supabase.from('coin_ledger').select('delta').in('motivo', ['venta_clip', 'propina', 'venta_consulta']),
     supabase.from('payout_accounts').select('user_id').eq('user_id', uid),
   ])
 

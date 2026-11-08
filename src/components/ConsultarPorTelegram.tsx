@@ -56,7 +56,7 @@ export default function ConsultarPorTelegram({ clip, creadora, haySesion, handle
           Toca «Iniciar».</li>
         <li>Escribe tu mensaje ahí mismo: mínimo {MIN_PALABRAS} palabras y que tenga que ver con
           este clip o con ella. Si no cumple, el bot te dice por qué.</li>
-        <li>Ella te responde por ese mismo chat, en un máximo de 2 días.</li>
+        <li>Ella te responde por ese mismo chat, en un máximo de 2 días.{COBRO_CONSULTAS_ACTIVO && ' Si no responde, se te devuelve el saldo.'}</li>
       </ol>
       {/* La consulta es para PREGUNTAR; lo que se pide grabado es un encargo. */}
       {handle && (
