@@ -191,6 +191,31 @@ export async function clipsPublicados(limite = 30): Promise<Lectura<ClipConAutor
   return leido((data ?? []) as unknown as ClipConAutora[])
 }
 
+/** Una pagina del catalogo de Explorar: destacados primero, el resto en un
+ *  orden revuelto pero ESTABLE para una misma semilla (ver `explorar_ids`).
+ *  El filtro ('gratis' | 'pago' | cualquier otro = todo) lo aplica el
+ *  servidor, asi que llega a todo el catalogo y no solo a lo ya cargado.
+ *  `clipsPublicados` sigue como estaba: lo usa ClipDetail. */
+export async function clipsExplorar(
+  semilla: string, filtro: string, desde: number, cuantos = 30,
+): Promise<Lectura<ClipConAutora[]>> {
+  const { data: ids, error: errIds } = await supabase.rpc('explorar_ids', {
+    p_semilla: semilla, p_filtro: filtro, p_desde: desde, p_cuantos: cuantos,
+  })
+  // Un fallo nunca se presenta como «no hay clips».
+  if (errIds) return noSePudo([], errIds)
+  const orden = ((ids ?? []) as { id: string }[]).map(f => f.id)
+  if (orden.length === 0) return leido([])
+
+  const { data, error } = await supabase.from('clips')
+    .select(CON_AUTORA).in('id', orden)
+  if (error) return noSePudo([], error)
+  // `in` no conserva el orden: se reacomoda segun los ids. Un id que ya no
+  // este (caduco o lo quitaron entre una consulta y otra) simplemente no sale.
+  const porId = new Map(((data ?? []) as unknown as ClipConAutora[]).map(c => [c.id, c]))
+  return leido(orden.flatMap(id => { const c = porId.get(id); return c ? [c] : [] }))
+}
+
 export async function clipPorId(id: string): Promise<Lectura<ClipConAutora | null>> {
   const { data, error } = await supabase.from('clips')
     .select(CON_AUTORA).eq('id', id).maybeSingle()

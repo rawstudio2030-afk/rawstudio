@@ -3,10 +3,11 @@
 // La pantalla que faltaba. Hasta ahora "Explorar" abria un solo clip: no habia
 // donde ver QUE HAY, asi que aunque alguien publicara, nadie lo encontraba.
 // Es el hueco estructural del set original: nunca se diseño un catalogo.
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
-import { clipsPublicados, urlPortada, type ClipConAutora } from '../lib/clips'
+import { clipsExplorar, urlPortada, type ClipConAutora } from '../lib/clips'
+import { semillaDeExplorar } from '../lib/semillaExplorar'
 import { creadoras, type FichaCreadora } from '../lib/perfiles'
 import Avatar from '../components/Avatar'
 import { portadaDe } from '../lib/portadas'
@@ -20,6 +21,9 @@ import Icono from '../components/Iconos'
 import { COLOR, FUENTE, RADIO, DEGRADADO } from '../lib/diseño'
 
 type Filtro = 'todo' | 'gratis' | 'pago' | 'creadoras'
+
+// Cuantos clips trae cada pagina. Si una pagina llega llena, puede haber mas.
+const PAGINA = 30
 
 export default function Explorar() {
   const nav = useNavigate()
@@ -36,15 +40,54 @@ export default function Explorar() {
   const [intento, setIntento] = useState(0)
   const reintentar = () => setIntento(n => n + 1)
 
+  // «Ver más». Si falla, lo ya cargado se queda y el aviso es de esa pagina.
+  const [hayMas, setHayMas] = useState(false)
+  const [cargandoMas, setCargandoMas] = useState(false)
+  const [falloMas, setFalloMas] = useState(false)
+  // La semilla se fija al pedir la primera pagina y las siguientes la reusan:
+  // si se volviera a leer, pasados 30 minutos cambiaria a media lista y las
+  // paginas se repetirian o se saltarian clips.
+  const semilla = useRef('')
+  // Cuantos ids ya se pidieron (el offset de la siguiente pagina) y a que
+  // carga pertenece cada respuesta, para no mezclar un «Ver más» tardio con
+  // otro filtro.
+  const pedidos = useRef(0)
+  const generacion = useRef(0)
+
   useEffect(() => {
+    // El directorio de creadoras no es el catalogo: no se vuelve a pedir.
+    if (filtro === 'creadoras') return
     let vivo = true
-    setCargando(true)
-    clipsPublicados(60).then(r => {
-      if (!vivo) return
+    const gen = ++generacion.current
+    semilla.current = semillaDeExplorar()
+    pedidos.current = 0
+    setCargando(true); setHayMas(false); setFalloMas(false)
+    clipsExplorar(semilla.current, filtro, 0, PAGINA).then(r => {
+      if (!vivo || gen !== generacion.current) return
+      pedidos.current = PAGINA
       setClips(r.datos); setFallo(r.fallo); setCargando(false)
+      setHayMas(!r.fallo && r.datos.length >= PAGINA)
     })
     return () => { vivo = false }
-  }, [intento])
+  }, [filtro, intento])
+
+  const verMas = () => {
+    if (cargandoMas) return
+    const gen = generacion.current
+    setCargandoMas(true); setFalloMas(false)
+    clipsExplorar(semilla.current, filtro, pedidos.current, PAGINA).then(r => {
+      if (gen !== generacion.current) return
+      setCargandoMas(false)
+      if (r.fallo) { setFalloMas(true); return }
+      pedidos.current += PAGINA
+      // Sin duplicar: por si un clip se movio entre una pagina y otra.
+      setClips(previos => {
+        const vistos = new Set(previos.map(c => c.id))
+        return [...previos, ...r.datos.filter(c => !vistos.has(c.id))]
+      })
+      setHayMas(r.datos.length >= PAGINA)
+    })
+  }
 
   // El directorio se pide aparte y solo cuando hace falta: son cientos de
   // filas y no tiene sentido traerlas para quien viene a ver clips.
@@ -59,10 +102,6 @@ export default function Explorar() {
     }, busca ? 300 : 0)
     return () => { vivo = false; clearTimeout(t) }
   }, [filtro, busca])
-
-  const visibles = clips.filter(c =>
-    filtro === 'todo' ? true :
-    filtro === 'gratis' ? c.visibility === 'gratis' : c.visibility === 'pago')
 
   return (
     <div style={{
@@ -170,22 +209,22 @@ export default function Explorar() {
             texto="No pudimos cargar el catálogo. No es que esté vacío: no conseguimos preguntar."
             accion={{ texto: 'Reintentar', al: reintentar }}
           />
-        ) : visibles.length === 0 ? (
+        ) : clips.length === 0 ? (
           <Vacio
-            texto={clips.length === 0
+            texto={filtro === 'todo'
               ? 'Todavía nadie ha publicado nada.'
               : 'No hay clips con ese filtro.'}
-            accion={perfil?.is_creator && clips.length === 0
+            accion={perfil?.is_creator && filtro === 'todo'
               ? { texto: 'Publica el primero', al: () => nav('/upload') }
               : undefined}
           />
-        ) : (
-          /* Las columnas van en la hoja de estilos porque cambian con el
+        ) : (<>
+          {/* Las columnas van en la hoja de estilos porque cambian con el
              ancho: dos en el telefono, y tantas como quepan de 220 en
              adelante. Fijas en dos, en una pantalla de computadora salian
-             dos tarjetas de medio metro. */
+             dos tarjetas de medio metro. */}
           <div className="rejilla-clips">
-            {visibles.map(c => {
+            {clips.map(c => {
               const p = portadaDe(c.id, urlPortada(c.cover_path))
               const marca = insignias(c)
               const t = TONO[marca[0].tono]
@@ -268,7 +307,31 @@ export default function Explorar() {
               )
             })}
           </div>
-        )}
+
+          {/* «Ver más»: el catalogo completo, de 30 en 30. Si falla, lo ya
+              cargado se queda tal cual y el aviso es solo de esta pagina. */}
+          {falloMas && (
+            <div role="alert" style={{
+              marginTop: 18, padding: '14px 16px', borderRadius: RADIO.neon, textAlign: 'center',
+              border: '1.5px solid rgba(255,90,90,.6)', background: 'rgba(255,90,90,.08)',
+              font: `400 14px/1.45 ${FUENTE.ui}`, color: COLOR.texto,
+            }}>
+              No pudimos cargar más clips. Lo que ya viste sigue aquí.
+            </div>
+          )}
+          {(hayMas || falloMas) && (
+            <div style={{ marginTop: 18, textAlign: 'center' }}>
+              <Pulsable al={verMas} activo={!cargandoMas} style={{
+                display: 'inline-block', padding: '16px 24px', cursor: cargandoMas ? 'default' : 'pointer',
+                borderRadius: RADIO.neon, border: '2px solid #FF4FE0', color: '#FFF',
+                opacity: cargandoMas ? 0.6 : 1,
+                background: 'linear-gradient(180deg, rgba(255,43,209,.26), rgba(255,43,209,.1))',
+                boxShadow: '0 0 10px rgba(255,43,209,.6), 0 0 28px rgba(255,43,209,.35), inset 0 0 16px rgba(255,43,209,.25)',
+                font: `500 13px/1 ${FUENTE.ui}`, letterSpacing: 2.6, textTransform: 'uppercase',
+              }}>{cargandoMas ? 'Cargando…' : falloMas ? 'Reintentar' : 'Ver más'}</Pulsable>
+            </div>
+          )}
+        </>)}
       </div>
     </div>
   )
