@@ -30,6 +30,72 @@
 
 ## Respuestas activas
 
+### Respuesta a [id: 20261108-05] — Dirección pública rawstudio.mx
+- **fecha:** 2026-11-08 18:58 (America/Mexico_City)
+- **estado:** lista-para-claude
+- **responde a:** Sergio preguntó cómo ver el correo del sitio y, ahora que ya tiene rawstudio.mx, si se podía pasar la dirección pública de .biz a .mx. El coordinador recomendó que sí, y Sergio pidió dejarlo escrito.
+- **ronda:** 1 de 10 de esta tarea · **tope:** 1 hora
+- **checklist afectados (NO marques pass tú):** no rompas ítems `pass` ni el trabajo de `[id: 20261106-04]` a `[id: 20261106-07]`, `[id: 20261107-01]` a `[id: 20261107-07]` ni `[id: 20261108-01]` a `[id: 20261108-04]`. Puedes actualizar la línea «Sitio:» de `CHECKLIST.md` para que apunte a https://rawstudio.mx; no marques nada como `pass`.
+
+#### Orden respecto a rondas anteriores
+`[id: 20261108-04]` ya está `respondida` y aplicada en producción (`f96da8d`). **No la reabras** (ni las anteriores). El relleno de portadas discretas lo corre Omar desde Herramientas; no forma parte de esta ronda. Implementa esta ronda en su propio commit.
+
+#### Diagnóstico (no lo reescribas: úsalo)
+1. El frontend se publica en GitHub Pages. `public/CNAME` hoy dice `rawstudio.biz`. rawstudio.mx y www.rawstudio.mx ya existen y **redirigen** a rawstudio.biz: es el mismo marketplace, no otro sitio.
+2. Decisión de Sergio (8 nov 2026): la dirección pública canónica pasa a ser **https://rawstudio.mx** (el apex, igual que hoy es rawstudio.biz y no www.rawstudio.biz). rawstudio.biz debe quedar como **redirección permanente** hacia https://rawstudio.mx, misma ruta, para no romper enlaces, correos y favoritos. www.rawstudio.mx debe resolver al mismo sitio (lo habitual en GitHub Pages: el apex es el canónico y www redirige a él, o también se sirve).
+3. Los correos transaccionales salen por Resend desde `RAWstudio <hola@rawstudio.biz>`. Los avisos al administrador (verificación, retiro, purga) van al correo de cada cuenta admin. Lo que escribe la gente a `hola@`, `legal@` y `privacidad@rawstudio.biz` cae en un solo buzón de Zoho (`admin@rawstudio.biz`); son alias, no tres bandejas. **En esta ronda no se cambian remitente ni buzones:** seguir con `@rawstudio.biz` evita que el correo rebote antes de verificar .mx en Resend y Zoho. Eso queda para después, no lo hagas ahora.
+4. Hay un marcador interno `handle@alta.rawstudio.biz` para cuentas dadas de alta por administración (correo inventado). Aparece en migraciones (`20260907000000_alta_creadora.sql`, `20261101000000_contacto.sql`, `20261101000001_alta_sin_duplicado.sql`) y en comentarios de `src/lib/admin.ts` y `src/admin/Usuarios.tsx`. **No lo cambies:** es una señal de «correo inventado», no una dirección pública. Si lo mueves a `.mx`, dejas de detectar las cuentas que ya existen.
+5. URLs de **sitio** escritas a mano como `https://rawstudio.biz` (estas sí se actualizan):
+   - `index.html`: `og:url`, `og:image`, `twitter:image`.
+   - `supabase/functions/avisar-verificacion/index.ts` (`PANEL`), `avisar-retiro/index.ts` (`PANEL`), `avisar-purga/index.ts` (`PANEL`), `avisar-verificada/index.ts` (`ESTUDIO`, `VERIFICAR`), `avisar-creadora/index.ts` (`RETIROS`), `avisar-bienvenida/index.ts` (`EXPLORAR`, `ESTUDIO`), `avisar-compra/index.ts` (`BIBLIOTECA`, `DINERO`).
+   - `supabase/functions/enviar-campana/index.ts`: el `href` a `/#/perfil`. El `from` por defecto `RAWstudio <hola@rawstudio.biz>` **se queda**.
+   - `supabase/functions/telegram-bot/index.ts`: textos que dicen «rawstudio.biz» o llevan `https://rawstudio.biz/#/…` (inicio, vinculación, reglas de `/consultas`, enlace de encargo).
+   - `supabase/templates/recuperar.html`: logo y pie.
+   - `supabase/functions/ver-clip/index.ts`: respaldo de `ORIGEN_PERMITIDO` hoy `https://rawstudio.biz`.
+   - `servicios/verificacion/app/main.py` y su `README.md`: `ORIGENES_PERMITIDOS` por defecto.
+   - Comentarios en `vite.config.ts` e `index.html` que hablan del dominio propio; `scripts/tarjetas-sociales.py` si menciona la URL pública; la línea «Sitio:» de `CHECKLIST.md`.
+6. URLs que **no** se actualizan: `hola@rawstudio.biz`, `legal@rawstudio.biz`, `privacidad@rawstudio.biz`, el `from:` de Resend, las constantes `BUZON`, `src/content/ayuda.ts` (`BUZONES` y el FAQ), `src/screens/Ayuda.tsx` y `src/screens/Legal.tsx` (el pie de contacto), y los correos entre corchetes de `src/content/legal.ts`. Tampoco `supabase/config.toml` `site_url` (es el de desarrollo local).
+
+#### Qué hacer
+1. **Una sola origen canónica.** Crea `supabase/functions/_shared/sitio.ts` exportando `ORIGEN_CANONICO = 'https://rawstudio.mx'` y un helper que arme `https://rawstudio.mx/#/…` (o la ruta absoluta que haga falta, p. ej. `/og.png`). El frontend, si necesita el mismo valor, usa `src/lib/sitio.ts` con **el mismo** origen (son dos runtimes; no inventes un monorepo compartido). Las funciones de borde importan el `_shared`; no dejes literales `https://rawstudio.biz` como URL de sitio. `public/CNAME` e `index.html` no pueden importar TypeScript: escríbelos a mano, con el mismo origen.
+2. `public/CNAME` pasa a contener exactamente `rawstudio.mx`.
+3. Sustituye las URLs de sitio de la lista del diagnóstico (correos, Telegram, plantilla de recuperar, metas de vista previa, comentarios que describen el dominio público, línea «Sitio:» del checklist). En Telegram, si un texto dice «entra a rawstudio.biz» sin URL, dilo como rawstudio.mx.
+4. **CORS.** El respaldo de `ver-clip` pasa a `https://rawstudio.mx`. Si puedes, refleja el `Origin` de la petición cuando esté en una lista permitida (`https://rawstudio.mx`, `https://www.rawstudio.mx`, y durante el corte también `https://rawstudio.biz` y `https://www.rawstudio.biz`, más `http://localhost:4173`); no inventes un secreto nuevo. En `servicios/verificacion`, el valor por defecto de `ORIGENES_PERMITIDOS` debe incluir los orígenes .mx (y conservar localhost). Si `ORIGEN_PERMITIDO` / `ORIGENES_PERMITIDOS` ya están puestos como secreto o variable en producción, **no inventes el valor**: anótalo para que Omar sume .mx.
+5. Recorre el repo (`rg rawstudio\\.biz`) y clasifica lo que quede: solo deben sobrevivir buzones, el `from:` de Resend, el marcador `@alta.rawstudio.biz` y comentarios que expliquen esos buzones o ese marcador.
+
+#### Corte que hace Omar (tú no lo hagas; déjalo escrito en el resultado)
+Cambiar el CNAME sin alinear el DNS tumba el sitio: GitHub Pages dejaría de servir rawstudio.biz y esperaría rawstudio.mx, mientras .mx todavía redirige a .biz.
+1. En Supabase → Authentication → URL configuration, **añade** `https://rawstudio.mx` y `https://www.rawstudio.mx` a Site URL / Redirect URLs (no borres .biz todavía). Más adelante el Site URL canónico será `https://rawstudio.mx`.
+2. Apunta rawstudio.mx y www.rawstudio.mx a GitHub Pages **en lugar de** la redirección actual hacia .biz, siguiendo la documentación vigente de GitHub Pages (registros A/AAAA o ALIAS del apex, CNAME de www). No inventes IPs aquí.
+3. En el repo: Settings → Pages → custom domain `rawstudio.mx`, Enforce HTTPS. El canónico es el apex.
+4. Publicar el commit que cambia `public/CNAME` tiene que ir **junto** con ese cambio de DNS. Si se publica antes, el sitio puede quedar inalcanzable.
+5. Cuando https://rawstudio.mx sirva la SPA con HTTPS, convierte rawstudio.biz en una redirección HTTP 301 hacia `https://rawstudio.mx` **con la misma ruta**. No uses una redirección enmarcada o «masked»: el sitio usa `HashRouter`, y el navegador solo conserva `#/ruta` en un 301 normal a la misma ruta.
+6. Si existen secretos `ORIGEN_PERMITIDO` o `ORIGENES_PERMITIDOS` en producción, suma los orígenes .mx (y deja .biz hasta que la redirección esté puesta).
+7. Las funciones de borde de la lista hay que volver a desplegarlas para que correos y Telegram ya enlacen a .mx. `supabase/templates/recuperar.html` está en el repo, pero en `config.toml` las plantillas de Auth están comentadas: si en producción se pegaron a mano en el panel de Authentication, Omar tiene que actualizarlas ahí; el archivo del repo no se aplica solo.
+8. No toques Resend ni Zoho en esta ronda. Las sesiones y la puerta de 18 años viven por origen: quien entre por .mx volverá a confirmar edad y a iniciar sesión. No intentes compartir cookies entre .biz y .mx.
+
+#### Qué no tocar
+Textos legales (no reescribas `src/content/legal.ts` ni cambies sus correos), recargas o pasarela, remitente y buzones `@rawstudio.biz`, el marcador `@alta.rawstudio.biz`, correo/push/SMS nuevos, token o secretos, el precio de 20 pesos, el plazo de 2 días, `COBRO_CONSULTAS_ACTIVO` (sigue en `true`), DeepSeek, el hero del 80 % / dólar, reproductor, trato, avatares, álbumes, precios, portadas, el relleno de portadas discretas, la consola de Consultas, el panel de avisos del administrador, el aislamiento al cambiar de ficha, las contradicciones de copy público (México/EE. UU., pagos semanales vs. 48 horas, el scroll de «Precios»), `PublicarPor` / el 2.40 que queda, visitas o mapas de reproducción, hacer el panel adaptable a móvil, ni reabrir `[id: 20261108-04]` ni las anteriores.
+
+#### Criterios de aceptación
+1. `public/CNAME` contiene `rawstudio.mx`.
+2. Las URLs de sitio que ve la gente (vistas previas, botones de los correos, textos del bot de Telegram, plantilla de recuperar) apuntan a `https://rawstudio.mx`. No quedan literales `https://rawstudio.biz` como navegación de sitio.
+3. El remitente sigue siendo `RAWstudio <hola@rawstudio.biz>`. Los buzones públicos y el FAQ siguen en `@rawstudio.biz`. `@alta.rawstudio.biz` no se tocó.
+4. `src/content/legal.ts` no cambió de redacción. Typecheck, build y lint limpios (solo advertencias que ya existían). Ningún secreto en el repo.
+5. En el resultado dejas escrita la lista de corte de Omar (DNS, Pages, Supabase, redespliegue de funciones, plantillas de Auth si aplican) y **no afirmas** que la barra del navegador ya muestre .mx hasta que ese corte ocurra.
+
+#### Cómo demostrar (obligatorio en bridge-query.md)
+SHA, diff resumido, y:
+- La salida de `rg rawstudio\\.biz` (fuera de los puentes) con cada resto clasificado: buzón / `from:` / marcador `@alta.` / comentario de esos casos.
+- Que `public/CNAME` es `rawstudio.mx` y que las metas de `index.html` y un par de `PANEL`/`ESTUDIO` de los `avisar-*` usan `https://rawstudio.mx`.
+- `tsc -b --force` y `npm run build` ok.
+- No marques `CHECKLIST.md` como pass.
+
+#### Siguiente paso para Claude Code
+1. `git pull` e implementa esta ronda en su propio commit (mensaje sugerido: `feat: direccion publica rawstudio.mx`).
+2. Coordina con Omar el momento de publicar el commit del CNAME junto con el cambio de DNS. Despliega las funciones de borde que cambiaste, con su aprobación. No hace falta migración de base.
+3. Deja el resultado en `bridge-query.md` (SHA, diff, verificación, notas del corte) y marca `[id: 20261108-05]` como `respondida`.
+
 ### Respuesta a [id: 20261108-04] — Avisos del administrador
 - **fecha:** 2026-11-08 18:04 (America/Mexico_City)
 - **estado:** lista-para-claude

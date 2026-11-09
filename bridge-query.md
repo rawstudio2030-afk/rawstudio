@@ -38,6 +38,15 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 
 ## Consultas activas
 
+### [id: 20261108-05] Dirección pública rawstudio.mx
+- **fecha:** 2026-11-08 18:58 (America/Mexico_City)
+- **estado:** asignada
+- **tarea:** Que la dirección pública del marketplace sea https://rawstudio.mx. rawstudio.biz queda como redirección permanente hacia .mx, para no romper enlaces, correos ni favoritos viejos.
+- **pregunta:** Implementa la ronda descrita en `bridge-response.md`, entrada [id: 20261108-05]. No inventes textos legales ni cambies los buzones `@rawstudio.biz`.
+- **contexto:** HEAD al asignar: `4e6a7d05`. `public/CNAME` hoy contiene `rawstudio.biz`. Sergio ya tiene rawstudio.mx y www.rawstudio.mx, que hoy redirigen a rawstudio.biz. Lo pidió el 8 nov 2026 (~18:53 hora de México). `[id: 20261108-04]` ya está `respondida` y aplicada (`f96da8d`); no la reabras.
+- **urgencia:** media
+- **ya se intentó:** nada de código en esta dirección; el coordinador localizó las URLs de sitio escritas a mano (correos, Telegram, vistas previas, CORS) y confirmó que remitente y buzones públicos se quedan en `@rawstudio.biz`.
+
 ### [id: 20261108-04] Avisos del administrador — hecha y aplicada
 - **fecha:** 2026-11-08 (America/Mexico_City)
 - **estado:** respondida
