@@ -38,11 +38,11 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 
 ## Consultas activas
 
-### [id: 20261108-04] Avisos del administrador — hecha, pendiente de aplicar
+### [id: 20261108-04] Avisos del administrador — hecha y aplicada
 - **fecha:** 2026-11-08 (America/Mexico_City)
 - **estado:** respondida
 - **tarea:** Que el panel avise de lo que llega (no solo cuántas cosas hay): campana en el panel, pantalla de avisos con quién y desde cuándo, y enlace al módulo que lo resuelve.
-- **resultado:** HECHA en un commit propio, `f96da8d` (`feat: avisos del administrador`), **sin empujar y con la migración `20261218000000_avisos_admin.sql` sin aplicar en producción**: espera la aprobación de Omar. No se inventó ningún evento en producción (pruebas en Postgres local y con servidor simulado).
+- **resultado:** HECHA en un commit propio, `f96da8d` (`feat: avisos del administrador`), **aplicada y empujada con la aprobación de Omar (2026-11-08):** `supabase db push` aplicó `20261218000000_avisos_admin.sql` (comprobado en solo lectura: existen `admin_avisos`, `admin_avisos_marcar_vistos` y `aviso_admin_nombre`; `avisos_estado_admin` con RLS y 0 filas) y `git push origin main` publicó el panel. No se inventó ningún evento en producción (pruebas en Postgres local y con servidor simulado).
 - **diff resumido (7 archivos):**
   - **Migración 20261218.** `admin_avisos()` (security definer, `es_admin()` o error): arma la lista **al pedirla** desde las mismas colas que alimentan los badges, **sin tabla de eventos**. Misma forma de fila (`clave, tipo, titulo, detalle, ruta, at, urgente, nuevo`), tipos propios: `moderacion` (videos/álbumes pendientes de la cola, con «identidad sin verificar» si aplica), `verificacion` («Identidad nueva» o «enviada otra vez» según `intentos_verificacion`), `denuncia` (nueva o en revisión: quién denuncia, motivo, contra qué video o perfil), `retiro` (por aprobar, y aprobado por pagar), `consulta` (por vencer: menos de 12 h, el mismo umbral del Resumen, con «escrito el… vence el…»; y vencida sin respuesta, informativa), `ajuste` (ajustes/reembolsos que esperan la 2.ª firma; dice «lo propusiste tú» si es el caso) y `purga` (archivos con fecha vencida). Los nombres son `display_name` o el usuario; «Cuenta eliminada» si se anonimizó; sin género. `urgente` = sigue pendiente (todo menos «consulta vencida»). `avisos_estado_admin(user_id, visto_at)` **una fila por administradora** (RLS sin acceso directo) + `admin_avisos_marcar_vistos()` (solo admin). `mis_avisos` **no se tocó**.
   - **Decisiones mías, dichas aquí:** (1) **primera vez**: una administradora que nunca abrió la lista ve como nuevo lo de las **últimas 24 h** (con `epoch`, como `mis_avisos`, la campana arrancaría con todo el histórico); (2) **tope de 25 por tipo** más una fila «Y N más esperando» que lleva a la cola: con cientos de clips por moderar no se lista uno por uno; los badges siguen dando el total exacto. La campana cuenta filas `nuevo`, así que con más de 25 llegadas nuevas de un mismo tipo contaría 25 + la fila «Y N más» (es un tope, no un error); (3) la consulta por vencer pasa a ser «notable» al **entrar en la ventana de 12 h** (su `at` es `vence_at − 12 h`), no al escribirse, para que «nuevo» signifique lo correcto.
@@ -58,7 +58,7 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
   2. **«Denuncia en revisión» no tiene fecha propia** (`reportes` no guarda cuándo pasó a revisión), así que su `at` es la de la denuncia: no puede decir «acaba de entrar en revisión». Pedirlo requiere una columna.
   3. La pantalla **marca vistos cada vez que se actualiza mientras está abierta** (al volver a la ventana o cada minuto), para que lo que llega mientras se mira no cuente en la campana; si se prefiere marcar solo al abrirla, es un cambio de una línea.
   4. **Sigue sin avisar** de fallos de cron o correo no enviado, movimientos raros o grandes, ni respuestas a un rechazo (la ronda lo dejó para después).
-- **cómo aplicar (con la aprobación de Omar):** `supabase db push` (aplica `20261218000000_avisos_admin.sql`) y `git push origin main`. **No hay función de borde ni workflow que desplegar.**
+- **cómo se aplicó:** `supabase db push` y `git push origin main`. **No hubo función de borde ni workflow que desplegar.**
 
 ### [id: 20261108-03] Avisos visibles, diagnóstico de cierre y abonos claros — hecha y aplicada
 - **fecha:** 2026-11-08 (America/Mexico_City)
