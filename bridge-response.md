@@ -30,6 +30,72 @@
 
 ## Respuestas activas
 
+### Respuesta a [id: 20261109-03] — Blindar borrado y moderar ediciones de clips
+- **fecha:** 2026-11-09 17:15 (America/Mexico_City)
+- **decisión de Sergio:** aprobó la ronda. Cierra las dos decisiones abiertas de [id: 20261109-02]: (a) el servidor no debe soft-borrar un clip con historial cuando lo borra la dueña; (b) editar título/descripción/portada de un clip ya aprobado pasa por la misma regla de confianza que el alta, o vuelve a moderación.
+
+#### Diagnóstico (no lo reescribas: úsalo)
+1. `clips_no_borrar_con_historial` (`20261120`, reescrito en `20261220`) convierte un `DELETE` con historial (compras, rentas, reportes, reembolsos_retiro vía `clip_tiene_historial`) en borrado lógico (`borrado_at`, purga +30 días) y cancela el DELETE. No distingue dueña vs administración.
+2. `tiene_acceso` (`20260929`) exige `borrado_at is null` **también para quien compró**. Ese soft-delete le quita el acceso al instante y contradice «para siempre». La UI de Gestionar ya oculta «Eliminar» con historial, pero `clips_delete_propio` sigue permitiendo el `DELETE` directo desde el cliente.
+3. El soft-delete **no** pone `published = false`. `explorar_ids` y `clipsPublicados` filtran por `published` y caducidad, **no** por `borrado_at`, así un clip soft-borrado puede seguir saliendo en el catálogo.
+4. `editar_mi_clip` / `cambiar_mi_portada` (`20261220`) no tocan `estado` ni `published`. Un cambio de título, descripción o portada en un clip `aprobado` sale directo al catálogo. Precio/renta/visibilidad ya se acordó que afectan solo compras nuevas.
+5. Regla de auto-aprobación al **insert** (`clips_publicar_alta` en `20260912000001_moderacion_reglas.sql`): si `moderacion_previa_forzada` → `pendiente`; si no, `aprobado` solo con `identidad_verificada` y ≥5 clips ya `aprobado` de esa creadora. El trigger corre en INSERT y UPDATE y siempre hace `published := (estado = 'aprobado')` (y limpia `published_at` si no está publicado).
+6. `admin_avisos()` (`20261218`) arma la lista al pedirla desde colas reales (entre ellas clips `estado = 'pendiente'` → tipo `moderacion`). No hay tabla de eventos genérica; lo único persistente es `avisos_estado_admin.visto_at` por admin.
+
+#### Qué hacer
+
+**Migración nueva** `supabase/migrations/20261221000000_blindar_borrado_y_moderar_ediciones.sql` (si el nombre está tomado, el siguiente libre). Todo con el estilo del repo: `security definer` donde toque, `set search_path = ''`, grants/revokes explícitos. **Se aplica solo con la aprobación de Omar.**
+
+**A) Blindar el borrado con historial**
+1. Reescribe `clips_no_borrar_con_historial` (o añade lógica equivalente en el mismo disparador BEFORE DELETE):
+   - Si `clip_tiene_historial(old.id)` **y** `not public.es_admin()` → `raise exception` en español claro, p. ej. `Este clip ya tiene compras: usa «Dejar de venderlo ya» o el retiro total.` (errcode coherente con el resto). **No** soft-borres. La fila queda intacta.
+   - Si hay historial **y** `public.es_admin()` → soft-delete como hoy **y además** `published = false` (y lo que ya hacía: `borrado_at`, motivo, purga +30d, quitar destacado). El trigger `clips_publicar_alta` sincroniza `published` con `estado`; si solo tocas `published`/`borrado_at` sin bajar `estado`, asegúrate de que el soft-delete admin deje el clip fuera del catálogo (p. ej. `published = false` y, si hace falta para no pelearse con el trigger, `estado = 'retirado'` **solo** en este camino admin — documenta lo que elijas; no inventes un estado nuevo).
+   - Sin historial → `return old` (DELETE duro), igual que hoy.
+2. Catálogo: `explorar_ids` y la lectura de `clipsPublicados` (y cualquier otra lista pública del catálogo que toques en esta ronda) deben excluir `borrado_at is not null`. Preferible filtrar en SQL (`explorar_ids`) y, si `clipsPublicados` sigue en el cliente, añadir `.is('borrado_at', null)` o el equivalente que ya use el repo. Verifica que quien compró sigue con `tiene_acceso` en un clip **no** borrado (p. ej. solo «dejó de venderse»); no cambies la semántica de compras/rentas.
+3. Frontend: en `eliminarMiClip` / `GestionarClip`, mapea el error nuevo a texto amigable dentro del panel (no detrás de un modal). La UI con historial sigue sin ofrecer «Eliminar».
+
+**B) Moderar ediciones de título / descripción / portada**
+1. Extrae la regla de confianza del insert a un helper reutilizable (p. ej. `creadora_autoaprueba(uid uuid) returns boolean`) con **la misma** lógica que `clips_publicar_alta` en INSERT: `not ajuste_bool('moderacion_previa_forzada')` y `identidad_verificada` y `count(estado = 'aprobado') >= 5`. Haz que el INSERT la llame (no dupliques la regla en dos sitios).
+2. En `editar_mi_clip` y `cambiar_mi_portada`, **solo** cuando cambian de verdad título, descripción o portada (`is distinct from`) **y** el clip tiene `estado = 'aprobado'` al entrar:
+   - Si `creadora_autoaprueba(auth.uid())`: el cambio queda en vivo (sigue `aprobado` / `published`); crea **un aviso de administración** por esa edición (clip, creadora, qué cambió). Como `admin_avisos` no tiene tabla de eventos, extiéndelo: una tabla chica (p. ej. `avisos_edicion_clip`) que `admin_avisos()` una con tipo propio (p. ej. `edicion`), `urgente = false`, ruta a `/admin/moderacion` o `/admin/contenido`, y `nuevo` según el `visto_at` de esa admin. No rehagas el panel ni la campana.
+   - Si no autoaprueba: `estado = 'pendiente'` (el trigger pondrá `published = false`). Entra solo a la cola de moderación que ya alimenta `admin_avisos` (tipo `moderacion`). Si puedes, distingue en el título del aviso «Edición por moderar» vs «Video nuevo…» cuando el clip ya tuvo aprobación antes (`revisado_at is not null` o equivalente); no es bloqueante.
+3. Precio, renta y visibilidad **siguen en vivo** sin tocar `estado` ni generar aviso de edición (aunque vayan en el mismo `editar_mi_clip`). Si en la misma llamada cambian precio **y** título: el título dispara la regla de contenido; el precio se aplica igual.
+4. Edición sin cambios reales (no-op): no registres, no avises, no cambies estado (como hoy con `cambios: 0`).
+5. La respuesta JSON de las RPC debe permitir que la UI diga, cuando quedó en revisión: `Tu cambio quedó en revisión; el clip vuelve a mostrarse cuando lo aprueben.` (campo claro, p. ej. `en_revision: true`, o un mensaje estable). En Gestionar, muéstralo dentro del panel.
+6. Compradores: mientras el clip esté `pendiente` tras una edición, **deben conservar el acceso**. `tiene_acceso` hoy no exige `published` para quien compró (solo `borrado_at is null` y no retiro total). Verifícalo con una prueba SQL; si algo lo rompe, arréglalo sin tocar `comprar_clip` / `rentar_clip` / el ledger. Quien no compró no lo ve en el catálogo (`published = false`).
+7. Sigue registrando `admin_log` (`editar_clip` / `cambiar_portada`) con antes/después.
+
+**C) Recordatorio de [id: 20261108-05] (no lo implementes aquí)**
+- El commit local que mueve el correo a `.mx` **no se publica**. Remitente y buzones se quedan en `@rawstudio.biz`; el marcador `@alta.rawstudio.biz` no se toca.
+- El commit del `CNAME` a `rawstudio.mx` solo en el corte de DNS con Omar. Esta ronda **no** cambia dominio ni correo.
+
+#### No tocar
+- `comprar_clip`, `rentar_clip`, comisiones, ledger.
+- Permisos de `update` sobre `clips` al cliente (siguen revocados).
+- Layout del panel de administración, Resumen, badges (solo extender `admin_avisos` para el aviso de edición en vivo).
+- Textos legales, recargas, token/secretos, DeepSeek, hero 80%/dólar, reproductor, trato, avatares, precios de catálogo, [id: 20261108-05], [id: 20261109-01], [id: 20261109-02] (no las reabras; esta ronda las cierra en las dos decisiones).
+- No inventes textos de reembolso nuevos.
+
+#### Criterios de aceptación
+1. Dueña, `DELETE` directo sobre un clip **con** compra → error en español, fila intacta (`borrado_at` null), comprador con `tiene_acceso = true`.
+2. Dueña, `DELETE` sobre clip **sin** historial → se borra.
+3. Admin, `DELETE` sobre clip con historial → soft-delete + fuera del catálogo (`published = false` / no sale en `explorar_ids` ni en `clipsPublicados`).
+4. Creadora **sin** autoaprobar: cambia título o portada de un `aprobado` → `estado = 'pendiente'`, `published = false`, mensaje de revisión en la UI; comprador sigue con acceso; aparece en cola/avisos de moderación.
+5. Creadora **con** autoaprobar (verificada, ≥5 aprobados, bandera apagada): el mismo cambio queda en vivo y genera un aviso admin de edición; `admin_log` registra.
+6. Solo precio/renta/visibilidad: en vivo, sin cambiar `estado`, sin aviso de edición.
+7. No-op: sin log de cambio, sin aviso, sin estado nuevo.
+8. `npm run build` / typecheck pasan.
+
+#### Entrega
+- Commit sugerido: `feat: blindar borrado y moderar ediciones de clips` (uno solo; no mezclar con 08-05).
+- Migración con `supabase db push` **solo con la aprobación de Omar**; frontend después de aplicarla.
+- Marca [id: 20261109-03] `respondida` con SHA, diff y verificación SQL de los criterios 1–7.
+
+#### Siguiente paso para Claude Code
+1. `git pull` e implementa esta ronda en su propio commit.
+2. No empujes CNAME ni ningún cambio de correo a `.mx`.
+3. Deja el resultado en `bridge-query.md`.
+
 ### Respuesta a [id: 20261109-02] — Gestionar mis clips desde el Estudio
 - **fecha:** 2026-11-09 13:45 (America/Mexico_City)
 - **decisión de Sergio:** las creadoras deben poder gestionar su material ya subido desde el Estudio (venta/renta, portada, eliminar, etc.), con una pantalla clara.

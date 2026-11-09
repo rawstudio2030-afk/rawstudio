@@ -38,6 +38,15 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 
 ## Consultas activas
 
+### [id: 20261109-03] Blindar borrado y moderar ediciones de clips
+- **fecha:** 2026-11-09 17:15 (America/Mexico_City)
+- **estado:** asignada
+- **tarea:** Blindar el borrado con historial (rechazar DELETE de la dueña; soft-delete admin + fuera del catálogo) y moderar ediciones de título/descripción/portada con la misma regla de confianza del alta, avisando a administración.
+- **pregunta:** Implementa la ronda descrita en `bridge-response.md`, entrada [id: 20261109-03]. Commit propio. Cierra las dos decisiones abiertas de [id: 20261109-02]. No mezcles con [id: 20261108-05] ni reabras otras rondas.
+- **contexto:** HEAD al asignar: `c960dc4`. Diagnóstico del coordinador (revisión post-09-02): soft-delete de dueña quita `tiene_acceso` al comprador; `clips_delete_propio` permite el bypass; soft-delete no apaga `published` y el catálogo no filtra `borrado_at`; editar contenido de un `aprobado` no pasa por moderación. Sergio aprobó la ronda el 9 nov 2026 (~17:15 hora de México).
+- **urgencia:** alta
+- **ya se intentó:** nada de código de esta ronda; 09-02 dejó las dos decisiones abiertas a propósito.
+
 ### [id: 20261109-02] Gestionar mis clips desde el Estudio — hecha y aplicada
 - **fecha:** 2026-11-09 13:45 (America/Mexico_City)
 - **estado:** respondida
@@ -60,8 +69,8 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 - **NO verificado:** nada contra producción (migración sin aplicar). **Subir portadas y sacar cuadros con el Storage y la URL firmada reales:** el arnés usó un video del mismo origen; con la URL firmada de `ver-clip` hace falta que Storage mande CORS (la herramienta «Portadas más discretas» de administración ya lo hace igual, pero lo confirma Omar con un clip real tras publicar). El flujo de «Quitárselo también a quien lo compró» no se tocó ni se probó.
 - **Diferencias con el diagnóstico (importantes):**
   1. **`MisClips` no estaba montado en el Estudio**: solo lo pintaba la rama «cuenta suspendida» de `Upload.tsx`. Una creadora normal **no veía la lista en ningún sitio**. Por eso añadí la ruta `/estudio/clips` y la tarjeta; la rama de suspendida sigue mostrando la lista (ahora gestionable) y el servidor rechaza los cambios con «Tu cuenta no está activa…».
-  2. **Borrado lógico y compradores — lo que pasa hoy:** `tiene_acceso` exige `borrado_at is null` (también para quien compró; la administradora tampoco). Si una creadora borra por la API un clip con compras, el disparador lo marca borrado y **quien pagó pierde el acceso al instante** (lo probé: `tiene_acceso` del comprador pasa de true a false), y a los 30 días la purga borra los archivos. Eso contradice la promesa de «para siempre». **La pantalla ya no lo permite** (con historial no hay «Eliminar», y se vuelve a comprobar antes de borrar), pero **el servidor sí lo permite**: la política `clips_delete_propio` deja borrar y el disparador no distingue a la dueña de la administración. **No lo cambié** (no estaba en la ronda y altera una regla de 20261120). **Propuesta para decidir:** que `clips_no_borrar_con_historial` rechace con mensaje cuando quien borra es la dueña y no una administradora (el retiro total ya existe como camino).
-  3. **Editar título, descripción o portada de un clip YA publicado no vuelve a pasar por moderación** (la ronda pedía no tocarla). Cualquier cambio sale directo al catálogo. Decidir si debe volver a `pendiente` o al menos avisar a administración.
+  2. **Borrado lógico y compradores — RESUELTO en [id: 20261109-03].** Hallazgo intacto de esta ronda: `tiene_acceso` exige `borrado_at is null` (también para quien compró). Soft-delete vía dueña le quitaba el acceso; la UI ya ocultaba «Eliminar», pero el servidor permitía el `DELETE`. La decisión aprobada y la implementación van en [id: 20261109-03] (rechazar DELETE de la dueña con historial; soft-delete solo admin + fuera del catálogo).
+  3. **Editar título/descripción/portada de un aprobado sin moderación — RESUELTO en [id: 20261109-03].** Hallazgo de esta ronda: el cambio salía directo. La decisión aprobada (misma regla de confianza del alta → aviso admin, o `pendiente` + mensaje a la creadora; precio/renta/visibilidad en vivo) se implementa en [id: 20261109-03].
   4. **Descripción vacía → `null`** como pedía la ronda: no se vuelve a poner la frase genérica «Video de {nombre}» que `Upload` usa al publicar. Si debe ponerse al editar, es un cambio de una línea.
   5. Un álbum no ofrece cambiar portada desde la pantalla (la portada sale de una foto, no de un video); la función del servidor sí acepta una ruta válida.
 
