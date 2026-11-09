@@ -22,6 +22,7 @@ import Bitacora from '../admin/Bitacora'
 import Herramientas from '../admin/Herramientas'
 import Resumen from '../admin/Resumen'
 import Consultas from '../admin/Consultas'
+import AvisosAdmin from '../admin/AvisosAdmin'
 
 export default function Admin() {
   const nav = useNavigate()
@@ -47,6 +48,7 @@ export default function Admin() {
   return (
     <Marco titulo={modulo.titulo}>
       {modulo.clave === 'resumen'      && <Resumen />}
+      {modulo.clave === 'avisos'       && <AvisosAdmin />}
       {modulo.clave === 'usuarios'     && <Usuarios key={search} />}
       {modulo.clave === 'moderacion'   && <Moderacion />}
       {modulo.clave === 'contenido'    && <Contenido key={search} />}

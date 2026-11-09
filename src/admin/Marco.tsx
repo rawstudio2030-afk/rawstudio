@@ -15,6 +15,7 @@ import { ANCHO_MINIMO } from './piezas'
 import { Pulsable, Enlace } from '../components/Pulsable'
 import { GRUPOS, MODULOS } from './modulos'
 import BuscadorGeneral from './BuscadorGeneral'
+import CampanaAdmin from './CampanaAdmin'
 import { PendientesCtx, SIN_DATOS, cargarPendientes, type Pendientes } from './pendientes'
 
 export function useModulo() {
@@ -219,6 +220,9 @@ export function Marco({ children, titulo, resumen }: {
               {resumen}
             </span>
           )}
+          {/* La campana del PANEL (lo que llega a la plataforma). La de las cuentas
+              sigue oculta aqui: esa es lo personal. */}
+          <div style={{ marginLeft: 'auto', alignSelf: 'center' }}><CampanaAdmin /></div>
         </header>
         <div style={{ marginTop: 20 }}>{children}</div>
       </main>

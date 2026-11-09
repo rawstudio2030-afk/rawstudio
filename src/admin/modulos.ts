@@ -17,6 +17,7 @@ export type Modulo = {
 export const GRUPOS: { titulo: string; modulos: Modulo[] }[] = [
   { titulo: 'Por atender', modulos: [
     { clave: 'resumen',      titulo: 'Resumen',      listo: true },
+    { clave: 'avisos',       titulo: 'Avisos',       listo: true },
     { clave: 'moderacion',   titulo: 'Moderación',   listo: true },
     { clave: 'verificacion', titulo: 'Verificación', listo: true },
     { clave: 'reportes',     titulo: 'Denuncias',    listo: true },
