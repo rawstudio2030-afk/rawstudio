@@ -452,19 +452,53 @@ export async function reactivarCuenta(id: string) {
   return error?.message ?? ''
 }
 
-export async function ajustarSaldo(id: string, cantidad: number, motivo: string) {
+/** Un movimiento de dinero del panel (abono, descuento, reembolso) termina de
+ *  UNA de tres maneras, y no son intercambiables:
+ *  - `aplicado`: ya esta en el libro.
+ *  - `propuesto`: paso del tope; NO se aplico, quedo esperando la firma de otra
+ *    administradora (o de la misma pasadas 24 h). El servidor lo acepto: no es un
+ *    error, y volver a enviarlo crearia una SEGUNDA propuesta.
+ *  - `fallo`: el servidor lo rechazo o no hubo respuesta. */
+export type ResultadoMovimiento =
+  | { resultado: 'aplicado'; saldo: number }
+  | { resultado: 'propuesto' }
+  | { resultado: 'fallo'; error: string }
+
+export async function ajustarSaldo(id: string, cantidad: number, motivo: string): Promise<ResultadoMovimiento> {
   const { data, error } = await supabase.rpc('admin_ajustar_saldo', {
     objetivo: id, cantidad, motivo_texto: motivo,
   })
-  if (error) return { error: error.message }
-  // Pasado el tope no se aplica: queda propuesto para otra administradora.
-  if ((data as { pendiente?: boolean }).pendiente) return { error: AVISO_PROPUESTA }
-  return data as { ok: boolean; saldo: number }
+  if (error) return { resultado: 'fallo', error: error.message }
+  const r = (data ?? {}) as { pendiente?: boolean; saldo?: number }
+  if (r.pendiente) return { resultado: 'propuesto' }
+  return { resultado: 'aplicado', saldo: Number(r.saldo ?? 0) }
 }
 
-/** Lo que dice el panel cuando un ajuste o reembolso pasa del tope. */
-const AVISO_PROPUESTA =
-  'Supera el tope: quedó propuesto y NO se aplicó. Otra administradora debe aprobarlo en Retiros › Ajustes por aprobar.'
+/* ---- Diagnostico de cierre de cuenta (solo lectura) ----
+ * Lo que impide anonimizar o eliminar a ESTA cuenta. No sustituye las reglas del
+ * servidor, que vuelven a validar al confirmar. */
+
+export type DiagnosticoCierre =
+  | { existe: false }
+  | {
+      existe: true; handle: string
+      es_propia: boolean; es_admin: boolean; es_demo: boolean; anonimizada: boolean
+      /** Centavos de dolar. */
+      saldo: number
+      retiros_abiertos: number
+      verificaciones_con_imagenes: number
+      verificaciones_sin_resolver: number
+      imagenes_se_borran_el: string | null
+      historial: { clase: string; cuantos: number }[]
+      clips_con_historial: number
+    }
+
+export async function diagnosticoCierre(id: string):
+  Promise<{ diagnostico: DiagnosticoCierre } | { error: string }> {
+  const { data, error } = await supabase.rpc('admin_diagnostico_cierre', { objetivo: id })
+  if (error) return { error: error.message }
+  return { diagnostico: data as DiagnosticoCierre }
+}
 
 /* ==================== Modulo 6: bitacora ==================== */
 
@@ -736,11 +770,16 @@ export async function resolverVerificacion(id: string, aprobar: boolean, nota?: 
 
 /** Los documentos viven en un bucket privado que solo lee la administracion.
  *  La liga dura cinco minutos: es tiempo de sobra para mirarla y poco para
- *  que quede pegada en ningun lado. */
-export async function urlDocumento(bucket: 'verificacion' | 'expedientes', path: string) {
+ *  que quede pegada en ningun lado.
+ *
+ *  Devuelve `error` cuando no se pudo firmar la liga: es distinto de «no hay
+ *  archivo» (nunca lo hubo o ya se borro) y la pantalla tiene que poder
+ *  decirlos distinto. */
+export async function urlDocumento(bucket: 'verificacion' | 'expedientes', path: string):
+  Promise<{ url: string } | { error: string }> {
   const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, 300)
-  if (error) return null
-  return data.signedUrl
+  if (error || !data?.signedUrl) return { error: error?.message ?? 'sin liga' }
+  return { url: data.signedUrl }
 }
 
 /* ==================== Modulo 3: contenido ==================== */
@@ -1148,13 +1187,14 @@ export async function marcarPagado(id: string, referencia: string) {
 
 export async function reembolsar(
   destino: string, deQuien: string, cantidad: number, motivo: string, ref?: string,
-) {
+): Promise<ResultadoMovimiento> {
   const { data, error } = await supabase.rpc('admin_reembolsar', {
     destino, de_quien: deQuien, cantidad, motivo, referencia: ref ?? null,
   })
-  if (error) return { error: error.message }
-  if ((data as { pendiente?: boolean }).pendiente) return { error: AVISO_PROPUESTA }
-  return data as { ok: boolean; saldo_origen: number }
+  if (error) return { resultado: 'fallo', error: error.message }
+  const r = (data ?? {}) as { pendiente?: boolean; saldo_origen?: number }
+  if (r.pendiente) return { resultado: 'propuesto' }
+  return { resultado: 'aplicado', saldo: Number(r.saldo_origen ?? 0) }
 }
 
 export type EncargoDisputa = {

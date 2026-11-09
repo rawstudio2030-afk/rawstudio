@@ -5,10 +5,11 @@
  * asi que necesita sus propios componentes en vez de estirar los de la app.
  * Comparte los tokens de diseño, no el diseño.
  */
-import { useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 import { Pulsable } from '../components/Pulsable'
 import { cuantos } from '../lib/plural'
+import { humano } from '../lib/humano'
 import { useEscape, tecladoComoBoton } from '../lib/teclado'
 
 export const ANCHO_MINIMO = 1280
@@ -109,6 +110,37 @@ export function Etiquetado({ texto, hijo, ancho }: {
   )
 }
 
+/** Aviso dentro de una pantalla o de un recuadro. Un error o una atención se
+ *  anuncian (`role="alert"`); un resultado bueno o una propuesta pendiente son
+ *  informativos (`role="status"`). Siempre se pone DENTRO de lo que el
+ *  administrador tiene abierto: un aviso en la pantalla de atras queda tapado
+ *  por la ficha o el recuadro y es como no haberlo dado. */
+export type TipoAviso = 'ok' | 'propuesto' | 'atencion' | 'error'
+const COLOR_AVISO: Record<TipoAviso, string> = {
+  ok: COLOR.dinero, propuesto: '#FFB020', atencion: '#FFB020', error: '#FF4444',
+}
+const ROTULO_AVISO: Record<TipoAviso, string> = {
+  ok: 'Listo', propuesto: 'Propuesto, aún no aplicado', atencion: 'Atención', error: 'No se pudo',
+}
+
+export function Aviso({ tipo, children, cierra }: {
+  tipo: TipoAviso; children: ReactNode; cierra?: () => void
+}) {
+  const c = COLOR_AVISO[tipo]
+  return (
+    <div role={tipo === 'error' || tipo === 'atencion' ? 'alert' : 'status'} style={{
+      marginTop: 14, padding: '10px 13px', border: `1px solid ${c}`,
+      display: 'flex', gap: 12, alignItems: 'flex-start',
+      font: `400 12px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave,
+    }}>
+      <div style={{ flex: 1, minWidth: 0, overflowWrap: 'anywhere' }}>
+        <b style={{ color: c }}>{ROTULO_AVISO[tipo]}.</b> {children}
+      </div>
+      {cierra && <Boton chico al={cierra}>Cerrar</Boton>}
+    </div>
+  )
+}
+
 /* ---------- Modal de confirmacion ----------
  *
  * Toda accion destructiva o de dinero pasa por aqui. No es adorno: el panel
@@ -116,21 +148,61 @@ export function Etiquetado({ texto, hijo, ancho }: {
  * facilisimo. Cuando `exigeMotivo` esta puesto, el boton no se habilita hasta
  * que hay texto, porque el motivo termina en la bitacora y un registro sin
  * explicacion no sirve de nada dentro de un mes.
+ *
+ * EL RESULTADO SE VE AQUI MISMO. `al` puede devolver un texto: es el error, y se
+ * pinta dentro del recuadro, con el motivo y los campos intactos, sin cerrar.
+ * Antes el error se mandaba al aviso de la pantalla de atras, que el propio
+ * recuadro (y la ficha, si estaba abierta) tapaba: se pulsaba, no pasaba nada
+ * y nadie decia por que. Si `al` lanza (red, excepcion) tambien se muestra, sin
+ * dejar el boton ocupado ni dar el exito por hecho. Un segundo clic mientras
+ * corre el primero no hace nada: un abono no puede enviarse dos veces.
+ *
+ * `bloqueo` es una razon por la que la accion no puede hacerse ahora (por
+ * ejemplo, el usuario escrito no coincide): se explica dentro y el boton queda
+ * inactivo, sin llamar al servidor.
  */
 export function Confirmar({ titulo, cuerpo, etiqueta, tono = 'peligro',
-  exigeMotivo, extra, al, cancela }: {
+  exigeMotivo, extra, bloqueo, inactivo, al, cancela }: {
   titulo: string; cuerpo: ReactNode; etiqueta: string; tono?: TonoBoton
   exigeMotivo?: boolean
   extra?: (motivo: string) => ReactNode
-  al: (motivo: string) => void | Promise<void>
+  bloqueo?: ReactNode
+  /** Desactiva el boton sin decir nada (falta un dato obvio, como escribir el usuario). */
+  inactivo?: boolean
+  /** Devuelve un texto para mostrar un error dentro del recuadro; nada o '' si salio bien. */
+  al: (motivo: string) => void | string | Promise<void | string>
   cancela: () => void
 }) {
   const [motivo, setMotivo] = useState('')
   const [ocupado, setOcupado] = useState(false)
+  const [error, setError] = useState('')
+  const enCurso = useRef(false)
+  const zonaError = useRef<HTMLDivElement>(null)
 
   useEscape(true, cancela)
 
-  const listo = !ocupado && (!exigeMotivo || motivo.trim().length > 0)
+  // Con el diagnostico y el motivo el recuadro puede ser alto: el error se lleva
+  // a la vista en vez de quedar por debajo del pliegue.
+  useEffect(() => {
+    if (error) zonaError.current?.scrollIntoView?.({ block: 'nearest' })
+  }, [error])
+
+  const listo = !ocupado && !bloqueo && !inactivo && (!exigeMotivo || motivo.trim().length > 0)
+
+  const enviar = async () => {
+    if (enCurso.current) return
+    enCurso.current = true
+    setOcupado(true); setError('')
+    try {
+      const r = await al(motivo.trim())
+      if (typeof r === 'string' && r) setError(humano(r))
+    } catch (e) {
+      setError(humano(e instanceof Error && e.message ? e.message : 'fetch failed'))
+    } finally {
+      enCurso.current = false
+      setOcupado(false)
+    }
+  }
 
   return (
     <div onClick={cancela} style={{
@@ -138,7 +210,8 @@ export function Confirmar({ titulo, cuerpo, etiqueta, tono = 'peligro',
       background: 'rgba(8,8,10,.82)', display: 'grid', placeItems: 'center',
     }}>
       <div role="dialog" aria-modal="true" aria-label={titulo} onClick={e => e.stopPropagation()} style={{
-        width: 460, maxWidth: '92vw', background: COLOR.superficie,
+        width: 460, maxWidth: '92vw', maxHeight: '92vh', overflowY: 'auto',
+        background: COLOR.superficie,
         border: `1px solid ${LINEA.fuerte}`, borderRadius: 14, padding: 26,
       }}>
         <div style={{
@@ -160,12 +233,15 @@ export function Confirmar({ titulo, cuerpo, etiqueta, tono = 'peligro',
 
         {extra?.(motivo)}
 
+        {bloqueo && <Aviso tipo="atencion">{bloqueo}</Aviso>}
+
+        <div ref={zonaError}>
+          {error && <Aviso tipo="error">{error}</Aviso>}
+        </div>
+
         <div style={{ display: 'flex', gap: 10, marginTop: 22, justifyContent: 'flex-end' }}>
           <Boton al={cancela} tono="normal">Cancelar</Boton>
-          <Boton tono={tono} activo={listo} al={async () => {
-            setOcupado(true)
-            try { await al(motivo.trim()) } finally { setOcupado(false) }
-          }}>{ocupado ? 'Un momento…' : etiqueta}</Boton>
+          <Boton tono={tono} activo={listo} al={enviar}>{ocupado ? 'Un momento…' : etiqueta}</Boton>
         </div>
       </div>
     </div>

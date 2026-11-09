@@ -1,22 +1,24 @@
 /* Modulo 1: usuarios. */
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import Avatar from '../components/Avatar'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 import { usd, aCentavos } from '../lib/dinero'
 import {
   listarUsuarios, fichaUsuario, suspenderCuenta, banearCuenta, reactivarCuenta, cambiarCorreo,
-  anonimizarCuenta, eliminarCuenta,
+  anonimizarCuenta, eliminarCuenta, diagnosticoCierre,
   ajustarSaldo, otorgarAdmin, revocarAdmin, marcarCreadora,
-  type FilaUsuario, type FichaUsuario, type OrdenUsuarios,
+  type ResultadoMovimiento, type FilaUsuario, type FichaUsuario, type OrdenUsuarios, type DiagnosticoCierre,
   type RolUsuario, type EstadoCuenta,
 } from '../lib/admin'
 import {
-  Tabla, Paginador, Boton, Campo, Selector, Etiquetado, Confirmar, Insignia,
+  Tabla, Paginador, Boton, Campo, Selector, Etiquetado, Confirmar, Insignia, Aviso,
   COLOR_ESTADO, COLOR_ROL, fecha, fechaHora, desde,
-  type Columna,
+  type Columna, type TipoAviso,
 } from './piezas'
+import { bloqueosDe, type Salida } from '../lib/cierreCuenta'
+import { humano } from '../lib/humano'
 import { Pulsable } from '../components/Pulsable'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { tratoDe } from '../lib/admin'
 import { OPCIONES_TRATO, type Trato } from '../lib/trato'
 import { useEscape } from '../lib/teclado'
@@ -48,6 +50,10 @@ export default function Usuarios() {
   const [abierta, setAbierta]   = useState<FilaUsuario | null>(null)
   const [ficha, setFicha]       = useState<FichaUsuario | null>(null)
   const [dialogo, setDialogo]   = useState<Dialogo>(null)
+  // Resultado de la ultima accion (listo / propuesto / atencion). Se enseña DENTRO
+  // de la ficha si esta abierta —la ficha tapa la pantalla— y en la pantalla si no.
+  const [aviso, setAviso]       = useState<{ tipo: TipoAviso; texto: ReactNode } | null>(null)
+  const [errorFicha, setErrorFicha] = useState('')
 
   // El buscador espera a que dejes de escribir. Sin esto, cada tecla dispara
   // una consulta y la tabla parpadea con resultados de busquedas ya viejas.
@@ -71,11 +77,12 @@ export default function Usuarios() {
   useEffect(() => { cargar() }, [cargar])
 
   useEffect(() => {
-    if (!abierta) { setFicha(null); return }
+    if (!abierta) { setFicha(null); setErrorFicha(''); return }
     let vivo = true
     fichaUsuario(abierta.id).then(r => {
       if (!vivo) return
-      if ('ficha' in r && r.ficha) setFicha(r.ficha)
+      if ('ficha' in r && r.ficha) { setFicha(r.ficha); setErrorFicha('') }
+      else setErrorFicha(('error' in r && r.error) || 'No se pudo cargar la ficha.')
     })
     return () => { vivo = false }
   }, [abierta])
@@ -86,14 +93,25 @@ export default function Usuarios() {
     setPagina(0)
   }
 
-  const tras = async (msg: string) => {
-    if (msg) { setError(msg); return }
-    setError(''); setDialogo(null)
+  // Vuelve a pedir la tabla y la fila abierta. Si la fila ya no se encuentra (una
+  // cuenta anonimizada cambia de usuario) la ficha se cierra.
+  const refrescar = async () => {
     await cargar()
     if (abierta) {
-      const r = await listarUsuarios({ busqueda: abierta.handle, porPagina: 1 })
-      setAbierta(r.filas[0] ?? null)
+      const r = await listarUsuarios({ busqueda: abierta.handle, porPagina: 10 })
+      setAbierta(r.filas.find(f => f.id === abierta.id) ?? null)
     }
+  }
+
+  /** Corre una accion de un recuadro. Si falla, DEVUELVE el texto: lo pinta el
+   *  propio recuadro, que sigue abierto con lo que se habia escrito. Si sale bien,
+   *  lo cierra, refresca y deja un aviso de que paso. Nunca finge exito. */
+  const ejecutar = async (accion: Promise<string | null>, ok: ReactNode): Promise<string> => {
+    const msg = await accion
+    if (msg) return msg
+    setDialogo(null); setAviso({ tipo: 'ok', texto: ok })
+    await refrescar()
+    return ''
   }
 
   const columnas: Columna<FilaUsuario>[] = [
@@ -173,29 +191,37 @@ export default function Usuarios() {
       </div>
 
       {error && (
-        <div style={{
+        <div role="alert" style={{
           marginBottom: 14, padding: '10px 13px', border: '1px solid #FF4444',
           color: '#FF4444', font: `400 12px/1.45 ${FUENTE.ui}`,
         }}>{error}</div>
+      )}
+      {aviso && !abierta && (
+        <div style={{ marginBottom: 14 }}>
+          <Aviso tipo={aviso.tipo} cierra={() => setAviso(null)}>{aviso.texto}</Aviso>
+        </div>
       )}
 
       <div style={{ opacity: cargando ? .5 : 1, transition: 'opacity .15s' }}>
         <Tabla columnas={columnas} filas={filas} clave={f => f.id}
           orden={orden} descendente={desc} ordenar={ordenar}
-          alElegir={setAbierta} elegida={abierta?.id}
+          alElegir={f => { setAviso(null); setAbierta(f) }} elegida={abierta?.id}
           vacia={cargando ? 'Cargando…' : 'Ninguna usuaria cumple ese filtro'} />
       </div>
 
       <Paginador pagina={pagina} porPagina={POR_PAGINA} total={total} cambia={setPagina} />
 
       {abierta && (
-        <Ficha fila={abierta} ficha={ficha} cierra={() => setAbierta(null)}
-          pide={setDialogo} />
+        <Ficha fila={abierta} ficha={ficha} errorFicha={errorFicha}
+          aviso={aviso} cierraAviso={() => setAviso(null)}
+          cierra={() => { setAbierta(null); setAviso(null) }}
+          pide={d => { setAviso(null); setDialogo(d) }} />
       )}
 
       {/* ---- Confirmaciones ---- */}
       {dialogo === 'suspender' && abierta && (
-        <SuspenderDialogo fila={abierta} cancela={() => setDialogo(null)} listo={tras} />
+        <SuspenderDialogo fila={abierta} cancela={() => setDialogo(null)}
+          listo={(accion, ok) => ejecutar(accion, ok)} />
       )}
       {dialogo === 'banear' && abierta && (
         <Confirmar titulo="Banear permanentemente" tono="peligro" etiqueta="Banear"
@@ -203,28 +229,23 @@ export default function Usuarios() {
           cuerpo={<>Se cierra la cuenta de <b style={{ color: COLOR.texto }}>@{abierta.handle}</b> de
             forma indefinida. A diferencia de la suspensión, el baneo no caduca solo.</>}
           cancela={() => setDialogo(null)}
-          al={m => banearCuenta(abierta.id, m).then(tras)} />
+          al={m => ejecutar(banearCuenta(abierta.id, m), <>@{abierta.handle} quedó baneada.</>)} />
       )}
       {dialogo === 'anonimizar' && abierta && (
-        <Confirmar titulo="Anonimizar la cuenta" tono="peligro" etiqueta="Anonimizar"
-          exigeMotivo
-          cuerpo={<>Se quita lo que identifica a <b style={{ color: COLOR.texto }}>@{abierta.handle}</b>:
-            nombre, descripción, foto, correo, teléfono y sesiones. Sus clips pasan a borrados y sus
-            suscripciones activas se cancelan. <b style={{ color: COLOR.texto }}>No se borra el
-            historial</b>: libro de movimientos, compras, retiros, consentimientos, cuenta de cobro y
-            expediente se conservan. No se puede deshacer. Se niega si la cuenta tiene saldo, un
-            retiro sin resolver o imágenes de verificación sin borrar.</>}
-          cancela={() => setDialogo(null)}
-          al={m => anonimizarCuenta(abierta.id, m).then(tras)} />
+        <AnonimizarDialogo fila={abierta} cancela={() => setDialogo(null)}
+          al={m => ejecutar(anonimizarCuenta(abierta.id, m).then(x => x || null),
+            <>La cuenta de @{abierta.handle} quedó anonimizada: se quitó lo que la identifica y se conservó su historial.</>)} />
       )}
       {dialogo === 'eliminar' && abierta && (
         <EliminarDialogo fila={abierta} cancela={() => setDialogo(null)}
-          falla={msg => setError(msg)}
           eliminada={async aviso => {
-            // La cuenta ya no existe: se cierra la ficha y se recarga la tabla.
+            // La cuenta ya no existe: se cierra la ficha y se recarga la tabla. Un
+            // aviso de limpieza pendiente se enseña como atencion, no como silencio.
             setDialogo(null); setAbierta(null)
+            setAviso(aviso
+              ? { tipo: 'atencion', texto: aviso }
+              : { tipo: 'ok', texto: <>La cuenta de @{abierta.handle} se eliminó definitivamente.</> })
             await cargar()
-            setError(aviso)
           }} />
       )}
       {dialogo === 'reactivar' && abierta && (
@@ -232,16 +253,30 @@ export default function Usuarios() {
           cuerpo={<>Se levanta el castigo de <b style={{ color: COLOR.texto }}>@{abierta.handle}</b> y
             la cuenta vuelve a quedar activa.</>}
           cancela={() => setDialogo(null)}
-          al={() => reactivarCuenta(abierta.id).then(tras)} />
+          al={() => ejecutar(reactivarCuenta(abierta.id), <>@{abierta.handle} volvió a estar activa.</>)} />
       )}
       {dialogo === 'saldo' && abierta && (
-        <SaldoDialogo fila={abierta} cancela={() => setDialogo(null)} listo={tras} />
+        <SaldoDialogo fila={abierta} cancela={() => setDialogo(null)}
+          resultado={async (r, n) => {
+            if (r.resultado === 'fallo') return r.error
+            setDialogo(null)
+            setAviso(r.resultado === 'aplicado'
+              ? { tipo: 'ok', texto: <>{n > 0 ? 'Se abonaron' : 'Se descontaron'} {usd(Math.abs(n))} {n > 0 ? 'a' : 'de'} @{abierta.handle}. Saldo nuevo: {usd(r.saldo)}.</> }
+              : { tipo: 'propuesto', texto: <>El ajuste de {usd(n)} a @{abierta.handle} pasó del tope y <b style={{ color: COLOR.texto }}>NO se aplicó</b>:
+                  quedó propuesto y espera la firma de otra administradora (o la tuya pasadas 24 horas). El servidor ya lo
+                  registró: <b style={{ color: COLOR.texto }}>no lo vuelvas a enviar</b>. Se firma en{' '}
+                  <Link to="/admin/retiros" style={{ color: COLOR.admin }}>Retiros › Ajustes por aprobar</Link>.</> })
+            await refrescar()
+            return ''
+          }} />
       )}
       {dialogo === 'rol' && abierta && (
-        <RolDialogo fila={abierta} cancela={() => setDialogo(null)} listo={tras} />
+        <RolDialogo fila={abierta} cancela={() => setDialogo(null)}
+          listo={async () => { setDialogo(null); setAviso({ tipo: 'ok', texto: <>Se cambió el rol de @{abierta.handle}.</> }); await refrescar() }} />
       )}
       {dialogo === 'correo' && abierta && (
-        <CorreoDialogo fila={abierta} cancela={() => setDialogo(null)} listo={tras} />
+        <CorreoDialogo fila={abierta} cancela={() => setDialogo(null)}
+          listo={(accion, ok) => ejecutar(accion, ok)} />
       )}
     </>
   )
@@ -249,8 +284,9 @@ export default function Usuarios() {
 
 /* ---------- Ficha lateral ---------- */
 
-function Ficha({ fila, ficha, cierra, pide }: {
-  fila: FilaUsuario; ficha: FichaUsuario | null
+function Ficha({ fila, ficha, errorFicha, aviso, cierraAviso, cierra, pide }: {
+  fila: FilaUsuario; ficha: FichaUsuario | null; errorFicha: string
+  aviso: { tipo: TipoAviso; texto: ReactNode } | null; cierraAviso: () => void
   cierra: () => void; pide: (d: Dialogo) => void
 }) {
   const [pestana, setPestana] = useState<'clips' | 'movimientos' | 'acciones'>('clips')
@@ -286,6 +322,8 @@ function Ficha({ fila, ficha, cierra, pide }: {
           </div>
           <Boton chico al={cierra}>Cerrar</Boton>
         </div>
+
+        {aviso && <Aviso tipo={aviso.tipo} cierra={cierraAviso}>{aviso.texto}</Aviso>}
 
         <div style={{ display: 'flex', gap: 6, marginTop: 14 }}>
           <Insignia texto={fila.rol} color={COLOR_ROL[fila.rol]} />
@@ -350,10 +388,17 @@ function Ficha({ fila, ficha, cierra, pide }: {
             Mueven dinero o borran datos. Anonimizar y eliminar no se pueden deshacer.
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            <Boton al={() => pide('saldo')}>Ajustar saldo</Boton>
+            <Boton al={() => pide('saldo')}>Abonar o descontar saldo</Boton>
             <Boton tono="peligro" al={() => pide('anonimizar')}>Anonimizar</Boton>
             <Boton tono="peligro" al={() => pide('eliminar')}>Eliminar definitivamente</Boton>
           </div>
+          <div style={{ marginTop: 9, font: `400 11px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
+            El saldo se ajusta con un asiento contable interno: <b style={{ color: COLOR.texto }}>no
+            registra un depósito bancario recibido</b>. <b style={{ color: COLOR.texto }}>Anonimizar</b> es
+            la salida normal de una cuenta con historial; <b style={{ color: COLOR.texto }}>Eliminar</b> solo
+            cabe en una cuenta sin historial.
+          </div>
+          <CierreDeCuenta key={fila.id} id={fila.id} />
         </div>
 
         <div style={{ marginTop: 12, font: `400 11px/1.45 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
@@ -376,7 +421,10 @@ function Ficha({ fila, ficha, cierra, pide }: {
         </div>
 
         <div style={{ marginTop: 12 }}>
-          {!ficha && <Vacio texto="Cargando…" />}
+          {!ficha && errorFicha && (
+            <Aviso tipo="error">No se pudo cargar el detalle de la cuenta: {errorFicha}</Aviso>
+          )}
+          {!ficha && !errorFicha && <Vacio texto="Cargando…" />}
           {ficha && pestana === 'clips' && (
             ficha.clips.length === 0 ? <Vacio texto="No ha publicado nada" /> :
             ficha.clips.map(c => (
@@ -389,7 +437,7 @@ function Ficha({ fila, ficha, cierra, pide }: {
             ficha.movimientos.length === 0 ? <Vacio texto="Sin movimientos" /> :
             ficha.movimientos.map(m => (
               <Renglon key={m.id} izq={m.motivo.replace(/_/g, ' ')}
-                der={`${m.delta > 0 ? '+' : ''}${m.delta}`}
+                der={`${m.delta > 0 ? '+' : ''}${usd(m.delta)}`}
                 colorDer={m.delta > 0 ? COLOR.dinero : '#FF4444'}
                 pie={`${fechaHora(m.created_at)}${m.nota ? ` · ${m.nota}` : ''}`} />
             ))
@@ -432,10 +480,98 @@ function Renglon({ izq, der, pie, colorDer, marca }: {
   )
 }
 
+/* ---------- Diagnostico de cierre ----------
+ *
+ * Que le impide a ESTA cuenta anonimizarse o eliminarse, ANTES de confirmar y
+ * con sus datos (no un texto generico). Es solo lectura y no sustituye al
+ * servidor: anonimizar y eliminar vuelven a validar todo al confirmar, y si el
+ * diagnostico decia que se podia y el servidor lo rechaza, ese rechazo tambien
+ * se ve dentro del recuadro. */
+
+type Existente = Extract<DiagnosticoCierre, { existe: true }>
+type EstadoDiagnostico = { cargando: boolean; d?: Existente; error?: string }
+
+function useDiagnostico(id: string): EstadoDiagnostico {
+  const [est, setEst] = useState<EstadoDiagnostico>({ cargando: true })
+  useEffect(() => {
+    let vivo = true
+    diagnosticoCierre(id).then(r => {
+      if (!vivo) return
+      if ('error' in r) setEst({ cargando: false, error: r.error })
+      else if (!r.diagnostico.existe) setEst({ cargando: false, error: 'La cuenta ya no existe.' })
+      else setEst({ cargando: false, d: r.diagnostico })
+    }).catch(() => vivo && setEst({ cargando: false, error: humano('fetch failed') }))
+    return () => { vivo = false }
+  }, [id])
+  return est
+}
+
+const NOMBRE_SALIDA: Record<Salida, string> = { anonimizar: 'Anonimizar', eliminar: 'Eliminar definitivamente' }
+
+function Bloqueos({ est, salida }: { est: EstadoDiagnostico; salida: Salida }) {
+  const base = { font: `400 12px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave } as const
+  if (est.cargando) return <div style={base}>Revisando la cuenta…</div>
+  if (!est.d) {
+    return (
+      <div role="alert" style={base}>
+        No se pudo revisar el estado de la cuenta ({est.error}). Al confirmar, el servidor la vuelve a validar.
+      </div>
+    )
+  }
+  const lista = bloqueosDe(est.d, salida)
+  if (lista.length === 0) {
+    return (
+      <div style={base}>
+        <b style={{ color: COLOR.dinero }}>Sin bloqueos conocidos.</b> El servidor igual lo vuelve a comprobar al confirmar.
+      </div>
+    )
+  }
+  return (
+    <ul style={{ ...base, margin: 0, paddingLeft: 18 }}>
+      {lista.map(b => (
+        <li key={b.texto} style={{ marginTop: 3 }}>
+          <span style={{ color: COLOR.texto }}>{b.texto}</span>
+          {b.enlace && (
+            <> <Link to={b.enlace.ruta} style={{ color: COLOR.admin }}>{b.enlace.etiqueta}</Link></>
+          )}
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+/** En la ficha, bajo los botones de la zona de riesgo: el estado de cada salida. */
+function CierreDeCuenta({ id }: { id: string }) {
+  const est = useDiagnostico(id)
+  return (
+    <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid rgba(255,68,68,.25)' }}>
+      <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
+        color: COLOR.textoSuave }}>Antes de cerrar esta cuenta</div>
+      {(['anonimizar', 'eliminar'] as const).map(sal => {
+        const lista = est.d ? bloqueosDe(est.d, sal) : []
+        return (
+          <div key={sal} style={{ marginTop: 9 }}>
+            <div style={{ font: `700 11px/1.3 ${FUENTE.ui}`, color: COLOR.texto }}>
+              {NOMBRE_SALIDA[sal]}
+              {est.d && (
+                <span style={{ marginLeft: 8, color: lista.length ? '#FFB020' : COLOR.dinero }}>
+                  {lista.length ? 'bloqueada ahora' : 'se puede'}
+                </span>
+              )}
+            </div>
+            {(!est.d || lista.length > 0) && <div style={{ marginTop: 3 }}><Bloqueos est={est} salida={sal} /></div>}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 /* ---------- Dialogos con campos propios ---------- */
 
 function SuspenderDialogo({ fila, cancela, listo }: {
-  fila: FilaUsuario; cancela: () => void; listo: (m: string) => void
+  fila: FilaUsuario; cancela: () => void
+  listo: (accion: Promise<string | null>, ok: ReactNode) => Promise<string>
 }) {
   const [hasta, setHasta] = useState('')
   return (
@@ -451,7 +587,86 @@ function SuspenderDialogo({ fila, cancela, listo }: {
         </div>
       )}
       cancela={cancela}
-      al={m => suspenderCuenta(fila.id, m, hasta ? new Date(hasta).toISOString() : null).then(listo)} />
+      al={m => listo(
+        suspenderCuenta(fila.id, m, hasta ? new Date(hasta).toISOString() : null),
+        <>@{fila.handle} quedó suspendida{hasta ? <> hasta {fechaHora(new Date(hasta).toISOString())}</> : ' sin fecha de fin'}.</>)} />
+  )
+}
+
+/** Anonimizar: la salida normal de una cuenta con historial. Quita lo que identifica
+ *  a la persona y CONSERVA el historial. */
+function AnonimizarDialogo({ fila, cancela, al }: {
+  fila: FilaUsuario; cancela: () => void; al: (motivo: string) => Promise<string>
+}) {
+  const est = useDiagnostico(fila.id)
+  return (
+    <Confirmar titulo="Anonimizar la cuenta" tono="peligro" etiqueta="Anonimizar"
+      exigeMotivo
+      cuerpo={<>Se quita lo que identifica a <b style={{ color: COLOR.texto }}>@{fila.handle}</b>:
+        nombre, descripción, foto, correo, teléfono y sesiones. Sus clips pasan a borrados y sus
+        suscripciones activas se cancelan. <b style={{ color: COLOR.texto }}>No se borra el
+        historial</b>: libro de movimientos, compras, retiros, consentimientos, consultas, cuenta de
+        cobro y expediente se conservan. No se puede deshacer. Se niega si la cuenta tiene saldo, un
+        retiro sin resolver o imágenes de verificación sin borrar.</>}
+      extra={() => (
+        <div style={{ marginTop: 14 }}>
+          <div style={{ marginBottom: 5, font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
+            textTransform: 'uppercase', color: COLOR.textoSuave }}>Estado de la cuenta</div>
+          <Bloqueos est={est} salida="anonimizar" />
+        </div>
+      )}
+      cancela={cancela}
+      al={al} />
+  )
+}
+
+/** Borrado de verdad. Pide el usuario escrito a mano: es lo unico que impide
+ *  borrar la cuenta equivocada con un par de clics seguidos. El servidor lo
+ *  vuelve a comprobar y se niega si la cuenta tiene historial que se conserva
+ *  (movimientos, compras, retiros, consultas...). Un usuario que no coincide se
+ *  explica aqui y no se manda al servidor. */
+function EliminarDialogo({ fila, cancela, eliminada }: {
+  fila: FilaUsuario; cancela: () => void
+  eliminada: (aviso: string) => void | Promise<void>
+}) {
+  const [escrito, setEscrito] = useState('')
+  const est = useDiagnostico(fila.id)
+  const ok = escrito.trim().toLowerCase() === fila.handle.toLowerCase()
+  return (
+    <Confirmar titulo="Eliminar la cuenta definitivamente" tono="peligro"
+      etiqueta={ok ? 'Eliminar para siempre' : 'Escribe el usuario'}
+      exigeMotivo
+      inactivo={!ok}
+      bloqueo={escrito.trim() && !ok
+        ? <>Lo escrito no coincide con el usuario de esta cuenta, <b style={{ color: COLOR.texto }}>@{fila.handle}</b>.</>
+        : undefined}
+      cuerpo={<>Se borra <b style={{ color: COLOR.texto }}>@{fila.handle}</b> de verdad: su
+        perfil, su acceso, sus clips y sus archivos. <b style={{ color: COLOR.texto }}>No se puede
+        deshacer.</b> Solo funciona con cuentas que no tienen historial que se conserva; si tiene
+        movimientos, compras, retiros, consentimientos, consultas, expediente o clips con compras o
+        reportes, el servidor se niega y hay que usar <b style={{ color: COLOR.texto }}>Anonimizar</b>.
+        Queda constancia en la bitácora.</>}
+      extra={() => (
+        <>
+          <div style={{ marginTop: 14 }}>
+            <div style={{ marginBottom: 5, font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
+              textTransform: 'uppercase', color: COLOR.textoSuave }}>Estado de la cuenta</div>
+            <Bloqueos est={est} salida="eliminar" />
+          </div>
+          <div style={{ marginTop: 14 }}>
+            <Etiquetado texto={`Escribe ${fila.handle} para confirmar`} hijo={
+              <Campo valor={escrito} cambia={setEscrito} mono autoFoco marcador={fila.handle} />
+            } />
+          </div>
+        </>
+      )}
+      cancela={cancela}
+      al={async m => {
+        if (!ok) return `Escribe el usuario de la cuenta (${fila.handle}) para confirmar.`
+        const r = await eliminarCuenta(fila.id, m, escrito.trim())
+        if (!r.eliminada) return r.error
+        await eliminada(r.error)
+      }} />
   )
 }
 
@@ -461,44 +676,9 @@ function SuspenderDialogo({ fila, cancela, listo }: {
  *  el suyo se lo invento la plataforma —@alta.rawstudio.biz— asi que no les
  *  llega nada, ni siquiera «olvidé mi contraseña». Sin esto se quedan
  *  incomunicadas para siempre. */
-/** Borrado de verdad. Pide el usuario escrito a mano: es lo unico que impide
- *  borrar la cuenta equivocada con un par de clics seguidos. El servidor lo
- *  vuelve a comprobar y se niega si la cuenta tiene historial que se conserva. */
-function EliminarDialogo({ fila, cancela, falla, eliminada }: {
-  fila: FilaUsuario; cancela: () => void
-  falla: (m: string) => void; eliminada: (aviso: string) => void | Promise<void>
-}) {
-  const [escrito, setEscrito] = useState('')
-  const ok = escrito.trim().toLowerCase() === fila.handle.toLowerCase()
-  return (
-    <Confirmar titulo="Eliminar la cuenta definitivamente" tono="peligro"
-      etiqueta={ok ? 'Eliminar para siempre' : 'Escribe el usuario'}
-      exigeMotivo
-      cuerpo={<>Se borra <b style={{ color: COLOR.texto }}>@{fila.handle}</b> de verdad: su
-        perfil, su acceso, sus clips y sus archivos. <b style={{ color: COLOR.texto }}>No se puede
-        deshacer.</b> Solo funciona con cuentas que no tienen historial que se conserva; si tiene
-        movimientos, compras, retiros, consentimientos, expediente o clips con compras o
-        reportes, el servidor se niega y hay que usar <b style={{ color: COLOR.texto }}>Anonimizar</b>.
-        Queda constancia en la bitácora.</>}
-      extra={() => (
-        <div style={{ marginTop: 14 }}>
-          <Etiquetado texto={`Escribe ${fila.handle} para confirmar`} hijo={
-            <Campo valor={escrito} cambia={setEscrito} mono autoFoco marcador={fila.handle} />
-          } />
-        </div>
-      )}
-      cancela={cancela}
-      al={async m => {
-        if (!ok) { falla('Escribe el usuario de la cuenta para confirmar.'); return }
-        const r = await eliminarCuenta(fila.id, m, escrito.trim())
-        if (!r.eliminada) { falla(r.error); return }
-        await eliminada(r.error)
-      }} />
-  )
-}
-
 function CorreoDialogo({ fila, cancela, listo }: {
-  fila: FilaUsuario; cancela: () => void; listo: (m: string) => void
+  fila: FilaUsuario; cancela: () => void
+  listo: (accion: Promise<string | null>, ok: ReactNode) => Promise<string>
 }) {
   const [correo, setCorreo] = useState('')
   const ok = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(correo.trim())
@@ -506,6 +686,7 @@ function CorreoDialogo({ fila, cancela, listo }: {
   return (
     <Confirmar titulo="Corregir correo" tono="primario"
       etiqueta={ok ? 'Cambiar el correo' : 'Escribe un correo'}
+      inactivo={!ok}
       cuerpo={<>El correo de <b style={{ color: COLOR.texto }}>@{fila.handle}</b> es{' '}
         <b style={{ color: inventado ? '#FFB020' : COLOR.texto }}>{fila.email}</b>
         {inventado && <> — ese se lo inventó la plataforma al darla de alta, así que
@@ -520,59 +701,85 @@ function CorreoDialogo({ fila, cancela, listo }: {
         </div>
       )}
       cancela={cancela}
-      al={() => ok ? cambiarCorreo(fila.id, correo).then(m => listo(m ?? ''))
-                   : Promise.resolve(listo('Ese correo no tiene forma de correo.'))} />
+      al={() => ok
+        ? listo(cambiarCorreo(fila.id, correo), <>Se corrigió el correo de @{fila.handle}.</>)
+        : 'Ese correo no tiene forma de correo.'} />
   )
 }
 
-function SaldoDialogo({ fila, cancela, listo }: {
-  fila: FilaUsuario; cancela: () => void; listo: (m: string) => void
+/** Abonar o descontar saldo. Es un ajuste CONTABLE interno: un asiento en el libro
+ *  (append-only) con motivo y bitacora. No es el registro de un deposito bancario
+ *  recibido. Termina de una de tres maneras —aplicado, propuesto o fallo— y el
+ *  recuadro solo se cierra en las dos primeras. */
+function SaldoDialogo({ fila, cancela, resultado }: {
+  fila: FilaUsuario; cancela: () => void
+  resultado: (r: ResultadoMovimiento, n: number) => Promise<string>
 }) {
   const [cantidad, setCantidad] = useState('')
   // Se escribe en dolares y con signo: '-5.50' descuenta cinco cincuenta.
   const negativo = cantidad.trim().startsWith('-')
   const magnitud = aCentavos(cantidad.replace('-', '')) ?? 0
   const n = negativo ? -magnitud : magnitud
+  const resultante = fila.saldo + n
+  const queda = resultante < 0 ? 'negativo' : 'positivo'
   return (
-    <Confirmar titulo="Ajustar saldo" tono="primario"
+    <Confirmar titulo="Abonar o descontar saldo" tono="primario"
       etiqueta={n === 0 ? 'Pon una cantidad'
-        : n > 0 ? `Acreditar ${usd(n)}` : `Descontar ${usd(-n)}`}
+        : n > 0 ? `Abonar ${usd(n)}` : `Descontar ${usd(-n)}`}
       exigeMotivo
-      cuerpo={<>Saldo actual de <b style={{ color: COLOR.texto }}>@{fila.handle}</b>:{' '}
-        <b style={{ color: COLOR.dinero }}>{usd(fila.saldo)}</b>. Usa un número negativo para
-        descontar. Esto NO edita un número suelto: escribe un asiento en el libro
-        contable, que es append-only, y queda en la bitácora.</>}
+      inactivo={n === 0}
+      cuerpo={<>Cuenta de <b style={{ color: COLOR.texto }}>@{fila.handle}</b> ({fila.display_name}).
+        Saldo actual: <b style={{ color: COLOR.dinero }}>{usd(fila.saldo)}</b>. Usa un número negativo
+        para descontar. Es un <b style={{ color: COLOR.texto }}>ajuste contable interno</b>, no el
+        registro de un depósito bancario recibido: escribe un asiento en el libro, que es
+        append-only, y queda en la bitácora. Si pasa del tope, no se aplica: queda propuesto para
+        la firma de otra administradora.</>}
       extra={() => (
         <div style={{ marginTop: 14 }}>
-          <Etiquetado texto="Cantidad (negativa para descontar)" hijo={
+          <Etiquetado texto="Cantidad en dólares (negativa para descontar)" hijo={
             <Campo valor={cantidad} cambia={setCantidad} mono autoFoco marcador="5.00 o -5.00" />
           } />
           {n !== 0 && (
-            <div style={{ marginTop: 8, font: `400 12px/1 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
-              {usd(fila.saldo)} → <b style={{ color: COLOR.dinero }}>{usd(fila.saldo + n)}</b>
+            <div style={{ marginTop: 8, font: `400 12px/1.5 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
+              @{fila.handle}: {usd(fila.saldo)} → <b style={{ color: queda === 'negativo' ? '#FFB020' : COLOR.dinero }}>{usd(resultante)}</b>
+              {queda === 'negativo' && <span style={{ color: '#FFB020' }}> · quedaría en negativo</span>}
             </div>
           )}
         </div>
       )}
       cancela={cancela}
       al={async m => {
-        if (n === 0) return
-        const r = await ajustarSaldo(fila.id, n, m)
-        listo('error' in r ? r.error : '')
+        if (n === 0) return 'Pon una cantidad distinta de cero.'
+        return resultado(await ajustarSaldo(fila.id, n, m), n)
       }} />
   )
 }
 
 function RolDialogo({ fila, cancela, listo }: {
-  fila: FilaUsuario; cancela: () => void; listo: (m: string) => void
+  fila: FilaUsuario; cancela: () => void; listo: () => void | Promise<void>
 }) {
+  const [error, setError] = useState('')
+  const [ocupado, setOcupado] = useState(false)
   useEscape(true, cancela)
+
+  // Cada interruptor cambia un privilegio: un fallo se dice AQUI, con el recuadro abierto.
+  const correr = async (accion: Promise<string | null>) => {
+    if (ocupado) return
+    setOcupado(true); setError('')
+    try {
+      const m = await accion
+      if (m) setError(humano(m)); else await listo()
+    } catch (e) {
+      setError(humano(e instanceof Error && e.message ? e.message : 'fetch failed'))
+    } finally { setOcupado(false) }
+  }
+
   return (
     <div onClick={cancela} style={{
       position: 'fixed', inset: 0, zIndex: 95, background: 'rgba(8,8,10,.82)',
       display: 'grid', placeItems: 'center',
     }}>
-      <div onClick={e => e.stopPropagation()} style={{
+      <div role="dialog" aria-modal="true" aria-label="Cambiar rol" onClick={e => e.stopPropagation()} style={{
         width: 460, maxWidth: '92vw', background: COLOR.superficie,
         border: `1px solid ${LINEA.fuerte}`, padding: 26,
       }}>
@@ -585,16 +792,18 @@ function RolDialogo({ fila, cancela, listo }: {
         </div>
 
         <div style={{ marginTop: 20, display: 'grid', gap: 10 }}>
-          <Interruptor titulo="Creadora" activo={fila.rol === 'creadora' || fila.clips_total > 0}
+          <Interruptor titulo="Creadora" activo={!ocupado && (fila.rol === 'creadora' || fila.clips_total > 0)}
             puesto={fila.rol === 'creadora'}
             nota="Puede subir contenido y cobrar."
-            al={() => marcarCreadora(fila.id, fila.rol !== 'creadora').then(() => listo(''))} />
-          <Interruptor titulo="Administradora" puesto={fila.rol === 'admin'} activo
+            al={() => correr(marcarCreadora(fila.id, fila.rol !== 'creadora'))} />
+          <Interruptor titulo="Administradora" puesto={fila.rol === 'admin'} activo={!ocupado}
             nota="Ve todo el contenido sin pagar y puede mover saldos. Se registra quién y cuándo lo otorgó."
-            al={() => (fila.rol === 'admin'
+            al={() => correr(fila.rol === 'admin'
               ? revocarAdmin(fila.id)
-              : otorgarAdmin(fila.id, 'desde el panel')).then(() => listo(''))} />
+              : otorgarAdmin(fila.id, 'desde el panel'))} />
         </div>
+
+        {error && <Aviso tipo="error">{error}</Aviso>}
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 22 }}>
           <Boton al={cancela}>Cerrar</Boton>

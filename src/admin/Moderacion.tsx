@@ -1,5 +1,6 @@
 /* Modulo 2: cola de moderacion. */
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, type ReactNode } from 'react'
+import { Link } from 'react-router-dom'
 import { cuantos } from '../lib/plural'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 import {
@@ -8,7 +9,8 @@ import {
 } from '../lib/admin'
 import { urlPortada, urlVideoFirmada } from '../lib/clips'
 import VisorAlbum from '../components/VisorAlbum'
-import { Boton, Confirmar, Paginador, Insignia, fecha, desde } from './piezas'
+import { Boton, Confirmar, Paginador, Insignia, Aviso, fecha, desde } from './piezas'
+import { humano } from '../lib/humano'
 import { usePendientes } from './pendientes'
 import { usd } from '../lib/dinero'
 import { Pulsable } from '../components/Pulsable'
@@ -35,6 +37,8 @@ export default function Moderacion() {
   const [error, setError] = useState('')
   const [bandera, setBandera] = useState(false)
   const [viendo, setViendo] = useState<ClipEnCola | null>(null)
+  // Lo que paso con el ultimo clip revisado; el revisor ya se cerro y no lo tapa.
+  const [aviso, setAviso] = useState<ReactNode>(null)
 
   const cargar = useCallback(async () => {
     setCargando(true)
@@ -47,9 +51,10 @@ export default function Moderacion() {
   useEffect(() => { cargar() }, [cargar])
   useEffect(() => { leerBandera().then(setBandera) }, [])
 
-  const tras = async (msg: string) => {
-    if (msg) { setError(msg); return }
-    setError(''); setViendo(null); await cargar()
+  // Se llama cuando la decision YA se tomo. Un fallo no pasa por aqui: lo enseña el
+  // revisor o el recuadro de confirmacion, que siguen abiertos.
+  const decidido = async (ok: ReactNode) => {
+    setError(''); setViendo(null); setAviso(ok); await cargar()
   }
 
   return (
@@ -95,8 +100,11 @@ export default function Moderacion() {
       </div>
 
       {error && (
-        <div style={{ marginBottom: 14, padding: '10px 13px', border: '1px solid #FF4444',
+        <div role="alert" style={{ marginBottom: 14, padding: '10px 13px', border: '1px solid #FF4444',
           color: '#FF4444', font: `400 12px/1.45 ${FUENTE.ui}` }}>{error}</div>
+      )}
+      {aviso && !viendo && (
+        <div style={{ marginBottom: 14 }}><Aviso tipo="ok" cierra={() => setAviso(null)}>{aviso}</Aviso></div>
       )}
 
       {/* ---- Cuadrícula ---- */}
@@ -116,7 +124,7 @@ export default function Moderacion() {
 
       <Paginador pagina={pagina} porPagina={POR_PAGINA} total={total} cambia={setPagina} />
 
-      {viendo && <Revisor clip={viendo} cierra={() => setViendo(null)} listo={tras} />}
+      {viendo && <Revisor clip={viendo} cierra={() => setViendo(null)} listo={decidido} />}
     </>
   )
 }
@@ -179,10 +187,23 @@ function Tarjeta({ clip, al }: { clip: ClipEnCola; al: () => void }) {
 /* ---------- Revisor con reproductor ---------- */
 
 function Revisor({ clip, cierra, listo }: {
-  clip: ClipEnCola; cierra: () => void; listo: (m: string) => void
+  clip: ClipEnCola; cierra: () => void; listo: (ok: ReactNode) => void | Promise<void>
 }) {
   const [url, setUrl] = useState<string | null>(null)
   const [fallo, setFallo] = useState('')
+  // El resultado de «Aprobar» (que no pasa por un recuadro) se enseña aqui mismo.
+  const [errorAprobar, setErrorAprobar] = useState('')
+  const [aprobando, setAprobando] = useState(false)
+  const aprobar = async () => {
+    if (aprobando) return
+    setAprobando(true); setErrorAprobar('')
+    try {
+      const m = await moderar(clip.id, 'aprobado')
+      if (m) setErrorAprobar(humano(m)); else await listo(<>«{clip.titulo}» quedó <b>aprobado</b> y ya se puede ver.</>)
+    } catch (e) {
+      setErrorAprobar(humano(e instanceof Error && e.message ? e.message : 'fetch failed'))
+    } finally { setAprobando(false) }
+  }
   const [dialogo, setDialogo] = useState<'rechazar' | 'retirar' | 'banear' | null>(null)
   useEscape(true, cierra)
 
@@ -268,8 +289,8 @@ function Revisor({ clip, cierra, listo }: {
 
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 20 }}>
             {clip.estado !== 'aprobado' && (
-              <Boton tono="primario" al={() => moderar(clip.id, 'aprobado').then(listo)}>
-                Aprobar
+              <Boton tono="primario" activo={!aprobando} al={aprobar}>
+                {aprobando ? 'Un momento…' : 'Aprobar'}
               </Boton>
             )}
             {clip.estado === 'pendiente' && (
@@ -280,6 +301,19 @@ function Revisor({ clip, cierra, listo }: {
             )}
             <Boton tono="peligro" al={() => setDialogo('banear')}>Banear creadora</Boton>
           </div>
+
+          {/* Por que «Aprobar» no va a funcionar todavia. El servidor sigue siendo quien
+              decide (lo comprueba al aprobar); esto solo evita que se descubra a ciegas. */}
+          {clip.estado !== 'aprobado' && !clip.creadora_verificada && (
+            <div role="status" style={{ marginTop: 12, padding: '9px 11px', border: '1px solid #FFB020',
+              font: `400 11px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
+              <b style={{ color: '#FFB020' }}>Aprobar se va a rechazar:</b> la identidad de
+              @{clip.creadora_handle} todavía no está verificada, y sin eso no se puede aprobar
+              contenido suyo. Resuélvela primero en{' '}
+              <Link to="/admin/verificacion" style={{ color: COLOR.admin }}>Verificación</Link>.
+            </div>
+          )}
+          {errorAprobar && <Aviso tipo="error">{errorAprobar}</Aviso>}
         </div>
       </div>
 
@@ -287,20 +321,32 @@ function Revisor({ clip, cierra, listo }: {
         <Confirmar titulo="Rechazar el clip" etiqueta="Rechazar" exigeMotivo
           cuerpo="El motivo se le comunica a la creadora. Sin explicación no sabrá qué corregir y volverá a subirlo igual."
           cancela={() => setDialogo(null)}
-          al={m => moderar(clip.id, 'rechazado', m).then(listo)} />
+          al={async m => {
+            const e = await moderar(clip.id, 'rechazado', m)
+            if (e) return e
+            await listo(<>«{clip.titulo}» quedó <b>rechazado</b>; se le comunicó el motivo a la creadora.</>)
+          }} />
       )}
       {dialogo === 'retirar' && (
         <Confirmar titulo="Retirar un clip ya publicado" etiqueta="Retirar" exigeMotivo
           cuerpo="Deja de verse de inmediato. Quien ya lo compró tampoco podrá abrirlo."
           cancela={() => setDialogo(null)}
-          al={m => moderar(clip.id, 'retirado', m).then(listo)} />
+          al={async m => {
+            const e = await moderar(clip.id, 'retirado', m)
+            if (e) return e
+            await listo(<>«{clip.titulo}» se <b>retiró</b>: ya no se ve.</>)
+          }} />
       )}
       {dialogo === 'banear' && (
         <Confirmar titulo={`Banear a @${clip.creadora_handle}`} etiqueta="Banear" exigeMotivo
           cuerpo={<>Cierra la cuenta completa, no solo este clip. Si lo que sobra es el
             clip y no la persona, usa <b style={{ color: COLOR.texto }}>Rechazar</b>.</>}
           cancela={() => setDialogo(null)}
-          al={m => banearCuenta(clip.creadora, m).then(listo)} />
+          al={async m => {
+            const e = await banearCuenta(clip.creadora, m)
+            if (e) return e
+            await listo(<>@{clip.creadora_handle} quedó <b>baneada</b>.</>)
+          }} />
       )}
     </div>
   )

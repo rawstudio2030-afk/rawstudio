@@ -14,11 +14,11 @@ import {
   reembolsar, tipoCambio, fijarTipoCambio, mostrarPesos, fijarMostrarPesos,
   tasasConfirmadas, confirmarTasas,
   ajustesPendientes, aprobarAjuste, rechazarAjuste, type AjustePendiente,
-  type Retiro, type EstadoRetiro, type EncargoDisputa,
+  type Retiro, type EstadoRetiro, type EncargoDisputa, type ResultadoMovimiento,
 } from '../lib/admin'
 import {
-  Tabla, Boton, Campo, Confirmar, Etiquetado, Paginador,
-  desde, type Columna,
+  Tabla, Boton, Campo, Confirmar, Etiquetado, Paginador, Aviso,
+  desde, fechaHora, type Columna,
 } from './piezas'
 import { descargarCSV } from './csv'
 import { usePendientes } from './pendientes'
@@ -48,6 +48,8 @@ export default function Retiros() {
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
   const [aviso, setAviso] = useState('')
+  // Un reembolso que paso del tope NO es un exito ni un error: queda propuesto.
+  const [propuesta, setPropuesta] = useState('')
   const [coin, setCoin] = useState<number | null>(null)
   const [verPesos, setVerPesos] = useState(false)
   const [editandoCoin, setEditandoCoin] = useState(false)
@@ -77,8 +79,18 @@ export default function Retiros() {
 
   const tras = async (m: string) => {
     if (m) { setError(m); return }
-    setError(''); setDialogo(null); setReembolso(null); setFirma(null)
+    setError(''); setPropuesta(''); setDialogo(null); setReembolso(null); setFirma(null)
     setConfirmaTasas(false); await cargar()
+  }
+
+  /** Corre la accion de un recuadro. Si falla, devuelve el texto y el recuadro lo
+   *  enseña dentro, abierto, sin perder lo escrito; si sale bien, avisa y refresca. */
+  const correr = async (accion: Promise<string>, ok: string): Promise<string> => {
+    const m = await accion
+    if (m) return m
+    setAviso(ok)
+    await tras('')
+    return ''
   }
 
   // Todas las solicitudes de la pestana visible (no solo la pagina), con las
@@ -258,6 +270,13 @@ export default function Retiros() {
                   <div style={{ marginTop: 4, font: `400 11px/1.45 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
                     {a.motivo} · propuso @{a.propuesto_handle} · {desde(a.propuesto_at)}
                   </div>
+                  {/* Si «Aprobar» esta apagado es porque lo propuso quien esta mirando. */}
+                  {!a.puede_aprobar && (
+                    <div style={{ marginTop: 5, font: `400 11px/1.5 ${FUENTE.ui}`, color: '#FFB020' }}>
+                      Lo propusiste tú, así que no puedes firmarlo ahora. Lo firma otra administradora; si eres
+                      la única, a partir del {fechaHora(new Date(new Date(a.propuesto_at).getTime() + 86_400_000).toISOString())} podrás aprobarlo.
+                    </div>
+                  )}
                 </div>
                 <Boton chico tono="primario" activo={a.puede_aprobar}
                   al={() => setFirma({ a, que: 'aprobar' })}>Aprobar</Boton>
@@ -321,6 +340,9 @@ export default function Retiros() {
         <div style={{ marginBottom: 14, padding: '10px 13px', border: `1px solid ${COLOR.dinero}`,
           color: COLOR.dinero, font: `400 12px/1.45 ${FUENTE.ui}` }}>{aviso}</div>
       )}
+      {propuesta && (
+        <div style={{ marginBottom: 14 }}><Aviso tipo="propuesto" cierra={() => setPropuesta('')}>{propuesta}</Aviso></div>
+      )}
 
       <div style={{ opacity: cargando ? .5 : 1 }}>
         <Tabla columnas={columnas} filas={filas} clave={r => r.id}
@@ -336,7 +358,8 @@ export default function Retiros() {
             : <>Confirmas que un contador revisó las tasas de ISR e IVA de la tabla de retenciones. A partir de
               aquí los retiros se aprueban y se calculan con ellas. Queda en la bitácora a tu nombre.</>}
           cancela={() => setConfirmaTasas(false)}
-          al={async () => tras(await confirmarTasas(!tasas))} />
+          al={() => correr(confirmarTasas(!tasas),
+            tasas ? 'Las tasas de retención quedaron como provisionales.' : 'Tasas de retención confirmadas.')} />
       )}
 
       {firma?.que === 'aprobar' && (
@@ -346,14 +369,14 @@ export default function Retiros() {
             : <>{usd(firma.a.cantidad)} de @{firma.a.de_quien_handle} a @{firma.a.objetivo_handle}</>}.
             Lo propuso @{firma.a.propuesto_handle}: «{firma.a.motivo}».</>}
           cancela={() => setFirma(null)}
-          al={async () => tras(await aprobarAjuste(firma.a.id))} />
+          al={() => correr(aprobarAjuste(firma.a.id), 'Ajuste aprobado y aplicado en el libro.')} />
       )}
 
       {firma?.que === 'rechazar' && (
         <Confirmar titulo="Rechazar el ajuste" etiqueta="Rechazar" exigeMotivo
           cuerpo={<>No se aplica nada. Queda anotado quién lo rechazó y por qué.</>}
           cancela={() => setFirma(null)}
-          al={async m => tras(await rechazarAjuste(firma.a.id, m))} />
+          al={m => correr(rechazarAjuste(firma.a.id, m), 'Ajuste rechazado: no se aplicó nada.')} />
       )}
 
       {dialogo?.que === 'aprobar' && (
@@ -369,7 +392,7 @@ export default function Retiros() {
           cancela={() => setDialogo(null)}
           al={async () => {
             const r = await resolverRetiro(dialogo.r.id, true)
-            if ('error' in r) return tras(r.error)
+            if ('error' in r) return r.error
             setAviso(`Aprobado. Bruto ${pesos(r.bruto_mxn ?? 0)}, neto a transferir ${pesos(r.neto_mxn ?? 0)}.`)
             await tras('')
           }} />
@@ -380,21 +403,34 @@ export default function Retiros() {
           cancela={() => setDialogo(null)}
           al={async m => {
             const r = await resolverRetiro(dialogo.r.id, false, m)
-            await tras('error' in r ? r.error : '')
+            if ('error' in r) return r.error
+            setAviso('Retiro rechazado: su saldo no se tocó.')
+            await tras('')
           }} />
       )}
       {dialogo?.que === 'pagar' && (
-        <PagarDialogo r={dialogo.r} cancela={() => setDialogo(null)} listo={tras} />
+        <PagarDialogo r={dialogo.r} cancela={() => setDialogo(null)}
+          listo={(accion, ok) => correr(accion, ok)} />
       )}
       {reembolso && (
-        <ReembolsoDialogo d={reembolso} cancela={() => setReembolso(null)} listo={tras} />
+        <ReembolsoDialogo d={reembolso} cancela={() => setReembolso(null)}
+          resultado={async (r, n) => {
+            if (r.resultado === 'fallo') return r.error
+            if (r.resultado === 'aplicado') setAviso(`Reembolso de ${usd(n)} aplicado a @${reembolso.fan_handle}.`)
+            await tras('')
+            if (r.resultado === 'propuesto') {
+              setPropuesta(`El reembolso de ${usd(n)} pasó del tope y NO se aplicó: quedó propuesto en «Ajustes por aprobar» (arriba) y espera la firma de otra administradora. El servidor ya lo registró: no lo vuelvas a enviar.`)
+            }
+            return ''
+          }} />
       )}
     </>
   )
 }
 
 function PagarDialogo({ r, cancela, listo }: {
-  r: Retiro; cancela: () => void; listo: (m: string) => void
+  r: Retiro; cancela: () => void
+  listo: (accion: Promise<string>, ok: string) => Promise<string>
 }) {
   const [ref, setRef] = useState('')
   return (
@@ -409,19 +445,24 @@ function PagarDialogo({ r, cancela, listo }: {
           } />
         </div>
       )}
+      inactivo={!ref.trim()}
       cancela={cancela}
-      al={async () => { if (ref.trim()) listo(await marcarPagado(r.id, ref.trim())) }} />
+      al={() => ref.trim()
+        ? listo(marcarPagado(r.id, ref.trim()), `Retiro de @${r.handle} marcado como pagado.`)
+        : 'La referencia del SPEI es obligatoria.'} />
   )
 }
 
-function ReembolsoDialogo({ d, cancela, listo }: {
-  d: EncargoDisputa; cancela: () => void; listo: (m: string) => void
+function ReembolsoDialogo({ d, cancela, resultado }: {
+  d: EncargoDisputa; cancela: () => void
+  resultado: (r: ResultadoMovimiento, n: number) => Promise<string>
 }) {
   const [cantidad, setCantidad] = useState((d.coins / 100).toFixed(2))
   const n = aCentavos(cantidad) ?? 0
   return (
     <Confirmar titulo="Reembolsar el encargo" etiqueta={n > 0 ? `Devolver ${usd(n)}` : 'Pon una cantidad'}
       exigeMotivo
+      inactivo={n <= 0}
       cuerpo={<>Se le devuelven dólares a @{d.fan_handle} y se le descuentan a @{d.creadora_handle}.
         Puedes devolver menos del total si hubo entrega parcial. Si la creadora ya se gastó el
         dinero, su saldo quedará en negativo: eso es a propósito, para poder cobrárselo después
@@ -435,9 +476,8 @@ function ReembolsoDialogo({ d, cancela, listo }: {
       )}
       cancela={cancela}
       al={async m => {
-        if (n <= 0) return
-        const r = await reembolsar(d.fan, d.creadora, n, m, d.id)
-        listo('error' in r ? r.error : '')
+        if (n <= 0) return 'Pon una cantidad mayor que cero.'
+        return resultado(await reembolsar(d.fan, d.creadora, n, m, d.id), n)
       }} />
   )
 }

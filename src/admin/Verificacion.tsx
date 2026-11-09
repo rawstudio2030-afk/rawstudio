@@ -8,14 +8,14 @@
  * Las imagenes no se guardan en el navegador ni se copian a ningun lado: se
  * piden con una liga firmada de cinco minutos cada vez que se abre la ficha.
  */
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { cuantos } from '../lib/plural'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 import {
   listarVerificaciones, conteoVerificaciones, resolverVerificacion, urlDocumento,
   type Verificacion, type EstadoVerificacion,
 } from '../lib/admin'
-import { Boton, Confirmar, Paginador, Insignia, fecha, fechaHora, desde } from './piezas'
+import { Boton, Confirmar, Paginador, Insignia, Aviso, fecha, fechaHora, desde } from './piezas'
 import { usePendientes } from './pendientes'
 import { Pulsable } from '../components/Pulsable'
 import { useEscape } from '../lib/teclado'
@@ -40,6 +40,8 @@ export default function Verificacion() {
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
   const [abierta, setAbierta] = useState<Verificacion | null>(null)
+  // Lo que paso con la ultima ficha resuelta. Se ve en la pantalla porque la ficha ya se cerro.
+  const [aviso, setAviso] = useState<ReactNode>(null)
 
   const cargar = useCallback(async () => {
     setCargando(true)
@@ -51,9 +53,10 @@ export default function Verificacion() {
 
   useEffect(() => { cargar() }, [cargar])
 
-  const tras = async (m: string) => {
-    if (m) { setError(m); return }
-    setError(''); setAbierta(null); await cargar()
+  // Se llama cuando la solicitud ya quedo resuelta. Un fallo NO pasa por aqui: lo
+  // enseña el recuadro de confirmacion, que sigue abierto, no esta pantalla.
+  const resuelta = async (ok: ReactNode) => {
+    setError(''); setAbierta(null); setAviso(ok); await cargar()
   }
 
   return (
@@ -81,8 +84,11 @@ export default function Verificacion() {
       </div>
 
       {error && (
-        <div style={{ marginBottom: 14, padding: '10px 13px', border: '1px solid #FF4444',
+        <div role="alert" style={{ marginBottom: 14, padding: '10px 13px', border: '1px solid #FF4444',
           color: '#FF4444', font: `400 12px/1.45 ${FUENTE.ui}` }}>{error}</div>
+      )}
+      {aviso && !abierta && (
+        <div style={{ marginBottom: 14 }}><Aviso tipo="ok" cierra={() => setAviso(null)}>{aviso}</Aviso></div>
       )}
 
       {filas.length === 0 ? (
@@ -126,16 +132,33 @@ export default function Verificacion() {
 
       <Paginador pagina={pagina} porPagina={POR_PAGINA} total={total} cambia={setPagina} />
 
-      {abierta && <Ficha v={abierta} cierra={() => setAbierta(null)} listo={tras} />}
+      {abierta && <Ficha v={abierta} cierra={() => setAbierta(null)} listo={resuelta} />}
     </>
   )
 }
 
+/** Una imagen del expediente: cargando, lista, o NO se pudo cargar. «Sin archivo» es
+ *  otra cosa (nunca hubo imagen o ya se borro) y no se confunde con un fallo. */
+type Imagen = { estado: 'cargando' } | { estado: 'lista'; url: string } | { estado: 'fallo'; error: string }
+
+function useImagen(path: string | null): Imagen | null {
+  const [img, setImg] = useState<Imagen | null>(path ? { estado: 'cargando' } : null)
+  useEffect(() => {
+    if (!path) return
+    let vivo = true
+    urlDocumento('verificacion', path)
+      .then(r => vivo && setImg('url' in r ? { estado: 'lista', url: r.url } : { estado: 'fallo', error: r.error }))
+      .catch(() => vivo && setImg({ estado: 'fallo', error: 'sin conexión' }))
+    return () => { vivo = false }
+  }, [path])
+  return img
+}
+
 function Ficha({ v, cierra, listo }: {
-  v: Verificacion; cierra: () => void; listo: (m: string) => void
+  v: Verificacion; cierra: () => void; listo: (ok: ReactNode) => void | Promise<void>
 }) {
-  const [ine, setIne] = useState<string | null>(null)
-  const [selfie, setSelfie] = useState<string | null>(null)
+  const ine = useImagen(v.ine_path)
+  const selfie = useImagen(v.selfie_path)
   const [dialogo, setDialogo] = useState<'aprobar' | 'rechazar' | null>(null)
   useEscape(true, cierra)
 
@@ -145,13 +168,6 @@ function Ficha({ v, cierra, listo }: {
   const borradas = v.imagenes_borradas_at
     ? `Se borró el ${fecha(v.imagenes_borradas_at)}, al cumplirse el plazo.`
     : 'Sin archivo'
-
-  useEffect(() => {
-    let vivo = true
-    if (v.ine_path) urlDocumento('verificacion', v.ine_path).then(u => vivo && setIne(u))
-    if (v.selfie_path) urlDocumento('verificacion', v.selfie_path).then(u => vivo && setSelfie(u))
-    return () => { vivo = false }
-  }, [v.ine_path, v.selfie_path])
 
   return (
     <div onClick={cierra} style={{
@@ -175,8 +191,8 @@ function Ficha({ v, cierra, listo }: {
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 18 }}>
-          <Documento titulo="Identificación" url={ine} vacio={borradas} />
-          <Documento titulo="Selfie" url={selfie} vacio={borradas} />
+          <Documento titulo="Identificación" imagen={ine} vacio={borradas} />
+          <Documento titulo="Selfie" imagen={selfie} vacio={borradas} />
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 1, marginTop: 16,
@@ -239,34 +255,45 @@ function Ficha({ v, cierra, listo }: {
             {v.nombre}</b>, que coincide con la selfie y que es mayor de edad. A partir de aquí
             puede publicar y cobrar.</>}
           cancela={() => setDialogo(null)}
-          al={m => resolverVerificacion(v.id, true, m || undefined).then(listo)} />
+          al={async m => {
+            const e = await resolverVerificacion(v.id, true, m || undefined)
+            if (e) return e
+            await listo(<>La verificación de {v.nombre} (@{v.handle}) quedó <b>aprobada</b>. Sus imágenes se borran solas.</>)
+          }} />
       )}
       {dialogo === 'rechazar' && (
         <Confirmar titulo="Rechazar la verificación" etiqueta="Rechazar" exigeMotivo
           cuerpo="El motivo le llega a quien lo solicitó, para que sepa qué volver a mandar."
           cancela={() => setDialogo(null)}
-          al={m => resolverVerificacion(v.id, false, m).then(listo)} />
+          al={async m => {
+            const e = await resolverVerificacion(v.id, false, m)
+            if (e) return e
+            await listo(<>La verificación de {v.nombre} (@{v.handle}) quedó <b>rechazada</b>; se le comunicó el motivo. Sus imágenes se borran solas.</>)
+          }} />
       )}
     </div>
   )
 }
 
-function Documento({ titulo, url, vacio = 'Sin archivo' }: {
-  titulo: string; url: string | null; vacio?: string
+function Documento({ titulo, imagen, vacio = 'Sin archivo' }: {
+  titulo: string; imagen: Imagen | null; vacio?: string
 }) {
+  const falla = imagen?.estado === 'fallo'
   return (
     <div>
       <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
         textTransform: 'uppercase', color: COLOR.textoSuave, marginBottom: 6 }}>{titulo}</div>
       <div style={{
-        aspectRatio: '4/3', border: `1px solid ${LINEA.tenue}`, background: COLOR.fondo,
+        aspectRatio: '4/3', border: `1px solid ${falla ? '#FF4444' : LINEA.tenue}`, background: COLOR.fondo,
         display: 'grid', placeItems: 'center', overflow: 'hidden',
       }}>
-        {url
-          ? <img src={url} alt={titulo} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-          : <span style={{ font: `400 11px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave,
-              textAlign: 'center', padding: '0 14px' }}>
-              {vacio}
+        {imagen?.estado === 'lista'
+          ? <img src={imagen.url} alt={titulo} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+          : <span role={falla ? 'alert' : undefined} style={{ font: `400 11px/1.5 ${FUENTE.ui}`,
+              color: falla ? '#FF4444' : COLOR.textoSuave, textAlign: 'center', padding: '0 14px' }}>
+              {imagen?.estado === 'cargando' ? 'Cargando…'
+                : falla ? `No se pudo cargar la imagen (${imagen.error}). Cierra la ficha y vuelve a abrirla; el archivo puede seguir ahí.`
+                : vacio}
             </span>}
       </div>
     </div>
