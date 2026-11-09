@@ -33,7 +33,7 @@ export const RUTAS_PANEL = ['/admin', '/alta-creadora']
 
 export const EXIGE_SESION = [
   '/library', '/chat', '/avisos', '/perfil', '/yo', '/upload', '/upload/album', '/earnings', '/admin', '/wallet',
-  '/estudio', '/estudio/niveles', '/estudio/encargos', '/estudio/blog',
+  '/estudio', '/estudio/niveles', '/estudio/encargos', '/estudio/blog', '/estudio/clips',
   '/estudio/cobro', '/estudio/retirar',
 ]
 
@@ -137,6 +137,7 @@ export const BIBLIOTECA_DE_CREADORA: Destino =
  *  Ninguna pantalla se borro. Cambiaron de sitio, o se piden cuando tocan. */
 export const ESTUDIO: Destino[] = [
   { path: '/upload',       titulo: 'Subir un clip', icono: 'subir', papeles: ['creadora'] },
+  { path: '/estudio/clips', titulo: 'Tus clips',    icono: 'play',  papeles: ['creadora'] },
   { path: '/estudio/blog', titulo: 'Blog',          icono: 'texto', papeles: ['creadora'] },
 ]
 

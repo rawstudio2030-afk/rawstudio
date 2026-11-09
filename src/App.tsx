@@ -28,6 +28,7 @@ const Admin = lazy(() => import('./screens/Admin'))
 import Niveles from './estudio/Niveles'
 import EncargosRedirige from './estudio/EncargosRedirige'
 import Blog from './estudio/Blog'
+import ClipsEstudio from './estudio/Clips'
 import Cobro from './estudio/Cobro'
 import Retirar from './estudio/Retirar'
 import Estudio from './screens/Estudio'
@@ -79,6 +80,7 @@ export const SCREENS = [
   { path: '/estudio/niveles',  n: '21', title: 'Suscripción mensual', el: <Niveles /> },
   { path: '/estudio/encargos', n: '22', title: 'Contenido a la medida', el: <EncargosRedirige /> },
   { path: '/estudio/blog',     n: '23', title: 'Blog', el: <Blog /> },
+  { path: '/estudio/clips',    n: '31', title: 'Tus clips', el: <ClipsEstudio /> },
   { path: '/estudio/cobro',    n: '24', title: 'Cuenta para cobrar', el: <Cobro /> },
   { path: '/estudio/retirar',  n: '25', title: 'Retirar', el: <Retirar /> },
   { path: '/upload',    n: '05', title: 'Upload',         el: <Upload /> },

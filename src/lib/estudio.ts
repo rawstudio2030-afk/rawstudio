@@ -101,6 +101,15 @@ export function canales(
       estado: 'listo',
       nota: 'Al subir eliges tambien si se puede rentar por 48 o 72 horas',
     },
+    {
+      // Lo ya publicado: cambiar el precio, la portada, los datos, dejar de venderlo.
+      clave: 'misclips', titulo: 'Tus clips', icono: 'estudio', ruta: '/estudio/clips',
+      grupo: 'hacer',
+      descripcion: r.clips > 0
+        ? `Precio, portada y más de ${cuantos(r.clips, 'publicación', 'publicaciones')}`
+        : 'Aquí vas a gestionar lo que publiques',
+      estado: 'listo',
+    },
     ...(albumes ? [{
       clave: 'albumes', titulo: 'Álbumes de fotos', icono: 'estudio', ruta: '/upload/album',
       grupo: 'hacer' as const,

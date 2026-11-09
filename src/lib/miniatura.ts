@@ -256,7 +256,22 @@ export async function cuadrosDeVideo(
   archivo: File, cuantos = CUADROS_A_ELEGIR,
 ): Promise<Cuadro[]> {
   const fuente = URL.createObjectURL(archivo)
+  try {
+    return await cuadrosDeUrl(fuente, cuantos)
+  } finally {
+    URL.revokeObjectURL(fuente)
+  }
+}
+
+/** Lo mismo, pero desde una URL: sirve para cambiar la portada de un video que
+ *  YA esta subido (se firma su URL y se sacan los cuadros de ahi). Con una URL
+ *  de otro origen hace falta que el servidor mande CORS; sin el, el canvas
+ *  queda contaminado y no se puede leer: se devuelve lista vacia. */
+export async function cuadrosDeUrl(
+  fuente: string, cuantos = CUADROS_A_ELEGIR,
+): Promise<Cuadro[]> {
   const v = document.createElement('video')
+  v.crossOrigin = 'anonymous'
   v.preload = 'auto'; v.muted = true; v.playsInline = true
 
   const esperar = (ev: string, ms: number) => new Promise<boolean>(res => {
@@ -295,7 +310,24 @@ export async function cuadrosDeVideo(
   } finally {
     v.removeAttribute('src')
     v.load()
-    URL.revokeObjectURL(fuente)
+  }
+}
+
+/** Prepara una imagen que la creadora subio a mano como portada: la NITIDA se
+ *  limita a 720 px de ancho (nunca se agranda una mas chica) y la PUBLICA sale
+ *  a 240. Devuelve null si el navegador no sabe leer el formato. */
+export async function prepararPortada(
+  imagen: File,
+): Promise<{ nitida: File; chica: File } | null> {
+  try {
+    const mapa = await createImageBitmap(imagen)
+    const ancho = mapa.width
+    mapa.close()
+    const nitida = ancho > ANCHO_MAXIMO ? await achicar(imagen, ANCHO_MAXIMO) : imagen
+    const chica = nitida ? await achicar(nitida) : null
+    return nitida && chica ? { nitida, chica } : null
+  } catch {
+    return null
   }
 }
 

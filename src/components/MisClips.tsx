@@ -1,22 +1,28 @@
-/* Estado de los clips propios, para la creadora.
+/* «Tus clips»: lo que la creadora ya subio, y desde aqui lo gestiona.
  *
- * Existe porque la moderacion guarda un motivo cuando rechaza o retira algo, y
- * sin esta pantalla ese motivo no lo leia nadie: la creadora solo veia que su
- * clip no aparecia, sin saber por que ni que corregir. Un rechazo silencioso
- * garantiza que lo vuelva a subir igual.
+ * Nacio para algo mas chico: la moderacion guarda un motivo cuando rechaza o
+ * retira algo, y sin esta pantalla ese motivo no lo leia nadie — la creadora solo
+ * veia que su clip no aparecia, sin saber por que ni que corregir. Eso sigue: cada
+ * fila dice en que estado esta y, si se rechazo, el motivo.
+ *
+ * Ahora tambien es donde se administra lo publicado (precio, renta, portada,
+ * datos, dejar de venderlo, eliminarlo). La creadora no puede hacer UPDATE directo
+ * sobre `clips`: todo pasa por las funciones de la base que valida
+ * `src/lib/misclips.ts`; el panel esta en `GestionarClip`.
+ *
+ * Lista TODOS sus clips, de 30 en 30. Si la lectura falla se dice que fallo: una
+ * lista en blanco leeria como «no has subido nada».
  */
-import { useEffect, useState } from 'react'
-import { supabase } from '../lib/supabase'
+import { useEffect, useRef, useState } from 'react'
 import { useSesion } from '../lib/sesion'
-import { COLOR, LINEA, FUENTE } from '../lib/diseño'
-import { fijarCaducidad, type ModoCaducidad } from '../lib/canales'
+import { COLOR, FUENTE } from '../lib/diseño'
+import { usd } from '../lib/dinero'
+import { cuantos } from '../lib/plural'
+import { urlPortada } from '../lib/clips'
+import { portadaDe } from '../lib/portadas'
+import { misClips, yaCaduco, PAGINA_MIS_CLIPS, type MiClip } from '../lib/misclips'
 import { Pulsable } from './Pulsable'
-
-type Fila = {
-  id: string; title: string; estado: string
-  motivo_rechazo: string | null; created_at: string
-  caduca_at: string | null; caduca_modo: string
-}
+import GestionarClip from './GestionarClip'
 
 const TEXTO: Record<string, { t: string; c: string; nota: string }> = {
   pendiente: { t: 'En revisión', c: '#FFB020',
@@ -28,56 +34,136 @@ const TEXTO: Record<string, { t: string; c: string; nota: string }> = {
     nota: 'Estaba publicado y se retiró.' },
 }
 
-export default function MisClips() {
+/** Como se vende, en una linea: «$20.00 · renta 48 h $0.80», «Gratis», etc. */
+function ventaDe(c: MiClip): string {
+  if (c.formato === 'album') return `${usd(c.price_coins)} · precio fijo`
+  if (c.visibility === 'gratis') return 'Gratis'
+  if (c.visibility === 'suscriptores') return 'Para suscriptores'
+  const renta = c.renta_horas != null && c.renta_coins != null
+    ? ` · renta ${c.renta_horas} h ${usd(c.renta_coins)}` : ''
+  return usd(c.price_coins) + renta
+}
+
+export default function MisClips({ sinRotulo = false }: { sinRotulo?: boolean }) {
   const { sesion } = useSesion()
-  const [filas, setFilas] = useState<Fila[]>([])
+  const uid = sesion?.user.id ?? null
+  const [filas, setFilas] = useState<MiClip[]>([])
   const [cargando, setCargando] = useState(true)
+  const [fallo, setFallo] = useState<string | null>(null)
+  const [intento, setIntento] = useState(0)
+  const [hayMas, setHayMas] = useState(false)
+  const [cargandoMas, setCargandoMas] = useState(false)
+  const [falloMas, setFalloMas] = useState(false)
   const [abierto, setAbierto] = useState<string | null>(null)
-  const [fecha, setFecha] = useState('')
-  const [modo, setModo] = useState<ModoCaducidad>('deja_de_venderse')
-  const [error, setError] = useState('')
+  // «Ahora» no se lee al pintar (da resultados que cambian solos): se fija al
+  // montar y se refresca cada vez que se lee la lista del servidor.
+  const [ahora, setAhora] = useState(() => Date.now())
+  // Cuantas filas hay cargadas, para releer EXACTAMENTE esas tras un cambio.
+  const cargadas = useRef(0)
 
   useEffect(() => {
-    if (!sesion) return
-    recargar()
-  }, [sesion])
+    if (!uid) return
+    let vivo = true
+    const pedidos = Math.max(PAGINA_MIS_CLIPS, cargadas.current)
+    misClips(uid, 0, pedidos).then(r => {
+      if (!vivo) return
+      // Si la relectura falla NO se vacia la lista: se conserva lo que habia.
+      if (r.fallo) { setFallo(r.fallo); setCargando(false); return }
+      setFilas(r.datos); cargadas.current = r.datos.length; setAhora(Date.now())
+      // Si llego completo lo que se pidio, puede haber mas.
+      setHayMas(r.datos.length >= pedidos)
+      setFallo(null); setCargando(false)
+    })
+    return () => { vivo = false }
+  }, [uid, intento])
 
-  const recargar = () => {
-    if (!sesion) return
-    supabase.from('clips')
-      .select('id,title,estado,motivo_rechazo,created_at,caduca_at,caduca_modo')
-      .eq('creator_id', sesion.user.id)
-      .order('created_at', { ascending: false })
-      .limit(30)
-      .then(({ data }) => { setFilas((data ?? []) as Fila[]); setCargando(false) })
+  const recargar = () => setIntento(n => n + 1)
+
+  const verMas = () => {
+    if (!uid || cargandoMas) return
+    setCargandoMas(true); setFalloMas(false)
+    misClips(uid, cargadas.current).then(r => {
+      setCargandoMas(false)
+      if (r.fallo) { setFalloMas(true); return }
+      // Sin duplicar: por si algo se movio entre una pagina y otra.
+      setFilas(prev => {
+        const vistos = new Set(prev.map(f => f.id))
+        const nuevas = r.datos.filter(f => !vistos.has(f.id))
+        cargadas.current = prev.length + nuevas.length
+        return [...prev, ...nuevas]
+      })
+      setHayMas(r.datos.length >= PAGINA_MIS_CLIPS)
+    })
   }
 
-  if (cargando || filas.length === 0) return null
+  const rotulo = sinRotulo ? null : (
+    <div style={{
+      font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 2,
+      textTransform: 'uppercase', color: COLOR.textoSuave, marginBottom: 12,
+    }}>Tus clips</div>
+  )
+
+  if (!uid) return null
+  if (cargando) return <div>{rotulo}<div style={ayuda}>Cargando…</div></div>
+
+  if (fallo && filas.length === 0) {
+    return (
+      <div>
+        {rotulo}
+        <div role="alert" style={aviso}>
+          No pudimos cargar tus clips. No es que no tengas: no conseguimos preguntar.
+        </div>
+        <Pulsable al={recargar} style={reintento}>Reintentar</Pulsable>
+      </div>
+    )
+  }
+  if (filas.length === 0) {
+    return <div>{rotulo}<div style={ayuda}>Todavía no has subido nada.</div></div>
+  }
 
   return (
     <div>
-      <div style={{
-        font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 2,
-        textTransform: 'uppercase', color: COLOR.textoSuave, marginBottom: 12,
-      }}>Tus clips</div>
+      {rotulo}
+      {fallo && (
+        <div role="alert" style={{ ...aviso, marginBottom: 12 }}>
+          No pudimos actualizar la lista. Lo que ves puede estar desfasado.{' '}
+          <Pulsable al={recargar} style={{ ...reintento, display: 'inline', padding: 0 }}>Reintentar</Pulsable>
+        </div>
+      )}
 
       {filas.map(f => {
         const e = TEXTO[f.estado] ?? { t: f.estado, c: COLOR.textoTenue, nota: '' }
+        const detenido = yaCaduco(f.caduca_at, ahora)
+        const portada = portadaDe(f.id, urlPortada(f.cover_path))
+        const abiertoAhora = abierto === f.id
         return (
           <div key={f.id} className="tarjeta-sobria" style={{ padding: '14px 14px', marginBottom: 8 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
-              <span style={{ font: `700 14px/1.3 ${FUENTE.ui}`, color: COLOR.texto }}>
-                {f.title}
-              </span>
-              <span style={{
-                font: `700 10px/1.6 ${FUENTE.ui}`, letterSpacing: 1.1,
-                textTransform: 'uppercase', color: e.c, whiteSpace: 'nowrap',
-              }}>{e.t}</span>
+            <div style={{ display: 'flex', gap: 12 }}>
+              <div role="img" aria-label={`Portada de ${f.title}`} style={{
+                flex: '0 0 auto', width: 48, height: 64, borderRadius: 8,
+                background: `center/cover url("${portada}")`, border: '1px solid rgba(255,255,255,.14)',
+              }} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+                  <span style={{
+                    font: `700 14px/1.3 ${FUENTE.ui}`, color: COLOR.texto,
+                    overflowWrap: 'anywhere', minWidth: 0,
+                  }}>{f.title}</span>
+                  <span style={{
+                    font: `700 10px/1.6 ${FUENTE.ui}`, letterSpacing: 1.1,
+                    textTransform: 'uppercase', color: e.c, whiteSpace: 'nowrap',
+                  }}>{e.t}</span>
+                </div>
+                <div style={{ marginTop: 6, font: `400 12px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
+                  {f.formato === 'album' ? `Álbum · ${cuantos(f.num_fotos, 'foto')}` : 'Video'}
+                  {' · '}{ventaDe(f)}
+                  {detenido && <b style={{ color: '#FFB020' }}> · Dejó de venderse</b>}
+                </div>
+              </div>
             </div>
+
             {(e.nota || f.motivo_rechazo) && (
-              <div style={{
-                marginTop: 6, font: `400 12px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave,
-              }}>
+              <div style={{ marginTop: 8, font: `400 12px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
                 {e.nota}
                 {f.motivo_rechazo && (
                   <div style={{ marginTop: 4, color: COLOR.textoSuave }}>
@@ -87,84 +173,46 @@ export default function MisClips() {
               </div>
             )}
 
-            {/* Caducidad: la creadora decide hasta cuando vive lo que subio. */}
-            {abierto === f.id ? (
-              <div style={{ marginTop: 12, padding: '14px 14px', borderRadius: 12,
-                border: `1px solid ${LINEA.fuerte}`, background: COLOR.fondo }}>
-                <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.6,
-                  textTransform: 'uppercase', color: COLOR.textoSuave }}>
-                  Retirar el
-                </div>
-                <input type="date" value={fecha} className="campo-sobrio"
-                  aria-label="Fecha de retiro"
-                  min={new Date(Date.now() + 86400000).toISOString().slice(0, 10)}
-                  onChange={ev => setFecha(ev.target.value)}
-                  style={{
-                    width: '100%', boxSizing: 'border-box', marginTop: 8, colorScheme: 'dark',
-                    padding: '12px 13px', font: `400 16px/1 ${FUENTE.ui}`,
-                  }} />
-
-                <Pulsable al={() => setModo(m =>
-                  m === 'retiro_total' ? 'deja_de_venderse' : 'retiro_total')}
-                  activado={modo === 'retiro_total'}
-                  style={{
-                    boxSizing: 'border-box', width: '100%', textAlign: 'left',
-                    marginTop: 10, padding: '13px 14px', cursor: 'pointer', borderRadius: 12,
-                    border: `1px solid ${modo === 'retiro_total' ? '#FF4444' : LINEA.media}`,
-                  }}>
-                  <div style={{ font: `700 14px/1.3 ${FUENTE.ui}`,
-                    color: modo === 'retiro_total' ? '#FF4444' : COLOR.texto }}>
-                    {modo === 'retiro_total'
-                      ? 'Quitárselo también a quien lo compró'
-                      : 'Dejar de venderlo'}
-                  </div>
-                  <div style={{ marginTop: 6, font: `400 12px/1.5 ${FUENTE.ui}`,
-                    color: COLOR.textoSuave }}>
-                    {modo === 'retiro_total'
-                      ? 'Nadie podrá verlo, ni quien ya pagó por él. Tienen derecho a que se les devuelva su dinero.'
-                      : 'Desaparece del catálogo y nadie más puede comprarlo. Quien ya lo compró lo conserva: eso fue lo que le vendiste.'}
-                  </div>
-                </Pulsable>
-
-                <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-                  <Pulsable al={async () => {
-                    const m = await fijarCaducidad(f.id,
-                      fecha ? new Date(fecha + 'T23:59:59').toISOString() : null, modo)
-                    if (m) { setError(m); return }
-                    setError(''); setAbierto(null); recargar()
-                  }} className="boton-principal" style={{ flex: 1, fontSize: 12 }}>{fecha ? 'Guardar' : 'Quitar la fecha'}</Pulsable>
-                  <Pulsable al={() => { setAbierto(null); setError('') }} style={{
-                    flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 52,
-                    borderRadius: 14, cursor: 'pointer',
-                    border: `1px solid ${LINEA.fuerte}`, color: COLOR.textoSuave,
-                    font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
-                    textTransform: 'uppercase',
-                  }}>Cancelar</Pulsable>
-                </div>
-                {error && (
-                  <div style={{ marginTop: 9, font: `400 12px/1.45 ${FUENTE.ui}`,
-                    color: '#FF4444' }}>{error}</div>
-                )}
-              </div>
+            {abiertoAhora ? (
+              <GestionarClip clip={f} uid={uid} ahora={ahora}
+                alCambiar={recargar}
+                alEliminado={() => { setAbierto(null); recargar() }}
+                alCerrar={() => setAbierto(null)} />
             ) : (
-              <Pulsable al={() => {
-                setAbierto(f.id)
-                setFecha(f.caduca_at ? f.caduca_at.slice(0, 10) : '')
-                setModo((f.caduca_modo as ModoCaducidad) ?? 'deja_de_venderse')
-                setError('')
-              }} style={{
-                marginTop: 4, padding: '10px 0', font: `400 13px/1.45 ${FUENTE.ui}`, cursor: 'pointer',
-                color: f.caduca_at ? '#FFB020' : COLOR.textoSuave,
-                textDecoration: 'underline', textUnderlineOffset: 4,
-              }}>
-                {f.caduca_at
-                  ? `Se retira el ${new Date(f.caduca_at).toLocaleDateString('es-MX')}`
-                  : 'Ponerle fecha de retiro'}
-              </Pulsable>
+              <Pulsable al={() => setAbierto(f.id)} style={{
+                marginTop: 8, minHeight: 44, padding: '0 16px', cursor: 'pointer', borderRadius: 12,
+                border: '1px solid rgba(255,255,255,.28)', color: COLOR.texto,
+                font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 1.4, textTransform: 'uppercase',
+              }}>Gestionar</Pulsable>
             )}
           </div>
         )
       })}
+
+      {falloMas && (
+        <div role="alert" style={{ ...aviso, marginTop: 8 }}>
+          No pudimos cargar más clips. Lo que ya ves sigue aquí.
+        </div>
+      )}
+      {(hayMas || falloMas) && (
+        <Pulsable al={verMas} activo={!cargandoMas} style={{
+          width: '100%', minHeight: 48, marginTop: 8, cursor: cargandoMas ? 'default' : 'pointer',
+          borderRadius: 12, border: '1px solid rgba(255,255,255,.28)', color: COLOR.textoSuave,
+          opacity: cargandoMas ? .6 : 1,
+          font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 1.4, textTransform: 'uppercase',
+        }}>{cargandoMas ? 'Cargando…' : falloMas ? 'Reintentar' : 'Ver más'}</Pulsable>
+      )}
     </div>
   )
+}
+
+const ayuda: React.CSSProperties = { font: `400 13px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave }
+const aviso: React.CSSProperties = {
+  padding: '12px 14px', borderRadius: 12, border: '1px solid #FF4444', color: '#FF4444',
+  font: `400 13px/1.45 ${FUENTE.ui}`,
+}
+const reintento: React.CSSProperties = {
+  marginTop: 10, padding: '8px 0', cursor: 'pointer', font: `700 12px/1 ${FUENTE.ui}`,
+  letterSpacing: 1.2, textTransform: 'uppercase', color: COLOR.texto,
+  textDecoration: 'underline', textUnderlineOffset: 4,
 }
