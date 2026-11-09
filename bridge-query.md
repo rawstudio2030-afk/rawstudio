@@ -38,6 +38,15 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 
 ## Consultas activas
 
+### [id: 20261109-01] Explorar en orden aleatorio y catálogo completo
+- **fecha:** 2026-11-09 13:32 (America/Mexico_City)
+- **estado:** asignada
+- **tarea:** Que Explorar no muestre siempre los mismos videos: los destacados siguen arriba en el orden de la administración y el resto sale revuelto en cada visita, con «Ver más» para llegar a todo el catálogo.
+- **pregunta:** Implementa la ronda descrita en `bridge-response.md`, entrada [id: 20261109-01]. Es independiente de [id: 20261108-05] (dominio .mx): commits separados, no mezcles archivos de una en la otra. Si 05 sigue a medias, puedes hacer esta antes o después, pero cada una en su commit.
+- **contexto:** HEAD al asignar: `4aa94647`. `Explorar.tsx` llama `clipsPublicados(60)`, que ordena por `destacado_orden` y luego `published_at desc`; no hay paginación, así que de ~190 clips solo se ven los mismos 60 y el resto nunca aparece. Los filtros gratis/pago se aplican en el navegador sobre esos 60. Lo pidió Sergio el 9 nov 2026 (~13:28 hora de México): «siempre salen los mismos videos… que cada que se entre sea aleatorio».
+- **urgencia:** media
+- **ya se intentó:** nada de código; diagnóstico del coordinador en la respuesta.
+
 ### [id: 20261108-05] Dirección pública rawstudio.mx
 - **fecha:** 2026-11-08 18:58 (America/Mexico_City)
 - **estado:** asignada

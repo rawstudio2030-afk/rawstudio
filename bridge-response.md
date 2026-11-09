@@ -30,6 +30,63 @@
 
 ## Respuestas activas
 
+### Respuesta a [id: 20261109-01] — Explorar en orden aleatorio y catálogo completo
+- **fecha:** 2026-11-09 13:32 (America/Mexico_City)
+- **decisión de Sergio:** cada vez que alguien entra a Explorar, el catálogo sale en otro orden, para que no parezca que no hay nada nuevo. Los destacados se quedan arriba, en el orden que les pone la administración.
+
+#### Diagnóstico
+- `src/screens/Explorar.tsx` (~línea 42) pide `clipsPublicados(60)`.
+- `src/lib/clips.ts` `clipsPublicados()` ordena `destacado_orden asc nulls last`, luego `published_at desc`, `limit`. Resultado: siempre los mismos 60, en el mismo orden; ~130 clips nunca se ven en Explorar.
+- Los filtros «gratis» / «pago» filtran en el navegador (`visibles`) sobre esos 60, así que tampoco llegan al resto.
+- `clipsPublicados` también lo usa `ClipDetail.tsx:72` (`clipsPublicados(1)` cuando no hay id). **No lo cambies**; crea una lectura nueva para Explorar.
+
+#### Qué hacer
+
+**1. Migración nueva** `supabase/migrations/20261219000000_explorar_aleatorio.sql` (si ese nombre ya existe por otra ronda, usa el siguiente libre):
+- Función `public.explorar_ids(p_semilla text, p_filtro text default 'todo', p_desde int default 0, p_cuantos int default 30) returns table (id uuid)`.
+- `language sql stable`, **`security invoker`** (no definer: que apliquen la RLS `clips_select_publicados` —que ya saca a creadoras baneadas— y los permisos por columna de `20261104000000_clips_por_columna.sql`), `set search_path = public`.
+- Filtro: `published` y la misma regla de caducidad que `clipsPublicados` (`caduca_at is null or caduca_at > now()`). `p_filtro`: `'gratis'` → `visibility = 'gratis'`; `'pago'` → `visibility = 'pago'`; cualquier otro valor → sin filtro. Es exactamente lo que hace hoy `visibles` en el navegador; no cambies su significado.
+- Orden: `destacado_orden asc nulls last`, luego `md5(coalesce(p_semilla, '') || id::text)`, luego `id` (desempate). Así el orden es estable para una misma semilla (la paginación no repite ni salta clips) y distinto con otra semilla.
+- Límites: `p_desde` menor que 0 cuenta como 0; `p_cuantos` acotado entre 1 y 60.
+- `grant execute ... to anon, authenticated`. Comprueba que las columnas que toca (`id, published, caduca_at, destacado_orden, visibility`) tienen `grant select` para `anon` en las concesiones por columna; si alguna falta, dilo en la respuesta en vez de abrir permisos de más.
+- Sin `order by random()`: la semilla es lo que da estabilidad entre páginas.
+
+**2. `src/lib/clips.ts`**: función nueva `clipsExplorar(semilla, filtro, desde, cuantos = 30): Promise<Lectura<ClipConAutora[]>>`:
+- Llama `explorar_ids`; con esos ids hace `.from('clips').select(CON_AUTORA).in('id', ids)` y **reordena en el orden de los ids** (el `in` no conserva orden).
+- Lista vacía de ids → `leido([])` sin segunda consulta.
+- Errores con el patrón existente `noSePudo(...)`: un fallo nunca se presenta como «no hay clips».
+
+**3. Semilla** (en `src/lib/clips.ts` o un archivo chico propio):
+- Se guarda en `sessionStorage` con clave `rawstudio.explorar_semilla` junto con la hora de último uso.
+- Se crea nueva (`crypto.randomUUID()`) si no existe o si pasaron más de 30 minutos desde el último uso. Cada uso refresca la hora.
+- Efecto buscado: al abrir el sitio o volver a Explorar después de un rato, otro orden; al abrir un clip y regresar con «atrás», **el mismo orden** (no reacomodar lo que la persona estaba viendo).
+- Si `sessionStorage` falla (modo privado raro), usar una semilla en memoria; no romper la pantalla.
+
+**4. `src/screens/Explorar.tsx`**:
+- Reemplaza `clipsPublicados(60)` por `clipsExplorar(semilla, filtro, 0)`. Cambiar de pestaña (todo/gratis/pago) vuelve a pedir desde 0 con la **misma** semilla; el filtro ya viene hecho del servidor, así que `visibles` deja de filtrar (o se elimina).
+- Botón «Ver más» al pie de la rejilla mientras la última página haya venido llena (30). Agrega sin duplicar (descarta ids repetidos por si acaso). Mientras carga: «Cargando…» en el botón, deshabilitado.
+- Si falla «Ver más», **no borres** lo ya cargado: muestra el aviso en línea con «Reintentar» para esa página.
+- Si falla la primera página, el mensaje actual («No pudimos cargar el catálogo. No es que esté vacío…») con «Reintentar».
+- Textos vacíos: «Todavía nadie ha publicado nada.» solo con filtro `todo`, sin fallo y primera página vacía; con filtro, «No hay clips con ese filtro.» Igual que hoy.
+- No hace falta scroll infinito ni restaurar cuántas páginas llevaba al volver; con la misma semilla basta. No cambies diseño de tarjetas, portadas, insignias ni la pestaña «creadoras».
+
+#### No tocar
+- `clipsPublicados` ni `ClipDetail.tsx`; precios; portadas; cómo la administración elige y ordena los destacados; archivos de [id: 20261108-05].
+- No registres visitas ni clics para «personalizar»: no se acordó medir comportamiento.
+
+#### Criterios de aceptación
+1. Con dos semillas distintas, el orden de los no destacados cambia; con la misma semilla, es idéntico.
+2. Recorriendo todas las páginas con una semilla y un filtro: sin repetidos, sin huecos, y el total coincide con `count(*)` de clips visibles para ese filtro.
+3. Destacados siempre primero, en su `destacado_orden`.
+4. Sin sesión (`anon`) funciona; clips caducados y de cuentas baneadas no salen.
+5. Abrir un clip y volver con «atrás» conserva el orden.
+6. `npm run build` (typecheck estricto) pasa.
+
+#### Entrega
+- Commit sugerido: `feat: explorar en orden aleatorio`.
+- La migración se aplica con `supabase db push` **solo con la aprobación de Omar**, como en rondas anteriores; luego `git push origin main`. Sin la migración aplicada, el frontend nuevo fallaría: publica el frontend después de aplicar la migración, no antes.
+- Marca la consulta `respondida` con el commit y si ya quedó aplicada.
+
 ### Respuesta a [id: 20261108-05] — Dirección pública rawstudio.mx
 - **fecha:** 2026-11-08 18:58 (America/Mexico_City)
 - **estado:** lista-para-claude
