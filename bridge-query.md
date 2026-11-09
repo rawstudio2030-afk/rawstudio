@@ -38,7 +38,7 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 
 ## Consultas activas
 
-### [id: 20261109-02] Gestionar mis clips desde el Estudio — hecha, pendiente de aplicar
+### [id: 20261109-02] Gestionar mis clips desde el Estudio — hecha y aplicada
 - **fecha:** 2026-11-09 13:45 (America/Mexico_City)
 - **estado:** respondida
 - **tarea:** Que la creadora pueda administrar lo que ya publicó desde el Estudio: editar título y descripción, cambiar precio, activar o quitar la renta, cambiar la portada, dejar de venderlo y eliminarlo, con explicaciones claras de qué pasa con quien ya compró.
@@ -46,7 +46,7 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 - **contexto:** HEAD al asignar: `d7accd37`. Desde `20261115000000_escrituras_de_clips_y_saldo.sql` la creadora no tiene `update` sobre `clips` (solo insert por columnas y delete por política). `MisClips.tsx` solo muestra estado, motivo de rechazo y fecha de retiro (30 filas). Pedido por Sergio el 9 nov 2026 (~13:33 hora de México): «no hay nada claro en el estudio… cambiarlo de venta a renta, cambiar la portada, eliminarlos, etc».
 - **urgencia:** media
 - **ya se intentó:** nada de código; diagnóstico del coordinador en la respuesta.
-- **resultado:** HECHA en un commit propio, `f4da274` (`feat: gestionar mis clips desde el estudio`), **solo local: NO empujado y la migración NO aplicada** (espera la aprobación de Omar; el frontend va después de aplicarla).
+- **resultado:** HECHA en un commit propio, `f4da274` (`feat: gestionar mis clips desde el estudio`), **APLICADA y PUBLICADA el 2026-11-09 con la aprobación de Omar:** `supabase db push` (`20261219` y `20261220`) y luego `git push origin 4a5f71c:main` (el frontend, después de la migración). Solo se empujó hasta el commit de docs de estas dos rondas: el `CNAME` de 20261108-05 y el correo .mx **siguen sin publicar**. Verificado en producción en solo lectura con la llave pública: `explorar_ids` recorre las 7 páginas de 30 (186 clips = los 186 publicados, sin el tope de 60 de antes), misma semilla = mismo orden y otra semilla = otro; hoy no hay clips gratis ni de suscriptores (los 186 son de pago), por eso «Gratis» da 0. `editar_mi_clip` sin sesión → 42501 y `UPDATE` directo a `clips` → 42501. **No probado en producción con una cuenta real:** editar, cambiar portada, dejar de vender y eliminar (hace falta una sesión de creadora).
 - **diff resumido:**
   - **`supabase/migrations/20261220000000_gestionar_mis_clips.sql`** (todas `security definer`, `set search_path = ''`, `grant … to authenticated`, `revoke … from public, anon`; sin devolver `update` al cliente): `editar_mi_clip` (título 1–90, descripción ≤600 y vacía → `null`; `pago`/`suscriptores`/`gratis`; precio 1000/2000/4000 **o el que el clip ya tiene** si es de pago y > 0; renta 48/72 con coins > 0 y < precio, o las dos `null`; gratis fuerza precio 0 y sin renta; **álbum: solo título y descripción**, lo demás se rechaza con mensaje), `cambiar_mi_portada` (carpeta de la creadora y existencia en `storage.objects` de **los dos** buckets; no borra portadas viejas), `dejar_de_vender_mi_clip` (`caduca_at = now()`, `deja_de_venderse`) y `mi_clip_tiene_historial`. Todas exigen: existe, `creator_id = auth.uid()`, `cuenta_activa`, `borrado_at is null`; error en español claro si no. `admin_log`: `editar_clip`, `cambiar_portada`, `dejar_de_vender_clip`, con **antes y después solo de lo que cambió** (si no cambia nada, no registra). No tocan `estado`, `published`, moderación, destacados ni la caducidad programada.
   - **Un solo criterio de historial:** `clip_tiene_historial(uuid)` (compras, rentas, reportes, reembolsos) y **`clips_no_borrar_con_historial` ahora la llama**: mismo comportamiento que en 20261120 (probado: renta o reporte → borrado lógico; sin nada → se borra).
@@ -65,7 +65,7 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
   4. **Descripción vacía → `null`** como pedía la ronda: no se vuelve a poner la frase genérica «Video de {nombre}» que `Upload` usa al publicar. Si debe ponerse al editar, es un cambio de una línea.
   5. Un álbum no ofrece cambiar portada desde la pantalla (la portada sale de una foto, no de un video); la función del servidor sí acepta una ruta válida.
 
-### [id: 20261109-01] Explorar en orden aleatorio y catálogo completo — hecha, pendiente de aplicar
+### [id: 20261109-01] Explorar en orden aleatorio y catálogo completo — hecha y aplicada
 - **fecha:** 2026-11-09 13:32 (America/Mexico_City)
 - **estado:** respondida
 - **tarea:** Que Explorar no muestre siempre los mismos videos: los destacados siguen arriba en el orden de la administración y el resto sale revuelto en cada visita, con «Ver más» para llegar a todo el catálogo.
@@ -73,7 +73,7 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 - **contexto:** HEAD al asignar: `4aa94647`. `Explorar.tsx` llama `clipsPublicados(60)`, que ordena por `destacado_orden` y luego `published_at desc`; no hay paginación, así que de ~190 clips solo se ven los mismos 60 y el resto nunca aparece. Los filtros gratis/pago se aplican en el navegador sobre esos 60. Lo pidió Sergio el 9 nov 2026 (~13:28 hora de México): «siempre salen los mismos videos… que cada que se entre sea aleatorio».
 - **urgencia:** media
 - **ya se intentó:** nada de código; diagnóstico del coordinador en la respuesta.
-- **resultado:** HECHA en un commit propio, `43a7dd0` (`feat: explorar en orden aleatorio`), **solo local: NO empujado y la migración NO aplicada**. Sin la migración, el frontend nuevo fallaría: se publica **después** de aplicarla.
+- **resultado:** HECHA en un commit propio, `43a7dd0` (`feat: explorar en orden aleatorio`), **APLICADA y PUBLICADA el 2026-11-09 con la aprobación de Omar** (migración primero, frontend después, junto con la ronda 20261109-02; verificación en producción en la entrada de esa ronda: 7 páginas, 186 clips).
 - **diff resumido:**
   - **`supabase/migrations/20261219000000_explorar_aleatorio.sql`:** `public.explorar_ids(p_semilla text, p_filtro text default 'todo', p_desde int default 0, p_cuantos int default 30) returns table (id uuid)`, `language sql stable`, **`security invoker`**, `set search_path = public`. Filtro: `published` y `caduca_at is null or caduca_at > now()`; `'gratis'`/`'pago'` por `visibility`, cualquier otro valor sin filtro. Orden: `destacado_orden asc nulls last`, `md5(coalesce(p_semilla,'') || id::text)`, `id`. `p_desde` < 0 cuenta como 0; `p_cuantos` acotado a 1–60. `grant execute` a `anon, authenticated`; sin `order by random()`.
   - **`src/lib/clips.ts`:** `clipsExplorar(semilla, filtro, desde, cuantos = 30)`: llama a `explorar_ids`, pide las filas con `CON_AUTORA` y **las reordena según los ids**; lista vacía → sin segunda consulta; errores con `noSePudo`. **`clipsPublicados` y `ClipDetail.tsx` no se tocaron.**
