@@ -38,6 +38,15 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 
 ## Consultas activas
 
+### [id: 20261109-02] Gestionar mis clips desde el Estudio
+- **fecha:** 2026-11-09 13:45 (America/Mexico_City)
+- **estado:** asignada
+- **tarea:** Que la creadora pueda administrar lo que ya publicó desde el Estudio: editar título y descripción, cambiar precio, activar o quitar la renta, cambiar la portada, dejar de venderlo y eliminarlo, con explicaciones claras de qué pasa con quien ya compró.
+- **pregunta:** Implementa la ronda descrita en `bridge-response.md`, entrada [id: 20261109-02]. Es independiente de [id: 20261108-05] y [id: 20261109-01]: commit propio.
+- **contexto:** HEAD al asignar: `d7accd37`. Desde `20261115000000_escrituras_de_clips_y_saldo.sql` la creadora no tiene `update` sobre `clips` (solo insert por columnas y delete por política). `MisClips.tsx` solo muestra estado, motivo de rechazo y fecha de retiro (30 filas). Pedido por Sergio el 9 nov 2026 (~13:33 hora de México): «no hay nada claro en el estudio… cambiarlo de venta a renta, cambiar la portada, eliminarlos, etc».
+- **urgencia:** media
+- **ya se intentó:** nada de código; diagnóstico del coordinador en la respuesta.
+
 ### [id: 20261109-01] Explorar en orden aleatorio y catálogo completo
 - **fecha:** 2026-11-09 13:32 (America/Mexico_City)
 - **estado:** asignada

@@ -30,6 +30,69 @@
 
 ## Respuestas activas
 
+### Respuesta a [id: 20261109-02] — Gestionar mis clips desde el Estudio
+- **fecha:** 2026-11-09 13:45 (America/Mexico_City)
+- **decisión de Sergio:** las creadoras deben poder gestionar su material ya subido desde el Estudio (venta/renta, portada, eliminar, etc.), con una pantalla clara.
+
+#### Diagnóstico
+- `src/components/MisClips.tsx` (dentro de Estudio) lista hasta 30 clips con estado, motivo de rechazo y «Ponerle fecha de retiro» (`fijar_caducidad`). No hay portada, precio, renta, edición ni eliminar.
+- `20261115000000_escrituras_de_clips_y_saldo.sql` revocó `update` sobre `clips` a `authenticated`: la creadora **no puede** editar por la API. Cualquier edición tiene que ir por funciones `security definer` que validen dueña y columnas. No devuelvas `update` por columnas al cliente.
+- `borrarClip()` (`src/lib/clips.ts`) hace `delete`. El disparador `clips_no_borrar_con_historial` (20261120) convierte ese borrado en borrado lógico con `purgar_despues_de = now() + 30 días` cuando hay compras, rentas, reportes o reembolsos. Verifica qué pasa con el acceso de quien ya compró en ese caso (`tiene_acceso` / `clip_vigente` / la purga). La ficha y la FAQ prometen «para siempre», así que la creadora no debe poder quitarle el clip a quien pagó sin pasar por el flujo que ya existe de «Quitárselo también a quien lo compró» (retiro total con reembolso).
+- La renta hoy es un **añadido** a la venta (`Upload.tsx`: «También en renta», 48 o 72 h, `renta_coins`). No existe «solo renta». «Cambiar de venta a renta» se resuelve como activar/quitar la renta y fijar sus horas y precio; no inventes un modo solo-renta ni cambies `comprar_clip` / `rentar_clip`.
+- Precios de video: `src/lib/precios.ts` (`PRECIOS_VIDEO` 10/20/40, `PRECIO_INICIAL` 20). Álbumes tienen precio fijo de la plataforma (`configAlbumes().precio`).
+- Portadas: rutas iguales en `clip-covers` (pública 240 px, `achicar()`) y `clip-covers-full` (privada ≤720). `Upload.tsx` ya sabe elegir cuadro (`portadaDiscretaDeVideo` / `elegirCuadro`) o subir imagen, y escribir las dos copias en el orden correcto (primero la privada). Reutiliza eso; no dupliques la lógica.
+- Bitácora: `admin_log` (como `registra_subida_clip` y `fijar_caducidad`).
+
+#### Qué hacer
+
+**1. Migración nueva** (siguiente nombre libre después de las de 20261109-01; p. ej. `20261220000000_gestionar_mis_clips.sql`). Todas `security definer`, `set search_path = ''`, `grant execute ... to authenticated`, `revoke ... from public, anon`. En todas: el clip existe, `creator_id = auth.uid()`, `public.cuenta_activa(auth.uid())`, `borrado_at is null`; si no, error en español claro.
+- `editar_mi_clip(p_clip uuid, p_titulo text, p_descripcion text, p_visibilidad text, p_precio int, p_renta_horas int, p_renta_coins int)`:
+  - Título 1–90 y descripción ≤600 (las mismas reglas de la tabla); descripción vacía → `null`.
+  - Visibilidad solo entre las que ofrece `Upload` para video (`pago`, `suscriptores`, `gratis`). `gratis` fuerza precio 0 y sin renta.
+  - Precio: para `pago`, uno de 1000/2000/4000 **o** el precio que el clip ya tiene (para no obligar a cambiar un precio puesto a mano). No inventes rangos libres nuevos.
+  - Renta: `p_renta_horas` en (48, 72) con `p_renta_coins > 0` y menor que el precio de venta, o las dos `null` para quitarla. Solo con `pago`.
+  - Álbumes (`formato = 'album'`): solo título y descripción; precio, visibilidad y renta se rechazan con mensaje claro.
+  - No toques `estado`, moderación, `published`, destacados ni caducidad.
+  - Registra en `admin_log` (`accion = 'editar_clip'`, antes/después de los campos cambiados).
+  - Cambiar precio o quitar renta **no** afecta compras ni rentas ya hechas: dilo en la interfaz.
+- `cambiar_mi_portada(p_clip uuid, p_cover_path text)`: la ruta debe estar en la carpeta de la creadora (ya lo vigila `clips_archivos_en_su_carpeta`) y existir en `clip-covers` y `clip-covers-full` (comprueba en `storage.objects`). Actualiza `cover_path` y registra `cambiar_portada` en `admin_log`. Las portadas viejas no se borran en esta ronda.
+- `dejar_de_vender_mi_clip(p_clip uuid)`: equivale a retirarlo del catálogo **ya** con `caduca_modo = 'deja_de_venderse'` (`caduca_at = now()`), sin quitarle acceso a quien compró. Si `fijar_caducidad` exige fecha futura, esta función es la vía para «ahora». Registra en `admin_log`. Comprueba con `clip_vigente` / `tiene_acceso` que quien compró conserva el acceso y que nadie más puede comprar ni rentar.
+- `mi_clip_tiene_historial(p_clip uuid) returns boolean` (o un campo calculado en la lista) con el mismo criterio que `clips_no_borrar_con_historial`.
+
+**2. `src/lib/`** (`clips.ts` o un archivo nuevo `misclips.ts`): envolturas tipadas de esas funciones con el patrón de errores existente; un fallo nunca se pinta como éxito.
+
+**3. Pantalla: rehacer `MisClips.tsx`** como «Tus clips» gestionable (sigue dentro de Estudio):
+- Lista de **todos** sus clips (con «Ver más» de 30 en 30), cada uno con portada pequeña, título, estado, tipo (video/álbum), precio y renta si tiene. Mantén el estado y el motivo de rechazo actuales.
+- Al tocar un clip se abre un panel «Gestionar» con secciones:
+  - **Datos:** título y descripción.
+  - **Precio y renta:** los tres botones 10/20/40 (más el precio actual si es otro), gratis/pago/suscriptores, interruptor «También en renta» con 48/72 h y precio, igual que en `Upload`. Aviso: «Los cambios aplican a compras nuevas. Quien ya compró o rentó conserva lo que pagó».
+  - **Portada:** vista de la actual; «Elegir otro cuadro del video» (reusar la extracción de `Upload`; para eso firma la URL del propio video como hace la administración con `urlVideoFirmada` o el equivalente para la dueña) y «Subir una imagen». Escribe las dos copias y luego llama `cambiar_mi_portada`.
+  - **Fecha de retiro:** la de hoy, sin cambios de comportamiento.
+  - **Quitar:**
+    - Sin historial: «Eliminar» con confirmación («Se borra para siempre. No se puede deshacer»), usando `borrarClip`.
+    - Con historial: no ofrezcas «Eliminar». Ofrece «Dejar de venderlo ya» (`dejar_de_vender_mi_clip`), explicando: «Desaparece del catálogo y nadie más puede comprarlo. Quien ya lo compró lo conserva». Para quitárselo también a quien compró, remite al flujo existente de retiro total (fecha de retiro + «Quitárselo también a quien lo compró»), sin texto nuevo sobre reembolsos más allá del que ya existe.
+- Errores: visibles dentro del panel (no detrás de un modal; recuerda lo de 08-03). Tras guardar, confirmación corta y la lista se actualiza.
+- Mismo estilo Miami Neon del Estudio; funciona en teléfono (el Estudio no es el panel de administración, ahí sí aplica responsive).
+
+#### No tocar
+- `comprar_clip`, `rentar_clip`, comisiones, ledger, moderación, destacados.
+- No devuelvas permisos de `update` sobre `clips` al cliente.
+- No inventes textos legales ni políticas de reembolso nuevas.
+- Archivos de [id: 20261108-05] y [id: 20261109-01].
+
+#### Criterios de aceptación
+1. Una creadora edita título, descripción, precio y renta de un video suyo y se ve en su ficha pública; no puede hacerlo sobre un clip de otra (error claro).
+2. Precio fuera de 10/20/40 (y distinto del actual) se rechaza; álbum rechaza precio/visibilidad/renta.
+3. Cambiar la portada actualiza la pública (240) y la privada (≤720).
+4. Clip sin historial: «Eliminar» lo borra. Clip con compras: no aparece «Eliminar»; «Dejar de venderlo ya» lo saca del catálogo y quien compró lo sigue viendo.
+5. Cada cambio queda en `admin_log` (Bitácora).
+6. `npm run build` pasa.
+
+#### Entrega
+- Commit sugerido: `feat: gestionar mis clips desde el estudio`.
+- Migración con `supabase db push` **solo con la aprobación de Omar**; publica el frontend después de aplicarla.
+- Marca la consulta `respondida` con el commit; anota cualquier diferencia que encuentres con este diagnóstico (en especial qué pasa hoy con el acceso de compradores en un borrado lógico).
+
 ### Respuesta a [id: 20261109-01] — Explorar en orden aleatorio y catálogo completo
 - **fecha:** 2026-11-09 13:32 (America/Mexico_City)
 - **decisión de Sergio:** cada vez que alguien entra a Explorar, el catálogo sale en otro orden, para que no parezca que no hay nada nuevo. Los destacados se quedan arriba, en el orden que les pone la administración.
