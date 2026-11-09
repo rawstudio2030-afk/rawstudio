@@ -38,14 +38,23 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 
 ## Consultas activas
 
+### [id: 20261109-05] Videos de hasta 2 GB
+- **fecha:** 2026-11-09 17:30 (America/Mexico_City)
+- **estado:** asignada
+- **tarea:** Subir el tope de video a 2 GB (2048 MiB): bucket `clips`, validación en cliente y copy unificada. Omar debe alinear el global de Storage en el dashboard.
+- **pregunta:** Implementa la ronda descrita en `bridge-response.md`, entrada [id: 20261109-05]. Commit propio. Va **después** de [id: 20261109-04] (TUS). No mezcles con 09-03 ni 08-05.
+- **contexto:** HEAD al asignar: `d2e7af2`. Bucket hoy 2000 MiB; UI ya dice «2 GB» sin validar. Sergio pidió 1 GB y luego 2 GB (9 nov 2026, ~17:24–17:30 hora de México).
+- **urgencia:** alta
+- **ya se intentó:** nada de código; diagnóstico del coordinador (2000 vs 2048, global del dashboard, TUS en 09-04).
+
 ### [id: 20261109-04] Barra de progreso al subir videos
 - **fecha:** 2026-11-09 17:20 (America/Mexico_City)
 - **estado:** asignada
-- **tarea:** Mostrar una barra de progreso real (%, MB, etapa, cancelar) mientras se sube un video, para que no parezca que la página se trabó.
-- **pregunta:** Implementa la ronda descrita en `bridge-response.md`, entrada [id: 20261109-04]. Commit propio. No mezcles con [id: 20261109-03] ni [id: 20261108-05].
-- **contexto:** HEAD al asignar: `c5b1156`. El formulario de la creadora (`Upload.tsx` → `subirArchivo` → `storage.upload`) no reporta bytes; el admin ya sube con URL firmada + XHR y % en texto (`publicarPara` en `admin.ts`). Buckets: `clips` hasta 2000 MiB. Lo pidió Sergio el 9 nov 2026 (~17:16 hora de México): «mientras se sube el video, aparezca una barra de progreso… se podría pensar que la página se trabó».
+- **tarea:** Barra de progreso real al subir videos; **enmienda 17:30:** la transferencia de video va por **TUS resumible** (`tus-js-client`), no por XHR. Archivos chicos pueden seguir en XHR/`.upload()`.
+- **pregunta:** Implementa la ronda descrita en `bridge-response.md`, entrada [id: 20261109-04] (lee la enmienda 17:30). Commit propio. No mezcles con [id: 20261109-05] (límite 2 GB), [id: 20261109-03] ni [id: 20261108-05].
+- **contexto:** HEAD al asignar: `c5b1156`. Creadora sin progreso de bytes; admin con XHR+%. Enmienda: con tope a 2 GB (09-05), una sola petición a ese tamaño es frágil → TUS con reanudación. Lo pidió Sergio el 9 nov 2026 (~17:16; enmienda ~17:30 hora de México).
 - **urgencia:** alta
-- **ya se intentó:** nada de esta ronda; el % del admin es el precedente a reutilizar (barra visual + creadora).
+- **ya se intentó:** nada de esta ronda; el % del admin queda como precedente de UX, no del protocolo.
 
 ### [id: 20261109-03] Blindar borrado y moderar ediciones de clips
 - **fecha:** 2026-11-09 17:15 (America/Mexico_City)

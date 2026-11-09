@@ -30,9 +30,70 @@
 
 ## Respuestas activas
 
+### Respuesta a [id: 20261109-05] — Videos de hasta 2 GB
+- **fecha:** 2026-11-09 17:30 (America/Mexico_City)
+- **decisión de Sergio:** el tamaño máximo de video pasa a **2 GB** (2048 MiB). Antes dijo 1 GB; luego pidió 2 GB.
+
+#### Diagnóstico (no lo reescribas: úsalo)
+1. Bucket `clips`: `file_size_limit = 2000 * 1024 * 1024` (2000 MiB) en `20260823000000_clips.sql:117`. **Ninguna migración posterior lo cambia.** 2000 MiB ≠ 2048 MiB: un archivo de exactamente 2 GiB lo rechazaría el bucket.
+2. Copy: `Upload.tsx:295` y `PublicarPor.tsx:239` ya dicen «hasta 2 GB»; **no hay** `if (file.size > …)` en el cliente. `AltaCreadora` ni menciona tope.
+3. Tope global del proyecto (Storage Settings en el dashboard) **no está en el repo**. Free ≤ 50 MB/archivo; Pro permite subir el global hasta 500 GB. El bucket no puede superar el global. Si el global sigue en 50 MB, **ningún cambio de código basta**.
+4. Ajuste `limite_almacenamiento_mb` (default 1024) solo avisa del **cupo total** del plan en el panel (`20261003000000_uso_almacenamiento.sql`); no es el límite por archivo.
+5. La transferencia de video grande la implementa [id: 20261109-04] con **TUS**. Esta ronda solo sube el techo y valida en cliente.
+
+#### Qué hacer
+
+**1. Migración** (solo con aprobación de Omar), p. ej. `supabase/migrations/20261222000000_clips_2gb.sql`:
+```sql
+update storage.buckets
+   set file_size_limit = 2048 * 1024 * 1024
+ where id = 'clips';
+```
+Idempotente. No toques otros buckets.
+
+**2. Frontend — una sola constante** (p. ej. en `src/lib/clips.ts` o `src/lib/video.ts`):
+- `export const MAX_VIDEO_BYTES = 2048 * 1024 * 1024` // 2 GiB
+- Antes de subir, en **todos** estos sitios, rechaza si `archivo.size > MAX_VIDEO_BYTES` con mensaje amable, p. ej. `Este video pesa X GB; el máximo es 2 GB.` (formatea X con 1 decimal; si es < 1 GB, di MB):
+  - `src/screens/Upload.tsx`
+  - `src/admin/PublicarPor.tsx`
+  - `src/screens/AltaCreadora.tsx`
+  - `src/admin/SubidaMasiva.tsx` y/o dentro de `publicarPara` (`src/lib/admin.ts`) para no olvidar ningún camino
+- Copy unificada **«hasta 2 GB»** (o «MP4, MOV o WebM · hasta 2 GB») también en AltaCreadora.
+- No inventes un tope distinto en cada pantalla.
+
+**3. Para Omar en el dashboard de Supabase** (tú no lo haces; déjalo escrito en el resultado):
+- [ ] Confirmar plan **Pro** (o superior). En Free el global no puede pasar de 50 MB.
+- [ ] Storage → Settings: **Global file size limit ≥ 2 GB** (2048 MiB o más).
+- [ ] Revisar cupo total de almacenamiento del plan vs uso actual; si el aviso del panel usa `limite_almacenamiento_mb = 1024`, actualizarlo al cupo real (p. ej. 102400 en Pro de 100 GB) para que la alarma no mienta.
+- [ ] Aplicar la migración de esta ronda (`supabase db push`) con su aprobación, **después** de subir el global (si el global < bucket, el update del bucket puede fallar o quedar inútil).
+
+#### No tocar
+- Límites de `albumes`, `avatars`, `clip-covers`, `clip-covers-full`, `verificacion`, `expedientes`.
+- Funciones de reproducción (`ver-clip`), precios, moderación, RLS, dominio, correo.
+- No reabras 09-03 ni 08-05. La barra/TUS es [id: 20261109-04] (implementa 04 antes o en commit previo).
+
+#### Criterios de aceptación
+1. Migración aplicada: `file_size_limit` de `clips` = 2048 MiB.
+2. Archivo de **~1,9 GB** se acepta en cliente y, con 09-04, sube con progreso y **reanuda** tras cortar red (prueba conjunta o simulada).
+3. Archivo de **~2,1 GB** se **rechaza en el cliente** antes de transferir, con el mensaje de máximo 2 GB.
+4. Copy «hasta 2 GB» alineada en creadora y admin (incl. AltaCreadora).
+5. En el resultado: checklist de Omar del dashboard marcado como pendiente o hecho.
+6. `npm run build` / typecheck pasan.
+
+#### Entrega
+- Commit sugerido: `feat: videos de hasta 2 gb`.
+- Migración solo con Omar. Frontend después (o junto si el global ya está).
+- Marca [id: 20261109-05] `respondida` con SHA y verificación.
+
+#### Siguiente paso para Claude Code
+1. `git pull`. Preferible: terminar [id: 20261109-04] (TUS) y luego esta, cada una en su commit.
+2. Coordina con Omar el global ≥ 2 GB y el `db push`.
+3. Deja el resultado en `bridge-query.md`.
+
 ### Respuesta a [id: 20261109-04] — Barra de progreso al subir videos
 - **fecha:** 2026-11-09 17:20 (America/Mexico_City)
 - **decisión de Sergio:** mientras se sube un video debe verse una barra de progreso real; si no, parece que la página se trabó.
+- **enmienda:** 2026-11-09 17:30 — videos van por TUS resumible (ver «Enmienda 17:30»); XHR solo para archivos chicos. Motivo: tope de producto a 2 GB ([id: 20261109-05]).
 
 #### Diagnóstico (no lo reescribas: úsalo)
 1. **Formulario de la creadora** (`src/screens/Upload.tsx`): llama `subirArchivo('clips', …)` → `supabase.storage.from(bucket).upload(...)` en `src/lib/clips.ts:241-250`. El cliente de Supabase **no** expone progreso de bytes. La UI solo cambia el texto del botón (`paso`: «Subiendo el video…», «Subiendo la portada…», «Publicando…») y deshabilita el envío con `estado === 'subiendo'`. No hay barra, no hay %, no hay MB, no hay Cancelar, no hay `beforeunload`.
@@ -48,79 +109,73 @@
 6. **No hay `tus-js-client`** en `package.json`. `@supabase/supabase-js` ^2.112.3; `.upload()` no tiene callback de progreso. El endpoint resumible de Storage (`/storage/v1/upload/resumable`) existiría en el proyecto, pero **no se usa**.
 7. Errores hoy: se pinta el mensaje y se queda el formulario; los archivos ya subidos en un fallo a mitad (video ok, portada o `crearClip` falla) **no se limpian** en el camino de la creadora (el admin sí llama `limpiar()` en `publicarPara`). Abandonar la pestaña a mitad no avisa.
 
+#### Enmienda 17:30 (America/Mexico_City) — subida reanudable (TUS)
+Sergio decidió videos de hasta **2 GB** ([id: 20261109-05]). Una sola petición XHR (o `storage.upload`) a ese tamaño es frágil: un corte de red, cambio de Wi‑Fi o un proxy/CDN que cierre la conexión obliga a **reiniciar desde cero** y parece que «la página se trabó» justo cuando más se necesita confianza. Supabase recomienda TUS para archivos > ~6 MB. Por eso esta ronda **deja de pedir XHR para video** y exige `tus-js-client` contra el endpoint resumible. El diagnóstico de arriba sigue válido; cambia solo el mecanismo de transferencia del **video**.
+
 #### Enfoque elegido (justificación)
-**Reutilizar y generalizar el patrón ya probado del admin: URL firmada + XHR con `upload.onprogress`.** No introducir TUS en esta ronda.
+**Videos: TUS resumible (`tus-js-client` → `/storage/v1/upload/resumable`). Archivos chicos (portadas, fotos de álbum, avatar, verificación, expedientes): XHR con URL firmada o `.upload()` como hoy — no hace falta TUS.**
 
-- Encaja con el código: mismos buckets, mismas rutas `{uid}/{uuid}.ext`, mismo `upsert: false` (o el que ya use cada camino), mismos permisos RLS (se evalúan al crear la URL firmada).
-- El video puede llegar a **2 GB**: una barra con % y MB ya cubre «la página no está trabada». TUS aportaría reanudar tras un corte de red, pero exige dependencia nueva, otro protocolo y no está en ningún flujo del repo; el admin consciente eligió XHR. Quedarse en XHR mantiene un solo mecanismo.
-- Cancelar = `xhr.abort()`. Reintentar = pedir **otra** URL firmada y subir de nuevo (las URLs firmadas de un solo uso no reanudan a mitad; dilo en la UI: «Se vuelve a subir desde el inicio»).
-- No hace falta migración. No toques límites de bucket ni RLS.
-
-Si al implementar descubres que en producción el signed upload rechaza videos grandes (p. ej. proxy/CDN), anótalo y para ahí: no pivotes a TUS sin una ronda nueva.
+- Mismos buckets/rutas/`upsert`/RLS; metadata TUS: `bucketName`, `objectName`, `contentType` (y `cacheControl` si el repo ya lo usa en algún sitio).
+- `chunkSize` **exactamente 6 MiB** (`6 * 1024 * 1024`) — requisito actual de Supabase; no lo cambies.
+- Auth: `Authorization: Bearer ${session.access_token}` del usuario (creadora o admin). Preferir el hostname de storage documentado por Supabase (`https://<ref>.storage.supabase.co/storage/v1/upload/resumable`) si mejora el rendimiento; si no, el del proyecto que ya use el cliente.
+- Reanudar tras corte de red o recarga: fingerprint de `tus-js-client` + `localStorage` (`removeFingerprintOnSuccess: true` al completar para poder volver a subir el mismo archivo otro día).
+- Cancelar: aborta el upload TUS y **elimina el objeto parcial** en Storage (si quedó algo); deja el formulario usable.
+- Reintentar: **reanuda** desde el fingerprint si sigue válido; si expiró la URL TUS (~24 h) o no hay huella, empieza de nuevo y dilo claro.
+- Añade la dependencia `tus-js-client` (y tipos si hacen falta). No inventes un wrapper en edge functions.
+- El XHR de `publicarPara` (`admin.ts`) **se sustituye para el video** por el helper TUS; no dejes dos caminos de video.
 
 #### Qué hacer
 
-**1. Helper compartido** (p. ej. `src/lib/subida.ts`, o extraer lo de `admin.ts` a un módulo que admin y creadora importen — **no dupliques** el XHR en tres sitios):
-- `subirConProgreso({ bucket, ruta, archivo, contentType?, signal?, alProgreso })`:
-  - `createSignedUploadUrl(ruta)` (mismo cliente `supabase` de sesión).
-  - XHR `PUT` a `signedUrl` con `Content-Type` del archivo.
-  - `alProgreso({ loaded, total, fraction })` en cada `onprogress` con `lengthComputable`.
-  - Respeta `AbortSignal` → `xhr.abort()`.
-  - Errores en español claros (rechazo HTTP, red, cancelado), al estilo de `admin.ts:236-240`.
-- Sustituye el cuerpo de subida de video (y, si cabe sin lío, el de portada grande) en:
-  - `subirArchivo` **o** solo el camino de video desde `Upload.tsx` (preferible: que `subirArchivo` acepte un `alProgreso`/`signal` opcional y, si vienen, use el helper; si no, mantén `.upload()` para fotos chicas — o unifica todo a XHR, coherente y simple).
-  - `publicarPara` debe **llamar al mismo helper** (borra su XHR interno).
-- Limpieza: si falla después de subir el video y antes de crear el clip, borra los objetos ya subidos (como `limpiar` del admin). Hoy el formulario de creadora no lo hace.
+**1. Helper de video** (p. ej. `src/lib/subidaVideo.ts` o `src/lib/subida.ts`):
+- `subirVideoResumible({ bucket, ruta, archivo, contentType?, signal?, alProgreso })` con TUS como arriba.
+- `alProgreso({ loaded, total, fraction })` desde `onProgress` de TUS.
+- Errores en español (red, rechazo, cancelado, sesión caducada).
+- Usarlo en: `Upload.tsx` (creadora), y en admin `publicarPara` → `PublicarPor`, `AltaCreadora`, `SubidaMasiva` (todos los videos al bucket `clips`).
+- Portadas / fotos: pueden seguir con XHR firmado (extrae el de `admin.ts` a un helper chico) o `.upload()`; **no** migres portadas a TUS en esta ronda.
+- Limpieza: si el video quedó subido y falla portada/`crearClip`, borra el objeto (como `limpiar` del admin). Hoy la creadora no lo hace.
 
-**2. Componente de UI** (p. ej. `BarraSubida` en `src/components/` o junto al formulario):
-- Barra **real** de porcentaje (no spinner): relleno proporcional, Miami Neon (`COLOR.dinero` / acentos del Design Brief).
-- Texto: `42% · 85 MB de 200 MB` (usa unidades legibles; 1 MB = 1024² o el criterio que ya use el repo si existe).
-- Tiempo estimado restante cuando haya al menos ~2 s de historial de velocidad (si no, no inventes «∞»; ocúltalo hasta tener dato).
-- Etapas visibles, en este orden cuando apliquen:
-  1. `Subiendo video`
-  2. `Preparando portada` (cuadro / achicar — CPU local, barra indeterminada o % de esa etapa si aplica)
-  3. `Subiendo portada`
-  4. `Guardando datos` (`crearClip` / RPC)
-  5. `Listo`
-- Botón **Cancelar** visible durante la transferencia; al cancelar: abort, mensaje claro, formulario usable de nuevo, sin fingir éxito.
-- `beforeunload` / aviso al salir **solo** mientras haya subida o guardado en curso.
-- Botón Publicar deshabilitado (sin doble envío); ya casi lo hace `estado === 'subiendo'` — manténlo.
-- Error claro + **Reintentar** (repite desde el video; no digas «reanuda» si no reanuda).
-- Accesible: `role="progressbar"`, `aria-valuemin={0}` `aria-valuemax={100}` `aria-valuenow={pct}` `aria-label` con la etapa.
-- Móvil: ancha al 100% del formulario (max 680 como Upload), toques ≥44 px en Cancelar.
+**2. Componente de UI** (p. ej. `BarraSubida`) — igual que antes, con estos matices:
+- Barra **real** de % (no spinner), Miami Neon; texto `42% · 85 MB de 200 MB`.
+- Tiempo estimado restante tras ~2 s de historial de velocidad (si no hay dato, no inventes «∞»).
+- Etapas: `Subiendo video` → `Preparando portada` → `Subiendo portada` → `Guardando datos` → `Listo`.
+- **Cancelar** (abort TUS + quitar parcial); `beforeunload` solo en curso; Publicar deshabilitado; error + **Reintentar** (que **reanude** si puede).
+- Accesible: `role="progressbar"`, `aria-valuemin/max/now`, `aria-label` con etapa.
+- Móvil: 100% del ancho del formulario; Cancelar ≥44 px.
 
 **3. Dónde montarla (prioridad)**
-1. **Obligatorio:** `Upload.tsx` (pedido de Sergio).
-2. **Obligatorio:** unificar el texto-% del admin a la misma barra: `AltaCreadora`, `PublicarPor`, y en `SubidaMasiva` **barra por archivo** (en la fila) **más** barra global del lote (hechos/total o bytes si es barato).
-3. **Deseable en la misma ronda si no se alarga:** `UploadAlbum.tsx` (barra global + etapa; el progreso por foto puede seguir en `hechas/total`).
-4. **Fuera de alcance:** avatar, verificación, expedientes, regenerar portadas del panel (archivos chicos / otra UX). Cambiar portada en `GestionarClip` tampoco es el foco; no lo fuerces.
+1. **Obligatorio:** `Upload.tsx`.
+2. **Obligatorio:** `AltaCreadora`, `PublicarPor`, `SubidaMasiva` (barra por archivo + barra global del lote).
+3. **Deseable:** `UploadAlbum.tsx` (barra global; fotos pueden seguir sin TUS).
+4. **Fuera:** avatar, verificación, expedientes, regenerar portadas, GestionarClip portada.
 
 **4. Estilo y copy**
-- Miami Neon Night; tipografía `FUENTE.ui` / `FUENTE.mono` para el % como en el resto del Estudio.
-- No inventes textos legales ni de reembolso.
+- Miami Neon; `FUENTE.ui` / `FUENTE.mono` para el %.
+- No inventes textos legales. El tope de 2 GB y `MAX_VIDEO_BYTES` son de [id: 20261109-05]; esta ronda no cambia el límite del bucket (puedes leer el tamaño solo para la barra).
 
 #### No tocar
-- Precios, moderación, lógica de portada discreta / `achicar` / buckets / RLS / políticas de storage.
+- Precios, moderación, `achicar` / portada discreta, límites de bucket (eso es 09-05), RLS.
 - `comprar_clip`, ledger, dominio, correo, hero, legales.
-- No nuevas migraciones (no hacen falta). No reabras [id: 20261109-03] ni [id: 20261108-05].
-- No añadas `tus-js-client` en esta ronda.
+- No reabras [id: 20261109-03] ni [id: 20261108-05].
+- No dejes el video por XHR «por si acaso»: el camino de video es TUS.
 
 #### Criterios de aceptación
-1. En `/estudio` (o la ruta de publicar video de la creadora), al publicar un video se ve barra con % y «MB de MB», etapa actual, y el botón no acepta un segundo clic.
-2. En DevTools → Network throttling (p. ej. Fast 3G) con un video ≥ 30 MB: el % avanza de forma continua durante la transferencia; no se queda en un spinner ni solo en «Subiendo el video…».
-3. Cancelar aborta la XHR, muestra mensaje, y se puede volver a intentar.
-4. Cerrar/recargar la pestaña a mitad pregunta confirmación.
-5. Fallo de red o HTTP: error dentro del formulario + Reintentar; no se finge «publicado».
-6. Admin (`PublicarPor` / lote): misma barra; en lote, progreso por archivo y uno global.
-7. `npm run build` / typecheck pasan. Sin secretos nuevos. Sin migración.
+1. Creadora: al publicar se ve barra con % y «MB de MB», etapa, sin doble clic.
+2. Throttling (Fast 3G) con video ≥ 30 MB: el % avanza por chunks; no solo texto «Subiendo…».
+3. Cortar la red a mitad y recuperar: **Reintentar reanuda** (no desde 0% si el fingerprint sigue).
+4. Cancelar aborta, limpia el parcial y deja reintentar.
+5. Recargar a mitad: `beforeunload` avisa; al volver, si hay fingerprint, Reintentar reanuda.
+6. Admin (PublicarPor / lote): misma barra; lote = por archivo + global.
+7. Portadas/fotos chicas no requieren TUS.
+8. `npm run build` / typecheck pasan. Sin secretos nuevos. Sin migración de bucket (la de 2 GB es 09-05).
 
 #### Entrega
 - Commit sugerido: `feat: barra de progreso al subir videos`.
-- Marca [id: 20261109-04] `respondida` con SHA, diff y captura o descripción de la prueba con red limitada.
+- Marca [id: 20261109-04] `respondida` con SHA, diff y prueba de reanudación.
+- Puedes implementar 09-04 antes que 09-05; si 09-05 ya está aplicada, prueba también con archivos grandes.
 
 #### Siguiente paso para Claude Code
-1. `git pull` e implementa esta ronda en su propio commit.
-2. No mezcles con 09-03 ni con el dominio .mx.
+1. `git pull` e implementa esta ronda en su propio commit (TUS, no XHR de video).
+2. No mezcles con 09-03, 09-05 ni el dominio .mx (09-05 puede ir en el commit siguiente).
 3. Deja el resultado en `bridge-query.md`.
 
 ### Respuesta a [id: 20261109-03] — Blindar borrado y moderar ediciones de clips
