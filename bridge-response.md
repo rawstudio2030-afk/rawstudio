@@ -30,6 +30,99 @@
 
 ## Respuestas activas
 
+### Respuesta a [id: 20261109-04] — Barra de progreso al subir videos
+- **fecha:** 2026-11-09 17:20 (America/Mexico_City)
+- **decisión de Sergio:** mientras se sube un video debe verse una barra de progreso real; si no, parece que la página se trabó.
+
+#### Diagnóstico (no lo reescribas: úsalo)
+1. **Formulario de la creadora** (`src/screens/Upload.tsx`): llama `subirArchivo('clips', …)` → `supabase.storage.from(bucket).upload(...)` en `src/lib/clips.ts:241-250`. El cliente de Supabase **no** expone progreso de bytes. La UI solo cambia el texto del botón (`paso`: «Subiendo el video…», «Subiendo la portada…», «Publicando…») y deshabilita el envío con `estado === 'subiendo'`. No hay barra, no hay %, no hay MB, no hay Cancelar, no hay `beforeunload`.
+2. **Admin ya resolvió el mismo problema** en `publicarPara` (`src/lib/admin.ts:196-247`): `createSignedUploadUrl` + `XMLHttpRequest` + `x.upload.onprogress`. Motivo documentado en el propio archivo: (a) el permiso se valida al pedir la URL, no al terminar; (b) XHR sí emite progreso. Lo usan `AltaCreadora.tsx`, `PublicarPor.tsx` y `SubidaMasiva.tsx`, pero solo como **texto** (`· 42%`), no como barra visual. En lote, una sola línea de avance y estados por fila (`espera`/`subiendo`/`listo`/`fallo`).
+3. **Álbumes** (`src/lib/albumes.ts` + `UploadAlbum.tsx`): también pasan por `subirArchivo` (sin progreso de bytes). Hay `alAvanzar({ paso, hechas, total })` — texto «N de M», no barra.
+4. **Portadas / avatar / verificación / cambiar portada en Gestionar:** `subirPortada` / `subirAvatar` / `verificacion` / `expedientes` usan `.upload()` directo. Archivos chicos (límites 2–10 MB); el dolor real es el **video**.
+5. **Límites de bucket (migraciones, no el `config.toml` local):**
+   - `clips`: **2000 MiB**, mime `video/mp4|quicktime|webm` (`20260823000000_clips.sql`).
+   - `clip-covers` / `clip-covers-full`: 5 MiB.
+   - `albumes`: 10 MiB por foto; entrada local ≤ 30 MB (`MAX_BYTES_ENTRADA`).
+   - `avatars`: 2 MiB. `verificacion` / `expedientes`: ver sus migraciones.
+   - `supabase/config.toml` `file_size_limit = "50MiB"` es solo el tope **global local** de la CLI; en producción mandan los límites por bucket.
+6. **No hay `tus-js-client`** en `package.json`. `@supabase/supabase-js` ^2.112.3; `.upload()` no tiene callback de progreso. El endpoint resumible de Storage (`/storage/v1/upload/resumable`) existiría en el proyecto, pero **no se usa**.
+7. Errores hoy: se pinta el mensaje y se queda el formulario; los archivos ya subidos en un fallo a mitad (video ok, portada o `crearClip` falla) **no se limpian** en el camino de la creadora (el admin sí llama `limpiar()` en `publicarPara`). Abandonar la pestaña a mitad no avisa.
+
+#### Enfoque elegido (justificación)
+**Reutilizar y generalizar el patrón ya probado del admin: URL firmada + XHR con `upload.onprogress`.** No introducir TUS en esta ronda.
+
+- Encaja con el código: mismos buckets, mismas rutas `{uid}/{uuid}.ext`, mismo `upsert: false` (o el que ya use cada camino), mismos permisos RLS (se evalúan al crear la URL firmada).
+- El video puede llegar a **2 GB**: una barra con % y MB ya cubre «la página no está trabada». TUS aportaría reanudar tras un corte de red, pero exige dependencia nueva, otro protocolo y no está en ningún flujo del repo; el admin consciente eligió XHR. Quedarse en XHR mantiene un solo mecanismo.
+- Cancelar = `xhr.abort()`. Reintentar = pedir **otra** URL firmada y subir de nuevo (las URLs firmadas de un solo uso no reanudan a mitad; dilo en la UI: «Se vuelve a subir desde el inicio»).
+- No hace falta migración. No toques límites de bucket ni RLS.
+
+Si al implementar descubres que en producción el signed upload rechaza videos grandes (p. ej. proxy/CDN), anótalo y para ahí: no pivotes a TUS sin una ronda nueva.
+
+#### Qué hacer
+
+**1. Helper compartido** (p. ej. `src/lib/subida.ts`, o extraer lo de `admin.ts` a un módulo que admin y creadora importen — **no dupliques** el XHR en tres sitios):
+- `subirConProgreso({ bucket, ruta, archivo, contentType?, signal?, alProgreso })`:
+  - `createSignedUploadUrl(ruta)` (mismo cliente `supabase` de sesión).
+  - XHR `PUT` a `signedUrl` con `Content-Type` del archivo.
+  - `alProgreso({ loaded, total, fraction })` en cada `onprogress` con `lengthComputable`.
+  - Respeta `AbortSignal` → `xhr.abort()`.
+  - Errores en español claros (rechazo HTTP, red, cancelado), al estilo de `admin.ts:236-240`.
+- Sustituye el cuerpo de subida de video (y, si cabe sin lío, el de portada grande) en:
+  - `subirArchivo` **o** solo el camino de video desde `Upload.tsx` (preferible: que `subirArchivo` acepte un `alProgreso`/`signal` opcional y, si vienen, use el helper; si no, mantén `.upload()` para fotos chicas — o unifica todo a XHR, coherente y simple).
+  - `publicarPara` debe **llamar al mismo helper** (borra su XHR interno).
+- Limpieza: si falla después de subir el video y antes de crear el clip, borra los objetos ya subidos (como `limpiar` del admin). Hoy el formulario de creadora no lo hace.
+
+**2. Componente de UI** (p. ej. `BarraSubida` en `src/components/` o junto al formulario):
+- Barra **real** de porcentaje (no spinner): relleno proporcional, Miami Neon (`COLOR.dinero` / acentos del Design Brief).
+- Texto: `42% · 85 MB de 200 MB` (usa unidades legibles; 1 MB = 1024² o el criterio que ya use el repo si existe).
+- Tiempo estimado restante cuando haya al menos ~2 s de historial de velocidad (si no, no inventes «∞»; ocúltalo hasta tener dato).
+- Etapas visibles, en este orden cuando apliquen:
+  1. `Subiendo video`
+  2. `Preparando portada` (cuadro / achicar — CPU local, barra indeterminada o % de esa etapa si aplica)
+  3. `Subiendo portada`
+  4. `Guardando datos` (`crearClip` / RPC)
+  5. `Listo`
+- Botón **Cancelar** visible durante la transferencia; al cancelar: abort, mensaje claro, formulario usable de nuevo, sin fingir éxito.
+- `beforeunload` / aviso al salir **solo** mientras haya subida o guardado en curso.
+- Botón Publicar deshabilitado (sin doble envío); ya casi lo hace `estado === 'subiendo'` — manténlo.
+- Error claro + **Reintentar** (repite desde el video; no digas «reanuda» si no reanuda).
+- Accesible: `role="progressbar"`, `aria-valuemin={0}` `aria-valuemax={100}` `aria-valuenow={pct}` `aria-label` con la etapa.
+- Móvil: ancha al 100% del formulario (max 680 como Upload), toques ≥44 px en Cancelar.
+
+**3. Dónde montarla (prioridad)**
+1. **Obligatorio:** `Upload.tsx` (pedido de Sergio).
+2. **Obligatorio:** unificar el texto-% del admin a la misma barra: `AltaCreadora`, `PublicarPor`, y en `SubidaMasiva` **barra por archivo** (en la fila) **más** barra global del lote (hechos/total o bytes si es barato).
+3. **Deseable en la misma ronda si no se alarga:** `UploadAlbum.tsx` (barra global + etapa; el progreso por foto puede seguir en `hechas/total`).
+4. **Fuera de alcance:** avatar, verificación, expedientes, regenerar portadas del panel (archivos chicos / otra UX). Cambiar portada en `GestionarClip` tampoco es el foco; no lo fuerces.
+
+**4. Estilo y copy**
+- Miami Neon Night; tipografía `FUENTE.ui` / `FUENTE.mono` para el % como en el resto del Estudio.
+- No inventes textos legales ni de reembolso.
+
+#### No tocar
+- Precios, moderación, lógica de portada discreta / `achicar` / buckets / RLS / políticas de storage.
+- `comprar_clip`, ledger, dominio, correo, hero, legales.
+- No nuevas migraciones (no hacen falta). No reabras [id: 20261109-03] ni [id: 20261108-05].
+- No añadas `tus-js-client` en esta ronda.
+
+#### Criterios de aceptación
+1. En `/estudio` (o la ruta de publicar video de la creadora), al publicar un video se ve barra con % y «MB de MB», etapa actual, y el botón no acepta un segundo clic.
+2. En DevTools → Network throttling (p. ej. Fast 3G) con un video ≥ 30 MB: el % avanza de forma continua durante la transferencia; no se queda en un spinner ni solo en «Subiendo el video…».
+3. Cancelar aborta la XHR, muestra mensaje, y se puede volver a intentar.
+4. Cerrar/recargar la pestaña a mitad pregunta confirmación.
+5. Fallo de red o HTTP: error dentro del formulario + Reintentar; no se finge «publicado».
+6. Admin (`PublicarPor` / lote): misma barra; en lote, progreso por archivo y uno global.
+7. `npm run build` / typecheck pasan. Sin secretos nuevos. Sin migración.
+
+#### Entrega
+- Commit sugerido: `feat: barra de progreso al subir videos`.
+- Marca [id: 20261109-04] `respondida` con SHA, diff y captura o descripción de la prueba con red limitada.
+
+#### Siguiente paso para Claude Code
+1. `git pull` e implementa esta ronda en su propio commit.
+2. No mezcles con 09-03 ni con el dominio .mx.
+3. Deja el resultado en `bridge-query.md`.
+
 ### Respuesta a [id: 20261109-03] — Blindar borrado y moderar ediciones de clips
 - **fecha:** 2026-11-09 17:15 (America/Mexico_City)
 - **decisión de Sergio:** aprobó la ronda. Cierra las dos decisiones abiertas de [id: 20261109-02]: (a) el servidor no debe soft-borrar un clip con historial cuando lo borra la dueña; (b) editar título/descripción/portada de un clip ya aprobado pasa por la misma regla de confianza que el alta, o vuelve a moderación.
