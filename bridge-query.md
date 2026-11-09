@@ -38,11 +38,11 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 
 ## Consultas activas
 
-### [id: 20261108-03] Avisos visibles, diagnóstico de cierre y abonos claros — hecha, pendiente de aplicar
+### [id: 20261108-03] Avisos visibles, diagnóstico de cierre y abonos claros — hecha y aplicada
 - **fecha:** 2026-11-08 (America/Mexico_City)
 - **estado:** respondida
 - **tarea:** Que los avisos del panel se vean dentro del recuadro que ejecutó la acción (no detrás), que la ficha de una cuenta diga antes de confirmar qué impide cerrarla, y que un abono se distinga de una propuesta pendiente de firma.
-- **resultado:** HECHA en un commit propio, `a50b9e4` (`feat: avisos visibles y diagnostico al cerrar una cuenta`), **todavía sin empujar y con la migración `20261217000000_cierre_de_cuenta.sql` sin aplicar en producción**: espera la aprobación de Omar. Nada de producción se tocó (todas las pruebas fueron en Postgres local y con datos de prueba simulados).
+- **resultado:** HECHA en un commit propio, `a50b9e4` (`feat: avisos visibles y diagnostico al cerrar una cuenta`), **aplicada y empujada con la aprobación de Omar (2026-11-08):** `supabase db push` aplicó `20261217000000_cierre_de_cuenta.sql` en producción (comprobado en solo lectura: existen `historial_de_cuenta`, `admin_diagnostico_cierre` y el disparador la usa) y `git push origin main` publicó el panel. Las pruebas del desarrollo fueron en Postgres local y con datos simulados; no se mutó ninguna cuenta real.
 - **diff resumido (9 archivos, +1010/−169):**
   - **`Confirmar` (`src/admin/piezas.tsx`).** `al` ahora puede **devolver un texto = error** y se pinta **dentro del recuadro** (`role="alert"`), sin cerrar y **conservando motivo y campos**; si `al` lanza (red, excepción) también se muestra, el botón se libera y **no se finge éxito**; un **candado** impide un segundo envío mientras corre el primero (un abono no se manda dos veces). Props nuevas `bloqueo` (razón visible + botón inactivo) e `inactivo`. El recuadro tiene `maxHeight: 92vh` con scroll y lleva el error a la vista. Piezas nuevas: `Aviso` (ok / propuesto / atención / error, con `role` correcto) y `src/lib/humano.ts` (un «Failed to fetch» se dice como «no se obtuvo respuesta… es posible que la acción sí se haya aplicado: revisa antes de repetirla»).
   - **Usuarios.** Eliminar, anonimizar, suspender, banear, reactivar, correo, ajustar saldo y rol devuelven el error al recuadro; un **handle que no coincide** se explica dentro y el botón queda inactivo (**no llega al servidor**). Los resultados buenos y las propuestas se muestran **dentro de la ficha** (la ficha tapa la pantalla de atrás); si la ficha se cierra (eliminada/anonimizada) se muestran en la pantalla. Los avisos de limpieza de Storage tras eliminar salen como «Atención», no como silencio. La ficha ya no se queda en «Cargando…» si falla el detalle (muestra el error). **Movimientos de la ficha con `usd()`** (+$2.40 / −$5.00, antes `240` / `-500`).
@@ -63,7 +63,7 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
   3. **El resto de las pantallas con diálogos** (Contenido, Reportes, Álbumes, Comunicación, Herramientas) usan el mismo `Confirmar`, que ya **captura la red y el doble envío**, pero **siguen mandando el error de la acción a la pantalla de atrás** (`.then(tras)`). Solo convertí las que pedía la ronda (Usuarios, Verificación, Moderación) más Retiros (el mismo patrón y el abono). Convertir las demás es mecánico.
   4. El diagnóstico **no bloquea** los botones a propósito (el servidor manda): si el diagnóstico se equivocara, no deja a la administradora sin poder actuar; el error se ve igual dentro del diálogo.
   5. El saldo **no** es un chequeo de «eliminar» (lo dicen las reglas vigentes): una cuenta con saldo pero sin ningún asiento no podría existir, así que en la práctica el ledger ya la protege.
-- **cómo aplicar (con la aprobación de Omar):** `supabase db push` (aplica `20261217000000_cierre_de_cuenta.sql`: crea `historial_de_cuenta` y `admin_diagnostico_cierre`, redefine el disparador y las dos funciones) y `git push origin main` (publica el panel). **No hay función de borde ni workflow que desplegar.**
+- **cómo se aplicó:** `supabase db push` y `git push origin main`. **No hubo función de borde ni workflow que desplegar.**
 
 ### [id: 20261108-02] Portada más discreta y descripción genérica — hecha, pendiente de aplicar
 - **fecha:** 2026-11-08 (America/Mexico_City)
