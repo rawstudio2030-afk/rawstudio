@@ -30,6 +30,73 @@
 
 ## Respuestas activas
 
+### Respuesta a [id: 20261108-04] — Avisos del administrador
+- **fecha:** 2026-11-08 18:04 (America/Mexico_City)
+- **estado:** lista-para-claude
+- **responde a:** Sergio vio que las cuentas ya tienen avisos y pidió algo parecido en el administrador: enterarse de lo que llega (moderación, verificación, cuentas, depósitos/abonos, mensajes, etc.), no solo de cuántas cosas hay pendientes.
+- **ronda:** 1 de 10 de esta tarea · **tope:** 1 hora
+- **checklist afectados (NO marques pass tú):** convenciones del panel de administración si tocas esas pantallas. No rompas ítems `pass` ni el trabajo de `[id: 20261106-04]` a `[id: 20261106-07]` ni `[id: 20261107-01]` a `[id: 20261107-07]` ni `[id: 20261108-01]` a `[id: 20261108-03]`.
+
+#### Orden respecto a rondas anteriores
+Si `[id: 20261108-03]` sigue `asignada`, **termínala primero** (avisos visibles dentro del diálogo, diagnóstico de cierre y abonos claros) y márcala `respondida`. Después, y no antes, implementa esta ronda en su propio commit. No la mezcles con la 03 ni reabras las anteriores. El relleno de portadas discretas lo corre Omar desde Herramientas; no forma parte de esta ronda.
+
+#### Diagnóstico (no lo reescribas: úsalo)
+1. Las cuentas tienen un centro de avisos **sin tabla de notificaciones**. `mis_avisos()` (security definer, solo la propia cuenta) arma la lista al pedirla, leyendo consultas, encargos, compras, rentas, propinas, suscripciones, comentarios, verificaciones, retiros y clips. Un asunto resuelto desaparece solo. Lo único persistente es `avisos_estado(user_id, visto_at)`; `avisos_marcar_vistos()` actualiza esa fecha al abrir la lista. Forma de cada fila (`src/lib/avisos.ts`): `clave`, `tipo`, `titulo`, `detalle`, `ruta`, `at`, `urgente`, `nuevo`. `urgente` = algo que te toca hacer y se queda mientras esté pendiente. Lo demás cuenta como nuevo hasta que abres la lista.
+2. La UI es `CampanaAvisos.tsx` (campana fija con cuenta = urgente + nuevo, refresco cada 60 s / foco / `avisos:cambio`) y `Avisos.tsx` en `/avisos`. Cada fila lleva a una `ruta` de la app. Se ve con sesión, para compradores y creadoras. **Dentro del panel se oculta** (`RUTAS_PANEL`). Un admin, en modo creadora o yendo a `/avisos`, ve lo *suyo* (una venta, un comentario de sus videos), no el trabajo de la plataforma.
+3. El panel no tiene inbox ni campana. `pendientes.ts` + `Marco.tsx` muestran **conteos actuales**: moderación (`pendiente`), verificación (`pendiente_revision`), denuncias (`nuevo` + `en_revision`), retiros por aprobar / por pagar, purga, consultas esperando / vencidas, y `atencion` (incluye avatares por revisar). Dicen cuántas hay, no qué llegó, de quién ni desde cuándo. Si de 3 retiros pasas a 4, nada señala cuál es el nuevo. Esos números solo se piden con el panel abierto.
+4. Hay correos (Resend) a un buzón admin para retiro nuevo, verificación nueva y purga semanal (`avisar-retiro`, `avisar-verificacion`, `avisar-purga`). No inventes más correo, push ni SMS. Telegram sigue solo para consultas.
+5. `ajustesPendientes()` ya existe en `src/lib/admin.ts` (abonos que esperan segunda firma) y **no** entra hoy en `Pendientes` / badges. Las denuncias, los videos por moderar y las consultas que se vencen solo aparecen como número de menú, no como aviso con persona y fecha.
+
+#### Qué hacer
+1. **Misma idea, datos aparte.** Un RPC nuevo `admin_avisos()` (security definer, exige `es_admin()`) que arme la lista al pedirla, a partir de las mismas fuentes que ya usa el panel (los `admin_conteo_*` / consultas que alimentan `pendientes.ts`, más `ajustesPendientes` / la tabla de ajustes por aprobar, más lo necesario para nombrar a la persona y la fecha). No lo mezcles con `mis_avisos`: lo personal y lo de la plataforma se quedan separados. No crees una tabla que vaya acumulando eventos para siempre.
+2. **Visto por cada admin.** Persiste un `visto_at` por cuenta administradora (p. ej. `avisos_estado_admin` o una columna equivalente claveada por `user_id`), más `admin_avisos_marcar_vistos()`. Que un admin abra la lista no se la marca como vista al otro.
+3. **Misma forma de fila** (`clave`, `tipo`, `titulo`, `detalle`, `ruta`, `at`, `urgente`, `nuevo`) para poder reutilizar la lista. Los `tipo` del admin son los de esta cola (p. ej. moderación, verificación, denuncia, retiro, consulta, ajuste, purga); no reutilices a la fuerza los `TipoAviso` de las cuentas (`venta`, `compra`, etc.). Un módulo tipo `src/lib/avisosAdmin.ts` está bien.
+4. **Campana dentro del marco del panel** (`Marco.tsx`), en el encabezado de escritorio, no la campana flotante de las cuentas. La de las cuentas sigue oculta en `RUTAS_PANEL`. La campana del admin abre una pantalla «Avisos» bajo Por atender (p. ej. `/admin/avisos`; añade el módulo en `modulos.ts` sin renombrar claves ajenas). Reutiliza el aspecto de `Avisos.tsx` si ayuda; no montes `CampanaAvisos` ni `misAvisos` dentro del panel.
+5. **Tipos imprescindibles** (cada uno con quién y desde cuándo; `urgente` mientras siga pendiente):
+   - Video nuevo por moderar.
+   - Identidad nueva o una que se volvió a enviar.
+   - Denuncia nueva (o que sigue en revisión y acaba de entrar).
+   - Solicitud de retiro nueva, y una ya aprobada que aún hay que marcar como pagada.
+   - Consulta por vencer (cerca del plazo de 2 días) o vencida sin respuesta.
+   - Abono/ajuste propuesto que espera la segunda firma.
+   - Archivos que ya pasaron la fecha de purga y esperan a que alguien pulse «Purgar».
+6. **Enlace profundo:** cada fila abre el módulo que ya existe y, si ese módulo ya acepta un id o un parámetro, el caso concreto: `/admin/moderacion`, `/admin/verificacion`, `/admin/reportes`, `/admin/retiros` (por aprobar o por pagar / ajustes por aprobar), `/admin/consultas`, y la purga donde ya vive el botón (p. ej. Herramientas). No inventes un enrutado complejo si el módulo no sabe abrir un ítem: basta con llegar a la cola correcta.
+7. **Campana vs. badges (importante, es distinto de las cuentas):**
+   - Los badges y el Resumen se quedan como están: «cuántas hay pendientes» por módulo.
+   - El número de la campana cuenta **solo lo `nuevo`** (lo que llegó o pasó a ese estado notable desde el último `visto_at` de ese admin). **No** sumes otra vez los pendientes (`urgente + nuevo` como `contarAvisos` de las cuentas): si no, la campana y el menú dirían el mismo 5.
+   - En la lista sí se marcan los urgentes, y siguen visibles mientras no se resuelvan.
+   - Abrir la lista marca vistos (lo nuevo deja de serlo; lo pendiente no desaparece hasta resolverse en su módulo).
+   - Al resolverse en su módulo, al volver a armar la lista esa fila ya no sale.
+8. Refresco razonable, al estilo de la campana de las cuentas (al montar, al volver a la pestaña, cada minuto, al marcar vistos). No dispares una consulta por ítem cada segundo. Si el RPC falla, no finjas «todo al día»: muestra que no se pudieron cargar.
+9. Textos neutros, sin asumir género («identidad de {nombre}», «video de {nombre}»). `{nombre}` = `display_name` o, si no hay, el handle. No inventes copy legal ni de marketing.
+
+#### Qué dejar para después (no lo hagas ahora)
+Fallos de un cron o de un correo que no salió (haría falta un registro de ejecuciones que hoy no está; no lo inventes). Movimientos «raros» o muy grandes. Avisar de que una creadora respondió a un rechazo. Los avatares por revisar ya tienen badge en `atencion`; no hace falta meterlos en esta primera campana.
+
+#### Qué no tocar
+Textos legales, recargas o pasarela, correo/push/SMS nuevos (los `avisar-*` que ya existen se quedan), token o secretos, el precio de 20 pesos, el plazo de 2 días, `COBRO_CONSULTAS_ACTIVO` (sigue en `true`), DeepSeek, el hero del 80 % / dólar, dominio, reproductor, trato, avatares, álbumes, precios, portadas, el relleno de portadas discretas, la consola de Consultas (sigue solo lectura), el Resumen / badges / búsqueda global (no los rehagas; solo conviven con la campana), visitas o mapas de reproducción, hacer el panel adaptable a móvil, mezclar avisos personales con los de la plataforma, ni reabrir `[id: 20261108-03]`.
+
+#### Criterios de aceptación
+1. Dentro del panel hay una campana que abre `/admin/avisos` (o la ruta que elijas bajo Por atender). Fuera del panel, la campana de las cuentas sigue igual y sigue oculta dentro del panel.
+2. Un admin ve avisos de la plataforma (video, identidad, denuncia, retiro, consulta, ajuste pendiente de firma, purga), cada uno con quién, desde cuándo y un enlace al módulo. Un no-admin no puede leer `admin_avisos`.
+3. El número de esa campana es lo nuevo desde la última vez que ese admin abrió la lista, no el total de pendientes del menú. Abrir la lista marca vistos para esa cuenta admin y no para otra.
+4. Un asunto resuelto en su módulo desaparece de la lista al refrescar. Un pendiente ya visto se queda en la lista (sin contar en la campana) hasta que se resuelve.
+5. `mis_avisos` y `/avisos` de las cuentas no cambian de significado. Typecheck, build y lint limpios (solo advertencias que ya existían). Ningún secreto en el repo.
+
+#### Cómo demostrar (obligatorio en bridge-query.md)
+SHA, diff resumido, y:
+- Una prueba del RPC (SQL local o datos de prueba, **sin inventar eventos en producción**): con sesión admin salen filas de al menos dos tipos de la lista imprescindible, con `ruta` hacia el módulo correcto; sin ser admin, se rechaza.
+- Marcar vistos: las mismas filas pendientes dejan de ser `nuevo` y la cuenta de la campana baja; el total de badges no tiene por qué bajar.
+- Resolver (o simular resuelto) un ítem y comprobar que desaparece de `admin_avisos`.
+- Que `mis_avisos` de una cuenta de prueba sigue sin incluir colas de administración.
+- No marques `CHECKLIST.md` como pass.
+
+#### Siguiente paso para Claude Code
+1. Si `[id: 20261108-03]` no está `respondida`, termínala primero.
+2. `git pull` e implementa esta ronda en su propio commit (mensaje sugerido: `feat: avisos del administrador`).
+3. Aplica en producción, con la aprobación de Omar, la migración del `visto_at` admin y del RPC. No hace falta un relleno manual.
+4. Deja el resultado en `bridge-query.md` (SHA, diff, verificación) y marca `[id: 20261108-04]` como `respondida`.
+
 ### Respuesta a [id: 20261108-03] — Avisos visibles, diagnóstico de cierre y abonos claros
 - **fecha:** 2026-11-08 17:42 (America/Mexico_City)
 - **estado:** lista-para-claude

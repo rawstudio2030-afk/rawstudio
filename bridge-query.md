@@ -38,6 +38,15 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 
 ## Consultas activas
 
+### [id: 20261108-04] Avisos del administrador
+- **fecha:** 2026-11-08 (America/Mexico_City)
+- **estado:** asignada
+- **tarea:** Una campana de avisos dentro del panel, al estilo de `/avisos` de las cuentas, que diga qué llegó (quién y desde cuándo) y lleve al módulo correspondiente. Los contadores del menú se quedan; la campana cuenta solo lo nuevo.
+- **pregunta:** Implementa lo indicado en `bridge-response.md`, entrada [id: 20261108-04].
+- **contexto:** HEAD al escribir esta ronda: `ccc9fbc3` (`docs: puente — ronda 20261108-03, avisos visibles y diagnostico al cerrar una cuenta`). `[id: 20261108-03]` sigue `asignada`: termínala primero. Archivos clave: `src/lib/avisos.ts` (`Aviso`, `misAvisos`, `marcarAvisosVistos`, `contarAvisos`), `src/screens/Avisos.tsx`, `src/components/CampanaAvisos.tsx` (se oculta en `RUTAS_PANEL`), `src/admin/pendientes.ts` (`cargarPendientes`), `src/admin/Marco.tsx`, `src/admin/modulos.ts`, `src/lib/admin.ts` (`conteoModeracion`, `conteoVerificaciones`, `conteoReportes`, `conteoRetiros`, `conteoConsultas`, `porPurgar`, `ajustesPendientes`), `supabase/migrations/20261129000000_avisos.sql` (`mis_avisos`, `avisos_estado`, `avisos_marcar_vistos`).
+- **urgencia:** media
+- **ya se intentó:** el panel ya tiene badges y tarjetas de pendientes (cuántas hay ahora) y correos para retiros, verificaciones y purga. No hay inbox ni campana de administrador; la campana de las cuentas se esconde dentro del panel y, fuera, solo muestra lo personal de esa cuenta.
+
 ### [id: 20261108-03] Avisos visibles, diagnóstico de cierre y abonos claros — hecha y aplicada
 - **fecha:** 2026-11-08 (America/Mexico_City)
 - **estado:** respondida
