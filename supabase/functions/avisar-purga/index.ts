@@ -52,25 +52,25 @@ function cuerpo(cuantos: number, dias: number, nombre: string) {
     ? 'Acaban de cumplir su plazo.'
     : `El más viejo lleva ${plural(dias, 'día', 'días')} esperando.`
 
-  return `<!doctype html><html><body style="margin:0;background:#08080A;padding:32px 16px">
+  return `<!doctype html><html><body style="margin:0;background:#0E1520;padding:32px 16px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
-<table role="presentation" width="520" cellpadding="0" cellspacing="0" style="max-width:520px;background:#0E0E11;border:1px solid rgba(255,255,255,.12)">
+<table role="presentation" width="520" cellpadding="0" cellspacing="0" style="max-width:520px;background:#141C28;border:1px solid rgba(243,235,226,.14)">
   <tr><td style="padding:28px 26px">
-    <div style="font:700 10px/1 system-ui;letter-spacing:2.2px;text-transform:uppercase;color:#FF2BD1">
+    <div style="font:700 10px/1 system-ui;letter-spacing:2.2px;text-transform:uppercase;color:#D4B483">
       RAWstudio &middot; purga pendiente
     </div>
-    <div style="font:400 26px/1.25 Georgia,serif;color:#F2F0F3;margin-top:16px">
+    <div style="font:400 26px/1.25 Georgia,serif;color:#F3EBE2;margin-top:16px">
       Hay ${cuenta} esperando a que alguien los borre de verdad.
     </div>
-    <div style="font:400 14px/1.7 system-ui;color:#9C979F;margin-top:14px">
+    <div style="font:400 14px/1.7 system-ui;color:#C9BDB0;margin-top:14px">
       ${espera} Hasta que se purguen, sus archivos siguen ocupando espacio
       &mdash; y la portada de un clip borrado se puede seguir descargando sin
       credenciales, porque vive en un bucket p&uacute;blico.
     </div>
-    <a href="${PANEL}" style="display:inline-block;margin-top:22px;background:#FF2BD1;color:#08080A;padding:14px 22px;font:700 10px/1 system-ui;letter-spacing:1.6px;text-transform:uppercase;text-decoration:none">
+    <a href="${PANEL}" style="display:inline-block;margin-top:22px;background:#D4B483;color:#141C28;padding:14px 22px;font:700 10px/1 system-ui;letter-spacing:1.6px;text-transform:uppercase;text-decoration:none">
       Abrir Contenido &rsaquo; Purga pendiente
     </a>
-    <div style="font:400 12px/1.6 ui-monospace,monospace;color:#6E6A72;margin-top:22px;border-top:1px solid rgba(255,255,255,.1);padding-top:14px">
+    <div style="font:400 12px/1.6 ui-monospace,monospace;color:#A89D92;margin-top:22px;border-top:1px solid rgba(255,255,255,.1);padding-top:14px">
       Para: ${nombre}. Este aviso sale solo cuando hay algo vencido, una vez
       por semana. Si purgas, deja de llegar.
     </div>

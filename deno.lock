@@ -1,6 +1,10 @@
 {
   "version": "5",
+  "redirects": {
+    "https://esm.sh/@supabase/supabase-js@2": "https://esm.sh/@supabase/supabase-js@2.119.0"
+  },
   "remote": {
+    "https://esm.sh/@supabase/supabase-js@2.119.0": "5b053344a262b305cfd47fdd75b3d244e47983d70fd7f7e68dc4dbbb98bc90bc",
     "https://esm.sh/@supabase/supabase-js@2.47.10": "8352fea62a92ad2fef32bc6a1aa529a5d2da0c939819f41767dd1480f0f30d70"
   },
   "workspace": {
@@ -15,6 +19,7 @@
         "npm:react-dom@^19.2.8",
         "npm:react-router-dom@^7.18.2",
         "npm:react@^19.2.8",
+        "npm:tus-js-client@^4.3.1",
         "npm:typescript@~6.0.2",
         "npm:vite@^8.2.0"
       ]

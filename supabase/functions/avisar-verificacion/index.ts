@@ -90,7 +90,7 @@ function fila(n: Nueva, ahora: number) {
   // dice es lo unico comprobable: cuanto queda del plazo, y que pasarse
   // significa estar guardando su INE mas tiempo del prometido.
   const alarma = (t: string) =>
-    `<br><span style="font:400 12px/1.6 system-ui;color:#FF2BD1">${t}</span>`
+    `<br><span style="font:400 12px/1.6 system-ui;color:#D4B483">${t}</span>`
 
   let plazo = ''
   if (dias !== null && dias < 0) {
@@ -106,9 +106,9 @@ function fila(n: Nueva, ahora: number) {
   }
 
   return `<tr>
-    <td style="padding:11px 0;border-bottom:1px solid rgba(255,255,255,.08);font:400 14px/1.5 system-ui;color:#F2F0F3">
+    <td style="padding:11px 0;border-bottom:1px solid rgba(255,255,255,.08);font:400 14px/1.5 system-ui;color:#F3EBE2">
       ${quien}<br>
-      <span style="font:400 13px/1.5 ui-monospace,monospace;color:#9C979F">Lo mandó ${hace(n.pedido_at, ahora)}</span>${plazo}
+      <span style="font:400 13px/1.5 ui-monospace,monospace;color:#C9BDB0">Lo mandó ${hace(n.pedido_at, ahora)}</span>${plazo}
     </td></tr>`
 }
 
@@ -134,11 +134,11 @@ export function panel(
       (masVieja ? `, la más vieja desde ${hace(masVieja, ahora)}.` : '.')
     : 'No hay ninguna otra esperando.'
 
-  return `<div style="background:#0E0E11;border:1px solid rgba(255,255,255,.12);padding:28px 26px">
-    <div style="font:700 10px/1 system-ui;letter-spacing:2.2px;text-transform:uppercase;color:#C8FF3D">
+  return `<div style="background:#141C28;border:1px solid rgba(243,235,226,.14);padding:28px 26px">
+    <div style="font:700 10px/1 system-ui;letter-spacing:2.2px;text-transform:uppercase;color:#E0B15A">
       RAWstudio &middot; identidad por revisar
     </div>
-    <div style="font:400 26px/1.25 Georgia,serif;color:#F2F0F3;margin-top:16px">
+    <div style="font:400 26px/1.25 Georgia,serif;color:#F3EBE2;margin-top:16px">
       ${nuevas.length === 1
         ? 'Alguien mandó su identificación.'
         : `${nuevas.length} personas mandaron su identificación.`}
@@ -147,23 +147,23 @@ export function panel(
       ${nuevas.map(n => fila(n, ahora)).join('')}
     </table>
 
-    <div style="font:400 13px/1.7 system-ui;color:#9C979F;margin-top:14px">
+    <div style="font:400 13px/1.7 system-ui;color:#C9BDB0;margin-top:14px">
       ${cola}
     </div>
 
     <div style="margin-top:18px;padding:13px 15px;border:1px solid rgba(200,255,61,.35);background:rgba(200,255,61,.06)">
-      <div style="font:400 13px/1.6 system-ui;color:#F2F0F3">
+      <div style="font:400 13px/1.6 system-ui;color:#F3EBE2">
         Hasta que resuelvas esto, ${nuevas.length === 1 ? 'esa persona' : 'esas personas'}
         <b>no ${nuevas.length === 1 ? 'puede' : 'pueden'} subir nada</b>. Publicar
         exige la identidad verificada, así que la cuenta está hecha y parada.
       </div>
     </div>
 
-    <a href="${PANEL}" style="display:inline-block;margin-top:22px;background:#C8FF3D;color:#08080A;padding:14px 22px;font:700 10px/1 system-ui;letter-spacing:1.6px;text-transform:uppercase;text-decoration:none">
+    <a href="${PANEL}" style="display:inline-block;margin-top:22px;background:#E0B15A;color:#141C28;padding:14px 22px;font:700 10px/1 system-ui;letter-spacing:1.6px;text-transform:uppercase;text-decoration:none">
       Abrir Verificación
     </a>
 
-    <div style="font:400 12px/1.6 ui-monospace,monospace;color:#6E6A72;margin-top:22px;border-top:1px solid rgba(255,255,255,.1);padding-top:14px">
+    <div style="font:400 12px/1.6 ui-monospace,monospace;color:#A89D92;margin-top:22px;border-top:1px solid rgba(255,255,255,.1);padding-top:14px">
       Para: ${nombre}. Las fotos están en el panel, no en este correo. De cada
       solicitud se avisa una sola vez: si no haces nada, no vuelve a llegar y
       el contador del panel es lo que queda.
@@ -175,7 +175,7 @@ export function panel(
  *  tarjeta. Las tablas no son decoracion: son lo unico que centra igual en
  *  Outlook y en Gmail. */
 function documento(dentro: string, ancho = 520) {
-  return `<!doctype html><html><body style="margin:0;background:#08080A;padding:32px 16px">
+  return `<!doctype html><html><body style="margin:0;background:#0E1520;padding:32px 16px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
 <table role="presentation" width="${ancho}" cellpadding="0" cellspacing="0" style="max-width:${ancho}px">
   <tr><td>${dentro}</td></tr>
@@ -213,13 +213,13 @@ export function muestraCuerpo(nombre: string): string {
   ]
 
   return documento(`
-    <div style="font:700 10px/1 system-ui;letter-spacing:2.2px;text-transform:uppercase;color:#FF2BD1">
+    <div style="font:700 10px/1 system-ui;letter-spacing:2.2px;text-transform:uppercase;color:#D4B483">
       RAWstudio &middot; muestra, nadie mandó nada
     </div>
-    <div style="font:400 26px/1.25 Georgia,serif;color:#F2F0F3;margin-top:14px">
+    <div style="font:400 26px/1.25 Georgia,serif;color:#F3EBE2;margin-top:14px">
       Así se ve el aviso de una identidad por revisar.
     </div>
-    <div style="font:400 14px/1.7 system-ui;color:#9C979F;margin-top:12px">
+    <div style="font:400 14px/1.7 system-ui;color:#C9BDB0;margin-top:12px">
       Las dos personas son inventadas. La segunda lleva veintiséis días
       esperando, para que se vea la advertencia del plazo: a cada quien se le
       promete que sus imágenes se conservan treinta días y no más.
@@ -227,7 +227,7 @@ export function muestraCuerpo(nombre: string): string {
 
     <div style="margin-top:22px">${panel(inventadas, 3, viejas, nombre, ahora)}</div>
 
-    <div style="font:400 12px/1.6 ui-monospace,monospace;color:#6E6A72;margin-top:24px;border-top:1px solid rgba(255,255,255,.1);padding-top:14px">
+    <div style="font:400 12px/1.6 ui-monospace,monospace;color:#A89D92;margin-top:24px;border-top:1px solid rgba(255,255,255,.1);padding-top:14px">
       Para: ${nombre}. Muestra pedida a mano. No se ha tocado ningún dato.
     </div>`, 560)
 }

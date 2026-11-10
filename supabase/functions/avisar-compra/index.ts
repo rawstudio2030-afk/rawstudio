@@ -70,24 +70,24 @@ export type Aviso = {
   correo_creadora: string | null
 }
 
-const TENUE = '#6E6A72'
-const APAGADO = '#9C979F'
+const TENUE = '#A89D92'
+const APAGADO = '#C9BDB0'
 
 function documento(color: string, titular: string, hola: string, texto: string,
                    extra: string, boton: string, enlace: string): string {
   return `<!doctype html>
-<html lang="es"><body style="margin:0;background:#08080A">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#08080A">
+<html lang="es"><body style="margin:0;background:#0E1520">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0E1520">
 <tr><td align="center" style="padding:28px 14px">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#111116;border:1px solid rgba(255,255,255,.12)">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#141C28;border:1px solid rgba(243,235,226,.14)">
   <tr><td style="padding:30px 26px">
     <div style="font:700 10px/1 system-ui;letter-spacing:2px;text-transform:uppercase;color:${color}">RAWstudio</div>
-    <h1 style="margin:18px 0 0;font:700 25px/1.2 system-ui;color:#F2F0F3">${titular}</h1>
-    <p style="margin:16px 0 0;font:400 15px/1.6 system-ui;color:#F2F0F3">${hola}</p>
-    <p style="margin:10px 0 0;font:400 15px/1.6 system-ui;color:#F2F0F3">${texto}</p>
+    <h1 style="margin:18px 0 0;font:700 25px/1.2 system-ui;color:#F3EBE2">${titular}</h1>
+    <p style="margin:16px 0 0;font:400 15px/1.6 system-ui;color:#F3EBE2">${hola}</p>
+    <p style="margin:10px 0 0;font:400 15px/1.6 system-ui;color:#F3EBE2">${texto}</p>
     ${extra}
-    <a href="${enlace}" style="display:inline-block;margin-top:24px;background:${color};color:#08080A;padding:14px 22px;font:700 10px/1 system-ui;letter-spacing:1.6px;text-transform:uppercase;text-decoration:none">${boton}</a>
-    <p style="margin:26px 0 0;padding-top:18px;border-top:1px solid rgba(255,255,255,.12);font:400 12px/1.6 system-ui;color:${TENUE}">
+    <a href="${enlace}" style="display:inline-block;margin-top:24px;background:${color};color:#141C28;padding:14px 22px;font:700 10px/1 system-ui;letter-spacing:1.6px;text-transform:uppercase;text-decoration:none">${boton}</a>
+    <p style="margin:26px 0 0;padding-top:18px;border-top:1px solid rgba(243,235,226,.14);font:400 12px/1.6 system-ui;color:${TENUE}">
       Este correo sale de ${BUZON} y lo lee una persona: si contestas, te
       contestamos. Nunca te vamos a pedir datos de pago por correo.
     </p>
@@ -97,7 +97,7 @@ function documento(color: string, titular: string, hola: string, texto: string,
 </body></html>`
 }
 
-function renglon(etiqueta: string, valor: string, color = '#F2F0F3') {
+function renglon(etiqueta: string, valor: string, color = '#F3EBE2') {
   return `<tr>
     <td style="padding:7px 0;font:400 12px/1 system-ui;color:${APAGADO}">${etiqueta}</td>
     <td align="right" style="padding:7px 0;font:400 14px/1 'Space Mono',monospace;color:${color}">${valor}</td>
@@ -117,16 +117,16 @@ export function recibo(a: Aviso): string {
   const texto = a.tipo === 'renta'
     ? `Rentaste <b>«${esc(a.clip)}»</b> de ${esc(a.creadora)}. Lo tienes en tu biblioteca hasta ${a.vence ? 'el ' + cuando(a.vence) : 'que venza el plazo'}.`
     : `Compraste <b>«${esc(a.clip)}»</b> de ${esc(a.creadora)}. Es tuyo: lo tienes en tu biblioteca para siempre.`
-  const tabla = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:18px;border-top:1px solid rgba(255,255,255,.12);border-bottom:1px solid rgba(255,255,255,.12)">
-    ${renglon(a.tipo === 'renta' ? 'Renta' : 'Compra', usd(a.precio), '#F2F0F3')}
-    ${renglon('Se descontó de tu saldo', usd(a.precio), '#FF2BD1')}
+  const tabla = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:18px;border-top:1px solid rgba(243,235,226,.14);border-bottom:1px solid rgba(243,235,226,.14)">
+    ${renglon(a.tipo === 'renta' ? 'Renta' : 'Compra', usd(a.precio), '#F3EBE2')}
+    ${renglon('Se descontó de tu saldo', usd(a.precio), '#D4B483')}
   </table>
   <p style="margin:14px 0 0;font:400 12px/1.6 system-ui;color:${APAGADO}">
     ${a.formato === 'album'
       ? 'Las fotos llevan tu nombre encima mientras las ves. Si aparecen en otro lado, esa marca dice de qué cuenta salieron.'
       : 'El video lleva tu nombre encima mientras lo ves. Si aparece en otro lado, esa marca dice de qué cuenta salió.'}
   </p>`
-  return documento('#FF2BD1', a.tipo === 'renta' ? 'Tu renta está lista' : 'Tu compra está lista',
+  return documento('#D4B483', a.tipo === 'renta' ? 'Tu renta está lista' : 'Tu compra está lista',
                    hola, texto, tabla, 'Ir a mi biblioteca', BIBLIOTECA)
 }
 
@@ -144,12 +144,12 @@ export function venta(a: Aviso): string {
     ? `${esc(a.comprador) || 'Alguien'} rentó <b>«${esc(a.clip)}»</b>${a.vence ? ' hasta el ' + cuando(a.vence) : ''}.`
     : `${esc(a.comprador) || 'Alguien'} compró <b>«${esc(a.clip)}»</b>.`
   const comision = a.precio - a.neto
-  const tabla = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:18px;border-top:1px solid rgba(255,255,255,.12);border-bottom:1px solid rgba(255,255,255,.12)">
+  const tabla = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:18px;border-top:1px solid rgba(243,235,226,.14);border-bottom:1px solid rgba(243,235,226,.14)">
     ${renglon('Pagó', usd(a.precio))}
     ${renglon('Comisión de la plataforma', '−' + usd(comision), APAGADO)}
-    ${renglon('Ya está en tu saldo', usd(a.neto), '#C8FF3D')}
+    ${renglon('Ya está en tu saldo', usd(a.neto), '#E0B15A')}
   </table>`
-  return documento('#C8FF3D', 'Vendiste', hola, texto, tabla, 'Ver mi dinero', DINERO)
+  return documento('#E0B15A', 'Vendiste', hola, texto, tabla, 'Ver mi dinero', DINERO)
 }
 
 async function mandar(llave: string, a: string, asunto: string, html: string) {

@@ -40,19 +40,19 @@ function aHtml(texto: string) {
     .replace(/Ó/g, '&Oacute;').replace(/Ú/g, '&Uacute;').replace(/Ñ/g, '&Ntilde;')
     .replace(/¿/g, '&iquest;').replace(/¡/g, '&iexcl;')
     .replace(/\n/g, '<br>')
-  return `<!doctype html><html><body style="margin:0;background:#08080A;padding:32px 0">
+  return `<!doctype html><html><body style="margin:0;background:#0E1520;padding:32px 0">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
 <table role="presentation" width="520" cellpadding="0" cellspacing="0" style="max-width:520px">
 <tr><td style="padding:0 24px 20px">
-<div style="font:400 22px/1 Arial,Helvetica,sans-serif;color:#F2F0F3;letter-spacing:1px">RAWSTUDIO</div>
+<div style="font:400 22px/1 Arial,Helvetica,sans-serif;color:#F3EBE2;letter-spacing:1px">RAWSTUDIO</div>
 </td></tr>
-<tr><td style="background:#111116;border:1px solid rgba(255,255,255,.14);padding:26px 24px">
-<div style="font:400 15px/1.65 Arial,Helvetica,sans-serif;color:#C9C4CC">${escapado}</div>
+<tr><td style="background:#141C28;border:1px solid rgba(255,255,255,.14);padding:26px 24px">
+<div style="font:400 15px/1.65 Arial,Helvetica,sans-serif;color:#C9BDB0">${escapado}</div>
 </td></tr>
 <tr><td style="padding:16px 24px 0">
-<div style="font:400 11px/1.6 Arial,Helvetica,sans-serif;color:#6E6A72">
+<div style="font:400 11px/1.6 Arial,Helvetica,sans-serif;color:#A89D92">
 Recibes esto porque tienes una cuenta en RAWstudio.<br>
-<a href="https://rawstudio.biz/#/perfil" style="color:#6E6A72">Preferencias de tu cuenta</a>
+<a href="https://rawstudio.biz/#/perfil" style="color:#A89D92">Preferencias de tu cuenta</a>
 </div>
 </td></tr>
 </table></td></tr></table></body></html>`

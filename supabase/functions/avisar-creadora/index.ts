@@ -74,10 +74,10 @@ export type Aviso = {
 
 /* ---------- Pedazos de la plantilla ---------- */
 
-const APAGADO = '#9C979F'
-const TENUE = '#6E6A72'
+const APAGADO = '#C9BDB0'
+const TENUE = '#A89D92'
 
-function renglon(etiqueta: string, valor: string, color = '#F2F0F3', fuerte = false) {
+function renglon(etiqueta: string, valor: string, color = '#F3EBE2', fuerte = false) {
   return `
     <tr>
       <td style="padding:7px 0;font:400 13px/1.4 system-ui;color:${APAGADO}">${etiqueta}</td>
@@ -96,12 +96,12 @@ function desglose(a: Aviso) {
   if (a.bruto_mxn === null || a.neto_mxn === null) return ''
   return `
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
-         style="margin-top:20px;border-top:1px solid rgba(255,255,255,.12)">
+         style="margin-top:20px;border-top:1px solid rgba(243,235,226,.14)">
     ${renglon('Lo que pediste', usd(a.coins))}
     ${renglon('En pesos, al tipo de cambio del día', pesos(a.bruto_mxn))}
     ${renglon('ISR retenido', '−' + pesos(a.isr_mxn ?? 0), APAGADO)}
     ${renglon('IVA retenido', '−' + pesos(a.iva_ret_mxn ?? 0), APAGADO)}
-    ${renglon(a.estado === 'pagada' ? 'Te transferimos' : 'Te llega', pesos(a.neto_mxn), '#C8FF3D', true)}
+    ${renglon(a.estado === 'pagada' ? 'Te transferimos' : 'Te llega', pesos(a.neto_mxn), '#E0B15A', true)}
   </table>
   <p style="margin:14px 0 0;font:400 12px/1.6 system-ui;color:${TENUE}">
     Las dos retenciones no se las queda RAWstudio: la ley obliga a la
@@ -137,7 +137,7 @@ export function cuerpo(a: Aviso): string {
   let titular: string, color: string, cuerpoTexto: string, extra = ''
 
   if (a.estado === 'aprobada') {
-    color = '#C8FF3D'
+    color = '#E0B15A'
     titular = 'Tu retiro está aprobado'
     cuerpoTexto = `Revisamos tu solicitud y está aprobada. El dinero sale por
       SPEI a la cuenta que registraste.`
@@ -145,53 +145,53 @@ export function cuerpo(a: Aviso): string {
       Te escribimos otra vez en cuanto salga la transferencia, con la
       referencia para que puedas rastrearla en tu banco.</p>`
   } else if (a.estado === 'pagada') {
-    color = '#C8FF3D'
+    color = '#E0B15A'
     titular = 'Ya te transferimos'
     cuerpoTexto = 'La transferencia ya salió por SPEI a la cuenta que registraste.'
     if (a.spei_ref) {
       extra = `
-      <div style="margin-top:18px;padding:13px 15px;border:1px solid rgba(255,255,255,.12)">
+      <div style="margin-top:18px;padding:13px 15px;border:1px solid rgba(243,235,226,.14)">
         <div style="font:700 9px/1 system-ui;letter-spacing:1.4px;text-transform:uppercase;color:${TENUE}">Referencia del SPEI</div>
-        <div style="margin-top:7px;font:400 15px/1.3 ui-monospace,monospace;color:#F2F0F3">${esc(a.spei_ref)}</div>
+        <div style="margin-top:7px;font:400 15px/1.3 ui-monospace,monospace;color:#F3EBE2">${esc(a.spei_ref)}</div>
       </div>
       <p style="margin:16px 0 0;font:400 14px/1.6 system-ui;color:${APAGADO}">
         Suele aparecer el mismo día. Si pasadas 48 horas no la ves, contesta a
         este correo con esa referencia y lo rastreamos.</p>`
     }
   } else {
-    color = '#FF2BD1'
+    color = '#D4B483'
     titular = 'Tu retiro no se aprobó'
     cuerpoTexto = 'Revisamos tu solicitud y esta vez no pudimos aprobarla.'
     extra = `
       ${a.motivo_rechazo ? `
-      <div style="margin-top:18px;padding:13px 15px;border:1px solid #FF2BD1;background:rgba(255,43,209,.08)">
-        <div style="font:700 9px/1 system-ui;letter-spacing:1.4px;text-transform:uppercase;color:#FF2BD1">El motivo</div>
-        <div style="margin-top:7px;font:400 14px/1.5 system-ui;color:#F2F0F3">${esc(a.motivo_rechazo)}</div>
+      <div style="margin-top:18px;padding:13px 15px;border:1px solid #D4B483;background:rgba(255,43,209,.08)">
+        <div style="font:700 9px/1 system-ui;letter-spacing:1.4px;text-transform:uppercase;color:#D4B483">El motivo</div>
+        <div style="margin-top:7px;font:400 14px/1.5 system-ui;color:#F3EBE2">${esc(a.motivo_rechazo)}</div>
       </div>` : ''}
       <p style="margin:16px 0 0;font:400 14px/1.6 system-ui;color:${APAGADO}">
-        <b style="color:#F2F0F3">Tu saldo sigue completo:</b> no se te descontó
+        <b style="color:#F3EBE2">Tu saldo sigue completo:</b> no se te descontó
         nada. Puedes volver a pedir el retiro cuando quieras. Y si el motivo no
         te queda claro, contesta a este correo.</p>`
   }
 
-  return `<!doctype html><html><body style="margin:0;background:#08080A;padding:32px 16px">
+  return `<!doctype html><html><body style="margin:0;background:#0E1520;padding:32px 16px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
-<table role="presentation" width="520" cellpadding="0" cellspacing="0" style="max-width:520px;background:#0E0E11;border:1px solid rgba(255,255,255,.12)">
+<table role="presentation" width="520" cellpadding="0" cellspacing="0" style="max-width:520px;background:#141C28;border:1px solid rgba(243,235,226,.14)">
   <tr><td style="padding:30px 26px">
 
     <div style="font:700 10px/1 system-ui;letter-spacing:2px;text-transform:uppercase;color:${color}">RAWstudio</div>
 
-    <h1 style="margin:18px 0 0;font:700 25px/1.2 system-ui;color:#F2F0F3">${titular}</h1>
+    <h1 style="margin:18px 0 0;font:700 25px/1.2 system-ui;color:#F3EBE2">${titular}</h1>
 
-    <p style="margin:16px 0 0;font:400 15px/1.6 system-ui;color:#F2F0F3">${hola}</p>
-    <p style="margin:10px 0 0;font:400 15px/1.6 system-ui;color:#F2F0F3">${cuerpoTexto}</p>
+    <p style="margin:16px 0 0;font:400 15px/1.6 system-ui;color:#F3EBE2">${hola}</p>
+    <p style="margin:10px 0 0;font:400 15px/1.6 system-ui;color:#F3EBE2">${cuerpoTexto}</p>
 
     ${a.estado === 'rechazada' ? '' : desglose(a)}
     ${extra}
 
-    <a href="${RETIROS}" style="display:inline-block;margin-top:24px;background:${color};color:#08080A;padding:14px 22px;font:700 10px/1 system-ui;letter-spacing:1.6px;text-transform:uppercase;text-decoration:none">Ver mis retiros</a>
+    <a href="${RETIROS}" style="display:inline-block;margin-top:24px;background:${color};color:#141C28;padding:14px 22px;font:700 10px/1 system-ui;letter-spacing:1.6px;text-transform:uppercase;text-decoration:none">Ver mis retiros</a>
 
-    <p style="margin:26px 0 0;padding-top:18px;border-top:1px solid rgba(255,255,255,.12);font:400 12px/1.6 system-ui;color:${TENUE}">
+    <p style="margin:26px 0 0;padding-top:18px;border-top:1px solid rgba(243,235,226,.14);font:400 12px/1.6 system-ui;color:${TENUE}">
       Este correo sale de ${BUZON} y lo lee una persona: si contestas, te
       contestamos. No incluimos tus datos bancarios por correo nunca; si algún
       mensaje que parezca nuestro te los pide, no es nuestro.

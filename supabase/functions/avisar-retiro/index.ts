@@ -56,12 +56,12 @@ type Nueva = {
 
 function fila(n: Nueva, tipoDeCambio: number | null) {
   const enPesos = tipoDeCambio === null ? '' :
-    `<span style="color:#6E6A72"> &middot; ~${pesos(aPesos(n.coins, tipoDeCambio))} antes de retenciones</span>`
+    `<span style="color:#A89D92"> &middot; ~${pesos(aPesos(n.coins, tipoDeCambio))} antes de retenciones</span>`
   const quien = n.handle ? `${n.quien} (@${n.handle})` : n.quien
   return `<tr>
-    <td style="padding:11px 0;border-bottom:1px solid rgba(255,255,255,.08);font:400 14px/1.5 system-ui;color:#F2F0F3">
+    <td style="padding:11px 0;border-bottom:1px solid rgba(255,255,255,.08);font:400 14px/1.5 system-ui;color:#F3EBE2">
       ${quien}<br>
-      <span style="font:700 15px/1.5 ui-monospace,monospace;color:#C8FF3D">${usd(n.coins)}</span>${enPesos}
+      <span style="font:700 15px/1.5 ui-monospace,monospace;color:#E0B15A">${usd(n.coins)}</span>${enPesos}
     </td></tr>`
 }
 
@@ -76,25 +76,25 @@ function cuerpo(
   // Si falta el tipo de cambio, aprobar FALLA. Mejor decirlo aqui que dejar
   // que lo descubra pulsando el boton con la creadora esperando.
   const aviso = tipoDeCambio === null ? `
-    <div style="margin-top:18px;padding:13px 15px;border:1px solid #FF2BD1;background:rgba(255,43,209,.08)">
-      <div style="font:700 10px/1 system-ui;letter-spacing:1.6px;text-transform:uppercase;color:#FF2BD1">
+    <div style="margin-top:18px;padding:13px 15px;border:1px solid #D4B483;background:rgba(255,43,209,.08)">
+      <div style="font:700 10px/1 system-ui;letter-spacing:1.6px;text-transform:uppercase;color:#D4B483">
         No vas a poder aprobarlo todavía
       </div>
-      <div style="font:400 13px/1.6 system-ui;color:#F2F0F3;margin-top:7px">
+      <div style="font:400 13px/1.6 system-ui;color:#F3EBE2;margin-top:7px">
         Falta definir <b>tipo_cambio_usd_mxn</b> en Ajustes: cuántos centavos de
         peso vale un dólar (1850 = 18.50). Sin ese número no hay forma de saber
         cuántos pesos transferir, y aprobar se niega en vez de suponerlo.
       </div>
     </div>` : ''
 
-  return `<!doctype html><html><body style="margin:0;background:#08080A;padding:32px 16px">
+  return `<!doctype html><html><body style="margin:0;background:#0E1520;padding:32px 16px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
-<table role="presentation" width="520" cellpadding="0" cellspacing="0" style="max-width:520px;background:#0E0E11;border:1px solid rgba(255,255,255,.12)">
+<table role="presentation" width="520" cellpadding="0" cellspacing="0" style="max-width:520px;background:#141C28;border:1px solid rgba(243,235,226,.14)">
   <tr><td style="padding:28px 26px">
-    <div style="font:700 10px/1 system-ui;letter-spacing:2.2px;text-transform:uppercase;color:#C8FF3D">
+    <div style="font:700 10px/1 system-ui;letter-spacing:2.2px;text-transform:uppercase;color:#E0B15A">
       RAWstudio &middot; retiro solicitado
     </div>
-    <div style="font:400 26px/1.25 Georgia,serif;color:#F2F0F3;margin-top:16px">
+    <div style="font:400 26px/1.25 Georgia,serif;color:#F3EBE2;margin-top:16px">
       ${nuevas.length === 1
         ? 'Alguien quiere cobrar lo que ha ganado.'
         : `${nuevas.length} personas quieren cobrar lo que han ganado.`}
@@ -102,14 +102,14 @@ function cuerpo(
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:18px">
       ${nuevas.map(n => fila(n, tipoDeCambio)).join('')}
     </table>
-    <div style="font:400 13px/1.7 system-ui;color:#9C979F;margin-top:14px">
+    <div style="font:400 13px/1.7 system-ui;color:#C9BDB0;margin-top:14px">
       ${cola} Los datos bancarios están en el panel, no en este correo.
     </div>
     ${aviso}
-    <a href="${PANEL}" style="display:inline-block;margin-top:22px;background:#C8FF3D;color:#08080A;padding:14px 22px;font:700 10px/1 system-ui;letter-spacing:1.6px;text-transform:uppercase;text-decoration:none">
+    <a href="${PANEL}" style="display:inline-block;margin-top:22px;background:#E0B15A;color:#141C28;padding:14px 22px;font:700 10px/1 system-ui;letter-spacing:1.6px;text-transform:uppercase;text-decoration:none">
       Abrir Retiros
     </a>
-    <div style="font:400 12px/1.6 ui-monospace,monospace;color:#6E6A72;margin-top:22px;border-top:1px solid rgba(255,255,255,.1);padding-top:14px">
+    <div style="font:400 12px/1.6 ui-monospace,monospace;color:#A89D92;margin-top:22px;border-top:1px solid rgba(255,255,255,.1);padding-top:14px">
       Para: ${nombre}. De cada solicitud se avisa una sola vez. Si no haces
       nada, no vuelve a llegar: el contador del panel es lo que queda.
     </div>
@@ -130,14 +130,14 @@ function cuerpo(
 
 function bloque(titulo: string, dentro: string) {
   return `<div style="margin-top:26px">
-    <div style="font:700 10px/1 system-ui;letter-spacing:2px;text-transform:uppercase;color:#9C979F;padding-bottom:9px;border-bottom:1px solid rgba(255,255,255,.14)">${titulo}</div>
+    <div style="font:700 10px/1 system-ui;letter-spacing:2px;text-transform:uppercase;color:#C9BDB0;padding-bottom:9px;border-bottom:1px solid rgba(255,255,255,.14)">${titulo}</div>
     ${dentro}
   </div>`
 }
 
-function renglon(etiqueta: string, valor: string, color = '#F2F0F3') {
+function renglon(etiqueta: string, valor: string, color = '#F3EBE2') {
   return `<tr>
-    <td style="padding:7px 0;font:400 13px/1.5 system-ui;color:#9C979F">${etiqueta}</td>
+    <td style="padding:7px 0;font:400 13px/1.5 system-ui;color:#C9BDB0">${etiqueta}</td>
     <td style="padding:7px 0;font:400 13px/1.5 ui-monospace,monospace;color:${color};text-align:right">${valor}</td>
   </tr>`
 }
@@ -158,54 +158,54 @@ function muestraCuerpo(
   const neto = bruto - isr - iva
 
   const loQueTuRecibes = `
-    <div style="background:#0E0E11;border:1px solid rgba(255,255,255,.12);padding:22px 20px;margin-top:12px">
-      <div style="font:700 10px/1 system-ui;letter-spacing:2.2px;text-transform:uppercase;color:#C8FF3D">
+    <div style="background:#141C28;border:1px solid rgba(243,235,226,.14);padding:22px 20px;margin-top:12px">
+      <div style="font:700 10px/1 system-ui;letter-spacing:2.2px;text-transform:uppercase;color:#E0B15A">
         RAWstudio &middot; retiro solicitado
       </div>
-      <div style="font:400 23px/1.3 Georgia,serif;color:#F2F0F3;margin-top:14px">
+      <div style="font:400 23px/1.3 Georgia,serif;color:#F3EBE2;margin-top:14px">
         Alguien quiere cobrar lo que ha ganado.
       </div>
-      <div style="padding:11px 0;border-bottom:1px solid rgba(255,255,255,.08);font:400 14px/1.5 system-ui;color:#F2F0F3;margin-top:12px">
+      <div style="padding:11px 0;border-bottom:1px solid rgba(255,255,255,.08);font:400 14px/1.5 system-ui;color:#F3EBE2;margin-top:12px">
         Valeria (@valeriahotlatina016)<br>
-        <span style="font:700 15px/1.5 ui-monospace,monospace;color:#C8FF3D">${usd(coins)}</span>
-        <span style="color:#6E6A72"> &middot; ~${pesos(bruto)} antes de retenciones</span>
+        <span style="font:700 15px/1.5 ui-monospace,monospace;color:#E0B15A">${usd(coins)}</span>
+        <span style="color:#A89D92"> &middot; ~${pesos(bruto)} antes de retenciones</span>
       </div>
-      <div style="font:400 13px/1.7 system-ui;color:#9C979F;margin-top:12px">
+      <div style="font:400 13px/1.7 system-ui;color:#C9BDB0;margin-top:12px">
         No hay ninguna otra sin resolver. Los datos bancarios están en el panel,
         no en este correo.
       </div>
-      <div style="display:inline-block;margin-top:18px;background:#C8FF3D;color:#08080A;padding:13px 20px;font:700 10px/1 system-ui;letter-spacing:1.6px;text-transform:uppercase">
+      <div style="display:inline-block;margin-top:18px;background:#E0B15A;color:#141C28;padding:13px 20px;font:700 10px/1 system-ui;letter-spacing:1.6px;text-transform:uppercase">
         Abrir Retiros
       </div>
     </div>`
 
   const loQueEllaVe = `
-    <div style="background:#0E0E11;border:1px solid rgba(255,255,255,.12);padding:22px 20px;margin-top:12px">
-      <div style="font:700 10px/1 system-ui;letter-spacing:2px;text-transform:uppercase;color:#9C979F">
+    <div style="background:#141C28;border:1px solid rgba(243,235,226,.14);padding:22px 20px;margin-top:12px">
+      <div style="font:700 10px/1 system-ui;letter-spacing:2px;text-transform:uppercase;color:#C9BDB0">
         Disponible para retirar
       </div>
-      <div style="font:400 40px/1 Georgia,serif;color:#C8FF3D;margin-top:9px">${usd(coins)}</div>
-      <div style="font:400 12px/1.6 system-ui;color:#9C979F;margin-top:9px">
+      <div style="font:400 40px/1 Georgia,serif;color:#E0B15A;margin-top:9px">${usd(coins)}</div>
+      <div style="font:400 12px/1.6 system-ui;color:#C9BDB0;margin-top:9px">
         Es tu saldo menos lo que ya pediste y sigue sin resolverse. El mínimo
         por solicitud son $5.00.
       </div>
-      <div style="margin-top:17px;font:700 10px/1 system-ui;letter-spacing:2px;text-transform:uppercase;color:#9C979F">
+      <div style="margin-top:17px;font:700 10px/1 system-ui;letter-spacing:2px;text-transform:uppercase;color:#C9BDB0">
         Cuánto quieres retirar, en dólares
       </div>
-      <div style="margin-top:7px;border:1px solid rgba(255,255,255,.25);padding:11px 13px;font:400 15px/1.3 ui-monospace,monospace;color:#F2F0F3">20.00</div>
-      <div style="font:400 12px/1.6 system-ui;color:#9C979F;margin-top:8px">
+      <div style="margin-top:7px;border:1px solid rgba(255,255,255,.25);padding:11px 13px;font:400 15px/1.3 ui-monospace,monospace;color:#F3EBE2">20.00</div>
+      <div style="font:400 12px/1.6 system-ui;color:#C9BDB0;margin-top:8px">
         Se te transfiere en pesos al tipo de cambio del día, con las retenciones
         ya calculadas.
       </div>
-      <div style="display:inline-block;margin-top:15px;background:#FF2BD1;color:#08080A;padding:13px 20px;font:700 10px/1 system-ui;letter-spacing:1.6px;text-transform:uppercase">
+      <div style="display:inline-block;margin-top:15px;background:#D4B483;color:#141C28;padding:13px 20px;font:700 10px/1 system-ui;letter-spacing:1.6px;text-transform:uppercase">
         Pedir el retiro
       </div>
-      <div style="margin-top:17px;padding-top:13px;border-top:1px solid rgba(255,255,255,.1);font:400 13px/1.5 system-ui;color:#C8FF3D">
+      <div style="margin-top:17px;padding-top:13px;border-top:1px solid rgba(255,255,255,.1);font:400 13px/1.5 system-ui;color:#E0B15A">
         Solicitud enviada. Te avisamos en cuanto se resuelva.
       </div>
-      <div style="margin-top:13px;font:700 10px/1 system-ui;letter-spacing:2px;text-transform:uppercase;color:#9C979F">Tus solicitudes</div>
-      <div style="margin-top:9px;font:500 16px/1.3 system-ui;color:#F2F0F3">${usd(coins)}
-        <span style="font:400 10px/1 ui-monospace,monospace;color:#6E6A72;padding-left:8px">EN REVISIÓN</span>
+      <div style="margin-top:13px;font:700 10px/1 system-ui;letter-spacing:2px;text-transform:uppercase;color:#C9BDB0">Tus solicitudes</div>
+      <div style="margin-top:9px;font:500 16px/1.3 system-ui;color:#F3EBE2">${usd(coins)}
+        <span style="font:400 10px/1 ui-monospace,monospace;color:#A89D92;padding-left:8px">EN REVISIÓN</span>
       </div>
     </div>`
 
@@ -215,20 +215,20 @@ function muestraCuerpo(
       ${renglon(`Tipo de cambio (${(cambio / 100).toFixed(2)} MXN/USD)`, pesos(bruto))}
       ${renglon(`ISR ${isrPct}% de la base`, '− ' + pesos(isr))}
       ${renglon(`IVA: ${ivaPct}% del IVA trasladado (16%)`, '− ' + pesos(iva))}
-      ${renglon('<b style="color:#F2F0F3">Lo que transfieres por SPEI</b>', '<b>' + pesos(neto) + '</b>', '#C8FF3D')}
+      ${renglon('<b style="color:#F3EBE2">Lo que transfieres por SPEI</b>', '<b>' + pesos(neto) + '</b>', '#E0B15A')}
     </table>`
 
-  return `<!doctype html><html><body style="margin:0;background:#08080A;padding:30px 16px">
+  return `<!doctype html><html><body style="margin:0;background:#0E1520;padding:30px 16px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
 <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px">
   <tr><td>
-    <div style="font:700 10px/1 system-ui;letter-spacing:2.2px;text-transform:uppercase;color:#FF2BD1">
+    <div style="font:700 10px/1 system-ui;letter-spacing:2.2px;text-transform:uppercase;color:#D4B483">
       RAWstudio &middot; muestra, no es un retiro real
     </div>
-    <div style="font:400 26px/1.25 Georgia,serif;color:#F2F0F3;margin-top:14px">
+    <div style="font:400 26px/1.25 Georgia,serif;color:#F3EBE2;margin-top:14px">
       Así se ve un retiro de $20 por las dos caras.
     </div>
-    <div style="font:400 14px/1.7 system-ui;color:#9C979F;margin-top:12px">
+    <div style="font:400 14px/1.7 system-ui;color:#C9BDB0;margin-top:12px">
       Nadie ha pedido nada: esto es un ejemplo. Los números sí son reales,
       salen del tipo de cambio y las tasas que hay ahora mismo en la base.
     </div>
@@ -237,11 +237,11 @@ function muestraCuerpo(
     ${bloque('2 &middot; La pantalla que ve ella', loQueEllaVe)}
     ${bloque('3 &middot; Las cuentas', cuentas)}
 
-    <div style="margin-top:26px;padding:14px 16px;border:1px solid #FF2BD1;background:rgba(255,43,209,.08)">
-      <div style="font:700 10px/1 system-ui;letter-spacing:1.6px;text-transform:uppercase;color:#FF2BD1">
+    <div style="margin-top:26px;padding:14px 16px;border:1px solid #D4B483;background:rgba(255,43,209,.08)">
+      <div style="font:700 10px/1 system-ui;letter-spacing:1.6px;text-transform:uppercase;color:#D4B483">
         Lo que ella NO recibe
       </div>
-      <div style="font:400 13px/1.6 system-ui;color:#F2F0F3;margin-top:7px">
+      <div style="font:400 13px/1.6 system-ui;color:#F3EBE2;margin-top:7px">
         Su pantalla dice <b>«Te avisamos en cuanto se resuelva»</b>, pero hoy no
         existe ningún correo hacia ella: ni al aprobar, ni al pagar, ni al
         rechazar. Si no vuelve a entrar a mirar, no se entera de nada. Tampoco
@@ -250,7 +250,7 @@ function muestraCuerpo(
       </div>
     </div>
 
-    <div style="font:400 12px/1.6 ui-monospace,monospace;color:#6E6A72;margin-top:24px;border-top:1px solid rgba(255,255,255,.1);padding-top:14px">
+    <div style="font:400 12px/1.6 ui-monospace,monospace;color:#A89D92;margin-top:24px;border-top:1px solid rgba(255,255,255,.1);padding-top:14px">
       Para: ${nombre}. Muestra pedida a mano. No se ha tocado ningún dato.
     </div>
   </td></tr>

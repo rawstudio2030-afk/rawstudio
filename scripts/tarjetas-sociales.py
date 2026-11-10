@@ -1,183 +1,164 @@
 #!/usr/bin/env python3
 """Las imagenes de marca que se pintan FUERA de la aplicacion.
 
-La vista previa de un enlace, los iconos del telefono, y el logo que mete
-Gmail en el correo de recuperacion. Tres sitios donde la marca la dibuja un
-programa ajeno a partir de un archivo, no el CSS del sitio.
+La vista previa de un enlace (og.png), los iconos del telefono y el logo que
+mete Gmail en el correo de recuperacion. Tres sitios donde la marca la dibuja
+un programa ajeno a partir de un archivo, no el CSS del sitio.
 
----------- Por que existia el hueco ----------
+---------- Direccion: «El descenso» ----------
 
-El sitio no tenia NI UNA etiqueta social: ni og:image, ni twitter:card, ni
-apple-touch-icon, ni manifiesto. Cada enlace compartido a WhatsApp, a X o a
-una biografia de TikTok salia en blanco. Para un sitio que crece por enlaces
-eso es lo mas barato con mas retorno.
+La marca es la de docs/diseno/descenso/README.md: «RAW» en una didona fina muy
+espaciada y marfil, «studio» en cursiva champagne, sobre el navy de Collins.
+Sin tubo de neon, sin resplandor, sin skyline. Los colores son los de
+src/lib/diseño.ts (COLOR / PISO.collins); si cambian alli, cambian aqui.
 
-Y habia algo peor y mas tonto: el favicon apuntaba a /rawstudio/favicon.svg,
-que da 404 en el dominio propio. El sitio llevaba sin icono desde que se
-movio a rawstudio.biz.
+---------- Tipografias ----------
+
+El sitio usa Italiana (RAW) y Bodoni Moda italica (studio), de Google Fonts. En
+esta maquina no estan, y Pillow solo dibuja con archivos locales: se usan Didot
+(para RAW) y Bodoni 72 cursiva (para studio), que vienen con macOS y son de la
+misma familia de didonas. Si algun dia hay que rehacer estas imagenes en otra
+maquina, basta con apuntar RUTA_RAW / RUTA_STUDIO a las .ttf de Italiana y
+Bodoni Moda; el resto del script no cambia.
 
 ---------- Por que Python y no un .mjs como los demas scripts ----------
 
 Porque Pillow es el unico rasterizador que hay en esta maquina: no estan
-rsvg-convert, ni inkscape, ni ImageMagick. ffmpeg si esta, pero no dibuja
-circulos ni rasteriza SVG, y la alternativa era añadir una dependencia de npm
-para generar cuatro imagenes que cambian una vez al año.
-
----------- Por que un script y no las imagenes a mano ----------
-
-Porque el dia que cambie el logo hay que rehacer las cuatro, y «rehazlas como
-estaban» sin receta acaba en cuatro imagenes que ya no combinan. Aqui la
-receta son los mismos tokens de src/lib/diseño.ts, escritos una vez.
+rsvg-convert, ni inkscape, ni ImageMagick.
 
 ---------- Lo que la tarjeta NO lleva ----------
 
-Contenido. Ni una portada, ni una miniatura, ni una silueta. Es la marca
-sobre su fondo y nada mas, y es deliberado: esa imagen la va a pintar WhatsApp
-en una conversacion y X en una linea de tiempo, sin que nadie la haya pedido
-y delante de quien pase por ahi. Una plataforma de contenido adulto que mete
-su contenido en la vista previa se gana que el enlace se marque, y de paso
-expone a quien lo comparte.
+Contenido. Ni una portada, ni una miniatura, ni una silueta, ni una foto de
+ambiente. Es la marca sobre su fondo y nada mas, y es deliberado: esa imagen la
+va a pintar WhatsApp en una conversacion y X en una linea de tiempo, sin que
+nadie la haya pedido y delante de quien pase por ahi. Una plataforma de
+contenido adulto que mete su contenido en la vista previa se gana que el
+enlace se marque, y de paso expone a quien lo comparte.
 
     python3 scripts/tarjetas-sociales.py
 """
 
 from pathlib import Path
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageDraw, ImageFont
 
 RAIZ = Path(__file__).resolve().parent.parent
-ORIGEN = RAIZ / 'src' / 'assets' / 'wordmark.png'
 SALIDA = RAIZ / 'public'
 
 # Los mismos de src/lib/diseño.ts. Si cambian alli, cambian aqui.
-FONDO = (8, 8, 10)
-SUPERFICIE = (17, 17, 22)
-ACENTO = (255, 43, 209)
-DINERO = (200, 255, 61)
+FONDO = (14, 21, 32)        # COLOR.fondo      #0E1520
+SUPERFICIE = (20, 28, 40)   # COLOR.superficie #141C28
+MARFIL = (243, 235, 226)    # COLOR.texto      #F3EBE2
+CHAMPAGNE = (212, 180, 131) # COLOR.acento     #D4B483
 
-# El correo no usa COLOR.fondo sino el suyo, un punto mas claro. Se copia de
-# supabase/templates/recuperar.html y no se unifica: cambiar el fondo de un
-# correo ya enviado es imposible, asi que esa plantilla congela sus colores.
-FONDO_CORREO = (11, 11, 14)
+# Tipografias del sistema (ver arriba). Didot y Bodoni 72 traen cursiva en el indice 1.
+RUTA_RAW = ('/System/Library/Fonts/Supplemental/Didot.ttc', 0)
+RUTA_STUDIO = ('/System/Library/Fonts/Supplemental/Bodoni 72.ttc', 1)
 
 
-def rayado(tam, color_a, color_b, paso=20, grosor=10):
-    """La trama diagonal que ya usa el producto: el fondo de una portada sin
-    foto y el de un avatar vacio son `repeating-linear-gradient(130deg, …)`.
-    Se repite aqui para que la tarjeta se reconozca como del mismo sitio."""
-    w, h = tam
-    lienzo = Image.new('RGB', tam, color_a)
+def fuente(ruta, px):
+    return ImageFont.truetype(ruta[0], px, index=ruta[1])
+
+
+def fondo_tarjeta(w, h):
+    """Navy con un degradado vertical suave: del void arriba al navy abajo."""
+    img = Image.new('RGB', (w, h), FONDO)
+    px = img.load()
+    for y in range(h):
+        t = y / (h - 1)
+        c = tuple(round(FONDO[i] + (SUPERFICIE[i] - FONDO[i]) * t) for i in range(3))
+        for x in range(w):
+            px[x, y] = c
+    return img
+
+
+def wordmark(alto_raw, espaciado=0.22, fondo=None):
+    """«RAW» espaciado en marfil + «studio» en cursiva champagne, en una linea.
+
+    Devuelve una imagen RGBA con el wordmark recortado a su caja. `alto_raw` es
+    el cuerpo de la RAW en px; «studio» va a 1.125x, como en el wordmark del
+    sitio (`Wordmark.tsx`). Se dibuja a 4x y se reduce: PIL no antialiasea
+    bien el trazo fino de una didona a tamaños chicos."""
+    k = 4
+    f_raw = fuente(RUTA_RAW, alto_raw * k)
+    f_stu = fuente(RUTA_STUDIO, round(alto_raw * 1.125 * k))
+    sp = round(alto_raw * k * espaciado)
+
+    # medir
+    d0 = ImageDraw.Draw(Image.new('RGBA', (10, 10)))
+    anchos = [d0.textlength(c, font=f_raw) for c in 'RAW']
+    w_raw = sum(anchos) + sp * 3          # espacio tambien tras la W (como letter-spacing)
+    w_stu = d0.textlength('studio', font=f_stu)
+    gap = round(alto_raw * k * 0.08)
+    W = round(w_raw + gap + w_stu) + 8 * k
+    H = round(alto_raw * k * 1.7)
+    lienzo = Image.new('RGBA', (W, H), (0, 0, 0, 0))
     d = ImageDraw.Draw(lienzo)
-    # 130 grados: se dibuja como lineas de pendiente fija recorriendo el ancho
-    # mas el alto, para que crucen el lienzo entero.
-    for x in range(-h, w + h, paso):
-        d.line([(x, 0), (x + h, h)], fill=color_b, width=grosor)
-    return lienzo
 
+    base = round(H * 0.72)   # linea de base comun
+    x = 4 * k
+    for c, a in zip('RAW', anchos):
+        d.text((x, base), c, font=f_raw, fill=MARFIL + (255,), anchor='ls')
+        x += a + sp
+    d.text((x + gap - sp + sp * 0, base), 'studio', font=f_stu, fill=CHAMPAGNE + (255,), anchor='ls')
 
-def con_resplandor(logo, color, radio, opacidad):
-    """El resplandor del wordmark: una copia teñida y desenfocada DEBAJO del
-    original, no un filtro encima. Devuelve (halo, margen) — hay que pegarlo
-    desplazado -margen en las dos direcciones.
-
-    DOS COSAS QUE SALIERON MAL AL PRIMER INTENTO, y por las que esto tiene
-    margen y una sola pasada:
-
-    1. Desenfocar dentro del lienzo del propio logo RECORTA el halo en los
-       cuatro bordes, y el recorte de un degradado es una linea recta. Salia
-       una caja magenta con esquinas. El margen es 3 veces el radio porque un
-       desenfoque gaussiano es despreciable mas alla de eso.
-
-    2. Apilar la misma capa tres veces para que se note no la intensifica: la
-       satura hasta volverla opaca, y entonces no es un resplandor sino un
-       rectangulo. La intensidad se sube en el canal alfa, con tope."""
-    m = radio * 3
-    lienzo = (logo.width + m * 2, logo.height + m * 2)
-
-    halo = Image.new('RGBA', lienzo, color + (0,))
-    mascara = Image.new('L', lienzo, 0)
-    mascara.paste(logo.getchannel('A'), (m, m))
-    halo.putalpha(mascara.filter(ImageFilter.GaussianBlur(radio)))
-
-    # Subir el alfa con tope en 255, en vez de componer varias veces.
-    a = halo.getchannel('A').point(lambda v: min(255, int(v * opacidad)))
-    halo.putalpha(a)
-    return halo, m
+    caja = lienzo.getbbox()
+    lienzo = lienzo.crop(caja)
+    return lienzo.resize((max(1, lienzo.width // k), max(1, lienzo.height // k)), Image.LANCZOS)
 
 
 def tarjeta():
     """1200x630, la medida que piden Open Graph y Twitter."""
     W, H = 1200, 630
-    fondo = rayado((W, H), FONDO, SUPERFICIE, paso=26, grosor=13)
+    img = fondo_tarjeta(W, H).convert('RGBA')
+    wm = wordmark(150)
+    x = (W - wm.width) // 2
+    y = (H - wm.height) // 2 - 18
+    img.alpha_composite(wm, (x, y))
 
-    logo = Image.open(ORIGEN).convert('RGBA')
-    ancho = 560
-    logo = logo.resize((ancho, round(ancho * logo.height / logo.width)), Image.LANCZOS)
-    # Los mismos -2 grados que lleva en la pantalla.
-    logo = logo.rotate(2, resample=Image.BICUBIC, expand=True)
-
-    capa = Image.new('RGBA', (W, H), (0, 0, 0, 0))
-    x = (W - logo.width) // 2
-    y = (H - logo.height) // 2 - 26
-    halo, m = con_resplandor(logo, ACENTO, 22, 2.1)
-    capa.alpha_composite(halo, (x - m, y - m))
-    capa.alpha_composite(logo, (x, y))
-
-    d = ImageDraw.Draw(capa)
-    # Una regla de dinero debajo. Corta, centrada: es el unico elemento que no
-    # es el logo, y su trabajo es dar escala a la tarjeta.
-    ancho_regla = 150
-    yr = y + logo.height + 42
-    d.rectangle([(W - ancho_regla) // 2, yr, (W + ancho_regla) // 2, yr + 5], fill=DINERO)
-
-    fondo = fondo.convert('RGBA')
-    fondo.alpha_composite(capa)
-    return fondo.convert('RGB')
-
-
-def simbolo(lado):
-    """El circulo con el triangulo de play de public/favicon.svg, al pixel.
-
-    El SVG usa un lienzo de 100: circulo en (50,50) r=26 con trazo 6, y el
-    triangulo 41,39 -> 60,50 -> 41,61. Se escala desde ahi para que el icono
-    de la app y la pestaña sean el MISMO dibujo y no dos parecidos."""
-    # 4x y luego se reduce: PIL no antialiasea el trazo de un arco.
-    s = lado * 4
-    k = s / 100
-    img = Image.new('RGBA', (s, s), FONDO + (255,))
+    # Un filete champagne debajo, corto y centrado: da escala a la tarjeta.
     d = ImageDraw.Draw(img)
-    r, t = 26 * k, 6 * k
-    c = 50 * k
-    d.ellipse([c - r, c - r, c + r, c + r], outline=ACENTO, width=round(t))
-    d.polygon([(41 * k, 39 * k), (60 * k, 50 * k), (41 * k, 61 * k)], fill=DINERO)
+    ancho_regla = 120
+    yr = y + wm.height + 44
+    d.rectangle([(W - ancho_regla) // 2, yr, (W + ancho_regla) // 2, yr + 2], fill=CHAMPAGNE + (255,))
+    return img.convert('RGB')
+
+
+def sello(lado):
+    """El monograma «RS» de public/favicon.svg: champagne sobre navy.
+
+    En el favicon es Georgia 700 sobre una caja de 32 con esquinas de 4. Aqui,
+    a pantalla completa y cuadrado (iOS y Android aplican su propia mascara), con
+    la didona de la marca en vez de Georgia."""
+    s = lado * 4
+    img = Image.new('RGBA', (s, s), SUPERFICIE + (255,))
+    d = ImageDraw.Draw(img)
+    f = fuente(RUTA_STUDIO, round(s * 0.40))
+    # RS en la cursiva de la marca, con un poco de aire entre letras
+    texto = 'RS'
+    w = d.textlength(texto, font=f) + s * 0.02
+    d.text(((s - w) / 2, s * 0.5), texto, font=f, fill=CHAMPAGNE + (255,), anchor='ls')
+    # un filete fino abajo: la «linea de sello»
+    d.rectangle([s * 0.36, s * 0.62, s * 0.64, s * 0.62 + max(2, s * 0.008)], fill=CHAMPAGNE + (200,))
     return img.resize((lado, lado), Image.LANCZOS)
 
 
 def logo_correo():
-    """El logo que pinta Gmail en el correo de recuperacion.
+    """El logo que pinta Gmail si el correo de recuperacion lo pide como imagen.
 
-    Era un JPEG de 376x133 con el fondo incrustado, y un JPEG de un
-    resplandor sobre negro es el peor caso posible para ese formato: el
-    degradado se parte en bloques y quedan manchas cuadradas alrededor de las
-    letras. Se veia a simple vista.
+    La plantilla (`supabase/templates/recuperar.html`) ya NO lo usa: lleva el
+    wordmark en texto, que no se bloquea como imagen ni depende de que cargue.
+    Se sigue generando porque una plantilla pegada a mano en el panel de
+    Supabase puede seguir llamando a `correo/logo.png`, y que salga la marca
+    nueva (y no la de neon) es mejor que un enlace roto.
 
-    Va en PNG y con el fondo del correo incrustado igual que antes. No
-    transparente: la plantilla la ven clientes viejos, y un PNG con alfa
-    sobre un fondo que algunos pintan blanco deja el logo ilegible. Mejor
-    incrustar el fondo exacto de la plantilla.
-
-    Se dibuja a 2x de como se muestra (188x66), que es lo que piden las
-    pantallas densas."""
-    logo = Image.open(ORIGEN).convert('RGBA')
-    ancho = 330
-    logo = logo.resize((ancho, round(ancho * logo.height / logo.width)), Image.LANCZOS)
-
+    PNG con el fondo del correo incrustado, no transparente: la ven clientes
+    viejos, y un PNG con alfa sobre un fondo que algunos pintan blanco deja el
+    logo ilegible. Se dibuja a 2x de como se muestra (188x66)."""
     W, H = 376, 132
-    fondo = Image.new('RGBA', (W, H), FONDO_CORREO + (255,))
-    x, y = (W - logo.width) // 2, (H - logo.height) // 2
-    halo, m = con_resplandor(logo, ACENTO, 14, 1.8)
-    fondo.alpha_composite(halo, (x - m, y - m))
-    fondo.alpha_composite(logo, (x, y))
-    return fondo.convert('RGB')
+    img = Image.new('RGBA', (W, H), FONDO + (255,))
+    wm = wordmark(52)
+    img.alpha_composite(wm, ((W - wm.width) // 2, (H - wm.height) // 2))
+    return img.convert('RGB')
 
 
 def main():
@@ -192,20 +173,15 @@ def main():
     for lado, nombre in [(180, 'apple-touch-icon.png'),
                          (192, 'icon-192.png'),
                          (512, 'icon-512.png')]:
-        simbolo(lado).save(SALIDA / nombre, optimize=True)
+        sello(lado).save(SALIDA / nombre, optimize=True)
         print(f"  {nombre:<22} {lado}x{lado}  "
               f"{(SALIDA / nombre).stat().st_size // 1024} KB")
 
     (SALIDA / 'correo').mkdir(exist_ok=True)
-    # Paleta de 128 colores con difuminado: un PNG de 24 bits de un degradado
-    # pesa 50 KB y con paleta pesa 20, y a este tamaño no se distingue uno de
-    # otro —comprobado comparando las dos imagenes, no suponiendolo—.
-    c = logo_correo().quantize(colors=128, method=Image.MEDIANCUT,
-                               dither=Image.FLOYDSTEINBERG)
+    c = logo_correo()
     c.save(SALIDA / 'correo' / 'logo.png', optimize=True)
     print(f"  correo/logo.png        {c.width}x{c.height}  "
-          f"{(SALIDA / 'correo' / 'logo.png').stat().st_size // 1024} KB"
-          f"   (antes: logo.jpg, 376x133, con artefactos)")
+          f"{(SALIDA / 'correo' / 'logo.png').stat().st_size // 1024} KB")
 
 
 if __name__ == '__main__':

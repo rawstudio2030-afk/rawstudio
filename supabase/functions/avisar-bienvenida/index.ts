@@ -31,8 +31,8 @@ const esc = (t: string) =>
 
 export type Aviso = { id: string; quien: string; creadora: boolean; correo: string }
 
-const TENUE = '#6E6A72'
-const APAGADO = '#9C979F'
+const TENUE = '#A89D92'
+const APAGADO = '#C9BDB0'
 
 export function asunto(a: Aviso): string {
   return a.creadora ? 'Bienvenida a RAWstudio' : 'Ya estás dentro'
@@ -42,7 +42,7 @@ export function cuerpo(a: Aviso): string {
   const hola = a.quien ? `Hola ${esc(a.quien)},` : 'Hola,'
   const { color, titular, texto, extra, boton, enlace } = a.creadora
     ? {
-        color: '#C8FF3D', titular: 'Ya tienes tu estudio',
+        color: '#E0B15A', titular: 'Ya tienes tu estudio',
         texto: 'Puedes subir desde ahora mismo, aunque tu identidad todavía no esté verificada: el clip se queda guardado y sale en cuanto se apruebe.',
         extra: `<p style="margin:10px 0 0;font:400 15px/1.6 system-ui;color:${APAGADO}">
                   El 80% de cada dólar es tuyo, sin cuota mensual y sin exclusividad.
@@ -51,7 +51,7 @@ export function cuerpo(a: Aviso): string {
         boton: 'Ir a mi estudio', enlace: ESTUDIO,
       }
     : {
-        color: '#FF2BD1', titular: 'Ya estás dentro',
+        color: '#D4B483', titular: 'Ya estás dentro',
         texto: 'Tu cuenta está lista. Cada video lleva tu nombre encima mientras lo ves, y lo que compras se queda en tu biblioteca.',
         extra: `<p style="margin:10px 0 0;font:400 15px/1.6 system-ui;color:${APAGADO}">
                   Si un día quieres publicar tú, en tu perfil está la casilla
@@ -60,18 +60,18 @@ export function cuerpo(a: Aviso): string {
         boton: 'Explorar', enlace: EXPLORAR,
       }
   return `<!doctype html>
-<html lang="es"><body style="margin:0;background:#08080A">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#08080A">
+<html lang="es"><body style="margin:0;background:#0E1520">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0E1520">
 <tr><td align="center" style="padding:28px 14px">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#111116;border:1px solid rgba(255,255,255,.12)">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#141C28;border:1px solid rgba(243,235,226,.14)">
   <tr><td style="padding:30px 26px">
     <div style="font:700 10px/1 system-ui;letter-spacing:2px;text-transform:uppercase;color:${color}">RAWstudio</div>
-    <h1 style="margin:18px 0 0;font:700 25px/1.2 system-ui;color:#F2F0F3">${titular}</h1>
-    <p style="margin:16px 0 0;font:400 15px/1.6 system-ui;color:#F2F0F3">${hola}</p>
-    <p style="margin:10px 0 0;font:400 15px/1.6 system-ui;color:#F2F0F3">${texto}</p>
+    <h1 style="margin:18px 0 0;font:700 25px/1.2 system-ui;color:#F3EBE2">${titular}</h1>
+    <p style="margin:16px 0 0;font:400 15px/1.6 system-ui;color:#F3EBE2">${hola}</p>
+    <p style="margin:10px 0 0;font:400 15px/1.6 system-ui;color:#F3EBE2">${texto}</p>
     ${extra}
-    <a href="${enlace}" style="display:inline-block;margin-top:24px;background:${color};color:#08080A;padding:14px 22px;font:700 10px/1 system-ui;letter-spacing:1.6px;text-transform:uppercase;text-decoration:none">${boton}</a>
-    <p style="margin:26px 0 0;padding-top:18px;border-top:1px solid rgba(255,255,255,.12);font:400 12px/1.6 system-ui;color:${TENUE}">
+    <a href="${enlace}" style="display:inline-block;margin-top:24px;background:${color};color:#141C28;padding:14px 22px;font:700 10px/1 system-ui;letter-spacing:1.6px;text-transform:uppercase;text-decoration:none">${boton}</a>
+    <p style="margin:26px 0 0;padding-top:18px;border-top:1px solid rgba(243,235,226,.14);font:400 12px/1.6 system-ui;color:${TENUE}">
       Este correo sale de ${BUZON} y lo lee una persona: si contestas, te
       contestamos. Si no fuiste tú quien creó esta cuenta, respóndenos y la
       cerramos.
