@@ -74,7 +74,7 @@ export default function Resumen() {
   const totalBytes = uso?.[0]?.total_bytes ?? 0
   const limiteBytes = (uso?.[0]?.limite_mb ?? 0) * 1048576
   const pct = limiteBytes ? Math.min(100, (totalBytes / limiteBytes) * 100) : 0
-  const colorUso = totalBytes > limiteBytes ? '#FF4444' : pct >= 80 ? '#FFB020' : COLOR.dinero
+  const colorUso = totalBytes > limiteBytes ? COLOR.error : pct >= 80 ? COLOR.aviso : COLOR.dinero
 
   return (
     <>
@@ -132,7 +132,7 @@ export default function Resumen() {
               <span style={{ flex: '0 0 130px', color: e.actor_handle ? COLOR.texto : COLOR.textoSuave }}>
                 {e.actor_handle ? `@${e.actor_handle}` : '—'}
               </span>
-              <span style={{ flex: 1, color: GRAVE.has(e.accion) ? '#FFB020' : COLOR.texto }}>
+              <span style={{ flex: 1, color: GRAVE.has(e.accion) ? COLOR.aviso : COLOR.texto }}>
                 {NOMBRE[e.accion] ?? e.accion.replace(/_/g, ' ')}
               </span>
               <span style={{ flex: '0 0 140px', textAlign: 'right', color: COLOR.textoSuave }}>
@@ -238,7 +238,7 @@ function Tarjeta({ a, n, titulo, texto, vacio, cargando, urgente }: {
         {cargando ? 'Cargando…' : hay ? texto : vacio}
       </div>
       {!cargando && hay && urgente && (
-        <div style={{ marginTop: 8, font: `700 12px/1.4 ${FUENTE.ui}`, color: '#FFB020' }}>{urgente}</div>
+        <div style={{ marginTop: 8, font: `700 12px/1.4 ${FUENTE.ui}`, color: COLOR.aviso }}>{urgente}</div>
       )}
     </Enlace>
   )

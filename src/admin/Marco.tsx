@@ -171,7 +171,7 @@ export function Marco({ children, titulo, resumen }: {
                       padding: '9px 18px',
                       cursor: m.listo ? 'pointer' : 'not-allowed',
                       opacity: m.listo ? 1 : .45,
-                      background: aqui ? 'rgba(0,229,255,.1)' : 'transparent',
+                      background: aqui ? 'rgba(126,191,179,.1)' : 'transparent',
                       borderLeft: `2px solid ${aqui ? COLOR.admin : 'transparent'}`,
                     }}>
                     <span style={{

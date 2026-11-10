@@ -19,7 +19,7 @@ export default function ElegirTrato({ valor, alElegir, obligatorio, bloqueado, p
   const nombre = useId()
   return (
     <fieldset style={{ border: 0, margin: 0, padding: 0, minWidth: 0 }}>
-      <legend style={{ padding: 0, marginBottom: 10, font: `400 13px/1.45 ${FUENTE.ui}`, color: '#CFCAD3' }}>
+      <legend style={{ padding: 0, marginBottom: 10, font: `400 13px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
         {pregunta ?? '¿Cómo prefieres que te tratemos?'}
         {obligatorio && <span style={{ color: COLOR.acento }}> *</span>}
       </legend>
@@ -32,8 +32,8 @@ export default function ElegirTrato({ valor, alElegir, obligatorio, bloqueado, p
               boxSizing: 'border-box', borderRadius: 10, cursor: bloqueado ? 'default' : 'pointer',
               font: `700 13px/1 ${FUENTE.ui}`,
               border: `1.5px solid ${marcada ? COLOR.dinero : 'rgba(255,255,255,.3)'}`,
-              background: marcada ? 'rgba(200,255,61,.08)' : 'transparent',
-              color: marcada ? COLOR.dinero : '#CFCAD3',
+              background: marcada ? 'rgba(224,177,90,.08)' : 'transparent',
+              color: marcada ? COLOR.dinero : COLOR.textoSuave,
               opacity: bloqueado ? .6 : 1,
             }}>
               <input type="radio" name={nombre} value={o.valor} checked={marcada}

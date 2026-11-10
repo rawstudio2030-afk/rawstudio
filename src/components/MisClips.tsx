@@ -25,12 +25,12 @@ import { Pulsable } from './Pulsable'
 import GestionarClip from './GestionarClip'
 
 const TEXTO: Record<string, { t: string; c: string; nota: string }> = {
-  pendiente: { t: 'En revisión', c: '#FFB020',
+  pendiente: { t: 'En revisión', c: COLOR.aviso,
     nota: 'Lo estamos revisando. Todavía no se ve en público.' },
-  aprobado:  { t: 'Publicado', c: '#C8FF3D', nota: '' },
-  rechazado: { t: 'Rechazado', c: '#FF4444',
+  aprobado:  { t: 'Publicado', c: COLOR.dinero, nota: '' },
+  rechazado: { t: 'Rechazado', c: COLOR.error,
     nota: 'No se publicó. Puedes corregirlo y subirlo de nuevo.' },
-  retirado:  { t: 'Retirado', c: '#FF4444',
+  retirado:  { t: 'Retirado', c: COLOR.error,
     nota: 'Estaba publicado y se retiró.' },
 }
 
@@ -157,7 +157,7 @@ export default function MisClips({ sinRotulo = false }: { sinRotulo?: boolean })
                 <div style={{ marginTop: 6, font: `400 12px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
                   {f.formato === 'album' ? `Álbum · ${cuantos(f.num_fotos, 'foto')}` : 'Video'}
                   {' · '}{ventaDe(f)}
-                  {detenido && <b style={{ color: '#FFB020' }}> · Dejó de venderse</b>}
+                  {detenido && <b style={{ color: COLOR.aviso }}> · Dejó de venderse</b>}
                 </div>
               </div>
             </div>
@@ -208,7 +208,7 @@ export default function MisClips({ sinRotulo = false }: { sinRotulo?: boolean })
 
 const ayuda: React.CSSProperties = { font: `400 13px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave }
 const aviso: React.CSSProperties = {
-  padding: '12px 14px', borderRadius: 12, border: '1px solid #FF4444', color: '#FF4444',
+  padding: '12px 14px', borderRadius: 12, border: `1px solid ${COLOR.error}`, color: COLOR.error,
   font: `400 13px/1.45 ${FUENTE.ui}`,
 }
 const reintento: React.CSSProperties = {

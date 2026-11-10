@@ -208,7 +208,7 @@ function Ampliada({ fotos, inicio, marca, titulo, alCerrar }: {
       }}>
       <button ref={cierre} type="button" onClick={alCerrar} aria-label="Cerrar" style={{
         position: 'absolute', top: 'calc(10px + env(safe-area-inset-top))', right: 12, width: 48, height: 48,
-        borderRadius: '50%', border: `1px solid ${LINEA.fuerte}`, background: 'rgba(8,8,10,.8)',
+        borderRadius: '50%', border: `1px solid ${LINEA.fuerte}`, background: 'rgba(14,21,32,.8)',
         color: COLOR.texto, font: `400 24px/1 ${FUENTE.ui}`, cursor: 'pointer', zIndex: 2,
       }}>×</button>
 
@@ -244,7 +244,7 @@ function Ampliada({ fotos, inicio, marca, titulo, alCerrar }: {
 function flecha(lado: 'left' | 'right'): React.CSSProperties {
   return {
     position: 'absolute', top: '50%', [lado]: 8, transform: 'translateY(-50%)', width: 48, height: 64,
-    border: 0, borderRadius: 10, background: 'rgba(8,8,10,.55)', color: COLOR.texto,
+    border: 0, borderRadius: 10, background: 'rgba(14,21,32,.55)', color: COLOR.texto,
     font: `400 34px/1 ${FUENTE.ui}`, cursor: 'pointer', zIndex: 2,
   }
 }

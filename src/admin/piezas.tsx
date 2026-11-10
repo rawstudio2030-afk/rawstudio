@@ -24,7 +24,7 @@ export function Boton({ children, al, tono = 'normal', activo = true, chico }: {
 }) {
   // El primario es CIAN, no magenta: el panel es el contexto privilegiado, y el
   // cian es el color que el sitio ya reserva para eso. El peligro sigue en rojo.
-  const color = tono === 'peligro' ? '#FF4444' : tono === 'primario' ? COLOR.admin : COLOR.textoSuave
+  const color = tono === 'peligro' ? COLOR.error : tono === 'primario' ? COLOR.admin : COLOR.textoSuave
   return (
     <button type="button" disabled={!activo} onClick={al} className="boton-admin" style={{
       font: `700 ${chico ? 10 : 11}px/1 ${FUENTE.ui}`,
@@ -117,7 +117,7 @@ export function Etiquetado({ texto, hijo, ancho }: {
  *  por la ficha o el recuadro y es como no haberlo dado. */
 export type TipoAviso = 'ok' | 'propuesto' | 'atencion' | 'error'
 const COLOR_AVISO: Record<TipoAviso, string> = {
-  ok: COLOR.dinero, propuesto: '#FFB020', atencion: '#FFB020', error: '#FF4444',
+  ok: COLOR.dinero, propuesto: COLOR.aviso, atencion: COLOR.aviso, error: COLOR.error,
 }
 const ROTULO_AVISO: Record<TipoAviso, string> = {
   ok: 'Listo', propuesto: 'Propuesto, aún no aplicado', atencion: 'Atención', error: 'No se pudo',
@@ -207,7 +207,7 @@ export function Confirmar({ titulo, cuerpo, etiqueta, tono = 'peligro',
   return (
     <div onClick={cancela} style={{
       position: 'fixed', inset: 0, zIndex: 90,
-      background: 'rgba(8,8,10,.82)', display: 'grid', placeItems: 'center',
+      background: 'rgba(14,21,32,.82)', display: 'grid', placeItems: 'center',
     }}>
       <div role="dialog" aria-modal="true" aria-label={titulo} onClick={e => e.stopPropagation()} style={{
         width: 460, maxWidth: '92vw', maxHeight: '92vh', overflowY: 'auto',
@@ -313,7 +313,7 @@ export function Tabla<T>({ columnas, filas, clave, orden, descendente, ordenar,
               <tr key={k} className={alElegir ? 'fila-admin' : undefined}
                 {...(alElegir ? tecladoComoBoton(() => alElegir(f)) : {})}
                 style={{
-                background: elegida === k ? 'rgba(0,229,255,.1)' : undefined,
+                background: elegida === k ? 'rgba(126,191,179,.1)' : undefined,
                 cursor: alElegir ? 'pointer' : 'default',
               }}>
                 {columnas.map(c => (
@@ -371,7 +371,7 @@ export function Insignia({ texto, color }: { texto: string; color: string }) {
 }
 
 export const COLOR_ESTADO: Record<string, string> = {
-  activa: COLOR.dinero, suspendida: '#FFB020', baneada: '#FF4444',
+  activa: COLOR.dinero, suspendida: COLOR.aviso, baneada: COLOR.error,
 }
 export const COLOR_ROL: Record<string, string> = {
   admin: COLOR.admin, creadora: COLOR.acento, usuaria: COLOR.textoSuave,

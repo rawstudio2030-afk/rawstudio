@@ -26,6 +26,7 @@ import BarraSubida from '../components/BarraSubida'
 import { useSubida } from '../lib/useSubida'
 import { subirVideoResumible } from '../lib/subidaVideo'
 import { supabase } from '../lib/supabase'
+import { FONDO_CALABOZO } from '../lib/calabozo'
 
 
 /* Modo consumo: rotulos en `textoSuave` (eran textoTenue, 3.78:1, bajo AA) y
@@ -287,7 +288,7 @@ export default function Upload() {
   return (
     <div style={{
       minHeight: '100%', boxSizing: 'border-box', padding: '20px 18px 40px',
-      background: COLOR.fondo, color: COLOR.texto, fontFamily: FUENTE.ui,
+      background: FONDO_CALABOZO, color: COLOR.texto, fontFamily: FUENTE.ui,
       display: 'flex', flexDirection: 'column', gap: 18,
       width: '100%', maxWidth: 680, margin: '0 auto',
     }}>
@@ -319,8 +320,8 @@ export default function Upload() {
       <Pulsable al={() => refVideo.current?.click()} style={{
         boxSizing: 'border-box', width: '100%',
         padding: '26px 18px', textAlign: 'center', cursor: 'pointer', borderRadius: RADIO.filo,
-        border: `1.5px dashed ${video ? 'rgba(200,255,61,.6)' : LINEA.marcada}`,
-        background: video ? 'rgba(200,255,61,.05)' : 'transparent',
+        border: `1.5px dashed ${video ? 'rgba(224,177,90,.6)' : LINEA.marcada}`,
+        background: video ? 'rgba(224,177,90,.05)' : 'transparent',
       }}>
         <span aria-hidden style={{ display: 'grid', placeItems: 'center', color: video ? COLOR.dinero : COLOR.textoSuave, marginBottom: 10 }}>
           <Icono nombre="subir" tam={28} />
@@ -343,7 +344,7 @@ export default function Upload() {
           setAvisoVideo(''); setVideo(f)
         }} />
       {avisoVideo && (
-        <div role="alert" style={{ font: `400 14px/1.45 ${FUENTE.ui}`, color: '#FF7BE6' }}>{avisoVideo}</div>
+        <div role="alert" style={{ font: `400 14px/1.45 ${FUENTE.ui}`, color: COLOR.acento }}>{avisoVideo}</div>
       )}
 
       {/* portada */}
@@ -382,7 +383,7 @@ export default function Upload() {
                   outlineOffset: 3,
                 }}
               ><span style={{
-                display: 'block', marginTop: 58, background: 'rgba(8,8,10,.78)',
+                display: 'block', marginTop: 58, background: 'rgba(14,21,32,.78)',
                 font: `700 10px/18px ${FUENTE.mono}`, color: COLOR.texto,
               }}>{c.segundo.toFixed(1)}s</span></Pulsable>
             ))}
@@ -510,7 +511,7 @@ export default function Upload() {
                 </div>
               </div>
               {rentaCoins >= precio && (
-                <div style={{ ...ayuda, color: '#FF7BE6', marginTop: 12 }}>
+                <div style={{ ...ayuda, color: COLOR.acento, marginTop: 12 }}>
                   Rentar cuesta igual o más que comprarlo. Nadie elegiría la renta.
                 </div>
               )}
@@ -525,7 +526,7 @@ export default function Upload() {
         alCancelar={sub.estado.etapa === 'video' ? sub.cancelar : undefined} />
 
       {estado === 'error' && (
-        <div role="alert" style={{ font: `400 14px/1.45 ${FUENTE.ui}`, color: '#FF7BE6' }}>
+        <div role="alert" style={{ font: `400 14px/1.45 ${FUENTE.ui}`, color: COLOR.acento }}>
           {detalle}
           {/conexi[oó]n|Reintenta/.test(detalle) && (
             <> «Reintentar» continúa donde se quedó mientras la subida siga vigente; si ya no, empieza de nuevo.</>

@@ -40,7 +40,7 @@ export default function Blog() {
           boxSizing: 'border-box', width: '100%', textAlign: 'left',
           marginTop: 16, padding: '12px 14px', cursor: 'pointer',
           border: `1px solid ${soloSubs ? COLOR.acento : LINEA.tenue}`,
-          background: soloSubs ? 'rgba(255,43,209,.06)' : 'transparent',
+          background: soloSubs ? 'rgba(212,180,131,.06)' : 'transparent',
         }}>
           <div style={{ font: `400 13px/1.3 ${FUENTE.ui}`,
             color: soloSubs ? COLOR.texto : COLOR.textoSuave }}>

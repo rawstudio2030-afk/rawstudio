@@ -2,11 +2,14 @@
    se pueda editar sin tocar el markup. Los iconos vienen de la pagina original,
    convertidos a JSX. */
 import type { ReactNode } from 'react'
-import { COLOR, LINEA } from '../lib/diseño'
+import { COLOR, LINEA, PISO } from '../lib/diseño'
 
-export const PINK = COLOR.acento
-export const LIME = COLOR.dinero
-export const CYAN = COLOR.admin
+/* «Para creadoras» es el antro (−1): rosa para los titulares grandes (5.0:1 sobre
+ * el void del antro: solo en texto grande), ambar para la cifra y hielo para las
+ * etiquetas pequeñas (13.6:1). */
+export const ROSA = PISO.antro.rosa
+export const AMBAR = PISO.antro.ambar
+export const HIELO = PISO.antro.hielo
 export const INK = COLOR.fondo
 export const PAPER = COLOR.texto
 export const MUTED = COLOR.textoSuave
@@ -52,36 +55,36 @@ export type Seccion = { id: string; nav: string; eyebrow: string; titulo: string
 
 export const SECCIONES: Seccion[] = [
   { id: 'dinero', nav: 'Dinero', eyebrow: 'Dinero', titulo: 'Ochenta por ciento', acento: 'es tuyo', filas: [
-    { icono: 'porcentaje', color: LIME, fuerte: '80% de cada peso es tuyo.', resto: 'Lo que cobra tu suscriptor lo ves reflejado, sin letras chiquitas.' },
-    { icono: 'reloj',      color: PINK, fuerte: 'Pagos cada semana,', resto: 'no cada mes. Sin monto mínimo para retirar.' },
-    { icono: 'tarjeta',    color: CYAN, fuerte: 'Concepto neutro en tu banco.', resto: 'Tu estado de cuenta no cuenta tu vida.' },
-    { icono: 'etiqueta',   color: LIME, fuerte: 'Cero comisiones escondidas', resto: 'por retirar, por procesar o por existir.' },
-    { icono: 'cartera',    color: PINK, fuerte: 'Cobra como te acomode:', resto: 'transferencia, efectivo por corresponsalía o cripto.' },
+    { icono: 'porcentaje', color: AMBAR, fuerte: '80% de cada peso es tuyo.', resto: 'Lo que cobra tu suscriptor lo ves reflejado, sin letras chiquitas.' },
+    { icono: 'reloj',      color: ROSA, fuerte: 'Pagos cada semana,', resto: 'no cada mes. Sin monto mínimo para retirar.' },
+    { icono: 'tarjeta',    color: HIELO, fuerte: 'Concepto neutro en tu banco.', resto: 'Tu estado de cuenta no cuenta tu vida.' },
+    { icono: 'etiqueta',   color: AMBAR, fuerte: 'Cero comisiones escondidas', resto: 'por retirar, por procesar o por existir.' },
+    { icono: 'cartera',    color: ROSA, fuerte: 'Cobra como te acomode:', resto: 'transferencia, efectivo por corresponsalía o cripto.' },
   ]},
   { id: 'privacidad', nav: 'Privacidad', eyebrow: 'Privacidad e identidad', titulo: 'Nadie sabe', acento: 'tu nombre', filas: [
-    { icono: 'escudo',      color: CYAN, fuerte: 'Verificación cifrada.', resto: 'Tus documentos se guardan bajo llave y nadie del equipo los anda hojeando.' },
-    { icono: 'mascara',     color: PINK, fuerte: 'Nombre artístico obligatorio.', resto: 'Tu nombre legal no aparece en ninguna pantalla, nunca.' },
-    { icono: 'nocompartir', color: LIME, fuerte: 'Tus datos no se venden ni se comparten.', resto: 'Ni con suscriptores, ni con terceros, ni con anunciantes.' },
-    { icono: 'sinubicar',   color: CYAN, fuerte: 'Limpieza automática de metadatos.', resto: 'Tus fotos no traen ubicación, fecha ni modelo de teléfono escondidos.' },
+    { icono: 'escudo',      color: HIELO, fuerte: 'Verificación cifrada.', resto: 'Tus documentos se guardan bajo llave y nadie del equipo los anda hojeando.' },
+    { icono: 'mascara',     color: ROSA, fuerte: 'Nombre artístico obligatorio.', resto: 'Tu nombre legal no aparece en ninguna pantalla, nunca.' },
+    { icono: 'nocompartir', color: AMBAR, fuerte: 'Tus datos no se venden ni se comparten.', resto: 'Ni con suscriptores, ni con terceros, ni con anunciantes.' },
+    { icono: 'sinubicar',   color: HIELO, fuerte: 'Limpieza automática de metadatos.', resto: 'Tus fotos no traen ubicación, fecha ni modelo de teléfono escondidos.' },
   ]},
   { id: 'control', nav: 'Control', eyebrow: 'Control y propiedad', titulo: 'Es tuyo.', acento: 'Punto.', filas: [
-    { icono: 'corona',   color: PINK, fuerte: 'El material es 100% tuyo.', resto: 'Sin cesión de derechos ni permisos raros escondidos en el contrato.' },
-    { icono: 'salida',   color: LIME, fuerte: 'Sin exclusividad forzada.', resto: 'Publica donde quieras y vete el día que quieras.' },
-    { icono: 'descarga', color: CYAN, fuerte: 'Te llevas todo:', resto: 'tu archivo completo y tu lista de suscriptores, en un clic.' },
-    { icono: 'perillas', color: PINK, fuerte: 'Tú pones las reglas:', resto: 'tus precios, tus promociones y qué publicas. Aquí nadie te cura el contenido.' },
+    { icono: 'corona',   color: ROSA, fuerte: 'El material es 100% tuyo.', resto: 'Sin cesión de derechos ni permisos raros escondidos en el contrato.' },
+    { icono: 'salida',   color: AMBAR, fuerte: 'Sin exclusividad forzada.', resto: 'Publica donde quieras y vete el día que quieras.' },
+    { icono: 'descarga', color: HIELO, fuerte: 'Te llevas todo:', resto: 'tu archivo completo y tu lista de suscriptores, en un clic.' },
+    { icono: 'perillas', color: ROSA, fuerte: 'Tú pones las reglas:', resto: 'tus precios, tus promociones y qué publicas. Aquí nadie te cura el contenido.' },
   ]},
   { id: 'apoyo', nav: 'Apoyo', eyebrow: 'Facilidad y apoyo', titulo: 'Subes en', acento: 'un minuto', filas: [
-    { icono: 'subir',      color: LIME, fuerte: 'Subir toma menos de un minuto.', resto: 'Sin conversiones, sin formatos raros, sin manual.' },
-    { icono: 'calendario', color: CYAN, fuerte: 'Programa tus publicaciones', resto: 'y edita desde el teléfono, sin apps de terceros.' },
-    { icono: 'barras',     color: PINK, fuerte: 'Estadísticas que se entienden:', resto: 'qué contenido te da más y quiénes son tus mejores suscriptores.' },
-    { icono: 'soporte',    color: LIME, fuerte: 'Soporte humano en español,', resto: 'que responde en horas y no con robots.' },
-    { icono: 'guia',       color: CYAN, fuerte: 'Guía de arranque', resto: 'para tus primeras semanas: qué subir, cómo cobrar y cómo promocionarte.' },
+    { icono: 'subir',      color: AMBAR, fuerte: 'Subir toma menos de un minuto.', resto: 'Sin conversiones, sin formatos raros, sin manual.' },
+    { icono: 'calendario', color: HIELO, fuerte: 'Programa tus publicaciones', resto: 'y edita desde el teléfono, sin apps de terceros.' },
+    { icono: 'barras',     color: ROSA, fuerte: 'Estadísticas que se entienden:', resto: 'qué contenido te da más y quiénes son tus mejores suscriptores.' },
+    { icono: 'soporte',    color: AMBAR, fuerte: 'Soporte humano en español,', resto: 'que responde en horas y no con robots.' },
+    { icono: 'guia',       color: HIELO, fuerte: 'Guía de arranque', resto: 'para tus primeras semanas: qué subir, cómo cobrar y cómo promocionarte.' },
   ]},
   { id: 'comunidad', nav: 'Comunidad', eyebrow: 'Comunidad y crecimiento', titulo: 'No empiezas', acento: 'sola', filas: [
-    { icono: 'megafono',  color: PINK, fuerte: 'Promoción destacada gratis', resto: 'tus primeros meses, para que no publiques en el vacío.' },
-    { icono: 'referidas', color: LIME, fuerte: 'Programa de referidas:', resto: 'ganas un porcentaje por cada creadora que traigas contigo.' },
-    { icono: 'mensaje',   color: CYAN, fuerte: 'Más formas de cobrar:', resto: 'mensajes con propina, contenido suelto de pago y suscripciones por niveles.' },
-    { icono: 'grupo',     color: PINK, fuerte: 'Grupo privado de creadoras', resto: 'para consejos, alertas de seguridad y datos que nadie te dice.' },
+    { icono: 'megafono',  color: ROSA, fuerte: 'Promoción destacada gratis', resto: 'tus primeros meses, para que no publiques en el vacío.' },
+    { icono: 'referidas', color: AMBAR, fuerte: 'Programa de referidas:', resto: 'ganas un porcentaje por cada creadora que traigas contigo.' },
+    { icono: 'mensaje',   color: HIELO, fuerte: 'Más formas de cobrar:', resto: 'mensajes con propina, contenido suelto de pago y suscripciones por niveles.' },
+    { icono: 'grupo',     color: ROSA, fuerte: 'Grupo privado de creadoras', resto: 'para consejos, alertas de seguridad y datos que nadie te dice.' },
   ]},
 ]
 

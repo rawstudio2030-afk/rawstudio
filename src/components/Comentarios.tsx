@@ -209,7 +209,7 @@ export default function Comentarios({ clip, esDuenia, haySesion, desbloqueado, a
       )}
 
       {error && (
-        <div role="alert" style={{ marginTop: 10, font: `400 13px/1.45 ${FUENTE.ui}`, color: '#FF7BE6' }}>
+        <div role="alert" style={{ marginTop: 10, font: `400 13px/1.45 ${FUENTE.ui}`, color: COLOR.acento }}>
           {error}
         </div>
       )}

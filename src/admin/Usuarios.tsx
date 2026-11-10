@@ -192,8 +192,8 @@ export default function Usuarios() {
 
       {error && (
         <div role="alert" style={{
-          marginBottom: 14, padding: '10px 13px', border: '1px solid #FF4444',
-          color: '#FF4444', font: `400 12px/1.45 ${FUENTE.ui}`,
+          marginBottom: 14, padding: '10px 13px', border: `1px solid ${COLOR.error}`,
+          color: COLOR.error, font: `400 12px/1.45 ${FUENTE.ui}`,
         }}>{error}</div>
       )}
       {aviso && !abierta && (
@@ -300,7 +300,7 @@ function Ficha({ fila, ficha, errorFicha, aviso, cierraAviso, cierra, pide }: {
 
   return (
     <div onClick={cierra} style={{
-      position: 'fixed', inset: 0, zIndex: 80, background: 'rgba(8,8,10,.6)',
+      position: 'fixed', inset: 0, zIndex: 80, background: 'rgba(14,21,32,.6)',
       display: 'flex', justifyContent: 'flex-end',
     }}>
       <aside onClick={e => e.stopPropagation()} style={{
@@ -383,7 +383,7 @@ function Ficha({ fila, ficha, errorFicha, aviso, cierraAviso, cierra, pide }: {
           border: '1px solid rgba(255,68,68,.45)', background: 'rgba(255,68,68,.05)',
         }}>
           <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.4,
-            textTransform: 'uppercase', color: '#FF4444' }}>Zona de riesgo</div>
+            textTransform: 'uppercase', color: COLOR.error }}>Zona de riesgo</div>
           <div style={{ margin: '7px 0 10px', font: `400 11px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
             Mueven dinero o borran datos. Anonimizar y eliminar no se pueden deshacer.
           </div>
@@ -438,7 +438,7 @@ function Ficha({ fila, ficha, errorFicha, aviso, cierraAviso, cierra, pide }: {
             ficha.movimientos.map(m => (
               <Renglon key={m.id} izq={m.motivo.replace(/_/g, ' ')}
                 der={`${m.delta > 0 ? '+' : ''}${usd(m.delta)}`}
-                colorDer={m.delta > 0 ? COLOR.dinero : '#FF4444'}
+                colorDer={m.delta > 0 ? COLOR.dinero : COLOR.error}
                 pie={`${fechaHora(m.created_at)}${m.nota ? ` · ${m.nota}` : ''}`} />
             ))
           )}
@@ -469,7 +469,7 @@ function Renglon({ izq, der, pie, colorDer, marca }: {
         <span style={{ font: `400 12px/1.3 ${FUENTE.ui}`, color: COLOR.texto }}>
           {izq}
           {marca && <span style={{ marginLeft: 7, font: `700 10px/1 ${FUENTE.ui}`,
-            letterSpacing: 1.2, textTransform: 'uppercase', color: '#FFB020' }}>{marca}</span>}
+            letterSpacing: 1.2, textTransform: 'uppercase', color: COLOR.aviso }}>{marca}</span>}
         </span>
         {der && <span style={{ font: `400 12px/1.3 ${FUENTE.mono}`,
           color: colorDer ?? COLOR.textoSuave, whiteSpace: 'nowrap' }}>{der}</span>}
@@ -554,7 +554,7 @@ function CierreDeCuenta({ id }: { id: string }) {
             <div style={{ font: `700 11px/1.3 ${FUENTE.ui}`, color: COLOR.texto }}>
               {NOMBRE_SALIDA[sal]}
               {est.d && (
-                <span style={{ marginLeft: 8, color: lista.length ? '#FFB020' : COLOR.dinero }}>
+                <span style={{ marginLeft: 8, color: lista.length ? COLOR.aviso : COLOR.dinero }}>
                   {lista.length ? 'bloqueada ahora' : 'se puede'}
                 </span>
               )}
@@ -688,7 +688,7 @@ function CorreoDialogo({ fila, cancela, listo }: {
       etiqueta={ok ? 'Cambiar el correo' : 'Escribe un correo'}
       inactivo={!ok}
       cuerpo={<>El correo de <b style={{ color: COLOR.texto }}>@{fila.handle}</b> es{' '}
-        <b style={{ color: inventado ? '#FFB020' : COLOR.texto }}>{fila.email}</b>
+        <b style={{ color: inventado ? COLOR.aviso : COLOR.texto }}>{fila.email}</b>
         {inventado && <> — ese se lo inventó la plataforma al darla de alta, así que
           hoy no le llega nada</>}. Es a donde irá «olvidé mi contraseña», así que
         tiene que ser suyo y real. En la bitácora solo queda el dominio anterior,
@@ -741,8 +741,8 @@ function SaldoDialogo({ fila, cancela, resultado }: {
           } />
           {n !== 0 && (
             <div style={{ marginTop: 8, font: `400 12px/1.5 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
-              @{fila.handle}: {usd(fila.saldo)} → <b style={{ color: queda === 'negativo' ? '#FFB020' : COLOR.dinero }}>{usd(resultante)}</b>
-              {queda === 'negativo' && <span style={{ color: '#FFB020' }}> · quedaría en negativo</span>}
+              @{fila.handle}: {usd(fila.saldo)} → <b style={{ color: queda === 'negativo' ? COLOR.aviso : COLOR.dinero }}>{usd(resultante)}</b>
+              {queda === 'negativo' && <span style={{ color: COLOR.aviso }}> · quedaría en negativo</span>}
             </div>
           )}
         </div>
@@ -776,7 +776,7 @@ function RolDialogo({ fila, cancela, listo }: {
 
   return (
     <div onClick={cancela} style={{
-      position: 'fixed', inset: 0, zIndex: 95, background: 'rgba(8,8,10,.82)',
+      position: 'fixed', inset: 0, zIndex: 95, background: 'rgba(14,21,32,.82)',
       display: 'grid', placeItems: 'center',
     }}>
       <div role="dialog" aria-modal="true" aria-label="Cambiar rol" onClick={e => e.stopPropagation()} style={{

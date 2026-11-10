@@ -10,6 +10,7 @@ import { usd } from '../lib/dinero'
 import { cuantos } from '../lib/plural'
 import { Pulsable, Enlace } from '../components/Pulsable'
 import Centro from '../components/Centro'
+import { FONDO_OSCURO } from '../lib/oscuro'
 
 
 export default function Library() {
@@ -47,7 +48,7 @@ export function VistaBiblioteca({ compras, fallo, alReintentar }: {
   return (
     <div style={{
       minHeight: '100%', boxSizing: 'border-box', padding: '28px 18px 40px',
-      background: COLOR.fondo, color: COLOR.texto, fontFamily: FUENTE.ui,
+      background: FONDO_OSCURO, color: COLOR.texto, fontFamily: FUENTE.ui,
       width: '100%', maxWidth: 680, margin: '0 auto',
     }}>
       <div style={{ marginBottom: 20 }}>

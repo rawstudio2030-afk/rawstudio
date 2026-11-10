@@ -62,8 +62,8 @@ export default function PublicarPor() {
       </div>
 
       {error && (
-        <div style={{ marginBottom: 14, padding: '10px 13px', border: '1px solid #FF4444',
-          color: '#FF4444', font: `400 12px/1.45 ${FUENTE.ui}` }}>{error}</div>
+        <div style={{ marginBottom: 14, padding: '10px 13px', border: `1px solid ${COLOR.error}`,
+          color: COLOR.error, font: `400 12px/1.45 ${FUENTE.ui}` }}>{error}</div>
       )}
 
       {lista.length === 0 ? (
@@ -93,7 +93,7 @@ export default function PublicarPor() {
               {c.verificada
                 ? <Insignia texto="Puede publicar" color={COLOR.dinero} />
                 : <Insignia texto={c.tiene_documentos ? 'Sin verificar' : 'Faltan documentos'}
-                    color="#FFB020" />}
+                    color={COLOR.aviso} />}
             </Pulsable>
           ))}
         </div>
@@ -264,7 +264,7 @@ function Formulario({ c, vuelve }: { c: CreadoraGestionable; vuelve: () => void 
                   display: 'flex', alignItems: 'center', gap: 10, padding: '9px 11px',
                   border: `1px solid ${
                     f.estado === 'listo' ? COLOR.dinero
-                    : f.estado === 'error' ? '#FF4444'
+                    : f.estado === 'error' ? COLOR.error
                     : f.estado === 'subiendo' ? COLOR.admin : LINEA.tenue}`,
                 }}>
                   <input value={f.titulo}
@@ -282,7 +282,7 @@ function Formulario({ c, vuelve }: { c: CreadoraGestionable; vuelve: () => void 
                   </span>
                   {f.estado === 'listo'    && <Insignia texto="publicado" color={COLOR.dinero} />}
                   {f.estado === 'subiendo' && <Insignia texto="subiendo" color={COLOR.admin} />}
-                  {f.estado === 'error'    && <Insignia texto="falló" color="#FF4444" />}
+                  {f.estado === 'error'    && <Insignia texto="falló" color={COLOR.error} />}
                   {f.estado === 'espera' && !ocupado && (
                     <Pulsable rotulo="Quitar esta fila"
                       al={() => setFila(x => x.filter((_, j) => j !== i))}
@@ -292,7 +292,7 @@ function Formulario({ c, vuelve }: { c: CreadoraGestionable; vuelve: () => void 
                 </div>
               ))}
               {fila.some(f => f.detalle) && (
-                <div style={{ font: `400 11px/1.45 ${FUENTE.mono}`, color: '#FF4444' }}>
+                <div style={{ font: `400 11px/1.45 ${FUENTE.mono}`, color: COLOR.error }}>
                   {fila.filter(f => f.detalle).map((f, i) => (
                     <div key={i}>{f.titulo}: {f.detalle}</div>
                   ))}
@@ -330,8 +330,8 @@ function Formulario({ c, vuelve }: { c: CreadoraGestionable; vuelve: () => void 
           </div>
 
           {error && (
-            <div style={{ marginTop: 14, padding: '10px 13px', border: '1px solid #FF4444',
-              color: '#FF4444', font: `400 12px/1.45 ${FUENTE.ui}` }}>{error}</div>
+            <div style={{ marginTop: 14, padding: '10px 13px', border: `1px solid ${COLOR.error}`,
+              color: COLOR.error, font: `400 12px/1.45 ${FUENTE.ui}` }}>{error}</div>
           )}
 
           <div style={{ marginTop: 18, display: 'flex', gap: 10, alignItems: 'center' }}>

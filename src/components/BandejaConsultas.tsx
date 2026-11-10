@@ -153,8 +153,8 @@ export default function BandejaConsultas() {
                     <div key={m.id} style={{
                       alignSelf: m.es_mio ? 'flex-end' : 'flex-start', maxWidth: '88%',
                       padding: '9px 12px', borderRadius: 10,
-                      background: m.es_mio ? 'rgba(200,255,61,.08)' : 'rgba(255,255,255,.05)',
-                      border: `1px solid ${m.es_mio ? 'rgba(200,255,61,.3)' : LINEA.suave}`,
+                      background: m.es_mio ? 'rgba(224,177,90,.08)' : 'rgba(255,255,255,.05)',
+                      border: `1px solid ${m.es_mio ? 'rgba(224,177,90,.3)' : LINEA.suave}`,
                     }}>
                       <div style={{
                         font: `400 14px/1.5 ${FUENTE.ui}`, color: COLOR.texto,

@@ -27,6 +27,7 @@ import Icono from '../components/Iconos'
 import ElegirTrato from '../components/ElegirTrato'
 import { perfilParaPublicar } from '../lib/trato'
 import { Pulsable, Enlace } from '../components/Pulsable'
+import { FONDO_CALABOZO } from '../lib/calabozo'
 
 
 /* Modo consumo: los rotulos y los textos de ayuda van en `textoSuave`. Eran
@@ -163,7 +164,7 @@ export default function Perfil() {
     <div style={{
       minHeight: '100%', boxSizing: 'border-box',
       padding: `20px 18px ${sucio || estado !== 'listo' ? 130 : 44}px`,
-      background: COLOR.fondo, color: COLOR.texto, fontFamily: FUENTE.ui,
+      background: FONDO_CALABOZO, color: COLOR.texto, fontFamily: FUENTE.ui,
       display: 'flex', flexDirection: 'column',
       // Un formulario a mil pixeles de ancho no se llena: el ojo pierde la
       // relacion entre la etiqueta y su campo. En el telefono no se nota
@@ -221,7 +222,7 @@ export default function Perfil() {
           pie={handleOk || !handle
             ? 'Entre 3 y 24 caracteres: letras, números y guion bajo.'
             : 'Necesita entre 3 y 24 caracteres.'}
-          pieColor={handleOk || !handle ? undefined : '#FF7BE6'}>
+          pieColor={handleOk || !handle ? undefined : COLOR.acento}>
           <div style={{ position: 'relative' }}>
             <span aria-hidden style={{
               position: 'absolute', left: 15, top: '50%', transform: 'translateY(-50%)',
@@ -270,7 +271,7 @@ export default function Perfil() {
         <Campo etiquetaTexto="Teléfono"
           pie={telefono ? pistaDe(telefono)
             : 'Por si el correo rebota. Solo lo ve la administración.'}
-          pieColor={telefono && !telOk ? '#FF7BE6' : undefined}>
+          pieColor={telefono && !telOk ? COLOR.acento : undefined}>
           <Telefono valor={telefono} cambia={setTelefono} />
         </Campo>
       </Seccion>
@@ -297,7 +298,7 @@ export default function Perfil() {
             if (m) setErrorTrato(m)
           }} />
         {errorTrato && (
-          <div role="alert" style={{ font: `400 13px/1.4 ${FUENTE.ui}`, color: '#FF7BE6' }}>{errorTrato}</div>
+          <div role="alert" style={{ font: `400 13px/1.4 ${FUENTE.ui}`, color: COLOR.acento }}>{errorTrato}</div>
         )}
       </Seccion>
 
@@ -312,8 +313,8 @@ export default function Perfil() {
             boxSizing: 'border-box', width: '100%', textAlign: 'left',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14,
             padding: '16px 16px', cursor: 'pointer', borderRadius: RADIO.filo,
-            border: `1px ${creadora ? 'solid' : 'dashed'} rgba(200,255,61,${creadora ? .55 : .35})`,
-            background: creadora ? 'rgba(200,255,61,.07)' : 'transparent',
+            border: `1px ${creadora ? 'solid' : 'dashed'} rgba(224,177,90,${creadora ? .55 : .35})`,
+            background: creadora ? 'rgba(224,177,90,.07)' : 'transparent',
           }}>
           <div>
             <div style={{ font: `700 13px/1.3 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase', color: creadora ? COLOR.dinero : COLOR.texto }}>
@@ -399,7 +400,7 @@ export default function Perfil() {
             su propia seccion y sin peso de boton principal. */}
         <Pulsable al={async () => { await salir(); nav('/entrar', { replace: true }) }} style={{
           alignSelf: 'flex-start', cursor: 'pointer', minHeight: 48, display: 'inline-flex', alignItems: 'center',
-          borderRadius: 12, border: '1px solid rgba(255,43,209,.55)', color: '#FF5BDC',
+          borderRadius: 12, border: '1px solid rgba(212,180,131,.55)', color: COLOR.acento,
           padding: '0 22px', font: `700 12px/1 ${FUENTE.ui}`,
           letterSpacing: 1.6, textTransform: 'uppercase',
         }}>Cerrar sesión</Pulsable>
@@ -416,7 +417,7 @@ export default function Perfil() {
           <div style={{ width: '100%', maxWidth: 680 - 36, margin: '0 auto' }}>
           {estado === 'error' && (
             <div role="alert" style={{
-              font: `400 13px/1.45 ${FUENTE.ui}`, color: '#FF7BE6', marginBottom: 10,
+              font: `400 13px/1.45 ${FUENTE.ui}`, color: COLOR.acento, marginBottom: 10,
             }}>{detalle}</div>
           )}
           <Pulsable al={guardar} activo={puedeGuardar} className="boton-principal"

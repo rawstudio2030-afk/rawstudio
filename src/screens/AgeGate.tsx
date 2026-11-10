@@ -28,7 +28,7 @@ import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import { marcarEdad } from '../lib/edad'
 import { supabase } from '../lib/supabase'
-import PaginaMiami from '../components/PaginaMiami'
+import PaginaCollins from '../components/PaginaCollins'
 import Insignia18 from '../components/Insignia18'
 import { COLOR, FUENTE } from '../lib/diseño'
 import { Pulsable, Enlace } from '../components/Pulsable'
@@ -68,21 +68,21 @@ export default function AgeGate() {
     marcarEdad()
     nav('/clip')
   }
-  /* Modo marca: es lo primero que ve cualquiera. La escena de Miami fija detras
-   * y el aviso en una tarjeta de neon, con el octagono 18+ arriba.
+  /* Modo marca: es lo primero que ve cualquiera. El salon de Collins fijo detras
+   * y el aviso en una tarjeta champagne, con el octagono 18+ arriba.
    *
    * La cortina (`assets/cortina.jpg`) estuvo aqui; es un linograbado en lima y
-   * magenta del lenguaje anterior de la marca y choca con la escena nueva. El
+   * magenta del lenguaje anterior de la marca y choca con el descenso. El
    * archivo sigue en el repo por si se quiere recuperar. */
   return (
-    <PaginaMiami>
+    <PaginaCollins>
       <div style={{ display: 'flex', justifyContent: 'center' }}><Insignia18 /></div>
 
       <div className="tarjeta-acceso">
-        {/* Sin acentos a proposito: Anton recorta las tildes con interlineado
-            1, y aqui el interlineado es 1. Ver la nota de FUENTE.display. */}
+        {/* Bodoni Moda con interlineado 1: los acentos del español caben. Ver
+            la nota de FUENTE.display. */}
         <h1 className="acceso-titulo">
-          Demuestra<br />que eres<br /><span className="neon-lima">mayor.</span>
+          Demuestra<br />que eres<br /><span className="realce">mayor.</span>
         </h1>
         <p className="acceso-bajada">
           Todo lo que hay detrás de esta puerta se paga, es privado, y lo hacen personas que eligieron estar aquí.
@@ -92,23 +92,22 @@ export default function AgeGate() {
           <span style={{
             border: `1px solid ${COLOR.dinero}`, color: COLOR.dinero, borderRadius: 999, padding: '8px 12px',
             font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.3, textTransform: 'uppercase',
-            boxShadow: '0 0 10px rgba(200,255,61,.3)',
           }}>Tu @ sobre el video</span>
           <span style={{
-            border: '1px solid rgba(255,255,255,.7)', color: '#FFF', borderRadius: 999, padding: '8px 12px',
+            border: '1px solid rgba(243,235,226,.7)', color: COLOR.texto, borderRadius: 999, padding: '8px 12px',
             font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.3, textTransform: 'uppercase',
           }}>Prohibida la reventa</span>
         </div>
 
         <div style={{ display: 'grid', gap: 12, marginTop: 4 }}>
-          <Pulsable al={confirmarEdad} className="miami-boton miami-boton-magenta">Tengo 18 años o más</Pulsable>
-          <Enlace a="/" className="miami-boton miami-boton-suave">Todavía no — sácame de aquí</Enlace>
+          <Pulsable al={confirmarEdad} className="btn-collins btn-collins-primario">Tengo 18 años o más</Pulsable>
+          <Enlace a="/" className="btn-collins btn-collins-suave">Todavía no — sácame de aquí</Enlace>
         </div>
 
         <div style={{ font: `400 12px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave, textAlign: 'center' }}>
           Para cobrar te pediremos una identificación y una selfie. Se guardan en privado y solo las ve quien administra.
         </div>
       </div>
-    </PaginaMiami>
+    </PaginaCollins>
   )
 }

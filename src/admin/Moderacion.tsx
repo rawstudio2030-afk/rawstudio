@@ -63,12 +63,12 @@ export default function Moderacion() {
       <div style={{
         display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16,
         padding: '12px 14px',
-        border: `1px solid ${bandera ? '#FFB020' : LINEA.tenue}`,
+        border: `1px solid ${bandera ? COLOR.aviso : LINEA.tenue}`,
       }}>
         <div style={{ flex: 1 }}>
           <div style={{
             font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
-            textTransform: 'uppercase', color: bandera ? '#FFB020' : COLOR.texto,
+            textTransform: 'uppercase', color: bandera ? COLOR.aviso : COLOR.texto,
           }}>Revisión previa forzada · {bandera ? 'encendida' : 'apagada'}</div>
           <div style={{ marginTop: 6, font: `400 11px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
             {bandera
@@ -100,8 +100,8 @@ export default function Moderacion() {
       </div>
 
       {error && (
-        <div role="alert" style={{ marginBottom: 14, padding: '10px 13px', border: '1px solid #FF4444',
-          color: '#FF4444', font: `400 12px/1.45 ${FUENTE.ui}` }}>{error}</div>
+        <div role="alert" style={{ marginBottom: 14, padding: '10px 13px', border: `1px solid ${COLOR.error}`,
+          color: COLOR.error, font: `400 12px/1.45 ${FUENTE.ui}` }}>{error}</div>
       )}
       {aviso && !viendo && (
         <div style={{ marginBottom: 14 }}><Aviso tipo="ok" cierra={() => setAviso(null)}>{aviso}</Aviso></div>
@@ -137,7 +137,7 @@ function Tarjeta({ clip, al }: { clip: ClipEnCola; al: () => void }) {
   return (
     <Pulsable al={al} style={{
       display: 'block', boxSizing: 'border-box', width: '100%', textAlign: 'left',
-      border: `1px solid ${clip.reportes > 0 ? '#FF4444' : LINEA.tenue}`,
+      border: `1px solid ${clip.reportes > 0 ? COLOR.error : LINEA.tenue}`,
       cursor: 'pointer', background: COLOR.superficie,
     }}>
       <div style={{
@@ -148,19 +148,19 @@ function Tarjeta({ clip, al }: { clip: ClipEnCola; al: () => void }) {
         {clip.reportes > 0 && (
           <div style={{ position: 'absolute', top: 8, left: 8 }}>
             <Insignia texto={`${clip.reportes} reporte${clip.reportes > 1 ? 's' : ''}`}
-              color={alerta ? '#FF4444' : '#FFB020'} />
+              color={alerta ? COLOR.error : COLOR.aviso} />
           </div>
         )}
         {clip.formato === 'album' && (
           <div style={{
             position: 'absolute', bottom: 8, right: 8, padding: '2px 6px',
-            background: 'rgba(8,8,10,.8)', font: `400 11px/1.45 ${FUENTE.mono}`, color: COLOR.admin,
+            background: 'rgba(14,21,32,.8)', font: `400 11px/1.45 ${FUENTE.mono}`, color: COLOR.admin,
           }}>Álbum · {cuantos(clip.num_fotos, 'foto')}</div>
         )}
         {clip.formato !== 'album' && clip.duracion != null && (
           <div style={{
             position: 'absolute', bottom: 8, right: 8, padding: '2px 6px',
-            background: 'rgba(8,8,10,.8)', font: `400 11px/1.45 ${FUENTE.mono}`,
+            background: 'rgba(14,21,32,.8)', font: `400 11px/1.45 ${FUENTE.mono}`,
             color: COLOR.texto,
           }}>{clip.duracion}s</div>
         )}
@@ -173,7 +173,7 @@ function Tarjeta({ clip, al }: { clip: ClipEnCola; al: () => void }) {
         <div style={{ marginTop: 5, font: `400 11px/1.45 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
           @{clip.creadora_handle}
           {!clip.creadora_verificada && (
-            <span style={{ color: '#FFB020' }}> · sin verificar</span>
+            <span style={{ color: COLOR.aviso }}> · sin verificar</span>
           )}
         </div>
         <div style={{ marginTop: 3, font: `400 11px/1.45 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
@@ -223,7 +223,7 @@ function Revisor({ clip, cierra, listo }: {
 
   return (
     <div onClick={cierra} style={{
-      position: 'fixed', inset: 0, zIndex: 85, background: 'rgba(8,8,10,.85)',
+      position: 'fixed', inset: 0, zIndex: 85, background: 'rgba(14,21,32,.85)',
       display: 'grid', placeItems: 'center', padding: 30,
     }}>
       <div onClick={e => e.stopPropagation()} style={{
@@ -244,7 +244,7 @@ function Revisor({ clip, cierra, listo }: {
             <video src={url} controls autoPlay style={{ width: '100%', maxHeight: '90vh' }} />
           ) : (
             <div style={{ padding: 40, textAlign: 'center',
-              font: `400 12px/1.45 ${FUENTE.ui}`, color: fallo ? '#FF4444' : COLOR.textoSuave }}>
+              font: `400 12px/1.45 ${FUENTE.ui}`, color: fallo ? COLOR.error : COLOR.textoSuave }}>
               {fallo || 'Abriendo el video…'}
             </div>
           )}
@@ -262,11 +262,11 @@ function Revisor({ clip, cierra, listo }: {
           <div style={{ display: 'flex', gap: 6, marginTop: 12, flexWrap: 'wrap' }}>
             <Insignia texto={clip.estado} color={
               clip.estado === 'aprobado' ? COLOR.dinero
-                : clip.estado === 'pendiente' ? '#FFB020' : '#FF4444'} />
+                : clip.estado === 'pendiente' ? COLOR.aviso : COLOR.error} />
             {clip.reportes > 0 && (
-              <Insignia texto={cuantos(clip.reportes, 'reporte')} color="#FF4444" />
+              <Insignia texto={cuantos(clip.reportes, 'reporte')} color={COLOR.error} />
             )}
-            {!clip.creadora_verificada && <Insignia texto="Sin verificar" color="#FFB020" />}
+            {!clip.creadora_verificada && <Insignia texto="Sin verificar" color={COLOR.aviso} />}
           </div>
 
           <div style={{ marginTop: 14, font: `400 12px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
@@ -281,9 +281,9 @@ function Revisor({ clip, cierra, listo }: {
           </div>
 
           {clip.motivo_rechazo && (
-            <div style={{ marginTop: 14, padding: '9px 11px', border: '1px solid #FF4444',
+            <div style={{ marginTop: 14, padding: '9px 11px', border: `1px solid ${COLOR.error}`,
               font: `400 11px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
-              <b style={{ color: '#FF4444' }}>Motivo registrado:</b> {clip.motivo_rechazo}
+              <b style={{ color: COLOR.error }}>Motivo registrado:</b> {clip.motivo_rechazo}
             </div>
           )}
 
@@ -305,9 +305,9 @@ function Revisor({ clip, cierra, listo }: {
           {/* Por que «Aprobar» no va a funcionar todavia. El servidor sigue siendo quien
               decide (lo comprueba al aprobar); esto solo evita que se descubra a ciegas. */}
           {clip.estado !== 'aprobado' && !clip.creadora_verificada && (
-            <div role="status" style={{ marginTop: 12, padding: '9px 11px', border: '1px solid #FFB020',
+            <div role="status" style={{ marginTop: 12, padding: '9px 11px', border: `1px solid ${COLOR.aviso}`,
               font: `400 11px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
-              <b style={{ color: '#FFB020' }}>Aprobar se va a rechazar:</b> la identidad de
+              <b style={{ color: COLOR.aviso }}>Aprobar se va a rechazar:</b> la identidad de
               @{clip.creadora_handle} todavía no está verificada, y sin eso no se puede aprobar
               contenido suyo. Resuélvela primero en{' '}
               <Link to="/admin/verificacion" style={{ color: COLOR.admin }}>Verificación</Link>.

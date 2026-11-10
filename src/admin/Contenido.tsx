@@ -101,10 +101,10 @@ export default function Contenido() {
       <div style={{ display: 'flex', gap: 5 }}>
         {c.formato === 'album' && <Insignia texto={`álbum · ${c.num_fotos ?? 0}`} color={COLOR.admin} />}
         {c.borrado_at
-          ? <Insignia texto="borrado" color="#FF4444" />
+          ? <Insignia texto="borrado" color={COLOR.error} />
           : <Insignia texto={c.estado} color={
               c.estado === 'aprobado' ? COLOR.dinero
-                : c.estado === 'pendiente' ? '#FFB020' : '#FF4444'} />}
+                : c.estado === 'pendiente' ? COLOR.aviso : COLOR.error} />}
         {c.destacado_orden != null && (
           <Insignia texto={`#${c.destacado_orden}`} color={COLOR.acento} />
         )}
@@ -145,9 +145,9 @@ export default function Contenido() {
     <>
       {/* ---- Purga pendiente ---- */}
       {pendientes.length > 0 && (
-        <div style={{ marginBottom: 16, padding: '13px 15px', border: '1px solid #FFB020' }}>
+        <div style={{ marginBottom: 16, padding: '13px 15px', border: `1px solid ${COLOR.aviso}` }}>
           <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
-            textTransform: 'uppercase', color: '#FFB020' }}>
+            textTransform: 'uppercase', color: COLOR.aviso }}>
             {pendientes.length} archivo{pendientes.length > 1 ? 's' : ''} cumplió los 30 días
           </div>
           <div style={{ margin: '8px 0 12px', font: `400 11px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
@@ -212,8 +212,8 @@ export default function Contenido() {
       </div>
 
       {error && (
-        <div style={{ marginBottom: 14, padding: '10px 13px', border: '1px solid #FF4444',
-          color: '#FF4444', font: `400 12px/1.45 ${FUENTE.ui}` }}>{error}</div>
+        <div style={{ marginBottom: 14, padding: '10px 13px', border: `1px solid ${COLOR.error}`,
+          color: COLOR.error, font: `400 12px/1.45 ${FUENTE.ui}` }}>{error}</div>
       )}
 
       <div style={{ opacity: cargando ? .5 : 1 }}>

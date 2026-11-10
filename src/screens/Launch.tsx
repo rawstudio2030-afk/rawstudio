@@ -1,13 +1,13 @@
 // Pantalla 00 — Launch (/intro)
 //
-// Modo marca (DESIGN-BRIEF.md): la escena de Miami fija y el wordmark de neon
-// que se enciende con unos parpadeos. Ya no lleva el video del ojo —es del
+// Modo marca (DESIGN-BRIEF.md): el salon de Collins fijo y el wordmark que
+// aparece con unos parpadeos. Ya no lleva el video del ojo —es del
 // lenguaje anterior de la marca—; el video sigue en la portada, dentro del iris.
 import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import Wordmark from '../components/Wordmark'
-import FondoFijo from '../components/FondoFijo'
+import FondoCollins from '../components/FondoCollins'
 import { COLOR, FUENTE } from '../lib/diseño'
 import { Pulsable } from '../components/Pulsable'
 
@@ -54,10 +54,10 @@ export default function Launch() {
   return (
     <div onClick={() => nav('/age')} style={{
       height: '100%', minHeight: '100svh', boxSizing: 'border-box', position: 'relative', overflow: 'hidden',
-      background: '#06050B', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+      background: COLOR.fondo, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
       fontFamily: FUENTE.ui,
     }}>
-      <FondoFijo />
+      <FondoCollins />
 
       <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', padding: '0 22px', marginTop: '-6vh' }}>
         <div className="intro-neon">
@@ -65,7 +65,7 @@ export default function Launch() {
         </div>
         <div className="intro-texto" style={{
           font: `500 16px/1 ${FUENTE.ui}`, letterSpacing: 6, textTransform: 'uppercase',
-          color: '#E2DEE6', marginTop: 22, textShadow: '0 1px 14px rgba(6,5,11,.9)',
+          color: COLOR.textoSuave, marginTop: 22, textShadow: '0 1px 14px rgba(14,21,32,.9)',
         }}>
           Paga para ver
         </div>
@@ -78,7 +78,7 @@ export default function Launch() {
         position: 'absolute', bottom: 'calc(30px + env(safe-area-inset-bottom))', zIndex: 1,
         minHeight: 44, padding: '0 14px', display: 'inline-flex', alignItems: 'center',
         font: `400 12px/1 'IBM Plex Mono', ui-monospace, monospace`, letterSpacing: 1.6, textTransform: 'uppercase',
-        color: '#B5B0BA', cursor: 'pointer',
+        color: COLOR.textoTenue, cursor: 'pointer',
       }}>
         Solo mayores de 18 — entrar
       </Pulsable>

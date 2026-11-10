@@ -115,8 +115,8 @@ export default function Finanzas() {
       </div>
 
       {error && (
-        <div style={{ marginBottom: 14, padding: '10px 13px', border: '1px solid #FF4444',
-          color: '#FF4444', font: `400 12px/1.45 ${FUENTE.ui}` }}>{error}</div>
+        <div style={{ marginBottom: 14, padding: '10px 13px', border: `1px solid ${COLOR.error}`,
+          color: COLOR.error, font: `400 12px/1.45 ${FUENTE.ui}` }}>{error}</div>
       )}
 
       {/* ---- Cifras principales ---- */}
@@ -152,7 +152,7 @@ export default function Finanzas() {
           background: LINEA.tenue, border: `1px solid ${LINEA.tenue}` }}>
           <Cifra t="Entrado" v={pesos(real.entrado_mxn)} c={COLOR.dinero}
             pie={`${cuantos(real.ordenes_pagadas, 'orden', 'órdenes')} ${palabra(real.ordenes_pagadas, 'pagada')}`} />
-          <Cifra t="Pendiente de cobro" v={pesos(real.pendiente_mxn)} c="#FFB020"
+          <Cifra t="Pendiente de cobro" v={pesos(real.pendiente_mxn)} c={COLOR.aviso}
             pie={cuantos(real.ordenes_pendientes, 'orden', 'órdenes')} />
           <Cifra t="Dispersado a creadoras" v={pesos(real.dispersado_mxn)} c={COLOR.texto}
             pie="Transferencias SPEI realmente hechas" />

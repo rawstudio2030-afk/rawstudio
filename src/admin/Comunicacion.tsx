@@ -75,7 +75,7 @@ export default function Comunicacion() {
         {(c.asunto ?? c.cuerpo).slice(0, 60)}{(c.asunto ?? c.cuerpo).length > 60 ? '…' : ''}</span> },
     { clave: 'r', titulo: 'Resultado', numerica: true, ancho: 130,
       pinta: c => (
-        <span style={{ color: c.fallidos ? '#FFB020' : COLOR.dinero }}>
+        <span style={{ color: c.fallidos ? COLOR.aviso : COLOR.dinero }}>
           {c.enviados}/{c.destinatarios}{c.fallidos ? ` · ${c.fallidos} fallo` : ''}
         </span>
       ) },
@@ -139,10 +139,10 @@ export default function Comunicacion() {
             </div>
 
             <div style={{ marginBottom: 16, padding: '10px 12px',
-              border: `1px solid ${gente.length ? LINEA.tenue : '#FFB020'}`,
+              border: `1px solid ${gente.length ? LINEA.tenue : COLOR.aviso}`,
               font: `400 11px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
               {gente.length === 0
-                ? <span style={{ color: '#FFB020' }}>Ese segmento no tiene a nadie ahora mismo.</span>
+                ? <span style={{ color: COLOR.aviso }}>Ese segmento no tiene a nadie ahora mismo.</span>
                 : <><b style={{ color: COLOR.dinero }}>{gente.length} destinatario
                     {gente.length > 1 ? 's' : ''}</b>
                    {SEGMENTOS.find(s => s.clave === segmento)?.nota &&
@@ -169,8 +169,8 @@ export default function Comunicacion() {
             </div>
 
             {error && (
-              <div style={{ marginTop: 14, padding: '10px 13px', border: '1px solid #FF4444',
-                color: '#FF4444', font: `400 12px/1.45 ${FUENTE.ui}` }}>{error}</div>
+              <div style={{ marginTop: 14, padding: '10px 13px', border: `1px solid ${COLOR.error}`,
+                color: COLOR.error, font: `400 12px/1.45 ${FUENTE.ui}` }}>{error}</div>
             )}
             {aviso && (
               <div style={{ marginTop: 14, padding: '10px 13px', border: `1px solid ${COLOR.dinero}`,

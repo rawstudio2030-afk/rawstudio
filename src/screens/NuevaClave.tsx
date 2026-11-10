@@ -7,7 +7,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import PaginaMiami from '../components/PaginaMiami'
+import PaginaCollins from '../components/PaginaCollins'
 import { COLOR, FUENTE } from '../lib/diseño'
 import { Pulsable } from '../components/Pulsable'
 
@@ -55,32 +55,32 @@ export default function NuevaClave() {
   }
 
   return (
-    <PaginaMiami>
+    <PaginaCollins>
       <div className="tarjeta-acceso">
         {estado === 'hecho' ? (
           <>
-            <h1 className="acceso-titulo">Listo,<br />ya<br /><span className="neon-lima">quedó.</span></h1>
+            <h1 className="acceso-titulo">Listo,<br />ya<br /><span className="realce">quedó.</span></h1>
             <p className="acceso-bajada">
               Tu contraseña nueva ya está guardada. La próxima vez entras directo con ella.
             </p>
-            <Pulsable al={() => nav('/clip', { replace: true })} className="miami-boton miami-boton-magenta">Entrar</Pulsable>
+            <Pulsable al={() => nav('/clip', { replace: true })} className="btn-collins btn-collins-primario">Entrar</Pulsable>
           </>
         ) : haySesion === false ? (
           <>
-            <h1 className="acceso-titulo">Este enlace<br /><span className="neon-lima">ya expiró.</span></h1>
+            <h1 className="acceso-titulo">Este enlace<br /><span className="realce">ya expiró.</span></h1>
             <p className="acceso-bajada">
               Los enlaces de recuperación duran poco, a propósito. Pide uno nuevo y ábrelo en cuanto llegue.
             </p>
             <Pulsable al={() => { sessionStorage.removeItem('rawstudio.recuperando'); nav('/acceso', { replace: true }) }}
-              className="miami-boton miami-boton-magenta">Pedir otro enlace</Pulsable>
+              className="btn-collins btn-collins-primario">Pedir otro enlace</Pulsable>
           </>
         ) : (
           <>
-            <h1 className="acceso-titulo">Pon tu<br />contraseña<br /><span className="neon-lima">nueva.</span></h1>
+            <h1 className="acceso-titulo">Pon tu<br />contraseña<br /><span className="realce">nueva.</span></h1>
 
             <div style={{ position: 'relative' }}>
               <input
-                type={ver ? 'text' : 'password'} autoComplete="new-password" className="campo-neon"
+                type={ver ? 'text' : 'password'} autoComplete="new-password" className="campo-collins"
                 aria-label="Contraseña nueva" aria-invalid={estado === 'error'}
                 placeholder="contraseña nueva" value={clave}
                 onChange={e => { setClave(e.target.value); if (estado === 'error') setEstado('listo') }}
@@ -94,29 +94,29 @@ export default function NuevaClave() {
             </div>
 
             <input
-              type={ver ? 'text' : 'password'} autoComplete="new-password" className="campo-neon"
+              type={ver ? 'text' : 'password'} autoComplete="new-password" className="campo-collins"
               aria-label="Repite la contraseña" aria-invalid={repetir.length > 0 && !iguales}
               placeholder="repítela" value={repetir}
               onChange={e => setRepetir(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') guardar() }} />
 
-            <div style={{ font: `400 12px/1.6 ${FUENTE.mono}`, color: repetir.length > 0 && !iguales ? '#FF7BE6' : COLOR.textoSuave }}>
+            <div style={{ font: `400 12px/1.6 ${FUENTE.mono}`, color: repetir.length > 0 && !iguales ? COLOR.acento : COLOR.textoSuave }}>
               {repetir.length > 0 && !iguales
                 ? 'Las dos contraseñas no son iguales.'
                 : 'Mínimo 6 caracteres.'}
             </div>
 
             {estado === 'error' && (
-              <div role="alert" style={{ font: `400 14px/1.45 ${FUENTE.ui}`, color: '#FF7BE6' }}>{detalle}</div>
+              <div role="alert" style={{ font: `400 14px/1.45 ${FUENTE.ui}`, color: COLOR.acento }}>{detalle}</div>
             )}
 
             <Pulsable al={guardar} activo={puede}
-              className={`miami-boton miami-boton-magenta${puede ? '' : ' miami-boton-apagado'}`}>
+              className={`btn-collins btn-collins-primario${puede ? '' : ' btn-collins-apagado'}`}>
               {estado === 'guardando' ? 'Guardando…' : 'Guardar contraseña'}
             </Pulsable>
           </>
         )}
       </div>
-    </PaginaMiami>
+    </PaginaCollins>
   )
 }

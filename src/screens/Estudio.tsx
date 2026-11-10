@@ -31,6 +31,7 @@ import VincularTelegram from '../components/VincularTelegram'
 import BandejaConsultas from '../components/BandejaConsultas'
 import DesempenoClips from '../components/DesempenoClips'
 import { configAlbumes, type ConfigAlbumes } from '../lib/albumes'
+import { FONDO_CALABOZO } from '../lib/calabozo'
 
 
 const COLOR_ESTADO: Record<Canal['estado'], string> = {
@@ -94,7 +95,7 @@ export default function Estudio() {
   return (
     <div style={{
       minHeight: '100%', boxSizing: 'border-box', padding: '28px 18px 40px',
-      background: COLOR.fondo, color: COLOR.texto, fontFamily: FUENTE.ui,
+      background: FONDO_CALABOZO, color: COLOR.texto, fontFamily: FUENTE.ui,
       width: '100%', maxWidth: 680, margin: '0 auto',
     }}>
       {/* Sin flecha de volver: el estudio es un destino de la barra, no una
@@ -123,10 +124,10 @@ export default function Estudio() {
       {!perfil.identidad_verificada && (
         <Enlace a="/verificar" style={{
           display: 'block', boxSizing: 'border-box', width: '100%', borderRadius: RADIO.filo,
-          border: `1.5px solid ${COLOR.acento}`, background: 'rgba(255,43,209,.08)',
+          border: `1.5px solid ${COLOR.acento}`, background: 'rgba(212,180,131,.08)',
           padding: '18px 16px', marginBottom: 18, cursor: 'pointer',
         }}>
-          <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase', color: '#FF5BDC' }}>
+          <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase', color: COLOR.acento }}>
             Falta verificar tu identidad
           </div>
           <div style={{ font: `400 14px/1.5 ${FUENTE.ui}`, color: COLOR.texto, marginTop: 9 }}>
@@ -136,7 +137,7 @@ export default function Estudio() {
             <span style={{ font: `400 12px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
               Toma dos minutos
             </span>
-            <span aria-hidden style={{ font: `700 16px/1 ${FUENTE.ui}`, color: '#FF5BDC' }}>&#8594;</span>
+            <span aria-hidden style={{ font: `700 16px/1 ${FUENTE.ui}`, color: COLOR.acento }}>&#8594;</span>
           </div>
         </Enlace>
       )}

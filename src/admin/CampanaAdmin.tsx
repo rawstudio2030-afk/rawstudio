@@ -50,7 +50,7 @@ export default function CampanaAdmin() {
     <Enlace a="/admin/avisos" rotulo={rotulo} style={{
       position: 'relative', width: 38, height: 38, borderRadius: '50%', display: 'grid', placeItems: 'center',
       cursor: 'pointer', background: COLOR.superficie,
-      border: `1px solid ${fallo ? '#FFB020' : cuenta > 0 ? COLOR.acento : LINEA.suave}`,
+      border: `1px solid ${fallo ? COLOR.aviso : cuenta > 0 ? COLOR.acento : LINEA.suave}`,
       color: cuenta > 0 ? COLOR.texto : COLOR.textoSuave,
     }}>
       <Icono nombre="campana" tam={20} />
@@ -58,7 +58,7 @@ export default function CampanaAdmin() {
         <span aria-hidden style={{
           position: 'absolute', top: -5, right: -5, minWidth: 18, height: 18, padding: '0 5px',
           boxSizing: 'border-box', borderRadius: 9, display: 'grid', placeItems: 'center',
-          background: fallo ? '#FFB020' : COLOR.acento, color: COLOR.fondo, font: `700 11px/1 ${FUENTE.mono}`,
+          background: fallo ? COLOR.aviso : COLOR.acento, color: COLOR.fondo, font: `700 11px/1 ${FUENTE.mono}`,
         }}>{marca}</span>
       )}
     </Enlace>

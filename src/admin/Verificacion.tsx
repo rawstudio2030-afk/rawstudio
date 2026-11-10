@@ -84,8 +84,8 @@ export default function Verificacion() {
       </div>
 
       {error && (
-        <div role="alert" style={{ marginBottom: 14, padding: '10px 13px', border: '1px solid #FF4444',
-          color: '#FF4444', font: `400 12px/1.45 ${FUENTE.ui}` }}>{error}</div>
+        <div role="alert" style={{ marginBottom: 14, padding: '10px 13px', border: `1px solid ${COLOR.error}`,
+          color: COLOR.error, font: `400 12px/1.45 ${FUENTE.ui}` }}>{error}</div>
       )}
       {aviso && !abierta && (
         <div style={{ marginBottom: 14 }}><Aviso tipo="ok" cierra={() => setAviso(null)}>{aviso}</Aviso></div>
@@ -122,7 +122,7 @@ export default function Verificacion() {
                 {v.tiene_expediente && <Insignia texto="Expediente" color={COLOR.admin} />}
                 {v.similitud != null && (
                   <Insignia texto={`${Math.round(Number(v.similitud) * 100)}% parecido`}
-                    color={Number(v.similitud) > .7 ? COLOR.dinero : '#FFB020'} />
+                    color={Number(v.similitud) > .7 ? COLOR.dinero : COLOR.aviso} />
                 )}
               </div>
             </Pulsable>
@@ -171,7 +171,7 @@ function Ficha({ v, cierra, listo }: {
 
   return (
     <div onClick={cierra} style={{
-      position: 'fixed', inset: 0, zIndex: 85, background: 'rgba(8,8,10,.88)',
+      position: 'fixed', inset: 0, zIndex: 85, background: 'rgba(14,21,32,.88)',
       display: 'grid', placeItems: 'center', padding: 28,
     }}>
       <div onClick={e => e.stopPropagation()} style={{
@@ -199,17 +199,17 @@ function Ficha({ v, cierra, listo }: {
           background: LINEA.tenue, border: `1px solid ${LINEA.tenue}` }}>
           <Dato t="Nacimiento" v={v.fecha_nacimiento ? fecha(v.fecha_nacimiento) : '—'} />
           <Dato t="Edad declarada" v={v.edad != null ? cuantos(v.edad, 'año') : '—'}
-            c={v.edad != null && v.edad < 18 ? '#FF4444' : COLOR.texto} />
+            c={v.edad != null && v.edad < 18 ? COLOR.error : COLOR.texto} />
           <Dato t="Parecido facial"
             v={v.similitud != null ? `${Math.round(Number(v.similitud) * 100)}%` : 'no medido'}
-            c={v.similitud != null && Number(v.similitud) > .7 ? COLOR.dinero : '#FFB020'} />
+            c={v.similitud != null && Number(v.similitud) > .7 ? COLOR.dinero : COLOR.aviso} />
           <Dato t="Intentos" v={String(v.intentos)} />
         </div>
 
         {v.paso_fallido && (
-          <div style={{ marginTop: 14, padding: '9px 12px', border: '1px solid #FFB020',
+          <div style={{ marginTop: 14, padding: '9px 12px', border: `1px solid ${COLOR.aviso}`,
             font: `400 12px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
-            <b style={{ color: '#FFB020' }}>Falló en:</b> {v.paso_fallido}
+            <b style={{ color: COLOR.aviso }}>Falló en:</b> {v.paso_fallido}
             {v.motivo && <> — {v.motivo}</>}
           </div>
         )}
@@ -225,7 +225,7 @@ function Ficha({ v, cierra, listo }: {
             ? <>Las imágenes se borraron el {fecha(v.imagenes_borradas_at)}</>
             : v.borrar_despues_de
               ? new Date(v.borrar_despues_de) <= new Date()
-                ? <span style={{ color: '#FFB020' }}>
+                ? <span style={{ color: COLOR.aviso }}>
                     Las imágenes debían borrarse el {fecha(v.borrar_despues_de)} y
                     siguen aquí. Se borran solas en la siguiente pasada.
                   </span>
@@ -284,13 +284,13 @@ function Documento({ titulo, imagen, vacio = 'Sin archivo' }: {
       <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
         textTransform: 'uppercase', color: COLOR.textoSuave, marginBottom: 6 }}>{titulo}</div>
       <div style={{
-        aspectRatio: '4/3', border: `1px solid ${falla ? '#FF4444' : LINEA.tenue}`, background: COLOR.fondo,
+        aspectRatio: '4/3', border: `1px solid ${falla ? COLOR.error : LINEA.tenue}`, background: COLOR.fondo,
         display: 'grid', placeItems: 'center', overflow: 'hidden',
       }}>
         {imagen?.estado === 'lista'
           ? <img src={imagen.url} alt={titulo} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           : <span role={falla ? 'alert' : undefined} style={{ font: `400 11px/1.5 ${FUENTE.ui}`,
-              color: falla ? '#FF4444' : COLOR.textoSuave, textAlign: 'center', padding: '0 14px' }}>
+              color: falla ? COLOR.error : COLOR.textoSuave, textAlign: 'center', padding: '0 14px' }}>
               {imagen?.estado === 'cargando' ? 'Cargando…'
                 : falla ? `No se pudo cargar la imagen (${imagen.error}). Cierra la ficha y vuelve a abrirla; el archivo puede seguir ahí.`
                 : vacio}

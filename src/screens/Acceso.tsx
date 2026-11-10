@@ -10,7 +10,7 @@
 import { useEffect, useId, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
-import PaginaMiami from '../components/PaginaMiami'
+import PaginaCollins from '../components/PaginaCollins'
 import { supabase } from '../lib/supabase'
 import { VERSION_LEGAL } from '../content/legal'
 import { COLOR, FUENTE } from '../lib/diseño'
@@ -91,7 +91,7 @@ function Casilla({ marcada, onCambio, obligatoria, children }: {
           color: COLOR.fondo, cursor: 'pointer',
         }} />
       <label htmlFor={id} style={{
-        font: `400 13px/1.5 ${FUENTE.ui}`, color: '#CFCAD3', cursor: 'pointer',
+        font: `400 13px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave, cursor: 'pointer',
       }}>
         {children}
         {obligatoria && <span style={{ color: COLOR.acento }}> *</span>}
@@ -240,30 +240,30 @@ export default function Acceso({ modo }: { modo: Modo }) {
    * botones. En modo marca (DESIGN-BRIEF.md): la puerta de entrada es lo
    * primero que se ve, asi que lleva la escena de la portada detras. */
   return (
-    <PaginaMiami>
+    <PaginaCollins>
       <div className="tarjeta-acceso">
         {aviso ? (
           <>
             <h1 className="acceso-titulo">
               {aviso.titulo[0]}<br />{aviso.titulo[1]}<br />
-              <span className="neon-lima">{aviso.titulo[2]}</span>
+              <span className="realce">{aviso.titulo[2]}</span>
             </h1>
             <p className="acceso-bajada">{aviso.texto}</p>
             <div style={{ font: `400 12px/1.6 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
               Si no llega en un minuto, revisa la carpeta de no deseados.
             </div>
-            <Pulsable al={() => { setEstado('listo'); nav('/entrar') }} className="miami-boton miami-boton-suave">Volver</Pulsable>
+            <Pulsable al={() => { setEstado('listo'); nav('/entrar') }} className="btn-collins btn-collins-suave">Volver</Pulsable>
           </>
         ) : (
           <>
             <h1 className="acceso-titulo">
               {t.titulo[0]}<br />{t.titulo[1]}<br />
-              <span className="neon-lima">{t.titulo[2]}</span>
+              <span className="realce">{t.titulo[2]}</span>
             </h1>
             <p className="acceso-bajada">{t.bajada}</p>
 
             <input
-              type="email" inputMode="email" autoComplete="email" className="campo-neon"
+              type="email" inputMode="email" autoComplete="email" className="campo-collins"
               aria-label="Correo" aria-invalid={malo}
               placeholder="tu@correo.com" value={correo}
               onChange={e => { setCorreo(e.target.value); if (estado === 'error') setEstado('listo') }}
@@ -271,7 +271,7 @@ export default function Acceso({ modo }: { modo: Modo }) {
 
             <div style={{ position: 'relative' }}>
               <input
-                type={verClave ? 'text' : 'password'} className="campo-neon"
+                type={verClave ? 'text' : 'password'} className="campo-collins"
                 aria-label="Contraseña" aria-invalid={malo}
                 autoComplete={modo === 'registro' ? 'new-password' : 'current-password'}
                 placeholder="tu contraseña" value={clave}
@@ -323,22 +323,22 @@ export default function Acceso({ modo }: { modo: Modo }) {
             )}
 
             {estado === 'error' && (
-              <div role="alert" style={{ font: `400 14px/1.45 ${FUENTE.ui}`, color: '#FF7BE6' }}>{detalle}</div>
+              <div role="alert" style={{ font: `400 14px/1.45 ${FUENTE.ui}`, color: COLOR.acento }}>{detalle}</div>
             )}
 
             <div style={{ display: 'grid', gap: 12, marginTop: 4 }}>
               <Pulsable al={enviar} activo={listo}
-                className={`miami-boton miami-boton-magenta${listo ? '' : ' miami-boton-apagado'}`}>
+                className={`btn-collins btn-collins-primario${listo ? '' : ' btn-collins-apagado'}`}>
                 {estado === 'enviando' ? 'Un momento…' : t.boton}
               </Pulsable>
 
               {conGoogle && (
-                <Pulsable al={entrarGoogle} className="miami-boton miami-boton-google">
+                <Pulsable al={entrarGoogle} className="btn-collins btn-collins-google">
                   Continuar con Google
                 </Pulsable>
               )}
 
-              <Enlace a={t.rutaAlterna} className="miami-boton miami-boton-suave">{t.alterno}</Enlace>
+              <Enlace a={t.rutaAlterna} className="btn-collins btn-collins-suave">{t.alterno}</Enlace>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 4 }}>
@@ -350,6 +350,6 @@ export default function Acceso({ modo }: { modo: Modo }) {
           </>
         )}
       </div>
-    </PaginaMiami>
+    </PaginaCollins>
   )
 }

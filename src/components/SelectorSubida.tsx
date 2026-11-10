@@ -15,7 +15,7 @@ export default function SelectorSubida({ actual }: { actual: 'video' | 'fotos' }
         flex: 1, boxSizing: 'border-box', padding: '12px 14px', textAlign: 'center', cursor: 'pointer',
         borderRadius: 12, minHeight: 56,
         border: `1.5px solid ${activo ? COLOR.dinero : LINEA.suave}`,
-        background: activo ? 'rgba(200,255,61,.08)' : 'transparent',
+        background: activo ? 'rgba(224,177,90,.08)' : 'transparent',
       }}>
         <div style={{ font: `700 14px/1.2 ${FUENTE.ui}`, color: activo ? COLOR.dinero : COLOR.texto }}>{titulo}</div>
         <div style={{ marginTop: 4, font: `400 11px/1.3 ${FUENTE.ui}`, color: COLOR.textoSuave }}>{nota}</div>

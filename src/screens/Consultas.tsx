@@ -18,7 +18,7 @@ import {
 } from '../content/consultas'
 
 const cuerpo: React.CSSProperties = {
-  margin: 0, font: `400 15px/1.65 ${FUENTE.ui}`, color: '#C2BDC7',
+  margin: 0, font: `400 15px/1.65 ${FUENTE.ui}`, color: COLOR.textoSuave,
 }
 
 function Titulo({ children }: { children: ReactNode }) {
@@ -41,9 +41,9 @@ function Lista({ items, ordenada }: { items: string[]; ordenada?: boolean }) {
 
 export default function Consultas() {
   return (
-    <MarcoDocumento titulo={['Consultas', 'por Telegram']}>
+    <MarcoDocumento titulo={['Consultas', 'por Telegram']} piso="antro">
       {INTRO.map((p, i) => (
-        <p key={i} style={{ ...cuerpo, margin: i ? '8px 0 0' : '18px 0 0', fontSize: 16, color: '#C2BDC7' }}>{p}</p>
+        <p key={i} style={{ ...cuerpo, margin: i ? '8px 0 0' : '18px 0 0', fontSize: 16, color: COLOR.textoSuave }}>{p}</p>
       ))}
 
       <div style={{ marginTop: 14, font: `400 12px/1.5 ${FUENTE.mono}`, color: COLOR.textoSuave }}>

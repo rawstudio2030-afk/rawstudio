@@ -5,17 +5,21 @@
  * el perfil iba a necesitar exactamente lo mismo: dos copias de «que color es
  * un clip de suscriptoras» acaban desacordandose.
  *
- * El color dice de un vistazo que es: magenta lo que se paga, cian lo de
- * suscriptoras, lima lo gratis.
+ * El color dice de un vistazo que es: safelight lo que se paga, plata lo de
+ * suscriptoras, ambar lo gratis.
  */
 import type { Clip } from './clips'
+import { PISO } from './diseño'
 
 export type Tono = 'm' | 'c' | 'l'
 
-export const TONO: Record<Tono, { borde: string; rgb: string }> = {
-  m: { borde: '#FF4FE0', rgb: '255,43,209' },
-  c: { borde: '#19E6FF', rgb: '0,229,255' },
-  l: { borde: '#C8FF3D', rgb: '200,255,61' },
+/** `borde` es el color del marco y del trazo; `rgb` su version translucida;
+ *  `relleno` y `texto` el par de una insignia SOLIDA (AA). Pago en safelight,
+ *  suscriptoras en plata y lo gratis en ambar: los colores del cuarto oscuro. */
+export const TONO: Record<Tono, { borde: string; rgb: string; relleno: string; texto: string }> = {
+  m: { borde: PISO.oscuro.safelightLit, rgb: '212,33,44', relleno: PISO.oscuro.safelight, texto: PISO.oscuro.papel },
+  c: { borde: PISO.oscuro.plata, rgb: '163,155,150', relleno: PISO.oscuro.plata, texto: PISO.oscuro.vacio },
+  l: { borde: PISO.oscuro.ambar, rgb: '201,160,74', relleno: PISO.oscuro.ambar, texto: PISO.oscuro.vacio },
 }
 
 export type Rotulo = { tono: Tono; texto: string; icono?: string }

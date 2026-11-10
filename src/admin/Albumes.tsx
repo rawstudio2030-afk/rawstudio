@@ -96,7 +96,7 @@ export default function Albumes() {
       {res && (
         <div style={{ marginTop: 14, font: `400 12px/1.6 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
           {cuantos(res.total, 'álbum', 'álbumes')} · {res.publicados} publicados · {res.en_revision} en revisión
-          · {res.subiendo} subiéndose{res.abandonados > 0 && <span style={{ color: '#FFB020' }}> · {res.abandonados} abandonados</span>}
+          · {res.subiendo} subiéndose{res.abandonados > 0 && <span style={{ color: COLOR.aviso }}> · {res.abandonados} abandonados</span>}
         </div>
       )}
 
@@ -106,15 +106,15 @@ export default function Albumes() {
         <Etiquetado texto="Máximo de fotos" ancho={120} hijo={<Campo valor={max} cambia={setMax} mono marcador="40" />} />
         <Boton tono="primario" activo={cambio && !ocupado} al={guardar}>Guardar</Boton>
       </div>
-      <div style={{ marginTop: 8, font: `400 11px/1.6 ${FUENTE.ui}`, color: valido ? COLOR.textoSuave : '#FF4444' }}>
+      <div style={{ marginTop: 8, font: `400 11px/1.6 ${FUENTE.ui}`, color: valido ? COLOR.textoSuave : COLOR.error }}>
         {valido
           ? `Hoy: ${usd(aj.precio)} por álbum · de ${aj.min} a ${cuantos(aj.max, 'foto')}. El precio nuevo no mueve los álbumes ya creados.`
           : 'Precio de al menos $1.00, mínimo de 1 o más y máximo entre el mínimo y 100.'}
       </div>
 
       {aband.length > 0 && (
-        <div style={{ marginTop: 16, padding: '12px 14px', border: '1px solid #FFB020' }}>
-          <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase', color: '#FFB020' }}>
+        <div style={{ marginTop: 16, padding: '12px 14px', border: `1px solid ${COLOR.aviso}` }}>
+          <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase', color: COLOR.aviso }}>
             {cuantos(aband.length, 'álbum abandonado', 'álbumes abandonados')}
           </div>
           <div style={{ margin: '8px 0 12px', font: `400 11px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
@@ -127,7 +127,7 @@ export default function Albumes() {
       )}
 
       {aviso && <div style={{ marginTop: 12, font: `400 12px/1.5 ${FUENTE.ui}`, color: COLOR.dinero }}>{aviso}</div>}
-      {error && <div style={{ marginTop: 12, font: `400 12px/1.5 ${FUENTE.ui}`, color: '#FF4444' }}>{error}</div>}
+      {error && <div style={{ marginTop: 12, font: `400 12px/1.5 ${FUENTE.ui}`, color: COLOR.error }}>{error}</div>}
 
       {dialogo === 'encender' && (
         <Confirmar titulo="Encender los álbumes para todas" tono="primario" etiqueta="Encender"

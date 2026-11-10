@@ -68,9 +68,6 @@ export default function Simbolo({
       style={{
         display: 'block',
         opacity: opacidad,
-        // El halo pertenece a la luz: es el mismo color del aro, no una
-        // sombra negra. Apagado no lleva ninguno.
-        filter: encendido ? `drop-shadow(0 0 ${lado * 0.22}px ${color})` : undefined,
       }}>
       <circle cx="50" cy="50" r="26" fill="none" stroke={aro} strokeWidth="6" />
       <path d="M41 39l19 11-19 11z" fill={centro} />

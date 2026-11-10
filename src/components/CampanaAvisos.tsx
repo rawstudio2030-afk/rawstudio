@@ -50,7 +50,7 @@ export default function CampanaAvisos() {
       style={{
         position: 'fixed', zIndex: 950, right: 12, top: 'calc(10px + env(safe-area-inset-top))',
         width: 44, height: 44, borderRadius: '50%', display: 'grid', placeItems: 'center',
-        background: 'rgba(8,8,10,.82)', backdropFilter: 'blur(10px)',
+        background: 'rgba(14,21,32,.82)', backdropFilter: 'blur(10px)',
         border: `1px solid ${cuenta > 0 ? COLOR.acento : LINEA.fuerte}`,
         color: cuenta > 0 ? COLOR.texto : COLOR.textoSuave, cursor: 'pointer',
       }}>
@@ -59,7 +59,7 @@ export default function CampanaAvisos() {
         <span aria-hidden style={{
           position: 'absolute', top: -4, right: -4, minWidth: 20, height: 20, padding: '0 5px',
           boxSizing: 'border-box', borderRadius: 10, display: 'grid', placeItems: 'center',
-          background: COLOR.acento, color: '#fff', font: `700 11px/1 ${FUENTE.ui}`,
+          background: COLOR.acento, color: COLOR.sobreAcento, font: `700 11px/1 ${FUENTE.ui}`,
         }}>{cuenta > 9 ? '9+' : cuenta}</span>
       )}
     </Enlace>

@@ -5,7 +5,8 @@
  * leer. */
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { COLOR, LINEA, FUENTE, RADIO } from '../lib/diseño'
+import { COLOR, LINEA, FUENTE, RADIO, PISO } from '../lib/diseño'
+import { BOTON_OSCURO } from '../lib/oscuro'
 import { useSesion } from '../lib/sesion'
 import { usdYPesos } from '../lib/dinero'
 import { useMoneda } from '../lib/moneda'
@@ -15,21 +16,20 @@ import {
 } from '../lib/canales'
 import { Pulsable } from './Pulsable'
 
-/** Tarjeta de neon, del mismo estilo que las de la portada y el catalogo. */
+/** Tarjeta del cuarto oscuro (la oferta vive en el perfil de la creadora): un
+ *  filete del color del trato sobre un fondo casi negro, sin resplandor. */
 function neon(rgb: string, borde: string) {
   return {
-    borderRadius: RADIO.filo, border: `1.5px solid ${borde}`,
-    background: `linear-gradient(180deg, rgba(${rgb},.09), rgba(8,8,10,.7))`,
-    boxShadow: `0 0 8px rgba(${rgb},.38), 0 0 22px rgba(${rgb},.16)`,
+    borderRadius: RADIO.filo, border: `1px solid ${borde}`,
+    background: `linear-gradient(180deg, rgba(${rgb},.08), rgba(8,4,5,.7))`,
   }
 }
-const M = { rgb: '255,43,209', borde: '#FF4FE0' }
-const C = { rgb: '0,229,255', borde: '#19E6FF' }
+const M = { rgb: '179,18,27', borde: PISO.oscuro.safelightLit }
+const C = { rgb: '163,155,150', borde: PISO.oscuro.plata }
 
-const BOTON_MAGENTA = {
+const BOTON_PRINCIPAL = {
   boxSizing: 'border-box', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-  minHeight: 50, cursor: 'pointer', borderRadius: RADIO.filo, color: '#FFF',
-  background: 'linear-gradient(135deg, #FF2BD1, #9B2BE8)', boxShadow: '0 0 16px rgba(255,43,209,.42)',
+  minHeight: 50, cursor: 'pointer', borderRadius: RADIO.filo, ...BOTON_OSCURO,
   font: `700 13px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
 } as const
 
@@ -67,7 +67,7 @@ export default function OfertaCreadora({ creadora, handle }: {
   return (
     <div style={{ marginTop: 30, display: 'grid', gap: 26 }}>
       {error && (
-        <div style={{ padding: '10px 12px', border: '1px solid #FF4444', color: '#FF4444', borderRadius: RADIO.filo,
+        <div style={{ padding: '10px 12px', border: `1px solid ${COLOR.error}`, color: COLOR.error, borderRadius: RADIO.filo,
           font: `400 13px/1.45 ${FUENTE.ui}` }}>{error}</div>
       )}
       {aviso && (
@@ -81,7 +81,7 @@ export default function OfertaCreadora({ creadora, handle }: {
           <div style={etiqueta}>Suscripción</div>
           {suscrita ? (
             <div style={{ marginTop: 12, padding: '14px 15px', borderRadius: RADIO.filo,
-              border: `1.5px solid ${COLOR.dinero}`, background: 'rgba(200,255,61,.05)' }}>
+              border: `1px solid ${COLOR.dinero}`, background: 'rgba(224,177,90,.05)' }}>
               <div style={{ font: `400 13px/1.45 ${FUENTE.ui}`, color: COLOR.texto }}>
                 Estás suscrita hasta el{' '}
                 {new Date(suscrita.periodo_fin).toLocaleDateString('es-MX')}
@@ -121,7 +121,7 @@ export default function OfertaCreadora({ creadora, handle }: {
                       const r = await suscribirse(t.id)
                       if ('error' in r) { setError(r.error!); return }
                       setError(''); setAviso('Listo, ya estás suscrita.'); cargar()
-                    }} style={{ ...BOTON_MAGENTA, marginTop: 14 }}>
+                    }} style={{ ...BOTON_PRINCIPAL, marginTop: 14 }}>
                       {sesion ? 'Suscribirme 30 días' : 'Entra para suscribirte'}
                     </Pulsable>
                   )}
@@ -140,7 +140,7 @@ export default function OfertaCreadora({ creadora, handle }: {
             <div style={{ marginTop: 12, padding: 15, ...neon(M.rgb, M.borde) }}>
               <textarea value={desc} onChange={e => setDesc(e.target.value)} rows={4}
                 placeholder="Qué te gustaría que grabara"
-                style={{ width: '100%', boxSizing: 'border-box', background: 'rgba(8,8,10,.6)',
+                style={{ width: '100%', boxSizing: 'border-box', background: 'rgba(14,21,32,.6)',
                   color: COLOR.texto, border: `1px solid ${LINEA.fuerte}`, borderRadius: 10,
                   padding: '12px 13px', font: `400 16px/1.45 ${FUENTE.ui}`,
                   outline: 'none', resize: 'vertical' }} />
@@ -149,7 +149,7 @@ export default function OfertaCreadora({ creadora, handle }: {
                   Ofrezco
                 </span>
                 <input type="number" value={oferta} onChange={e => setOferta(e.target.value)}
-                  style={{ width: 100, background: 'rgba(8,8,10,.6)', color: COLOR.dinero,
+                  style={{ width: 100, background: 'rgba(14,21,32,.6)', color: COLOR.dinero,
                     border: `1px solid ${LINEA.fuerte}`, borderRadius: 10, padding: '10px 11px',
                     font: `400 16px/1 ${FUENTE.mono}`, outline: 'none' }} />
                 <span style={{ font: `400 13px/1 ${FUENTE.mono}`, color: COLOR.dinero }}>⨯</span>
@@ -167,7 +167,7 @@ export default function OfertaCreadora({ creadora, handle }: {
                   if ('error' in r) { setError(r.error!); return }
                   setEncargando(false); setDesc(''); setError('')
                   nav('/estudio/encargos')
-                }} style={{ ...BOTON_MAGENTA, flex: 1, width: 'auto', fontSize: 12 }}>Enviar propuesta</Pulsable>
+                }} style={{ ...BOTON_PRINCIPAL, flex: 1, width: 'auto', fontSize: 12 }}>Enviar propuesta</Pulsable>
                 <Pulsable al={() => setEncargando(false)} style={{ flex: 1, display: 'flex', alignItems: 'center',
                   justifyContent: 'center', minHeight: 50, cursor: 'pointer', borderRadius: RADIO.filo,
                   border: `1px solid ${LINEA.fuerte}`, color: COLOR.textoSuave,

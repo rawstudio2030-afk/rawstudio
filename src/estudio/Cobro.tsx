@@ -103,7 +103,7 @@ export default function Cobro() {
             marcador="18 dígitos" />
           <p style={{
             ...nota,
-            color: clabe && !clabeOk ? COLOR.acento : sospechosa ? '#FFB020' : COLOR.textoApagado,
+            color: clabe && !clabeOk ? COLOR.acento : sospechosa ? COLOR.aviso : COLOR.textoApagado,
           }}>
             {clabe && !clabeOk ? `Van ${digitos.length} de 18 dígitos.`
               : sospechosa
@@ -136,7 +136,7 @@ export default function Cobro() {
                 boxSizing: 'border-box', width: '100%', textAlign: 'left',
                 padding: '13px 14px', cursor: 'pointer',
                 border: `1px solid ${regimen === r ? COLOR.dinero : LINEA.tenue}`,
-                background: regimen === r ? 'rgba(200,255,61,.07)' : 'transparent',
+                background: regimen === r ? 'rgba(224,177,90,.07)' : 'transparent',
                 color: regimen === r ? COLOR.texto : COLOR.textoSuave,
                 font: `${regimen === r ? 600 : 400} 14px/1.35 ${FUENTE.ui}`,
               }}>{NOMBRE_REGIMEN[r]}</Pulsable>

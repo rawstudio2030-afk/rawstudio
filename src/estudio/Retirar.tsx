@@ -160,10 +160,10 @@ export default function Retirar() {
                   font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
                   padding: '6px 8px', whiteSpace: 'nowrap',
                   color: s.estado === 'pagada' ? COLOR.fondo
-                    : s.estado === 'rechazada' ? '#FF4444' : COLOR.textoSuave,
+                    : s.estado === 'rechazada' ? COLOR.error : COLOR.textoSuave,
                   background: s.estado === 'pagada' ? COLOR.dinero : 'transparent',
                   border: s.estado === 'pagada' ? 'none'
-                    : `1px solid ${s.estado === 'rechazada' ? '#FF4444' : LINEA.media}`,
+                    : `1px solid ${s.estado === 'rechazada' ? COLOR.error : LINEA.media}`,
                 }}>{NOMBRE_ESTADO[s.estado]}</span>
               </div>
             ))}

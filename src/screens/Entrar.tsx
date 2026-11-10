@@ -5,8 +5,8 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
-import PaginaMiami from '../components/PaginaMiami'
-import { COLOR, FUENTE } from '../lib/diseño'
+import PaginaCollins from '../components/PaginaCollins'
+import { COLOR, FUENTE, RADIO } from '../lib/diseño'
 import { Enlace } from '../components/Pulsable'
 
 
@@ -21,14 +21,14 @@ export default function Entrar() {
   }, [cargando, sesion, nav])
 
   return (
-    <PaginaMiami>
+    <PaginaCollins>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 18, padding: '18px 0 4px' }}>
         {/* Interlineado 1 y no .9 como el deck: en español los titulares llevan
             mayusculas acentuadas (CÓMO) y con el interlineado apretado el acento
             queda tapado por la linea de arriba. El deck no lo sufre por estar
             en ingles. */}
         <h1 className="acceso-titulo">
-          Elige<br />cómo<br /><span className="neon-lima">entras.</span>
+          Elige<br />cómo<br /><span className="realce">entras.</span>
         </h1>
         <p className="acceso-bajada">
           Con tu correo y una contraseña. El acceso por liga también sigue ahí.
@@ -42,9 +42,8 @@ export default function Entrar() {
           a="/creadoras"
           style={{
             display: 'block', boxSizing: 'border-box', width: '100%',
-            marginTop: 6, padding: '18px 16px', cursor: 'pointer', borderRadius: 14,
-            border: '1.5px solid #C8FF3D', background: 'rgba(8,8,10,.72)',
-            boxShadow: '0 0 10px rgba(200,255,61,.35), 0 0 28px rgba(200,255,61,.14), inset 0 0 18px rgba(200,255,61,.06)',
+            marginTop: 6, padding: '18px 16px', cursor: 'pointer', borderRadius: RADIO.filo,
+            border: `1px solid ${COLOR.dinero}`, background: 'rgba(14,21,32,.72)',
           }}>
           <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase', color: COLOR.dinero, marginBottom: 9 }}>
             ¿Vas a publicar tú?
@@ -62,8 +61,8 @@ export default function Entrar() {
       </div>
 
       <div style={{ display: 'grid', gap: 12, marginTop: 6 }}>
-        <Enlace a="/registro" className="miami-boton miami-boton-magenta">Crear mi cuenta</Enlace>
-        <Enlace a="/acceso" className="miami-boton miami-boton-suave">Ya tengo cuenta</Enlace>
+        <Enlace a="/registro" className="btn-collins btn-collins-primario">Crear mi cuenta</Enlace>
+        <Enlace a="/acceso" className="btn-collins btn-collins-suave">Ya tengo cuenta</Enlace>
       </div>
 
       {/* Antes aqui se volvia a montar la portada informativa entera, que es
@@ -74,6 +73,6 @@ export default function Entrar() {
         font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase',
         color: COLOR.textoSuave, textDecoration: 'underline', textUnderlineOffset: 5,
       }}>Preguntas frecuentes &#8594;</Enlace>
-    </PaginaMiami>
+    </PaginaCollins>
   )
 }

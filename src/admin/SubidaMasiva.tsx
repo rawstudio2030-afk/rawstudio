@@ -167,8 +167,8 @@ export default function SubidaMasiva() {
       </div>
 
       {error && (
-        <div style={{ marginBottom: 14, padding: '10px 13px', border: '1px solid #FF4444',
-          color: '#FF4444', font: `400 12px/1.45 ${FUENTE.ui}` }}>{error}</div>
+        <div style={{ marginBottom: 14, padding: '10px 13px', border: `1px solid ${COLOR.error}`,
+          color: COLOR.error, font: `400 12px/1.45 ${FUENTE.ui}` }}>{error}</div>
       )}
       {aviso && (
         <div style={{ marginBottom: 14, padding: '10px 13px', border: `1px solid ${COLOR.dinero}`,
@@ -176,9 +176,9 @@ export default function SubidaMasiva() {
       )}
 
       {sinCreadora.length > 0 && (
-        <div style={{ marginBottom: 14, padding: '11px 13px', border: '1px solid #FFB020',
+        <div style={{ marginBottom: 14, padding: '11px 13px', border: `1px solid ${COLOR.aviso}`,
           font: `400 12px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
-          <b style={{ color: '#FFB020' }}>{sinCreadora.length} carpetas sin creadora:</b>{' '}
+          <b style={{ color: COLOR.aviso }}>{sinCreadora.length} carpetas sin creadora:</b>{' '}
           {sinCreadora.slice(0, 6).join(', ')}
           {sinCreadora.length > 6 && ` y ${sinCreadora.length - 6} más`}.
           <div style={{ marginTop: 6, color: COLOR.textoSuave }}>
@@ -194,7 +194,7 @@ export default function SubidaMasiva() {
             font: `400 12px/1 ${FUENTE.mono}` }}>
             <span style={{ color: COLOR.dinero }}>{porSubir} por subir</span>
             {cuenta('no_publica') > 0 && (
-              <span style={{ color: '#FFB020' }}>
+              <span style={{ color: COLOR.aviso }}>
                 {cuenta('no_publica')} quedarán pendientes
               </span>
             )}
@@ -202,7 +202,7 @@ export default function SubidaMasiva() {
               <span style={{ color: COLOR.admin }}>{cuenta('listo')} subidos</span>
             )}
             {cuenta('fallo') > 0 && (
-              <span style={{ color: '#FF4444' }}>{cuenta('fallo')} fallaron</span>
+              <span style={{ color: COLOR.error }}>{cuenta('fallo')} fallaron</span>
             )}
             <div style={{ flex: 1 }} />
             <Boton tono="primario" activo={porSubir > 0 && !ocupado} al={subir}>
@@ -238,15 +238,15 @@ export default function SubidaMasiva() {
                   <div style={{ padding: '8px 13px', background: COLOR.superficie,
                     borderBottom: `1px solid ${LINEA.tenue}`,
                     font: `700 11px/1 ${FUENTE.mono}`, letterSpacing: 1.2,
-                    color: sin ? '#FFB020' : COLOR.admin }}>
+                    color: sin ? COLOR.aviso : COLOR.admin }}>
                     {carp || '(sin carpeta)'} · {suyos.length} video{suyos.length > 1 ? 's' : ''}
                     {sin && ' · sin creadora'}
                   </div>
                   {suyos.map((v, i) => {
                     const color = v.estado === 'listo' ? COLOR.dinero
-                      : v.estado === 'fallo' ? '#FF4444'
+                      : v.estado === 'fallo' ? COLOR.error
                       : v.estado === 'subiendo' ? COLOR.admin
-                      : v.estado === 'espera' ? COLOR.textoSuave : '#FFB020'
+                      : v.estado === 'espera' ? COLOR.textoSuave : COLOR.aviso
                     return (
                       <div key={i} style={{
                         padding: '7px 13px 7px 26px',
@@ -269,7 +269,7 @@ export default function SubidaMasiva() {
                             "FALLO" a secas no le sirve a nadie para arreglarlo. */}
                         {v.detalle && (
                           <div style={{ marginTop: 3, font: `400 11px/1.45 ${FUENTE.ui}`,
-                            color: v.estado === 'fallo' ? '#FF4444' : COLOR.textoSuave }}>
+                            color: v.estado === 'fallo' ? COLOR.error : COLOR.textoSuave }}>
                             {v.detalle}
                           </div>
                         )}

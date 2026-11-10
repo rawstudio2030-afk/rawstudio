@@ -87,7 +87,7 @@ function Paleta({ cierra }: { cierra: () => void }) {
 
   return (
     <div onClick={cierra} style={{
-      position: 'fixed', inset: 0, zIndex: 90, background: 'rgba(8,8,10,.65)',
+      position: 'fixed', inset: 0, zIndex: 90, background: 'rgba(14,21,32,.65)',
       display: 'flex', justifyContent: 'center', alignItems: 'flex-start', paddingTop: '12vh',
     }}>
       <div role="dialog" aria-modal="true" aria-label="Buscar en el panel" onClick={e => e.stopPropagation()}
@@ -133,7 +133,7 @@ function Paleta({ cierra }: { cierra: () => void }) {
                       onClick={() => ir(r)} onMouseEnter={() => setSel(mia)}
                       style={{
                         cursor: 'pointer', padding: '8px 18px', display: 'flex', alignItems: 'baseline', gap: 10,
-                        background: activa ? 'rgba(0,229,255,.1)' : 'transparent',
+                        background: activa ? 'rgba(126,191,179,.1)' : 'transparent',
                         borderLeft: `2px solid ${activa ? COLOR.admin : 'transparent'}`,
                       }}>
                       <span style={{ font: `500 13px/1.35 ${FUENTE.ui}`, color: COLOR.texto,
@@ -167,6 +167,6 @@ function Paleta({ cierra }: { cierra: () => void }) {
 function Nota({ children, rojo }: { children: React.ReactNode; rojo?: boolean }) {
   return (
     <div role={rojo ? 'alert' : 'status'} style={{ padding: '14px 18px', font: `400 12px/1.5 ${FUENTE.ui}`,
-      color: rojo ? '#FF4444' : COLOR.textoSuave }}>{children}</div>
+      color: rojo ? COLOR.error : COLOR.textoSuave }}>{children}</div>
   )
 }

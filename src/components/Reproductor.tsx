@@ -298,7 +298,7 @@ export default function Reproductor({ src, poster, marca }: {
           <Pulsable al={alternar} rotulo={pausado ? 'Reproducir' : 'Pausar'} style={{
             pointerEvents: pausado ? 'auto' : 'none', width: 64, height: 64, borderRadius: '50%',
             display: 'grid', placeItems: 'center', color: COLOR.texto, cursor: 'pointer',
-            background: 'rgba(8,8,10,.62)', border: '1px solid rgba(255,255,255,.22)',
+            background: 'rgba(14,21,32,.62)', border: '1px solid rgba(255,255,255,.22)',
             opacity: pausado ? 1 : 0, transition: 'opacity .2s',
           }}>
             <Icono d={pausado ? PLAY : PAUSA} relleno tam={28} />
@@ -310,7 +310,7 @@ export default function Reproductor({ src, poster, marca }: {
       <div ref={barra} style={{
         position: 'absolute', left: 0, right: 0, bottom: 0, zIndex: 5,
         padding: '28px 8px 4px',
-        background: 'linear-gradient(180deg, rgba(8,8,10,0), rgba(8,8,10,.88))',
+        background: 'linear-gradient(180deg, rgba(14,21,32,0), rgba(14,21,32,.88))',
         opacity: mostrarBarra ? 1 : 0, pointerEvents: mostrarBarra ? 'auto' : 'none',
         transition: 'opacity .25s',
         font: `400 12px/1 ${FUENTE.mono}`, color: COLOR.texto,

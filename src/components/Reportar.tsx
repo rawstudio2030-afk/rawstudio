@@ -46,7 +46,7 @@ export default function Reportar({ clip, perfil, etiqueta = 'Reportar' }: {
 
       {abierto && (
         <div onClick={() => setAbierto(false)} style={{
-          position: 'fixed', inset: 0, zIndex: 95, background: 'rgba(8,8,10,.88)',
+          position: 'fixed', inset: 0, zIndex: 95, background: 'rgba(14,21,32,.88)',
           display: 'grid', placeItems: 'center', padding: 20,
         }}>
           <div role="dialog" aria-modal aria-label={etiqueta}
@@ -89,7 +89,7 @@ export default function Reportar({ clip, perfil, etiqueta = 'Reportar' }: {
                       boxSizing: 'border-box', width: '100%', textAlign: 'left',
                       padding: '10px 12px', cursor: 'pointer',
                       border: `1px solid ${motivo === m.v ? COLOR.acento : LINEA.tenue}`,
-                      background: motivo === m.v ? 'rgba(255,43,209,.06)' : 'transparent',
+                      background: motivo === m.v ? 'rgba(212,180,131,.06)' : 'transparent',
                     }}>
                       <div style={{ font: `400 13px/1.3 ${FUENTE.ui}`,
                         color: motivo === m.v ? COLOR.texto : COLOR.textoSuave }}>{m.t}</div>
@@ -111,7 +111,7 @@ export default function Reportar({ clip, perfil, etiqueta = 'Reportar' }: {
                   }} />
 
                 {error && (
-                  <div style={{ marginTop: 10, font: `400 12px/1.45 ${FUENTE.ui}`, color: '#FF4444' }}>
+                  <div style={{ marginTop: 10, font: `400 12px/1.45 ${FUENTE.ui}`, color: COLOR.error }}>
                     {error}
                   </div>
                 )}

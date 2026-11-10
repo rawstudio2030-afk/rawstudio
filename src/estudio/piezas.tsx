@@ -6,6 +6,7 @@
 import type { ReactNode } from 'react'
 import { COLOR, LINEA, FUENTE, RADIO } from '../lib/diseño'
 import { Pulsable, Enlace } from '../components/Pulsable'
+import { FONDO_CALABOZO } from '../lib/calabozo'
 
 /* Modo consumo (DESIGN-BRIEF.md): el estudio es donde se trabaja, asi que va
  * sobrio. Esquina suave, campos con foco en cian sin halo (.campo-sobrio) y el
@@ -17,7 +18,7 @@ export function Marco({ titulo, children, volverA = '/estudio' }: {
   return (
     <div style={{
       minHeight: '100%', boxSizing: 'border-box', padding: '20px 18px 90px',
-      background: COLOR.fondo, color: COLOR.texto, fontFamily: FUENTE.ui,
+      background: FONDO_CALABOZO, color: COLOR.texto, fontFamily: FUENTE.ui,
       width: '100%', maxWidth: 680, margin: '0 auto',
     }}>
       <div style={{ display: 'flex', alignItems: 'center',
@@ -48,13 +49,13 @@ export function Boton({ children, al, activo = true, tono = 'normal' }: {
         style={{ display: 'inline-flex', minHeight: 48, padding: '0 22px', fontSize: 12 }}>{children}</Pulsable>
     )
   }
-  const color = tono === 'peligro' ? '#FF4444' : COLOR.textoSuave
+  const color = tono === 'peligro' ? COLOR.error : COLOR.textoSuave
   return (
     <Pulsable al={al} activo={activo} style={{
       display: 'inline-flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center',
       minHeight: 48, padding: '0 22px', borderRadius: 12,
       cursor: activo ? 'pointer' : 'not-allowed', opacity: activo ? 1 : .4,
-      border: `1px solid ${tono === 'peligro' ? '#FF4444' : LINEA.fuerte}`, color,
+      border: `1px solid ${tono === 'peligro' ? COLOR.error : LINEA.fuerte}`, color,
       font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 1.4, textTransform: 'uppercase',
     }}>{children}</Pulsable>
   )
@@ -88,7 +89,7 @@ export function Etiqueta({ texto }: { texto: string }) {
 
 export function Aviso({ texto, tono = 'error' }: { texto: string; tono?: 'error' | 'bien' }) {
   if (!texto) return null
-  const c = tono === 'bien' ? COLOR.dinero : '#FF4444'
+  const c = tono === 'bien' ? COLOR.dinero : COLOR.error
   return (
     <div role={tono === 'error' ? 'alert' : 'status'} style={{
       margin: '14px 0', padding: '12px 14px', border: `1px solid ${c}`, borderRadius: 12,

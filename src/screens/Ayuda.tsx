@@ -22,7 +22,7 @@ import { Pulsable, Enlace } from '../components/Pulsable'
 export function Contacto() {
   return (
     <MarcoDocumento titulo={['Hablar con', 'una persona']}>
-      <p style={{ margin: '18px 0 0', font: `400 16px/1.6 ${FUENTE.ui}`, color: '#C2BDC7' }}>
+      <p style={{ margin: '18px 0 0', font: `400 16px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
         Detrás de estas direcciones hay una bandeja que lee una persona. Si
         escribes, te contestamos.
       </p>
@@ -86,7 +86,7 @@ export function Preguntas() {
 
   return (
     <MarcoDocumento titulo={['Preguntas', 'frecuentes']}>
-      <p style={{ margin: '18px 0 0', font: `400 16px/1.6 ${FUENTE.ui}`, color: '#C2BDC7' }}>
+      <p style={{ margin: '18px 0 0', font: `400 16px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
         Las que ya nos han hecho, con los números de verdad. Si falta la tuya,
         escríbenos.
       </p>
@@ -130,7 +130,7 @@ export function Preguntas() {
                       {q.r.map((p, i) => (
                         <p key={i} style={{
                           margin: '0 0 11px', font: `400 15px/1.65 ${FUENTE.ui}`,
-                          color: '#C2BDC7',
+                          color: COLOR.textoSuave,
                         }}>{p}</p>
                       ))}
                     </div>

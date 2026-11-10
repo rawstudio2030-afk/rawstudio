@@ -277,8 +277,8 @@ export function Burbujas({ msgs, yo }: {
               padding: '12px 14px', borderRadius: 14,
               // Lo mio, con un velo magenta; lo suyo, en tarjeta sobria. Sin
               // neon: es una conversacion, y se lee mucho rato.
-              border: `1px solid ${mio ? 'rgba(255,43,209,.45)' : 'rgba(255,255,255,.12)'}`,
-              background: mio ? 'rgba(255,43,209,.07)' : COLOR.superficie,
+              border: `1px solid ${mio ? 'rgba(212,180,131,.45)' : 'rgba(255,255,255,.12)'}`,
+              background: mio ? 'rgba(212,180,131,.07)' : COLOR.superficie,
               marginLeft: mio ? 28 : 0, marginRight: mio ? 0 : 28,
             }}>
               {m.cuerpo && (

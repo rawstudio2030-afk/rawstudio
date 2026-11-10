@@ -85,7 +85,7 @@ function Seccion({ titulo, children }: { titulo: string; children: React.ReactNo
 
 function Mensaje({ texto, tipo }: { texto: string; tipo: 'error' | 'bien' }) {
   if (!texto) return null
-  const c = tipo === 'bien' ? COLOR.dinero : '#FF4444'
+  const c = tipo === 'bien' ? COLOR.dinero : COLOR.error
   return (
     <div role={tipo === 'error' ? 'alert' : 'status'} style={{
       padding: '10px 12px', borderRadius: 10, border: `1px solid ${c}`, color: c,
@@ -111,8 +111,8 @@ function BotonContorno({ al, activo = true, peligro, children }: {
       flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center',
       minHeight: 48, padding: '0 14px', borderRadius: 12, cursor: activo ? 'pointer' : 'default',
       opacity: activo ? 1 : .5,
-      border: `1px solid ${peligro ? '#FF4444' : LINEA.fuerte}`,
-      color: peligro ? '#FF4444' : COLOR.textoSuave,
+      border: `1px solid ${peligro ? COLOR.error : LINEA.fuerte}`,
+      color: peligro ? COLOR.error : COLOR.textoSuave,
       font: `700 12px/1.2 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
     }}>{children}</Pulsable>
   )
@@ -271,7 +271,7 @@ function Datos({ clip, esAlbum, alCambiar }: {
                       </div>
                     </div>
                     {rentaMal && (
-                      <div style={{ ...ayuda, color: '#FF7BE6' }}>
+                      <div style={{ ...ayuda, color: COLOR.acento }}>
                         La renta tiene que costar menos que comprarlo ({usd(precio)}).
                       </div>
                     )}
@@ -424,7 +424,7 @@ function Portada({ clip, uid, alCambiar }: { clip: MiClip; uid: string; alCambia
                 border: `2px solid ${elegido === i ? COLOR.dinero : 'transparent'}`,
               }}>
               <span style={{
-                display: 'block', marginTop: 58, background: 'rgba(8,8,10,.78)',
+                display: 'block', marginTop: 58, background: 'rgba(14,21,32,.78)',
                 font: `700 10px/18px ${FUENTE.mono}`, color: COLOR.texto,
               }}>{c.segundo.toFixed(1)}s</span>
             </Pulsable>
@@ -491,9 +491,9 @@ function Retiro({ clip, ahora, alCambiar }: { clip: MiClip; ahora: number; alCam
           <Pulsable al={() => setModo(m => m === 'retiro_total' ? 'deja_de_venderse' : 'retiro_total')}
             activado={modo === 'retiro_total'} style={{
               boxSizing: 'border-box', width: '100%', textAlign: 'left', padding: '13px 14px', cursor: 'pointer',
-              borderRadius: 12, border: `1px solid ${modo === 'retiro_total' ? '#FF4444' : LINEA.media}`,
+              borderRadius: 12, border: `1px solid ${modo === 'retiro_total' ? COLOR.error : LINEA.media}`,
             }}>
-            <div style={{ font: `700 14px/1.3 ${FUENTE.ui}`, color: modo === 'retiro_total' ? '#FF4444' : COLOR.texto }}>
+            <div style={{ font: `700 14px/1.3 ${FUENTE.ui}`, color: modo === 'retiro_total' ? COLOR.error : COLOR.texto }}>
               {modo === 'retiro_total' ? 'Quitárselo también a quien lo compró' : 'Dejar de venderlo'}
             </div>
             <div style={{ marginTop: 6, ...ayuda }}>
@@ -515,7 +515,7 @@ function Retiro({ clip, ahora, alCambiar }: { clip: MiClip; ahora: number; alCam
       ) : (
         <Pulsable al={() => { setAbierto(true); setError('') }} style={{
           justifySelf: 'start', padding: '8px 0', font: `400 13px/1.45 ${FUENTE.ui}`, cursor: 'pointer',
-          color: clip.caduca_at ? '#FFB020' : COLOR.textoSuave,
+          color: clip.caduca_at ? COLOR.aviso : COLOR.textoSuave,
           textDecoration: 'underline', textUnderlineOffset: 4,
         }}>{rotulo}</Pulsable>
       )}
@@ -576,7 +576,7 @@ function Quitar({ clip, ahora, alCambiar, alEliminado }: {
       {typeof hist === 'object' && 'tiene' in hist && !hist.tiene && (
         confirmando === 'eliminar' ? (
           <div style={{ display: 'grid', gap: 10 }}>
-            <div style={{ font: `700 14px/1.4 ${FUENTE.ui}`, color: '#FF4444' }}>
+            <div style={{ font: `700 14px/1.4 ${FUENTE.ui}`, color: COLOR.error }}>
               Se borra para siempre. No se puede deshacer.
             </div>
             <div style={{ display: 'flex', gap: 8 }}>

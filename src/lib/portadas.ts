@@ -39,7 +39,7 @@ export function portadaGenerada(id: string): string {
 
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 133" preserveAspectRatio="xMidYMid slice">` +
-    `<rect width="100" height="133" fill="#0F0F13"/>` +
+    `<rect width="100" height="133" fill={COLOR.fondo}/>` +
     `<g transform="rotate(${giro} 50 66)">${capas}</g>` +
     `<rect width="100" height="133" fill="url(#g)"/>` +
     `<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">` +

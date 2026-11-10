@@ -4,6 +4,7 @@
  * y suscripciones. Lo que no existia era la forma de CREARLAS, asi que ninguno
  * de los cuatro podia usarse. */
 import { supabase } from './supabase'
+import { COLOR } from './diseño'
 
 /* ---------- Renta ---------- */
 
@@ -89,14 +90,14 @@ export type Encargo = {
 }
 
 export const ESTADO_ENCARGO: Record<string, { t: string; c: string }> = {
-  propuesta:  { t: 'Propuesta',        c: '#FFB020' },
-  negociando: { t: 'Negociando',       c: '#FFB020' },
-  aceptado:   { t: 'Aceptado, falta pagar', c: '#00E5FF' },
-  pagado:     { t: 'Pagado, por entregar',  c: '#00E5FF' },
-  en_proceso: { t: 'En proceso',       c: '#00E5FF' },
-  entregado:  { t: 'Entregado',        c: '#C8FF3D' },
-  rechazado:  { t: 'Rechazado',        c: '#FF4444' },
-  cancelado:  { t: 'Cancelado',        c: '#FF4444' },
+  propuesta:  { t: 'Propuesta',        c: COLOR.aviso },
+  negociando: { t: 'Negociando',       c: COLOR.aviso },
+  aceptado:   { t: 'Aceptado, falta pagar', c: COLOR.admin },
+  pagado:     { t: 'Pagado, por entregar',  c: COLOR.admin },
+  en_proceso: { t: 'En proceso',       c: COLOR.admin },
+  entregado:  { t: 'Entregado',        c: COLOR.dinero },
+  rechazado:  { t: 'Rechazado',        c: COLOR.error },
+  cancelado:  { t: 'Cancelado',        c: COLOR.error },
 }
 
 export async function misEncargos() {

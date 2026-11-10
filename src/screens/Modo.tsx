@@ -15,8 +15,8 @@ import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import { usePapel } from '../components/Navegacion'
 import { elegirModo, type Modo as TipoModo } from '../lib/modo'
-import PaginaMiami from '../components/PaginaMiami'
-import { COLOR, FUENTE } from '../lib/diseño'
+import PaginaCollins from '../components/PaginaCollins'
+import { COLOR, FUENTE, RADIO } from '../lib/diseño'
 import { Pulsable } from '../components/Pulsable'
 import { comoCreador, type Trato } from '../lib/trato'
 
@@ -40,10 +40,10 @@ export default function Modo() {
 
   if (cargando || cargandoPapel || !esAdmin) {
     return (
-      <PaginaMiami logo={false}>
+      <PaginaCollins logo={false}>
         <div role="status" style={{ minHeight: '60vh', display: 'grid', placeItems: 'center',
           color: COLOR.textoSuave, font: `400 14px/1 ${FUENTE.mono}` }}>Un momento…</div>
-      </PaginaMiami>
+      </PaginaCollins>
     )
   }
 
@@ -57,9 +57,9 @@ export function VistaModo({ papel, trato, alIr }: {
   /* Modo marca: es una puerta, y el cian de la segunda es el de siempre para
    * lo que es de administracion. */
   return (
-    <PaginaMiami>
+    <PaginaCollins>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14, padding: '14px 0 0' }}>
-        <h1 className="acceso-titulo">¿Cómo<br />entras <span className="neon-lima">hoy?</span></h1>
+        <h1 className="acceso-titulo">¿Cómo<br />entras <span className="realce">hoy?</span></h1>
         <p className="acceso-bajada">
           Tu cuenta hace dos trabajos. Elige uno y el otro se quita de en medio.
         </p>
@@ -87,13 +87,13 @@ export function VistaModo({ papel, trato, alIr }: {
         al otro cuando quieras: desde la pestaña «Panel» de la barra de abajo, y
         desde «Volver a la aplicación» en el panel.
       </p>
-    </PaginaMiami>
+    </PaginaCollins>
   )
 }
 
 const TONOS = {
-  m: { color: '#FF5BDC', borde: '#FF4FE0', rgb: '255,43,209' },
-  c: { color: '#3EE9FF', borde: '#19E6FF', rgb: '0,229,255' },
+  m: { color: COLOR.acento, borde: COLOR.acento, rgb: '212,180,131' },
+  c: { color: COLOR.admin, borde: COLOR.admin, rgb: '126,191,179' },
 } as const
 
 function Puerta({ tono, titulo, que, nota, al }: {
@@ -103,15 +103,14 @@ function Puerta({ tono, titulo, que, nota, al }: {
   return (
     <Pulsable al={al} style={{
       boxSizing: 'border-box', width: '100%', textAlign: 'left', minHeight: 88,
-      padding: '20px 18px', cursor: 'pointer', borderRadius: 14,
-      border: `1.5px solid ${borde}`, background: 'rgba(8,8,10,.74)', backdropFilter: 'blur(10px)',
-      boxShadow: `0 0 10px rgba(${rgb},.45), 0 0 30px rgba(${rgb},.2), inset 0 0 20px rgba(${rgb},.07)`,
+      padding: '20px 18px', cursor: 'pointer', borderRadius: RADIO.filo,
+      border: `1px solid ${borde}`, background: 'rgba(14,21,32,.78)', backdropFilter: 'blur(10px)',
+      boxShadow: `inset 0 1px 0 rgba(${rgb},.18)`,
       display: 'flex', alignItems: 'center', gap: 16,
     }}>
       <div style={{ flex: 1 }}>
         <div style={{
           font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase', color,
-          textShadow: `0 0 10px rgba(${rgb},.55)`,
         }}>{titulo}</div>
         <div style={{ marginTop: 9, font: `400 15px/1.45 ${FUENTE.ui}`, color: COLOR.texto }}>
           {que}

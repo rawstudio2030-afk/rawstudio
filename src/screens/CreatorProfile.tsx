@@ -18,12 +18,12 @@ import Avatar from '../components/Avatar'
 import { clipsDe, urlPortada, type Clip } from '../lib/clips'
 import { portadaDe } from '../lib/portadas'
 import type { PerfilPublico } from '../lib/supabase'
-import { COLOR, FUENTE, RADIO, LUZ, TRAMA } from '../lib/diseño'
+import { COLOR, FUENTE, PISO, RADIO, LUZ, TRAMA } from '../lib/diseño'
+import { BOTON_OSCURO, FONDO_OSCURO, MARCO_FOTOGRAMA } from '../lib/oscuro'
 import { nivelesDe } from '../lib/canales'
 import { TONO, insignias, duracion } from '../lib/catalogo'
 import TarjetaClip from '../components/TarjetaClip'
 import Icono from '../components/Iconos'
-import { BannerMiami } from '../components/FondoMiami'
 import Reportar from '../components/Reportar'
 import OfertaCreadora from '../components/OfertaCreadora'
 import { usd } from '../lib/dinero'
@@ -104,19 +104,27 @@ export default function CreatorProfile() {
   const boton = {
     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, boxSizing: 'border-box',
     flex: 1, minHeight: 54, padding: '0 14px', borderRadius: RADIO.filo, cursor: 'pointer',
-    font: `500 14px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase', color: '#FFF',
+    font: `500 14px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase', color: PISO.oscuro.papel,
   } as const
 
   return (
     <div style={{
       minHeight: '100%', boxSizing: 'border-box', color: COLOR.texto, fontFamily: FUENTE.ui,
       display: 'flex', flexDirection: 'column',
-      background: `radial-gradient(ellipse 90% 320px at 50% 0, rgba(123,60,255,.16), transparent 75%), ${COLOR.fondo}`,
+      // El cuarto oscuro (−2): la hoja de contactos de quien publica.
+      background: FONDO_OSCURO,
     }}>
-      {/* El banner: el skyline de Miami. Nadie tiene aun banner propio. */}
+      {/* La cabecera, en Collins: el salon de la portada, velado, para que el
+          nombre se lea sobre algo y no sobre el negro. Nadie tiene aun banner propio. */}
       <div style={{ height: 176, position: 'relative', flex: '0 0 auto', overflow: 'hidden' }}>
-        <BannerMiami />
-        <div aria-hidden style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg,rgba(8,8,10,.25) 0%,${COLOR.fondo} 100%)` }} />
+        <picture>
+          <source srcSet="/descenso/bar-hero.webp" type="image/webp" />
+          <img src="/descenso/bar-hero.jpg" alt="" decoding="async" width={1280} height={720} style={{
+            position: 'absolute', inset: 0, width: '100%', height: '100%',
+            objectFit: 'cover', objectPosition: 'center 60%', filter: 'saturate(.9) contrast(1.05)',
+          }} />
+        </picture>
+        <div aria-hidden style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg,rgba(14,21,32,.35) 0%,${PISO.oscuro.vacio} 100%)` }} />
         {/* Sin handle en la ruta esta pantalla es la pestaña «Yo», no una
             pantalla a la que se entro desde otra: un boton de volver ahi manda
             a donde estuvieras antes, que no es «atras» de nada. */}
@@ -125,14 +133,14 @@ export default function CreatorProfile() {
             position: 'absolute', top: 14, left: 14, width: 44, height: 44,
             borderRadius: '50%', border: '1px solid rgba(255,255,255,.25)',
             display: 'grid', placeItems: 'center', color: COLOR.texto,
-            cursor: 'pointer', background: 'rgba(8,8,10,.55)',
+            cursor: 'pointer', background: 'rgba(14,21,32,.55)',
           }}><span aria-hidden style={{ font: `400 22px/1 ${FUENTE.ui}` }}>&#8249;</span></Pulsable>
         )}
       </div>
 
       <div style={{ padding: '0 20px 40px', marginTop: -52, position: 'relative', boxSizing: 'border-box', width: '100%', maxWidth: 760, marginLeft: 'auto', marginRight: 'auto' }}>
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: 16 }}>
-          {/* El anillo de neon: degradado de magenta a cian detras de la foto. */}
+          {/* El anillo: un filete champagne a seafoam detras de la foto. */}
           <div style={{
             flex: '0 0 auto', width: 104, height: 104, borderRadius: '50%', padding: 3, boxSizing: 'border-box',
             background: TRAMA.hilo, boxShadow: `${LUZ.acento}`,
@@ -171,7 +179,7 @@ export default function CreatorProfile() {
         )}
 
         {perfil.bio && (
-          <div style={{ font: `400 16px/1.5 ${FUENTE.ui}`, color: '#CFCAD3', marginTop: 16 }}>{perfil.bio}</div>
+          <div style={{ font: `400 16px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave, marginTop: 16 }}>{perfil.bio}</div>
         )}
 
         {/* Las cifras que hay. Dos, y las dos son ciertas. */}
@@ -194,10 +202,7 @@ export default function CreatorProfile() {
         {!esMio && hayNiveles && (
           <div style={{ display: 'flex', marginTop: 18 }}>
             <Pulsable al={() => document.getElementById('suscripcion')?.scrollIntoView({ behavior: 'smooth', block: 'center' })} style={{
-              ...boton,
-              border: '2px solid #19E6FF', background: 'linear-gradient(180deg, rgba(0,229,255,.16), rgba(0,229,255,.05))',
-              boxShadow: '0 0 10px rgba(0,229,255,.55), 0 0 28px rgba(0,229,255,.3), inset 0 0 16px rgba(0,229,255,.2)',
-              textShadow: '0 0 10px rgba(180,250,255,.6)',
+              ...boton, ...BOTON_OSCURO,
             }}>
               <Icono nombre="corona" tam={20} />Suscripción
             </Pulsable>
@@ -222,10 +227,7 @@ export default function CreatorProfile() {
               ...boton, border: '1.5px solid rgba(255,255,255,.3)', background: 'rgba(255,255,255,.04)',
             }}><Icono nombre="biblioteca" tam={20} />Mis compras</Enlace>
             <Enlace a="/perfil" style={{
-              ...boton,
-              border: '2px solid #FF4FE0', background: 'linear-gradient(180deg, rgba(255,43,209,.2), rgba(255,43,209,.06))',
-              boxShadow: '0 0 10px rgba(255,43,209,.55), 0 0 28px rgba(255,43,209,.3), inset 0 0 16px rgba(255,43,209,.2)',
-              textShadow: '0 0 10px rgba(255,200,245,.6)',
+              ...boton, ...BOTON_OSCURO,
             }}><Icono nombre="engrane" tam={20} />Ajustes de cuenta</Enlace>
           </div>
         )}
@@ -250,10 +252,7 @@ export default function CreatorProfile() {
               {esMio && perfil.is_creator && (
                 <Enlace a="/upload" style={{
                   marginTop: 16, display: 'inline-block', padding: '16px 24px', cursor: 'pointer',
-                  borderRadius: RADIO.filo, border: '2px solid #FF4FE0', color: '#FFF',
-                  background: 'linear-gradient(180deg, rgba(255,43,209,.26), rgba(255,43,209,.1))',
-                  boxShadow: '0 0 10px rgba(255,43,209,.6), 0 0 28px rgba(255,43,209,.35), inset 0 0 16px rgba(255,43,209,.25)',
-                  font: `500 13px/1 ${FUENTE.ui}`, letterSpacing: 2.6, textTransform: 'uppercase',
+                  borderRadius: RADIO.filo, ...BOTON_OSCURO, letterSpacing: '.18em',
                 }}>Publicar el primero</Enlace>
               )}
             </div>
@@ -266,44 +265,42 @@ export default function CreatorProfile() {
                 const dur = duracion(c.duration_s)
                 return (
                   <article key={c.id} style={{
-                    padding: 4, borderRadius: 12, boxSizing: 'border-box',
-                    border: `1.5px solid ${t.borde}`, background: `rgba(${t.rgb},.05)`,
-                    boxShadow: `0 0 7px rgba(${t.rgb},.38), 0 0 18px rgba(${t.rgb},.14)`,
+                    padding: 4, borderRadius: RADIO.filo, boxSizing: 'border-box',
+                    ...MARCO_FOTOGRAMA,
                   }}>
-                    <div style={{ borderRadius: 8, overflow: 'hidden' }}>
+                    <div style={{ overflow: 'hidden' }}>
                       <TarjetaClip portada={p} tira={urlPortada(c.preview_path ?? null)} a={`/clip/${c.id}`}>
                         <div aria-hidden style={{ position: 'absolute', inset: 0, background: TRAMA.duotono, mixBlendMode: 'soft-light' }} />
-                        <div aria-hidden style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(8,8,10,.1) 50%,rgba(8,8,10,.8) 100%)' }} />
+                        <div aria-hidden style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(14,21,32,.1) 50%,rgba(14,21,32,.8) 100%)' }} />
                         {dur && (
                           <span style={{
-                            position: 'absolute', top: 5, left: 5, background: 'rgba(8,8,10,.72)', borderRadius: 5,
+                            position: 'absolute', top: 5, left: 5, background: 'rgba(14,21,32,.72)', borderRadius: 5,
                             padding: '3px 5px', font: `700 9px/1 ${FUENTE.mono}`, color: COLOR.texto,
                           }}>{dur}</span>
                         )}
                         {marca[0].icono && (
-                          <span style={{ position: 'absolute', top: 5, right: 5, color: t.borde, display: 'grid',
-                            filter: `drop-shadow(0 0 4px ${t.borde})` }}>
+                          <span style={{ position: 'absolute', top: 5, right: 5, color: t.borde, display: 'grid' }}>
                             <Icono nombre={marca[0].icono} tam={14} />
                           </span>
                         )}
                         {c.formato === 'album' && (
                           <span style={{
                             position: 'absolute', left: 5, bottom: 5, borderRadius: 5, padding: '3px 5px',
-                            background: 'rgba(8,8,10,.78)', border: `1px solid ${COLOR.admin}`, color: COLOR.admin,
+                            background: 'rgba(14,21,32,.78)', border: `1px solid ${COLOR.admin}`, color: COLOR.admin,
                             font: `700 8px/1 ${FUENTE.ui}`, letterSpacing: 1, textTransform: 'uppercase',
                           }}>Álbum · {c.num_fotos}</span>
                         )}
                         {!c.published && (
                           <span style={{
                             position: 'absolute', top: 5, left: 5, right: 5, textAlign: 'center',
-                            background: COLOR.acento, color: COLOR.fondo, borderRadius: 5, padding: '3px 4px',
+                            background: COLOR.acento, color: COLOR.sobreAcento, borderRadius: RADIO.filo, padding: '3px 4px',
                             font: `700 8px/1 ${FUENTE.ui}`, letterSpacing: 1, textTransform: 'uppercase',
                           }}>Borrador</span>
                         )}
                         <span style={{
                           position: 'absolute', right: 5, bottom: 5, borderRadius: 5, padding: '3px 5px',
-                          background: 'rgba(8,8,10,.78)', border: `1px solid ${t.borde}`,
-                          font: `700 10px/1 ${FUENTE.mono}`, color: c.visibility === 'pago' ? COLOR.dinero : t.borde,
+                          background: 'rgba(8,4,5,.78)', border: `1px solid ${t.borde}`,
+                          font: `700 10px/1 ${FUENTE.mono}`, color: c.visibility === 'pago' ? PISO.oscuro.ambar : COLOR.texto,
                         }}>
                           {c.visibility === 'gratis' ? 'Gratis' : c.visibility === 'suscriptores' ? 'Subs' : usd(c.price_coins)}
                         </span>

@@ -113,14 +113,14 @@ function IndiceDesarrollo() {
           position: 'fixed', right: 14, bottom: 84, zIndex: 9999,
           width: 40, height: 40, borderRadius: '50%', border: 'none',
           background: open ? COLOR.dinero : 'rgba(110,106,114,.9)',
-          color: open ? COLOR.fondo : '#fff', cursor: 'pointer',
+          color: open ? COLOR.fondo : COLOR.texto, cursor: 'pointer',
           font: "700 13px/1 'Space Grotesk', system-ui, sans-serif",
         }}>{open ? '×' : 'dev'}</button>
 
       {open && (
         <div onClick={() => setOpen(false)} style={{
           position: 'fixed', inset: 0, zIndex: 9998,
-          background: 'rgba(8,8,10,.95)', backdropFilter: 'blur(6px)',
+          background: 'rgba(14,21,32,.95)', backdropFilter: 'blur(6px)',
           display: 'flex', flexDirection: 'column', justifyContent: 'center',
           padding: '24px 18px 78px', boxSizing: 'border-box', overflowY: 'auto',
         }}>
@@ -138,7 +138,7 @@ function IndiceDesarrollo() {
                     boxSizing: 'border-box', width: '100%', textAlign: 'left',
                     display: 'flex', alignItems: 'center', gap: 12,
                     padding: '11px 12px', cursor: 'pointer',
-                    background: act ? 'rgba(255,43,209,.14)' : 'transparent',
+                    background: act ? 'rgba(212,180,131,.14)' : 'transparent',
                     borderLeft: `2px solid ${act ? COLOR.acento : 'transparent'}`,
                   }}>
                   <span style={{
@@ -148,7 +148,7 @@ function IndiceDesarrollo() {
                   }}>{s.n}</span>
                   <span style={{
                     font: "500 13px/1 'Space Grotesk', system-ui, sans-serif",
-                    color: act ? '#fff' : COLOR.textoSuave,
+                    color: act ? COLOR.texto : COLOR.textoSuave,
                   }}>{s.title}</span>
                 </Pulsable>
               )

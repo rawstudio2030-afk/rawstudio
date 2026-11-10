@@ -18,7 +18,8 @@ import TarjetaClip from '../components/TarjetaClip'
 import Wordmark from '../components/Wordmark'
 import { Pulsable, Enlace } from '../components/Pulsable'
 import Icono from '../components/Iconos'
-import { COLOR, FUENTE, RADIO, TRAMA } from '../lib/diseño'
+import { COLOR, FUENTE, PISO, RADIO, TRAMA } from '../lib/diseño'
+import { BOTON_OSCURO, FONDO_OSCURO, MARCO_FOTOGRAMA } from '../lib/oscuro'
 
 type Filtro = 'todo' | 'gratis' | 'pago' | 'creadoras'
 
@@ -106,16 +107,16 @@ export default function Explorar() {
   return (
     <div style={{
       minHeight: '100%', color: COLOR.texto, fontFamily: FUENTE.ui,
-      // Modo marca: un resplandor violeta arriba, que se apaga antes de la
-      // rejilla. Es el mismo cielo de la portada, no un fondo nuevo.
-      background: `radial-gradient(ellipse 90% 340px at 50% 0, rgba(123,60,255,.2), transparent 75%), ${COLOR.fondo}`,
+      // El cuarto oscuro (−2 de «El descenso»): luz de seguridad roja arriba,
+      // que se apaga antes de la rejilla, sobre el negro del laboratorio.
+      background: FONDO_OSCURO,
     }}>
       <div style={{ padding: '46px 18px 0' }}>
-        <div className="sin-riel"><Wordmark ancho={116} /></div>
+        <div className="sin-riel"><Wordmark ancho={116} piso="oscuro" /></div>
 
         <div style={{ marginTop: 22 }}>
           <h1 style={{
-            margin: 0, font: `700 14px/1 ${FUENTE.ui}`, letterSpacing: 6, textTransform: 'uppercase',
+            margin: 0, font: `400 34px/1.1 ${FUENTE.oscuro}`, letterSpacing: '-.02em', color: PISO.oscuro.papel,
           }}>Explorar</h1>
           <div style={{ marginTop: 7, font: `400 12px/1.3 ${FUENTE.ui}`, letterSpacing: 1.6,
             textTransform: 'uppercase', color: COLOR.textoSuave }}>
@@ -123,8 +124,8 @@ export default function Explorar() {
           </div>
         </div>
 
-        {/* Los filtros son pestañas: la activa en magenta con su filete de
-            neon, no cuatro botones. Misma logica que antes. */}
+        {/* Los filtros son pestañas: la activa en papel con su filete de luz
+            roja, no cuatro botones. Misma logica que antes. */}
         <div role="group" aria-label="Filtrar" style={{
           display: 'flex', gap: 4, margin: '10px -4px 16px',
           borderBottom: '1px solid rgba(255,255,255,.12)', overflowX: 'auto',
@@ -134,10 +135,8 @@ export default function Explorar() {
             <Pulsable key={v} al={() => setFiltro(v)} activado={filtro === v} style={{
               padding: '14px 11px', cursor: 'pointer', whiteSpace: 'nowrap', marginBottom: -1,
               font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
-              color: filtro === v ? '#FF5BDC' : COLOR.textoSuave,
-              textShadow: filtro === v ? '0 0 12px rgba(255,43,209,.6)' : 'none',
-              borderBottom: `2px solid ${filtro === v ? COLOR.acento : 'transparent'}`,
-              boxShadow: filtro === v ? '0 6px 12px -8px rgba(255,43,209,.8)' : 'none',
+              color: filtro === v ? PISO.oscuro.papel : COLOR.textoSuave,
+              borderBottom: `2px solid ${filtro === v ? PISO.oscuro.safelightLit : 'transparent'}`,
             }}>{t}</Pulsable>
           ))}
         </div>
@@ -148,7 +147,7 @@ export default function Explorar() {
           <label style={{
             display: 'flex', alignItems: 'center', gap: 10, boxSizing: 'border-box',
             border: '1.5px solid rgba(255,255,255,.28)', borderRadius: RADIO.filo,
-            padding: '0 14px', background: 'rgba(8,8,10,.6)', color: COLOR.textoSuave,
+            padding: '0 14px', background: 'rgba(14,21,32,.6)', color: COLOR.textoSuave,
           }}>
             <Icono nombre="lupa" tam={18} />
             <input value={busca} onChange={e => setBusca(e.target.value)}
@@ -171,11 +170,10 @@ export default function Explorar() {
                 <Enlace key={g.id} a={`/creator/${g.handle}`} style={{
                   display: 'flex', gap: 12, alignItems: 'center', cursor: 'pointer',
                   padding: '12px 13px', borderRadius: RADIO.filo,
-                  border: `1.5px solid ${TONO.c.borde}`, background: 'rgba(0,229,255,.04)',
-                  boxShadow: `0 0 8px rgba(${TONO.c.rgb},.3), 0 0 20px rgba(${TONO.c.rgb},.12)`,
+                  ...MARCO_FOTOGRAMA,
                 }}>
                   <Avatar ruta={g.avatar_path} nombre={g.display_name} handle={g.handle} tam={46}
-                    style={{ border: `1.5px solid ${COLOR.acento}` }} />
+                    style={{ border: `1.5px solid ${PISO.oscuro.papel}` }} />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ font: `700 16px/1.3 ${FUENTE.ui}`, display: 'flex', alignItems: 'center', gap: 6 }}>
                       {g.display_name}
@@ -232,8 +230,7 @@ export default function Explorar() {
               return (
                 <article key={c.id} style={{
                   padding: 6, borderRadius: RADIO.filo, boxSizing: 'border-box',
-                  border: `1.5px solid ${t.borde}`, background: `rgba(${t.rgb},.05)`,
-                  boxShadow: `0 0 8px rgba(${t.rgb},.4), 0 0 22px rgba(${t.rgb},.16)`,
+                  ...MARCO_FOTOGRAMA,
                 }}>
                   {/* El recorte redondeado va en el contenedor: la tarjeta
                       lleva `overflow: hidden` y un radio en el mismo elemento
@@ -245,14 +242,14 @@ export default function Explorar() {
                       {/* La portada publica es una miniatura de 240 px (la nitida
                           es privada): se le pone encima el duotono de la casa. */}
                       <div aria-hidden style={{ position: 'absolute', inset: 0, background: TRAMA.duotono, mixBlendMode: 'soft-light' }} />
-                      <div aria-hidden style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(8,8,10,.1) 45%,rgba(8,8,10,.78) 100%)' }} />
+                      <div aria-hidden style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(14,21,32,.1) 45%,rgba(14,21,32,.78) 100%)' }} />
                       <div style={{ position: 'absolute', top: 7, left: 7, right: 7, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                         {marca.map(m => (
                           <span key={m.texto} style={{
                             display: 'inline-flex', alignItems: 'center', gap: 4,
-                            background: m.icono ? TONO[m.tono].borde : 'rgba(8,8,10,.7)',
-                            color: m.icono || m.tono === 'l' ? COLOR.fondo : TONO[m.tono].borde,
-                            border: `1px solid ${TONO[m.tono].borde}`, borderRadius: 6, padding: '4px 6px',
+                            background: m.icono ? TONO[m.tono].relleno : 'rgba(8,4,5,.78)',
+                            color: m.icono ? TONO[m.tono].texto : COLOR.texto,
+                            border: `1px solid ${TONO[m.tono].borde}`, borderRadius: RADIO.filo, padding: '4px 6px',
                             font: `700 9px/1 ${FUENTE.ui}`, letterSpacing: 1.1, textTransform: 'uppercase',
                           }}>
                             {m.icono && <Icono nombre={m.icono} tam={10} />}{m.texto}
@@ -261,13 +258,13 @@ export default function Explorar() {
                       </div>
                       {c.formato === 'album' ? (
                         <span style={{
-                          position: 'absolute', right: 7, bottom: 7, background: 'rgba(8,8,10,.72)',
+                          position: 'absolute', right: 7, bottom: 7, background: 'rgba(14,21,32,.72)',
                           borderRadius: 6, padding: '4px 6px', font: `700 10px/1 ${FUENTE.mono}`, color: COLOR.texto,
                         }}>{cuantos(c.num_fotos, 'foto')}</span>
                       ) : dur && (
                         <span style={{
                           position: 'absolute', right: 7, bottom: 7, display: 'inline-flex', alignItems: 'center', gap: 4,
-                          background: 'rgba(8,8,10,.72)', borderRadius: 6, padding: '4px 6px',
+                          background: 'rgba(14,21,32,.72)', borderRadius: 6, padding: '4px 6px',
                           font: `700 10px/1 ${FUENTE.mono}`, color: COLOR.texto,
                         }}>{dur}<Icono nombre="play" tam={9} /></span>
                       )}
@@ -291,10 +288,11 @@ export default function Explorar() {
                         </div>
                       ) : <span />}
                       {c.visibility === 'pago' && (
+                        // El precio, a lapiz graso (Permanent Marker), en ambar: sobre
+                        // el negro del laboratorio da 8.4:1, mas que el rojo del papel.
                         <span style={{
-                          flex: '0 0 auto', border: `1px solid ${t.borde}`, borderRadius: 6, padding: '4px 7px',
-                          font: `700 12px/1 ${FUENTE.mono}`, color: COLOR.dinero,
-                          boxShadow: `0 0 8px rgba(${t.rgb},.35)`,
+                          flex: '0 0 auto', padding: '2px 4px', transform: 'rotate(-4deg)',
+                          font: `400 17px/1 ${FUENTE.lapiz}`, color: PISO.oscuro.ambar,
                         }}>{usd(c.price_coins)}</span>
                       )}
                     </div>
@@ -323,11 +321,9 @@ export default function Explorar() {
             <div style={{ marginTop: 18, textAlign: 'center' }}>
               <Pulsable al={verMas} activo={!cargandoMas} style={{
                 display: 'inline-block', padding: '16px 24px', cursor: cargandoMas ? 'default' : 'pointer',
-                borderRadius: RADIO.filo, border: '2px solid #FF4FE0', color: '#FFF',
+                borderRadius: RADIO.filo, ...BOTON_OSCURO,
                 opacity: cargandoMas ? 0.6 : 1,
-                background: 'linear-gradient(180deg, rgba(255,43,209,.26), rgba(255,43,209,.1))',
-                boxShadow: '0 0 10px rgba(255,43,209,.6), 0 0 28px rgba(255,43,209,.35), inset 0 0 16px rgba(255,43,209,.25)',
-                font: `500 13px/1 ${FUENTE.ui}`, letterSpacing: 2.6, textTransform: 'uppercase',
+                letterSpacing: '.18em',
               }}>{cargandoMas ? 'Cargando…' : falloMas ? 'Reintentar' : 'Ver más'}</Pulsable>
             </div>
           )}
@@ -347,10 +343,8 @@ function Vacio({ texto, accion }: { texto: string; accion?: { texto: string; al:
       {accion && (
         <Pulsable al={accion.al} style={{
           marginTop: 18, display: 'inline-block', padding: '16px 24px', cursor: 'pointer',
-          borderRadius: RADIO.filo, border: '2px solid #FF4FE0', color: '#FFF',
-          background: 'linear-gradient(180deg, rgba(255,43,209,.26), rgba(255,43,209,.1))',
-          boxShadow: '0 0 10px rgba(255,43,209,.6), 0 0 28px rgba(255,43,209,.35), inset 0 0 16px rgba(255,43,209,.25)',
-          font: `500 13px/1 ${FUENTE.ui}`, letterSpacing: 2.6, textTransform: 'uppercase',
+          borderRadius: RADIO.filo, ...BOTON_OSCURO,
+                letterSpacing: '.18em',
         }}>{accion.texto}</Pulsable>
       )}
     </div>

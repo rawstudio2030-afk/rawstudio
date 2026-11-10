@@ -48,6 +48,11 @@ export const COLOR = {
    *  teclado: es la señal de «esto es privilegiado» y por eso es el único tono
    *  frío del sitio; no usarlo decorativamente. 8.7:1 sobre `fondo`. */
   admin: '#7EBFB3',
+
+  /** Estados, no marca: error y aviso. Pasan AA (≥ 4.5) sobre `fondo`,
+   *  `superficie` y `superficieAlta`. No se usan de adorno. */
+  error: '#FF5A5A',  // 6.0 / 5.6 / 5.0
+  aviso: '#FFB020',  // 10.0 / 9.4 / 8.3
 } as const
 
 /** Bordes. La interfaz se define por líneas de marfil translúcido, no por

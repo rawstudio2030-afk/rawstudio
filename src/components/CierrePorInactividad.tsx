@@ -96,10 +96,9 @@ export default function CierrePorInactividad() {
       </div>
 
       <Pulsable al={seguir} style={{
-        marginTop: 8, background: COLOR.acento, color: COLOR.fondo,
+        marginTop: 8, background: COLOR.acento, color: COLOR.sobreAcento,
         padding: '18px 34px', font: `700 13px/1 ${FUENTE.ui}`,
         letterSpacing: 2.2, textTransform: 'uppercase', cursor: 'pointer',
-        boxShadow: '0 0 34px rgba(255,43,209,.42)',
       }}>
         Sigo aquí
       </Pulsable>

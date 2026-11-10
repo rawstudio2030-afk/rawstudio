@@ -1,26 +1,22 @@
 // Pantalla 09 — Para creadoras
 // Pagina de venta del lado creador. Modo marca (DESIGN-BRIEF.md): la escena de
-// Miami fija detras, con un velo denso porque es una pagina de mucho texto, y
-// cada bloque en una tarjeta translucida para que se lea.
+// el antro (−1 de «El descenso») fijo detras, con un velo denso porque es una
+// pagina de mucho texto, y cada bloque en una tarjeta translucida para que se lea.
 //
 // Los saltos de seccion desplazan la VENTANA, como el resto del sitio. Antes
 // desplazaban un contenedor interno (`overflowY: auto; height: 100%`) que en
 // este layout se estira al alto de su contenido y por tanto nunca desplaza:
 // los botones de seccion eran un no-op, en silencio.
 import Wordmark from '../components/Wordmark'
-import FondoFijo from '../components/FondoFijo'
+import FondoAntro from '../components/FondoAntro'
 import {
   SECCIONES, FAQ, NO_PROMETEMOS, ICONS,
-  PINK, LIME, CYAN, PAPER, MUTED, LINE,
+  ROSA, AMBAR, HIELO, PAPER, MUTED, LINE,
 } from '../content/creators'
 import { PRECIO_CONSULTA_TELEGRAM } from '../content/consultas'
-import { FUENTE, RADIO } from '../lib/diseño'
+import { COLOR, FUENTE, RADIO } from '../lib/diseño'
 import { Pulsable, Enlace } from '../components/Pulsable'
 
-
-/** Un titular de Anton a este tamaño no aguanta el glow denso de un letrero:
- *  se vuelve una mancha. Dos capas, y mas suaves. */
-const NEON_TITULO = '0 0 6px rgba(255,43,209,.8), 0 0 24px rgba(255,43,209,.5)'
 
 const etiqueta = (color: string): React.CSSProperties => ({
   font: `700 11px/1.3 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase', color,
@@ -30,18 +26,16 @@ const etiqueta = (color: string): React.CSSProperties => ({
  *  escena, asi que cada bloque lleva su propio fondo. */
 const tarjeta: React.CSSProperties = {
   boxSizing: 'border-box', borderRadius: RADIO.filo,
-  border: '1px solid rgba(255,255,255,.14)', background: 'rgba(8,8,10,.78)',
+  border: '1px solid rgba(122,63,160,.5)', background: 'rgba(8,6,14,.82)',
   backdropFilter: 'blur(8px)',
 }
 
-// Interlineado 1 y no .88/.9 como el deck: en español los titulares llevan
-// mayusculas acentuadas (CÓMO, INCÓMODO, MÁS) y con el interlineado apretado
-// del deck el acento queda tapado por la linea de arriba y la palabra se lee
-// mal. El deck no lo sufre porque esta en ingles.
+// Interlineado 1.12: en español los titulares llevan acentos (Cómo, incómodo,
+// más) y con el interlineado apretado del deck el acento queda tapado por la
+// linea de arriba. El deck no lo sufre porque esta en ingles.
 const titular: React.CSSProperties = {
-  fontFamily: FUENTE.display, fontSize: 'clamp(36px, 11vw, 52px)', lineHeight: 1,
-  textTransform: 'uppercase', color: PAPER, margin: '0 0 22px',
-  textShadow: '0 2px 22px rgba(6,5,11,.9)',
+  fontFamily: FUENTE.antro, fontWeight: 800, fontSize: 'clamp(30px, 8.6vw, 44px)', lineHeight: 1.12,
+  letterSpacing: '-.03em', color: PAPER, margin: '0 0 22px',
 }
 
 export default function Creators() {
@@ -85,17 +79,16 @@ export default function Creators() {
   return (
     <div style={{
       position: 'relative', minHeight: '100%',
-      background: '#06050B', color: PAPER, fontFamily: FUENTE.ui, fontWeight: 400,
+      background: COLOR.fondo, color: PAPER, fontFamily: FUENTE.ui, fontWeight: 400,
     }}>
-      <FondoFijo denso />
+      <FondoAntro />
       <div style={{ position: 'relative', zIndex: 1, padding: 'calc(30px + env(safe-area-inset-top)) 22px 40px', maxWidth: 560, margin: '0 auto' }}>
 
         {/* ---------- encabezado ---------- */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14, marginBottom: 22 }}>
-          <Wordmark ancho={176} />
+          <Wordmark ancho={176} piso="antro" />
           <span style={{
-            ...etiqueta(LIME), border: `1.5px solid ${LIME}`, borderRadius: 999, padding: '9px 13px', whiteSpace: 'nowrap',
-            boxShadow: '0 0 10px rgba(200,255,61,.3)',
+            ...etiqueta(AMBAR), border: `1px solid ${AMBAR}`, borderRadius: 999, padding: '9px 13px', whiteSpace: 'nowrap',
           }}>
             Escudo activo
           </span>
@@ -106,27 +99,26 @@ export default function Creators() {
           {[{ id: 'proteccion', nav: 'Protección' }, ...SECCIONES].map((s, i) => (
             <button key={s.id} onClick={() => saltar(s.id)} style={{
               flex: '0 0 auto', minHeight: 44, font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.4,
-              textTransform: 'uppercase', background: 'rgba(8,8,10,.6)', cursor: 'pointer', borderRadius: 999,
-              color: i % 2 ? '#3EE9FF' : '#FF5BDC', padding: '0 16px',
-              border: `1px solid ${i % 2 ? 'rgba(0,229,255,.55)' : 'rgba(255,43,209,.55)'}`,
+              textTransform: 'uppercase', background: 'rgba(8,6,14,.6)', cursor: 'pointer', borderRadius: 999,
+              color: i % 2 ? AMBAR : HIELO, padding: '0 16px',
+              border: `1px solid ${i % 2 ? 'rgba(212,146,58,.55)' : 'rgba(196,90,138,.55)'}`,
             }}>{s.nav}</button>
           ))}
         </div>
 
         {/* ---------- portada ---------- */}
         <div style={{ paddingBottom: 44 }}>
-          <div style={{ ...etiqueta(CYAN), marginBottom: 16 }}>
+          <div style={{ ...etiqueta(HIELO), marginBottom: 16 }}>
             Plataforma para creadoras · México y Estados Unidos
           </div>
           <h1 style={{
-            margin: '0 0 20px', fontFamily: FUENTE.display, fontWeight: 400, lineHeight: 1,
-            fontSize: 'clamp(46px, 15vw, 66px)', textTransform: 'uppercase',
-            textShadow: '0 2px 22px rgba(6,5,11,.9)',
+            margin: '0 0 20px', fontFamily: FUENTE.antro, fontWeight: 800, lineHeight: 1.1, letterSpacing: '-.035em',
+            fontSize: 'clamp(34px, 10.4vw, 54px)',
           }}>
             Tu contenido.<br />Tus reglas.<br />
-            <span style={{ color: PINK, textShadow: NEON_TITULO }}>Tu 80%.</span>
+            <span style={{ color: ROSA }}>Tu 80%.</span>
           </h1>
-          <div style={{ fontFamily: FUENTE.ui, fontSize: 19, lineHeight: 1.4, color: '#E2DEE6', marginBottom: 26 }}>
+          <div style={{ fontFamily: FUENTE.ui, fontSize: 19, lineHeight: 1.4, color: COLOR.textoSuave, marginBottom: 26 }}>
             Cobras directo de tus suscriptores, sin intermediarios y sin exclusividad.{' '}
             <span style={{ color: PAPER, fontWeight: 700 }}>Lo que subes sigue siendo tuyo</span>, y si alguien lo filtra, nosotros lo perseguimos.
           </div>
@@ -135,17 +127,17 @@ export default function Creators() {
               puerta de acceso: una persona que viene a registrarse caia en un
               «inicia sesion». Va al registro, que es lo que dice el boton. */}
           <div style={{ display: 'grid', gap: 12 }}>
-            <Enlace a="/registro" className="miami-boton miami-boton-magenta">Crear mi cuenta</Enlace>
-            <Pulsable al={() => saltar('proteccion')} className="miami-boton miami-boton-cian">Cómo te protegemos</Pulsable>
+            <Enlace a="/registro" className="btn-collins btn-collins-primario">Crear mi cuenta</Enlace>
+            <Pulsable al={() => saltar('proteccion')} className="btn-collins btn-collins-aviso">Cómo te protegemos</Pulsable>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8, marginTop: 30 }}>
             {[['80%', 'Para ti'], ['7 días', 'Entre pagos'], ['0', 'Exclusividad']].map(([n, t], i) => (
               <div key={t} style={{
                 ...tarjeta, padding: '16px 8px', textAlign: 'center',
-                borderColor: i % 2 ? 'rgba(0,229,255,.55)' : 'rgba(255,43,209,.55)',
+                borderColor: i % 2 ? 'rgba(212,146,58,.55)' : 'rgba(196,90,138,.55)',
               }}>
-                <div style={{ fontFamily: FUENTE.display, fontSize: 30, lineHeight: 1, color: LIME, marginBottom: 7 }}>{n}</div>
+                <div style={{ fontFamily: FUENTE.display, fontSize: 30, lineHeight: 1, color: AMBAR, marginBottom: 7 }}>{n}</div>
                 <div style={{ font: `700 10px/1.3 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase', color: MUTED }}>{t}</div>
               </div>
             ))}
@@ -154,9 +146,9 @@ export default function Creators() {
 
         {/* ---------- proteccion: preguntas ---------- */}
         <div id="proteccion" style={{ paddingTop: 40, borderTop: `1px solid ${LINE}` }}>
-          <div style={{ ...etiqueta(CYAN), marginBottom: 14 }}>Protección y seguridad</div>
-          <h2 style={titular}>Pregunta lo <span style={{ color: PINK, textShadow: NEON_TITULO }}>incómodo</span></h2>
-          <div style={{ fontFamily: FUENTE.ui, fontSize: 18, lineHeight: 1.4, color: '#CFCAD3', margin: '-8px 0 24px' }}>
+          <div style={{ ...etiqueta(HIELO), marginBottom: 14 }}>Protección y seguridad</div>
+          <h2 style={titular}>Pregunta lo <span style={{ color: ROSA }}>incómodo</span></h2>
+          <div style={{ fontFamily: FUENTE.ui, fontSize: 18, lineHeight: 1.4, color: COLOR.textoSuave, margin: '-8px 0 24px' }}>
             Las dudas que todas tienen antes de subir el primer video. Aquí están contestadas sin adorno: lo que sí podemos hacer, y lo que no.
           </div>
 
@@ -171,7 +163,7 @@ export default function Creators() {
                   <span className="faq-signo">+</span>
                   <span>{f.q}</span>
                 </summary>
-                <div style={{ padding: '0 0 20px 33px', color: '#CFCAD3', font: `400 16px/1.6 ${FUENTE.ui}` }}>
+                <div style={{ padding: '0 0 20px 33px', color: COLOR.textoSuave, font: `400 16px/1.6 ${FUENTE.ui}` }}>
                   {f.a.map((p, j) => <p key={j} style={{ margin: j ? '11px 0 0' : 0 }}>{p}</p>)}
                 </div>
               </details>
@@ -181,13 +173,12 @@ export default function Creators() {
           {/* ---------- lo que no prometemos ---------- */}
           <div style={{
             margin: '28px 0 6px', padding: '22px 18px', borderRadius: RADIO.filo,
-            border: `1.5px solid ${LIME}`, background: 'rgba(8,8,10,.78)',
-            boxShadow: '0 0 10px rgba(200,255,61,.3), 0 0 28px rgba(200,255,61,.12), inset 0 0 18px rgba(200,255,61,.05)',
+            border: `1px solid ${AMBAR}`, background: 'rgba(8,6,14,.82)',
           }}>
             <div style={{ fontFamily: FUENTE.display, fontSize: 26, lineHeight: 1, textTransform: 'uppercase', marginBottom: 14 }}>
-              <span style={{ color: LIME }}>Lo que no</span> te vamos a prometer
+              <span style={{ color: AMBAR }}>Lo que no</span> te vamos a prometer
             </div>
-            <ul style={{ margin: 0, paddingLeft: 18, color: '#CFCAD3', font: `400 16px/1.5 ${FUENTE.ui}` }}>
+            <ul style={{ margin: 0, paddingLeft: 18, color: COLOR.textoSuave, font: `400 16px/1.5 ${FUENTE.ui}` }}>
               {NO_PROMETEMOS.map((t, i) => <li key={i} style={{ marginBottom: i < NO_PROMETEMOS.length - 1 ? 10 : 0 }}>{t}</li>)}
             </ul>
           </div>
@@ -196,8 +187,8 @@ export default function Creators() {
         {/* ---------- secciones de beneficios ---------- */}
         {SECCIONES.map(s => (
           <div key={s.id} id={s.id} style={{ paddingTop: 40, marginTop: 30, borderTop: `1px solid ${LINE}` }}>
-            <div style={{ ...etiqueta(CYAN), marginBottom: 14 }}>{s.eyebrow}</div>
-            <h2 style={titular}>{s.titulo} <span style={{ color: PINK, textShadow: NEON_TITULO }}>{s.acento}</span></h2>
+            <div style={{ ...etiqueta(HIELO), marginBottom: 14 }}>{s.eyebrow}</div>
+            <h2 style={titular}>{s.titulo} <span style={{ color: ROSA }}>{s.acento}</span></h2>
             <div style={{ display: 'grid', gap: 10 }}>
               {s.filas.map((f, i) => (
                 <div key={i} style={{
@@ -207,7 +198,7 @@ export default function Creators() {
                     {ICONS[f.icono]}
                   </span>
                   <p style={{ margin: 0, font: `400 16px/1.5 ${FUENTE.ui}`, color: PAPER }}>
-                    <b style={{ fontWeight: 700 }}>{f.fuerte}</b> <span style={{ color: '#CFCAD3' }}>{f.resto}</span>
+                    <b style={{ fontWeight: 700 }}>{f.fuerte}</b> <span style={{ color: COLOR.textoSuave }}>{f.resto}</span>
                   </p>
                 </div>
               ))}
@@ -220,13 +211,13 @@ export default function Creators() {
             misma constante que /consultas; las reglas completas (privacidad,
             validacion) viven alli. */}
         <div id="consultas" style={{ marginTop: 30, paddingTop: 40, borderTop: `1px solid ${LINE}` }}>
-          <div style={{ ...etiqueta(CYAN), marginBottom: 14 }}>Consultas por Telegram</div>
+          <div style={{ ...etiqueta(HIELO), marginBottom: 14 }}>Consultas por Telegram</div>
           <div style={{ ...tarjeta, padding: '20px 18px' }}>
             <p style={{ margin: 0, font: `400 16px/1.55 ${FUENTE.ui}`, color: PAPER }}>
               <b style={{ fontWeight: 700 }}>Tienes un máximo de 2 días</b> para responder un mensaje pagado.
               Cada mensaje del cliente cuesta {PRECIO_CONSULTA_TELEGRAM}.
             </p>
-            <p style={{ margin: '10px 0 0', font: `400 16px/1.55 ${FUENTE.ui}`, color: '#CFCAD3' }}>
+            <p style={{ margin: '10px 0 0', font: `400 16px/1.55 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
               No hay guion rígido: cada contestación debe avanzar algo. Una pregunta de vuelta,
               un dato nuevo o una oferta concreta.
             </p>
@@ -238,7 +229,7 @@ export default function Creators() {
             <Enlace a="/consultas" style={{
               display: 'inline-block', marginTop: 16, cursor: 'pointer', minHeight: 44,
               font: `700 12px/44px ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase',
-              color: CYAN, textDecoration: 'underline', textUnderlineOffset: 5,
+              color: HIELO, textDecoration: 'underline', textUnderlineOffset: 5,
             }}>Leer las reglas completas &#8594;</Enlace>
           </div>
         </div>
@@ -246,12 +237,12 @@ export default function Creators() {
         {/* ---------- cierre ---------- */}
         <div style={{ marginTop: 50, paddingTop: 40, borderTop: `1px solid ${LINE}`, textAlign: 'center' }}>
           <h2 style={{
-            margin: '0 0 24px', fontFamily: FUENTE.display, fontWeight: 400, fontSize: 'clamp(30px, 9vw, 38px)', lineHeight: 1,
-            textTransform: 'uppercase', textShadow: '0 2px 22px rgba(6,5,11,.9)',
+            margin: '0 0 24px', fontFamily: FUENTE.antro, fontWeight: 800, fontSize: 'clamp(26px, 7.6vw, 36px)', lineHeight: 1.12,
+            letterSpacing: '-.03em',
           }}>
-            Lo tuyo <span style={{ color: PINK, textShadow: NEON_TITULO }}>se queda contigo.</span>
+            Lo tuyo <span style={{ color: ROSA }}>se queda contigo.</span>
           </h2>
-          <Enlace a="/registro" className="miami-boton miami-boton-magenta">Crear mi cuenta</Enlace>
+          <Enlace a="/registro" className="btn-collins btn-collins-primario">Crear mi cuenta</Enlace>
           <div style={{ marginTop: 20, font: `400 13px/1.5 ${FUENTE.ui}`, color: MUTED }}>
             Verificación de edad obligatoria. Sólo mayores de 18 años.
           </div>

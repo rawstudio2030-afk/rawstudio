@@ -19,6 +19,7 @@ import { perfilParaPublicar } from '../lib/trato'
 import { Pulsable, Enlace } from '../components/Pulsable'
 import Centro from '../components/Centro'
 import SelectorSubida from '../components/SelectorSubida'
+import { FONDO_CALABOZO } from '../lib/calabozo'
 
 const etiqueta: React.CSSProperties = {
   font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase', color: COLOR.textoSuave,
@@ -124,7 +125,7 @@ export default function UploadAlbum() {
   return (
     <div style={{
       minHeight: '100%', boxSizing: 'border-box', padding: '20px 18px 40px',
-      background: COLOR.fondo, color: COLOR.texto, fontFamily: FUENTE.ui,
+      background: FONDO_CALABOZO, color: COLOR.texto, fontFamily: FUENTE.ui,
       display: 'flex', flexDirection: 'column', gap: 18,
       width: '100%', maxWidth: 680, margin: '0 auto',
     }}>
@@ -162,7 +163,7 @@ export default function UploadAlbum() {
         <Pulsable al={() => refFotos.current?.click()} activo={!ocupado && fotos.length < max} style={{
           boxSizing: 'border-box', width: '100%', padding: '22px 18px', textAlign: 'center',
           cursor: 'pointer', borderRadius: RADIO.filo,
-          border: `1.5px dashed ${enRango ? 'rgba(200,255,61,.6)' : LINEA.marcada}`,
+          border: `1.5px dashed ${enRango ? 'rgba(224,177,90,.6)' : LINEA.marcada}`,
         }}>
           <div style={{ ...etiqueta, color: enRango ? COLOR.dinero : COLOR.textoSuave }}>
             {fotos.length === 0 ? 'Elegir fotos' : 'Agregar más fotos'}
@@ -201,18 +202,18 @@ export default function UploadAlbum() {
                 style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
               {i === 0 && (
                 <span style={{ position: 'absolute', left: 4, bottom: 4, padding: '3px 6px', borderRadius: 4,
-                  background: 'rgba(8,8,10,.8)', color: COLOR.dinero, font: `700 10px/1 ${FUENTE.ui}`,
+                  background: 'rgba(14,21,32,.8)', color: COLOR.dinero, font: `700 10px/1 ${FUENTE.ui}`,
                   letterSpacing: 1, textTransform: 'uppercase' }}>Portada</span>
               )}
               <Pulsable al={() => quitar(i)} activo={!ocupado} rotulo={`Quitar la foto ${i + 1}`} style={{
                 position: 'absolute', top: 2, right: 2, width: 32, height: 32, borderRadius: '50%',
-                display: 'grid', placeItems: 'center', background: 'rgba(8,8,10,.8)', color: COLOR.texto,
+                display: 'grid', placeItems: 'center', background: 'rgba(14,21,32,.8)', color: COLOR.texto,
                 cursor: 'pointer', font: `700 16px/1 ${FUENTE.ui}`,
               }}>×</Pulsable>
               {i > 0 && (
                 <Pulsable al={() => hacerPortada(i)} activo={!ocupado} rotulo={`Hacer portada la foto ${i + 1}`} style={{
                   position: 'absolute', top: 2, left: 2, width: 32, height: 32, borderRadius: '50%',
-                  display: 'grid', placeItems: 'center', background: 'rgba(8,8,10,.8)', color: COLOR.dinero,
+                  display: 'grid', placeItems: 'center', background: 'rgba(14,21,32,.8)', color: COLOR.dinero,
                   cursor: 'pointer', font: `400 15px/1 ${FUENTE.ui}`,
                 }}>★</Pulsable>
               )}
@@ -222,7 +223,7 @@ export default function UploadAlbum() {
       )}
 
       {aviso && (
-        <div role="alert" style={{ font: `400 13px/1.5 ${FUENTE.ui}`, color: estado === 'error' ? '#FF7BE6' : COLOR.textoSuave }}>
+        <div role="alert" style={{ font: `400 13px/1.5 ${FUENTE.ui}`, color: estado === 'error' ? COLOR.acento : COLOR.textoSuave }}>
           {aviso}
         </div>
       )}

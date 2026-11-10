@@ -64,7 +64,7 @@ export default function Bitacora() {
         : <span style={{ color: COLOR.textoSuave }}>—</span> },
     { clave: 'accion', titulo: 'Qué hizo',
       pinta: e => (
-        <span style={{ color: GRAVE.has(e.accion) ? '#FFB020' : COLOR.texto }}>
+        <span style={{ color: GRAVE.has(e.accion) ? COLOR.aviso : COLOR.texto }}>
           {NOMBRE[e.accion] ?? e.accion.replace(/_/g, ' ')}
         </span>
       ) },
@@ -135,8 +135,8 @@ export default function Bitacora() {
 
       {error && (
         <div style={{
-          marginBottom: 14, padding: '10px 13px', border: '1px solid #FF4444',
-          color: '#FF4444', font: `400 12px/1.45 ${FUENTE.ui}`,
+          marginBottom: 14, padding: '10px 13px', border: `1px solid ${COLOR.error}`,
+          color: COLOR.error, font: `400 12px/1.45 ${FUENTE.ui}`,
         }}>{error}</div>
       )}
 

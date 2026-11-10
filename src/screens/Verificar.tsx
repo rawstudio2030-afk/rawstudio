@@ -13,6 +13,7 @@ import { COLOR, FUENTE, RADIO } from '../lib/diseño'
 import Icono from '../components/Iconos'
 import { Pulsable, Enlace } from '../components/Pulsable'
 import Centro from '../components/Centro'
+import { FONDO_CALABOZO } from '../lib/calabozo'
 
 
 const SERVICIO = import.meta.env.VITE_VERIFICACION_URL as string | undefined
@@ -175,7 +176,7 @@ export default function Verificar() {
   return (
     <div style={{
       minHeight: '100%', boxSizing: 'border-box', padding: '20px 18px 40px',
-      background: COLOR.fondo, color: COLOR.texto, fontFamily: FUENTE.ui,
+      background: FONDO_CALABOZO, color: COLOR.texto, fontFamily: FUENTE.ui,
       display: 'flex', flexDirection: 'column', gap: 18,
       width: '100%', maxWidth: 680, margin: '0 auto',
     }}>
@@ -198,7 +199,7 @@ export default function Verificar() {
 
       {/* Lo que se promete en la pagina de creadoras, dicho aqui donde importa. */}
       <div style={{
-        borderRadius: RADIO.filo, border: '1.5px dashed rgba(200,255,61,.5)', background: 'rgba(200,255,61,.05)',
+        borderRadius: RADIO.filo, border: '1.5px dashed rgba(224,177,90,.5)', background: 'rgba(224,177,90,.05)',
         padding: '16px 16px',
       }}>
         <div style={{ ...etiqueta, color: COLOR.dinero }}>Qué hacemos con esto</div>
@@ -223,7 +224,7 @@ export default function Verificar() {
             width: '100%', boxSizing: 'border-box',
             font: `400 16px/1 ${FUENTE.ui}`, padding: '16px 15px', colorScheme: 'dark',
           }} />
-        <span style={{ ...ayuda, color: nacimiento && !edadOk ? '#FF7BE6' : COLOR.textoSuave }}>
+        <span style={{ ...ayuda, color: nacimiento && !edadOk ? COLOR.acento : COLOR.textoSuave }}>
           {!nacimiento ? 'Debe coincidir con tu identificación.'
             : !edadOk ? 'Necesitas 18 años o más para publicar.'
             : `${cuantos(edad, 'año')}.`}
@@ -266,7 +267,7 @@ export default function Verificar() {
               color: COLOR.fondo, cursor: 'pointer',
             }} />
           <label htmlFor={idCasilla} style={{
-            font: `400 13px/1.5 ${FUENTE.ui}`, color: '#CFCAD3', cursor: 'pointer',
+            font: `400 13px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave, cursor: 'pointer',
           }}>
             Autorizo el tratamiento de mis <b>datos biométricos faciales</b> y de mi
             identificación (INE y selfie) para verificar mi identidad y mi edad, como
@@ -278,7 +279,7 @@ export default function Verificar() {
       )}
 
       {estado === 'error' && (
-        <div role="alert" style={{ font: `400 14px/1.45 ${FUENTE.ui}`, color: '#FF7BE6' }}>{detalle}</div>
+        <div role="alert" style={{ font: `400 14px/1.45 ${FUENTE.ui}`, color: COLOR.acento }}>{detalle}</div>
       )}
 
       <Pulsable al={enviar} activo={puede} className="boton-principal"
@@ -311,8 +312,8 @@ function Foto({ etiqueta: et, nota, archivo, refInput, camara, onElegir }: {
       <Pulsable al={() => refInput.current?.click()} style={{
         boxSizing: 'border-box', width: '100%', textAlign: 'left', minHeight: 80,
         display: 'flex', alignItems: 'center', gap: 14, cursor: 'pointer', borderRadius: RADIO.filo,
-        border: `1.5px ${archivo ? 'solid' : 'dashed'} ${archivo ? 'rgba(200,255,61,.6)' : 'rgba(255,255,255,.28)'}`,
-        background: archivo ? 'rgba(200,255,61,.05)' : 'transparent', padding: 14,
+        border: `1.5px ${archivo ? 'solid' : 'dashed'} ${archivo ? 'rgba(224,177,90,.6)' : 'rgba(255,255,255,.28)'}`,
+        background: archivo ? 'rgba(224,177,90,.05)' : 'transparent', padding: 14,
       }}>
         <div style={{
           width: 56, height: 56, flex: '0 0 auto', borderRadius: 10, display: 'grid', placeItems: 'center',

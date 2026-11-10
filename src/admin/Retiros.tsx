@@ -125,7 +125,7 @@ export default function Retiros() {
       <div>
         <div style={{ color: COLOR.texto }}>{r.nombre}</div>
         <div style={{ font: `400 11px/1.3 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
-          @{r.handle}{!r.verificada && <span style={{ color: '#FF4444' }}> · sin verificar</span>}
+          @{r.handle}{!r.verificada && <span style={{ color: COLOR.error }}> · sin verificar</span>}
         </div>
       </div>
     ) },
@@ -134,7 +134,7 @@ export default function Retiros() {
     { clave: 'pesos', titulo: 'En pesos', numerica: true, ancho: 130,
       pinta: r => r.bruto_mxn != null
         ? <span>{pesos(r.bruto_mxn)}</span>
-        : <span style={{ color: coin ? COLOR.textoSuave : '#FFB020' }}>
+        : <span style={{ color: coin ? COLOR.textoSuave : COLOR.aviso }}>
             {coin ? pesos(Math.round(r.coins * coin / 100)) : 'falta el tipo de cambio'}</span> },
     { clave: 'neto', titulo: 'Neto', numerica: true, ancho: 120,
       pinta: r => <span style={{ color: r.neto_mxn ? COLOR.dinero : COLOR.textoSuave }}>
@@ -167,11 +167,11 @@ export default function Retiros() {
     <>
       {/* ---- Tipo de cambio ---- */}
       <div style={{ marginBottom: 16, padding: '12px 14px',
-        border: `1px solid ${coin ? LINEA.tenue : '#FFB020'}` }}>
+        border: `1px solid ${coin ? LINEA.tenue : COLOR.aviso}` }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <div style={{ flex: 1 }}>
             <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
-              textTransform: 'uppercase', color: coin ? COLOR.texto : '#FFB020' }}>
+              textTransform: 'uppercase', color: coin ? COLOR.texto : COLOR.aviso }}>
               {coin ? `1 USD = ${pesos(coin)}` : 'Falta definir el tipo de cambio dólar-peso'}
             </div>
             <div style={{ marginTop: 6, font: `400 11px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
@@ -227,11 +227,11 @@ export default function Retiros() {
 
       {/* ---- Tasas de retencion ---- */}
       <div style={{ marginBottom: 16, padding: '12px 14px',
-        border: `1px solid ${tasas ? LINEA.tenue : '#FFB020'}` }}>
+        border: `1px solid ${tasas ? LINEA.tenue : COLOR.aviso}` }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <div style={{ flex: 1 }}>
             <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
-              textTransform: 'uppercase', color: tasas ? COLOR.texto : '#FFB020' }}>
+              textTransform: 'uppercase', color: tasas ? COLOR.texto : COLOR.aviso }}>
               {tasas ? 'Tasas de retención confirmadas' : 'Tasas de retención provisionales'}
             </div>
             <div style={{ marginTop: 6, font: `400 11px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
@@ -248,9 +248,9 @@ export default function Retiros() {
 
       {/* ---- Ajustes por aprobar ---- */}
       {pend.length > 0 && (
-        <div style={{ marginBottom: 16, padding: '13px 15px', border: '1px solid #FFB020' }}>
+        <div style={{ marginBottom: 16, padding: '13px 15px', border: `1px solid ${COLOR.aviso}` }}>
           <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
-            textTransform: 'uppercase', color: '#FFB020' }}>
+            textTransform: 'uppercase', color: COLOR.aviso }}>
             Ajustes por aprobar · {pend.length}
           </div>
           <div style={{ marginTop: 6, font: `400 11px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
@@ -272,7 +272,7 @@ export default function Retiros() {
                   </div>
                   {/* Si «Aprobar» esta apagado es porque lo propuso quien esta mirando. */}
                   {!a.puede_aprobar && (
-                    <div style={{ marginTop: 5, font: `400 11px/1.5 ${FUENTE.ui}`, color: '#FFB020' }}>
+                    <div style={{ marginTop: 5, font: `400 11px/1.5 ${FUENTE.ui}`, color: COLOR.aviso }}>
                       Lo propusiste tú, así que no puedes firmarlo ahora. Lo firma otra administradora; si eres
                       la única, a partir del {fechaHora(new Date(new Date(a.propuesto_at).getTime() + 86_400_000).toISOString())} podrás aprobarlo.
                     </div>
@@ -289,9 +289,9 @@ export default function Retiros() {
 
       {/* ---- Disputas ---- */}
       {disputas.length > 0 && (
-        <div style={{ marginBottom: 16, padding: '13px 15px', border: '1px solid #FF4444' }}>
+        <div style={{ marginBottom: 16, padding: '13px 15px', border: `1px solid ${COLOR.error}` }}>
           <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.2,
-            textTransform: 'uppercase', color: '#FF4444' }}>
+            textTransform: 'uppercase', color: COLOR.error }}>
             {disputas.length} encargo{disputas.length > 1 ? 's' : ''} pagado y no entregado
           </div>
           <div style={{ marginTop: 10, display: 'grid', gap: 8 }}>
@@ -305,7 +305,7 @@ export default function Retiros() {
                   <div style={{ marginTop: 4, font: `400 11px/1.45 ${FUENTE.mono}`,
                     color: COLOR.textoSuave }}>
                     @{d.fan_handle} pagó {usd(d.coins)} a @{d.creadora_handle} ·{' '}
-                    <span style={{ color: '#FF4444' }}>{d.dias_de_retraso} días de retraso</span>
+                    <span style={{ color: COLOR.error }}>{d.dias_de_retraso} días de retraso</span>
                   </div>
                 </div>
                 <Boton chico tono="peligro" al={() => setReembolso(d)}>Reembolsar</Boton>
@@ -333,8 +333,8 @@ export default function Retiros() {
       </div>
 
       {error && (
-        <div style={{ marginBottom: 14, padding: '10px 13px', border: '1px solid #FF4444',
-          color: '#FF4444', font: `400 12px/1.45 ${FUENTE.ui}` }}>{error}</div>
+        <div style={{ marginBottom: 14, padding: '10px 13px', border: `1px solid ${COLOR.error}`,
+          color: COLOR.error, font: `400 12px/1.45 ${FUENTE.ui}` }}>{error}</div>
       )}
       {aviso && (
         <div style={{ marginBottom: 14, padding: '10px 13px', border: `1px solid ${COLOR.dinero}`,

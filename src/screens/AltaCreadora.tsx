@@ -21,6 +21,7 @@ import { Pulsable, Enlace } from '../components/Pulsable'
 import Centro from '../components/Centro'
 import BarraSubida from '../components/BarraSubida'
 import { useSubida } from '../lib/useSubida'
+import { FONDO_CALABOZO } from '../lib/calabozo'
 
 
 const etiqueta: React.CSSProperties = {
@@ -128,11 +129,11 @@ export default function AltaCreadora() {
   return (
     <div style={{
       minHeight: '100%', boxSizing: 'border-box', padding: '48px 22px 40px',
-      background: COLOR.fondo, color: COLOR.texto, fontFamily: FUENTE.ui,
+      background: FONDO_CALABOZO, color: COLOR.texto, fontFamily: FUENTE.ui,
       display: 'flex', flexDirection: 'column', gap: 20,
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Wordmark ancho={110} />
+        <Wordmark ancho={110} piso="calabozo" />
         <Enlace a="/admin" rotulo="Cerrar" style={{ font: `400 26px/1 ${FUENTE.ui}`, color: COLOR.textoSuave, cursor: 'pointer' }}>×</Enlace>
       </div>
 
@@ -189,7 +190,7 @@ export default function AltaCreadora() {
       {paso === 'documentos' && creadora && (
         <>
           <div style={{
-            border: '1.5px dashed rgba(255,43,209,.45)', background: TINTE.acento,
+            border: '1.5px dashed rgba(212,180,131,.45)', background: TINTE.acento,
             padding: '15px 14px',
           }}>
             <div style={{ ...etiqueta, color: COLOR.acento }}>@{creadora.handle} no puede publicar todavía</div>
@@ -225,7 +226,7 @@ export default function AltaCreadora() {
       {paso === 'clips' && creadora && (
         <>
           <div style={{
-            border: '1px solid rgba(200,255,61,.4)', background: TINTE.dinero,
+            border: '1px solid rgba(224,177,90,.4)', background: TINTE.dinero,
             padding: '14px 13px',
           }}>
             <div style={{ ...etiqueta, color: COLOR.dinero }}>
@@ -337,7 +338,7 @@ function Boton({ texto, activo, al }: { texto: string; activo: boolean; al: () =
       background: activo ? COLOR.admin : COLOR.superficieAlta, color: activo ? COLOR.fondo : COLOR.textoSuave,
       textAlign: 'center', padding: 18, marginTop: 4, borderRadius: 12,
       font: `700 13px/1 ${FUENTE.ui}`, letterSpacing: 2.2, textTransform: 'uppercase',
-      boxShadow: activo ? '0 0 18px rgba(0,229,255,.3)' : 'none',
+      boxShadow: activo ? '0 0 18px rgba(126,191,179,.3)' : 'none',
       cursor: activo ? 'pointer' : 'default',
     }}>{texto}</Pulsable>
   )

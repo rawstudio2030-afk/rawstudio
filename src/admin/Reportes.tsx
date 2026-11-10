@@ -72,7 +72,7 @@ export default function Reportes() {
           }}>
             {p.t}
             <span style={{ marginLeft: 7, font: `400 11px/1 ${FUENTE.mono}`,
-              color: p.v === 'nuevo' && conteo.nuevo ? '#FF4444' : COLOR.textoSuave }}>
+              color: p.v === 'nuevo' && conteo.nuevo ? COLOR.error : COLOR.textoSuave }}>
               {conteo[p.v] ?? 0}
             </span>
           </Pulsable>
@@ -89,8 +89,8 @@ export default function Reportes() {
       </div>
 
       {error && (
-        <div style={{ marginBottom: 14, padding: '10px 13px', border: '1px solid #FF4444',
-          color: '#FF4444', font: `400 12px/1.45 ${FUENTE.ui}` }}>{error}</div>
+        <div style={{ marginBottom: 14, padding: '10px 13px', border: `1px solid ${COLOR.error}`,
+          color: COLOR.error, font: `400 12px/1.45 ${FUENTE.ui}` }}>{error}</div>
       )}
 
       {filas.length === 0 ? (
@@ -155,7 +155,7 @@ function Ficha({ r, pide, tras }: {
   return (
     <div style={{
       display: 'flex', gap: 14, padding: 14,
-      border: `1px solid ${grave && abierto ? '#FF4444' : LINEA.tenue}`,
+      border: `1px solid ${grave && abierto ? COLOR.error : LINEA.tenue}`,
       background: COLOR.superficie,
     }}>
       <div style={{
@@ -167,9 +167,9 @@ function Ficha({ r, pide, tras }: {
 
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', gap: 7, alignItems: 'center', flexWrap: 'wrap' }}>
-          <Insignia texto={TEXTO_MOTIVO[r.motivo] ?? r.motivo} color={grave ? '#FF4444' : '#FFB020'} />
+          <Insignia texto={TEXTO_MOTIVO[r.motivo] ?? r.motivo} color={grave ? COLOR.error : COLOR.aviso} />
           {r.otros_del_mismo > 1 && abierto && (
-            <Insignia texto={`${r.otros_del_mismo} sobre lo mismo`} color="#FF4444" />
+            <Insignia texto={`${r.otros_del_mismo} sobre lo mismo`} color={COLOR.error} />
           )}
           {r.clip_estado && r.clip_estado !== 'aprobado' && (
             <Insignia texto={`clip ${r.clip_estado}`} color={COLOR.textoSuave} />

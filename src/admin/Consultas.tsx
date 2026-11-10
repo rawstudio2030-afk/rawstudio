@@ -27,7 +27,7 @@ import {
 import { useEscape } from '../lib/teclado'
 
 const POR_PAGINA = 25
-const ROJO = '#FF4444'
+const ROJO = COLOR.error
 
 const quien = (handle: string | null) => (handle ? `@${handle}` : 'Cuenta eliminada')
 
@@ -163,7 +163,7 @@ function Hilo({ fila, cierra }: { fila: FilaConsulta; cierra: () => void }) {
 
   return (
     <div onClick={cierra} style={{
-      position: 'fixed', inset: 0, zIndex: 80, background: 'rgba(8,8,10,.6)',
+      position: 'fixed', inset: 0, zIndex: 80, background: 'rgba(14,21,32,.6)',
       display: 'flex', justifyContent: 'flex-end',
     }}>
       <aside onClick={e => e.stopPropagation()} aria-label="Conversación de la consulta" style={{

@@ -118,9 +118,9 @@ export function BarraInferior() {
  *  `BarraInferior` segun el papel—: los recibe, y por eso se puede dibujar con
  *  cinco o seis sin tener una sesion de cada tipo.
  *
- *  Direccion «Miami Neon Night» (DESIGN-BRIEF.md): el destino activo se
- *  enciende como un letrero —icono con resplandor, rotulo con halo y un filete
- *  de neon arriba— y el resto se apaga a un gris legible. */
+ *  Direccion «El descenso» (DESIGN-BRIEF.md): el destino activo se marca con su
+ *  color, un filete arriba y un velo tenue, y el resto se queda en un gris
+ *  legible. Sin resplandor. */
 export function VistaBarraInferior({ destinos, aqui }: { destinos: Destino[]; aqui: string }) {
   const rotulo = rotuloPara(destinos.length)
 
@@ -130,16 +130,15 @@ export function VistaBarraInferior({ destinos, aqui }: { destinos: Destino[]; aq
        riel en pantalla ancha. */
     <nav className="barra-abajo" style={{
       position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 900,
-      background: 'rgba(8,8,10,.94)',
+      background: 'rgba(14,21,32,.94)',
       backdropFilter: 'blur(14px)',
       paddingBottom: 'env(safe-area-inset-bottom)',
     }}>
-      {/* El filo de arriba: un hilo de degradado de magenta a cian, la misma
-          linea que firma la portada. */}
+      {/* El filo de arriba: un hilo fino de champagne a seafoam, la firma de
+          la casa. */}
       <div aria-hidden style={{
         position: 'absolute', left: 0, right: 0, top: 0, height: 1,
         background: TRAMA.hilo, opacity: .55,
-        boxShadow: '0 0 10px rgba(255,43,209,.45)',
       }} />
       {destinos.map(d => {
         const activo = aqui === d.path || aqui.startsWith(d.path + '/')
@@ -162,17 +161,13 @@ export function VistaBarraInferior({ destinos, aqui }: { destinos: Destino[]; aq
             {activo && (
               <span aria-hidden style={{
                 position: 'absolute', top: 0, left: '22%', right: '22%', height: 2, borderRadius: 2,
-                background: color, boxShadow: `0 0 8px ${color}, 0 0 18px ${color}99`,
+                background: color,
               }} />
             )}
-            <span style={{
-              display: 'flex', lineHeight: 1,
-              filter: activo ? `drop-shadow(0 0 5px ${color}cc)` : 'none',
-            }}><Icono nombre={d.icono} tam={22} /></span>
+            <span style={{ display: 'flex', lineHeight: 1 }}><Icono nombre={d.icono} tam={22} /></span>
             <span style={{
               font: `700 ${rotulo.px}px/1 ${FUENTE.ui}`, letterSpacing: rotulo.esp,
               textTransform: 'uppercase',
-              textShadow: activo ? `0 0 10px ${color}88` : 'none',
               // Sin esto un rotulo que no quepa parte en dos lineas y cambia
               // la ALTURA de la barra entera, que es peor que recortarse.
               whiteSpace: 'nowrap',
@@ -318,8 +313,7 @@ function Renglon({ d, aqui, tono = COLOR.acento, exacto }: {
       color: activo ? COLOR.texto : COLOR.textoSuave,
     }}>
       <span style={{ width: 18, display: 'grid', placeItems: 'center',
-        color: activo ? tono : COLOR.textoTenue,
-        filter: activo ? `drop-shadow(0 0 4px ${tono}cc)` : 'none' }}><Icono nombre={d.icono} tam={17} /></span>
+        color: activo ? tono : COLOR.textoTenue,  }}><Icono nombre={d.icono} tam={17} /></span>
       <span style={{ font: `${activo ? 700 : 500} 13px/1 ${FUENTE.ui}` }}>{d.titulo}</span>
     </Enlace>
   )

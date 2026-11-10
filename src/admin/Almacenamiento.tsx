@@ -55,7 +55,7 @@ export default function Almacenamiento() {
   const pasado = total > limiteBytes
   const cerca = pct >= 80
 
-  const color = pasado ? '#FF4444' : cerca ? '#FFB020' : COLOR.dinero
+  const color = pasado ? COLOR.error : cerca ? COLOR.aviso : COLOR.dinero
   const plan = PLANES.find(p => p.mb === limiteMb)
 
   // Cuanto cabe todavia, en videos del tamaño medio de los que ya hay.
@@ -78,8 +78,8 @@ export default function Almacenamiento() {
       </div>
 
       {error && (
-        <div style={{ marginBottom: 14, padding: '10px 13px', border: '1px solid #FF4444',
-          color: '#FF4444', font: `400 12px/1.45 ${FUENTE.ui}` }}>{error}</div>
+        <div style={{ marginBottom: 14, padding: '10px 13px', border: `1px solid ${COLOR.error}`,
+          color: COLOR.error, font: `400 12px/1.45 ${FUENTE.ui}` }}>{error}</div>
       )}
 
       {/* ---- El medidor ---- */}
@@ -120,18 +120,18 @@ export default function Almacenamiento() {
 
         <div style={{ marginTop: 10, font: `400 12px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
           {pasado && plan ? (
-            <><b style={{ color: '#FF4444' }}>
+            <><b style={{ color: COLOR.error }}>
               Llenaste el {tamano(limiteBytes)} del plan {plan.nombre}.
             </b> Las subidas nuevas están fallando: Supabase las rechaza cuando ya no cabe.
             {plan.nombre === 'Gratuito'
               ? ' Pasa a Pro (100 GB por 25 USD al mes) o libera espacio purgando lo borrado.'
               : ' Libera espacio purgando lo borrado, o sube al siguiente plan.'}</>
           ) : pasado ? (
-            <><b style={{ color: '#FF4444' }}>Pasaste el tope de {tamano(limiteBytes)} que
+            <><b style={{ color: COLOR.error }}>Pasaste el tope de {tamano(limiteBytes)} que
             pusiste a mano.</b> Si coincide con la cuota de tu plan, las subidas nuevas ya
             están fallando. Si solo era un aviso tuyo, no pasa nada todavía.</>
           ) : cerca ? (
-            <><b style={{ color: '#FFB020' }}>Te queda poco: {tamano(limiteBytes - total)}.</b>
+            <><b style={{ color: COLOR.aviso }}>Te queda poco: {tamano(limiteBytes - total)}.</b>
             {caben !== null && <> Caben unos {caben} videos más del tamaño medio de los tuyos.</>}</>
           ) : (
             <>Te quedan {tamano(limiteBytes - total)}.

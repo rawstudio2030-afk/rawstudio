@@ -1,6 +1,6 @@
 /* CSS global heredado del deck: keyframes de las animaciones y reset. */
-body{margin:0;background:#0B0B0E;background-image:linear-gradient(rgba(255,255,255,.028) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.028) 1px,transparent 1px);background-size:32px 32px}
-a{color:#FF2BD1;text-decoration:none}a:hover{color:#C8FF3D}
+body{margin:0;background:#0E1520;background-image:linear-gradient(rgba(255,255,255,.028) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.028) 1px,transparent 1px);background-size:32px 32px}
+a{color:#D4B483;text-decoration:none}a:hover{color:#E0B15A}
 ::-webkit-scrollbar{width:0;height:0}
 @keyframes agPulse{0%,100%{opacity:1}50%{opacity:.45}}
 @keyframes agZoom{0%{transform:scale(.62);opacity:0;filter:blur(14px)}22%{opacity:1;filter:blur(0)}70%{transform:scale(1)}86%{transform:scale(1.04);opacity:1}100%{transform:scale(1.5);opacity:0;filter:blur(6px)}}

@@ -80,7 +80,7 @@ export default function AltaMasiva() {
         <code>archivo_identificacion</code> y <code>archivo_consentimiento</code>, elige
         también esos archivos abajo y se emparejan por nombre: así el expediente queda
         cargado y la creadora nace verificada. Sin documentos se crea igual, pero{' '}
-        <b style={{ color: '#FFB020' }}>no podrá publicar ni cobrar</b> hasta que se
+        <b style={{ color: COLOR.aviso }}>no podrá publicar ni cobrar</b> hasta que se
         carguen.
       </div>
 
@@ -118,8 +118,8 @@ export default function AltaMasiva() {
       </div>
 
       {error && (
-        <div style={{ marginBottom: 14, padding: '10px 13px', border: '1px solid #FF4444',
-          color: '#FF4444', font: `400 12px/1.45 ${FUENTE.ui}` }}>{error}</div>
+        <div style={{ marginBottom: 14, padding: '10px 13px', border: `1px solid ${COLOR.error}`,
+          color: COLOR.error, font: `400 12px/1.45 ${FUENTE.ui}` }}>{error}</div>
       )}
 
       {filas.length > 0 && (
@@ -128,13 +128,13 @@ export default function AltaMasiva() {
             font: `400 12px/1 ${FUENTE.mono}` }}>
             <span style={{ color: COLOR.dinero }}>{listas} listas</span>
             {cuenta('invalida') > 0 && (
-              <span style={{ color: '#FF4444' }}>{cuenta('invalida')} con errores</span>
+              <span style={{ color: COLOR.error }}>{cuenta('invalida')} con errores</span>
             )}
             {cuenta('creada') > 0 && (
               <span style={{ color: COLOR.admin }}>{cuenta('creada')} creadas</span>
             )}
             {cuenta('fallo') > 0 && (
-              <span style={{ color: '#FF4444' }}>{cuenta('fallo')} fallaron</span>
+              <span style={{ color: COLOR.error }}>{cuenta('fallo')} fallaron</span>
             )}
             <div style={{ flex: 1 }} />
             <Boton tono="primario" activo={listas > 0 && !ocupado} al={crear}>
@@ -147,7 +147,7 @@ export default function AltaMasiva() {
               const tieneDocs = !!archivos.get(f.archivo_identificacion.toLowerCase())
                 && !!archivos.get(f.archivo_consentimiento.toLowerCase())
               const color = f.estado === 'creada' ? COLOR.dinero
-                : f.estado === 'fallo' || f.estado === 'invalida' ? '#FF4444'
+                : f.estado === 'fallo' || f.estado === 'invalida' ? COLOR.error
                 : f.estado === 'creando' ? COLOR.admin : COLOR.textoSuave
               return (
                 <div key={i} style={{
@@ -158,7 +158,7 @@ export default function AltaMasiva() {
                     color: COLOR.textoSuave }}>{f.linea}</span>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ font: `400 13px/1.3 ${FUENTE.ui}`, color: COLOR.texto }}>
-                      {f.nombre || <i style={{ color: '#FF4444' }}>sin nombre</i>}
+                      {f.nombre || <i style={{ color: COLOR.error }}>sin nombre</i>}
                       <span style={{ marginLeft: 8, font: `400 11px/1 ${FUENTE.mono}`,
                         color: COLOR.textoSuave }}>@{f.handle}</span>
                     </div>
@@ -170,7 +170,7 @@ export default function AltaMasiva() {
                   </div>
                   {f.estado === 'lista' && (
                     <span style={{ font: `400 11px/1 ${FUENTE.mono}`,
-                      color: tieneDocs ? COLOR.dinero : '#FFB020' }}>
+                      color: tieneDocs ? COLOR.dinero : COLOR.aviso }}>
                       {tieneDocs ? 'con expediente' : 'sin documentos'}
                     </span>
                   )}

@@ -174,7 +174,7 @@ export default function AvatarAuto() {
         </div>
       )}
       {error && (
-        <div role="alert" style={{ marginTop: 12, font: `400 12px/1.5 ${FUENTE.ui}`, color: '#FF4444' }}>{error}</div>
+        <div role="alert" style={{ marginTop: 12, font: `400 12px/1.5 ${FUENTE.ui}`, color: COLOR.error }}>{error}</div>
       )}
 
       {confirma && (

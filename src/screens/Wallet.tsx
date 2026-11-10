@@ -27,6 +27,7 @@ import Icono from '../components/Iconos'
 import { Pulsable } from '../components/Pulsable'
 import { Enlace } from '../components/Pulsable'
 import Centro from '../components/Centro'
+import { FONDO_CALABOZO } from '../lib/calabozo'
 
 /* Se piden mas de los que caben en pantalla porque de aqui salen tambien los
    totales. Si algun dia hay mas de quinientos movimientos, los totales habra
@@ -96,7 +97,7 @@ export function VistaDinero({
   return (
     <div style={{
       minHeight: '100%', boxSizing: 'border-box', padding: '20px 18px 40px',
-      background: COLOR.fondo, color: COLOR.texto, fontFamily: FUENTE.ui,
+      background: FONDO_CALABOZO, color: COLOR.texto, fontFamily: FUENTE.ui,
       width: '100%', maxWidth: 680, margin: '0 auto',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 22 }}>
@@ -117,7 +118,6 @@ export function VistaDinero({
       <div style={{
         font: `700 clamp(52px, 17vw, 84px)/1 ${FUENTE.ui}`, letterSpacing: -1, marginTop: 12,
         color: fallo ? COLOR.textoApagado : COLOR.dinero,
-        textShadow: fallo ? 'none' : '0 0 24px rgba(200,255,61,.28)',
       }}>
         {fallo ? '—' : usd(centavos)}
       </div>
@@ -145,7 +145,7 @@ export function VistaDinero({
           minimo y disponible, y dice cual falta. */}
       <div style={{
         display: 'flex', marginTop: 24, borderRadius: RADIO.filo, overflow: 'hidden',
-        border: '1.5px solid rgba(200,255,61,.45)', background: 'rgba(200,255,61,.04)',
+        border: '1.5px solid rgba(224,177,90,.45)', background: 'rgba(224,177,90,.04)',
         boxShadow: `${LUZ.dinero}, inset 0 0 18px rgba(224,177,90,.06)`,
       }}>
         {esCreadora && (
@@ -239,7 +239,7 @@ export function VistaDinero({
                 <span aria-hidden style={{
                   flex: '0 0 auto', width: 40, height: 40, borderRadius: 10, display: 'grid', placeItems: 'center',
                   color: entra ? COLOR.dinero : COLOR.acento,
-                  border: `1px solid ${entra ? 'rgba(200,255,61,.45)' : 'rgba(255,43,209,.45)'}`,
+                  border: `1px solid ${entra ? 'rgba(224,177,90,.45)' : 'rgba(212,180,131,.45)'}`,
                   background: COLOR.fondo,
                 }}><Icono nombre="dinero" tam={20} /></span>
                 <div style={{ flex: 1, minWidth: 0 }}>
