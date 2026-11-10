@@ -38,32 +38,86 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 
 ## Consultas activas
 
-### [id: 20261109-05] Videos de hasta 2 GB
+### [id: 20261109-05] Videos de hasta 2 GB — hecha (migración sin aplicar)
 - **fecha:** 2026-11-09 17:30 (America/Mexico_City)
-- **estado:** asignada
+- **estado:** respondida
 - **tarea:** Subir el tope de video a 2 GB (2048 MiB): bucket `clips`, validación en cliente y copy unificada. Omar debe alinear el global de Storage en el dashboard.
 - **pregunta:** Implementa la ronda descrita en `bridge-response.md`, entrada [id: 20261109-05]. Commit propio. Va **después** de [id: 20261109-04] (TUS). No mezcles con 09-03 ni 08-05.
 - **contexto:** HEAD al asignar: `d2e7af2`. Bucket hoy 2000 MiB; UI ya dice «2 GB» sin validar. Sergio pidió 1 GB y luego 2 GB (9 nov 2026, ~17:24–17:30 hora de México).
 - **urgencia:** alta
 - **ya se intentó:** nada de código; diagnóstico del coordinador (2000 vs 2048, global del dashboard, TUS en 09-04).
+- **resultado:** HECHA en un commit propio, `07cc01a` (`feat: videos de hasta 2 gb`), después de 09-04. **NO aplicada ni publicada:** la migración `20261222000000_clips_2gb.sql` espera a que Omar suba el global de Storage (ver su checklist) y apruebe el `db push`.
+- **diff resumido:**
+  - **`supabase/migrations/20261222000000_clips_2gb.sql`:** `update storage.buckets set file_size_limit = 2048::bigint * 1024 * 1024 where id = 'clips'`. **Ojo, corrección a la receta de la ronda:** `2048 * 1024 * 1024` en SQL se evalúa como `int4` y **desborda** (2³¹ no cabe; probado: «entero fuera de rango»), por eso el `::bigint`. Idempotente; los otros seis buckets no se tocan (comprobado en el Postgres de prueba: albumes 10, avatars 2, clip-covers 5, clip-covers-full 5, expedientes 12, verificacion 8 MiB).
+  - **Una sola constante** `MAX_VIDEO_BYTES = 2048 * 1024 * 1024` y `errorTamanoVideo(bytes)` en `src/lib/clips.ts`: «Este video pesa 2.1 GB; el máximo es 2 GB.» (si pasa por muy poco: «un poco más de 2 GB», para que no diga «pesa 2.0 GB; el máximo es 2 GB»). Se rechaza **al elegir el archivo, antes de transferir**, en `Upload.tsx`, `AltaCreadora.tsx`, `PublicarPor.tsx` y `SubidaMasiva.tsx` (los que pasan se dejan fuera y se listan), y **además dentro de `publicarPara`** (`admin.ts`) para que ningún camino se lo salte. `Upload.tsx` lo vuelve a comprobar al publicar.
+  - **Copy:** «MP4, MOV o WebM · hasta 2 GB» ya estaba en creadora y `PublicarPor`; se añadió «hasta 2 GB» en `AltaCreadora`.
+- **verificación:** Postgres 17 de prueba con todas las migraciones: `clips` = 2147483648 bytes = 2048 MiB, el resto igual. Mensaje probado con Deno: 1.9 GB y exactamente 2 GiB pasan; 2 GiB + 1 byte y 2.1 GB se rechazan con el texto correcto. `tsc -b`, `npm run build` y lint (dinero y plurales) limpios.
+- **NO verificado:** nada contra producción. **Criterio 2 de aceptación (subir de verdad ~1,9 GB y reanudar)** no se probó con un archivo de ese tamaño: la reanudación se probó con 40 MB contra un servidor TUS local (ver 09-04). Que el global de Storage esté en ≥ 2 GB no se puede ver desde el repo.
+- **Checklist de Omar (dashboard de Supabase, yo no lo hago):**
+  - [ ] Confirmar plan **Pro** (en Free el global no pasa de 50 MB).
+  - [ ] Storage → Settings: **Global file size limit ≥ 2 GB** (2048 MiB o más), **antes** del `db push`.
+  - [ ] Revisar el cupo total vs uso; si el aviso del panel usa `limite_almacenamiento_mb = 1024`, subirlo al cupo real (p. ej. 102400 en Pro de 100 GB).
+  - [ ] Aprobar `supabase db push` (esta migración va junto con `20261221000000` de 09-03).
+- **Diferencias:** ninguna con el diagnóstico, salvo el `::bigint` de arriba.
 
-### [id: 20261109-04] Barra de progreso al subir videos
+### [id: 20261109-04] Barra de progreso al subir videos — hecha (solo frontend)
 - **fecha:** 2026-11-09 17:20 (America/Mexico_City)
-- **estado:** asignada
+- **estado:** respondida
 - **tarea:** Barra de progreso real al subir videos; **enmienda 17:30:** la transferencia de video va por **TUS resumible** (`tus-js-client`), no por XHR. Archivos chicos pueden seguir en XHR/`.upload()`.
 - **pregunta:** Implementa la ronda descrita en `bridge-response.md`, entrada [id: 20261109-04] (lee la enmienda 17:30). Commit propio. No mezcles con [id: 20261109-05] (límite 2 GB), [id: 20261109-03] ni [id: 20261108-05].
 - **contexto:** HEAD al asignar: `c5b1156`. Creadora sin progreso de bytes; admin con XHR+%. Enmienda: con tope a 2 GB (09-05), una sola petición a ese tamaño es frágil → TUS con reanudación. Lo pidió Sergio el 9 nov 2026 (~17:16; enmienda ~17:30 hora de México).
 - **urgencia:** alta
 - **ya se intentó:** nada de esta ronda; el % del admin queda como precedente de UX, no del protocolo.
+- **resultado:** HECHA en un commit propio, `c1b7f18` (`feat: barra de progreso al subir videos (subida reanudable TUS)`), después de 09-03. **Solo frontend, sin migración:** se publica con `git push` cuando Omar lo apruebe.
+- **diff resumido:**
+  - **Dependencia:** `tus-js-client@4.3.1`.
+  - **`src/lib/subidaVideo.ts` (nuevo):** `subirVideoResumible({ bucket, ruta, archivo, contentType?, signal?, alProgreso })`. TUS contra `https://<ref>.storage.supabase.co/storage/v1/upload/resumable` (si la URL del proyecto no es la de `.supabase.co`, la propia URL); `chunkSize` exactamente 6 MiB; `Authorization: Bearer` con el token de la sesión **pedido en cada petición** (una subida de 2 GB puede durar más que el token); `uploadDataDuringCreation`, `removeFingerprintOnSuccess`, `retryDelays [0,3,5,10,20] s`. **Reanudar:** busca una subida anterior del mismo archivo y bucket (huella de `tus-js-client` en localStorage) y la sigue **con la misma ruta de destino**; si no hay (o caducó) empieza de nuevo. **Cancelar:** `abort(true)` (DELETE al servidor) + `remove` de la ruta. Nunca lanza: devuelve `{ruta, reanudada}` o `{error, cancelada?}` con texto en español (red, 401/403, 413, 415, 5xx).
+  - **`src/lib/useSubida.ts`, `src/lib/velocidad.ts`, `src/lib/tamanos.ts`, `src/components/BarraSubida.tsx` (nuevos):** barra real (`role="progressbar"` con `aria-valuenow`/`aria-valuetext`; indeterminada en preparar/guardar y sin animación con «reducir movimiento»), «42% · 85 MB de 200 MB · faltan 3 min» (el tiempo solo con ≥ 2 s de historial y sobre los últimos 10 s; si no, no se muestra), Cancelar de 44 px (solo en la etapa del video, la única cancelable), `beforeunload` solo mientras hay subida en curso, y la subida se cancela si la pantalla se desmonta.
+  - **Dónde:** `Upload.tsx` (creadora; además **ahora borra el video subido si falla `crearClip`**, como ya hacía el admin; el botón pasa a «Reintentar» tras un error), `AltaCreadora.tsx`, `PublicarPor.tsx`, `SubidaMasiva.tsx` (barra del archivo + barra y texto global del lote «Lote: 3 de 12 archivos»; Cancelar detiene todo el lote) y `UploadAlbum.tsx` (barra global por foto, sin TUS).
+  - **`publicarPara` (`admin.ts`):** el XHR **del video se sustituyó por TUS** (no quedan dos caminos de video); portadas y la tira siguen con URL firmada + XHR. Nueva firma `alAvanzar(etapa, fraccion, bytes?)` con etapas `preparando | video | portada | guardando` y `opciones.signal`. Devuelve `cancelada` y limpia lo ya subido.
+- **verificación:**
+  - **Servidor TUS local (`@tus/server`) + arnés en el navegador, con la misma `subirVideoResumible`** (URL del proyecto apuntando a ese servidor): 40 MB suben en trozos de 6 MiB exactos (offsets 6291456, 12582912…), con `Authorization` en cada petición, el % sube de 0 a 100 y la huella se borra al terminar. **Corte de red** (el servidor destruye la conexión tras 3 trozos): tras los reintentos sale «Se cortó la conexión durante la subida. Reintenta: continúa donde se quedó.» y la huella queda guardada; **Reintentar** hace `HEAD`, **no** crea otra subida (1 `POST` en total) y **continúa desde el 60 %** (`reanudada: true`), termina en 100 % con el archivo completo (40 MiB en el servidor). **Cancelar** al 30 %: `cancelada: true`, el servidor recibe `DELETE`, la huella se borra y el archivo parcial no queda. Preflight CORS real (`OPTIONS`) a `ggyubhyobobizugeknen.supabase.co` y a `ggyubhyobobizugeknen.storage.supabase.co`: ambos responden 200 con los encabezados TUS permitidos.
+  - `MedidorVelocidad` y los formateadores con Deno (sin dato → null; con 1 s de historial → null; 1 MB/s con 8 MB por delante → 8 s; el contador que retrocede reinicia). La barra, vista a 375 px (sin alimentar con una subida real: estados fijos).
+  - `tsc -b`, `npm run build` y lint (dinero y plurales) limpios.
+- **NO verificado:** **nada contra el Storage real de Supabase** (no se subió nada a producción): que `POST /upload/resumable` acepte `uploadDataDuringCreation` y la sesión de una creadora con las políticas de `clips`, y la **reanudación tras recargar la página** (se probó tras un corte dentro de la misma página; la huella en localStorage es lo que lo permite, pero no se recargó). Throttling «Fast 3G» con un video real ≥ 30 MB, un archivo de ~1,9 GB, el flujo completo de cada pantalla (creadora, alta, Publicar por, lote) con una sesión real, y que el `DELETE` de cancelar deje limpio Storage (en el servidor de prueba sí).
+- **Diferencias con la ronda:**
+  1. **El orden real de etapas** es `Preparando portada → Subiendo video → Subiendo portada → Guardando datos`, no el de la lista de la ronda: la portada (y la tira de los gratis) se preparan **antes** de transferir porque, si el navegador no puede leer el formato, se sabe en segundos y no tras mandar 2 GB. Es como ya estaba.
+  2. **Cancelar solo aparece en la etapa del video**; las demás duran segundos y no hay nada que abortar de forma limpia.
+  3. **Reanudar tras expirar (~24 h)** no avisa con un texto aparte: si la URL caducó, `tus-js-client` empieza una subida nueva y la barra arranca en 0 %.
 
-### [id: 20261109-03] Blindar borrado y moderar ediciones de clips
+### [id: 20261109-03] Blindar borrado y moderar ediciones de clips — hecha (migración sin aplicar)
 - **fecha:** 2026-11-09 17:15 (America/Mexico_City)
-- **estado:** asignada
+- **estado:** respondida
 - **tarea:** Blindar el borrado con historial (rechazar DELETE de la dueña; soft-delete admin + fuera del catálogo) y moderar ediciones de título/descripción/portada con la misma regla de confianza del alta, avisando a administración.
 - **pregunta:** Implementa la ronda descrita en `bridge-response.md`, entrada [id: 20261109-03]. Commit propio. Cierra las dos decisiones abiertas de [id: 20261109-02]. No mezcles con [id: 20261108-05] ni reabras otras rondas.
 - **contexto:** HEAD al asignar: `c960dc4`. Diagnóstico del coordinador (revisión post-09-02): soft-delete de dueña quita `tiene_acceso` al comprador; `clips_delete_propio` permite el bypass; soft-delete no apaga `published` y el catálogo no filtra `borrado_at`; editar contenido de un `aprobado` no pasa por moderación. Sergio aprobó la ronda el 9 nov 2026 (~17:15 hora de México).
 - **urgencia:** alta
 - **ya se intentó:** nada de código de esta ronda; 09-02 dejó las dos decisiones abiertas a propósito.
+- **resultado:** HECHA en un commit propio, `916297f` (`feat: blindar borrado y moderar ediciones de clips`). **NO aplicada ni publicada:** la migración `20261221000000_blindar_borrado_y_moderar_ediciones.sql` espera la aprobación de Omar (`supabase db push`); el frontend, después.
+- **diff resumido:**
+  - **`supabase/migrations/20261221000000_blindar_borrado_y_moderar_ediciones.sql`:**
+    - **A) Borrado.** `clips_no_borrar_con_historial`: con historial y quien borra **no es admin** → `raise exception` en español (`restrict_violation`: «Este clip ya tiene compras, rentas o reportes y no se puede eliminar. Usa «Dejar de venderlo ya» o el retiro total.»), la fila no cambia; **admin** → borrado lógico (`borrado_at`, purga a 30 días, motivo «Borrado por administración», `published = false`, quita destacado); sin historial → `DELETE` duro. **Sin sesión de usuario** (`auth.uid()` nulo: funciones internas/`service_role`) se mantiene el borrado lógico de antes, para no romper nada interno; nadie con sesión llega por esa rama.
+    - **Catálogo:** `explorar_ids` excluye `borrado_at is not null`; `clipsPublicados` también (`.is('borrado_at', null)`). `anon` **no** tenía `select` sobre `borrado_at`, y `explorar_ids` es `security invoker`, así que sin más habría roto el catálogo a los visitantes; se añadió `grant select (borrado_at) on public.clips to anon` (en lo que `anon` puede ver —clips publicados— siempre vale `null`).
+    - **B) Ediciones.** `creadora_autoaprueba(uid)` = la regla del INSERT (sin `moderacion_previa_forzada`, identidad verificada, ≥ 5 clips `aprobado`), y **`clips_publicar_alta` la llama** en el INSERT (una sola regla; el resto del disparador igual). `editar_mi_clip` y `cambiar_mi_portada`: si cambian de verdad título, descripción o portada y el clip entra `aprobado`: creadora de confianza → en vivo + fila en `avisos_edicion_clip`; si no → `estado = 'pendiente'` (el disparador baja `published`) + fila con `en_revision = true`. Precio, renta y visibilidad siguen en vivo sin tocar estado ni aviso (aunque vayan en la misma llamada). Sin cambios reales → `cambios: 0`, sin log, sin aviso, sin estado. Las dos devuelven `en_revision` (true/false). `admin_log` registra antes/después, **incluido `estado`** cuando pasa a `pendiente`.
+    - **Avisos:** tabla `avisos_edicion_clip` (RLS activo, sin permisos al cliente) y `admin_avisos()` extendida: tipo nuevo **`edicion`** («Clip editado en vivo», no urgente, → `/admin/contenido`, 30 días) y, en la cola de moderación, el título **«Edición por moderar»** (con qué cambió y la fecha de la edición como «cuándo llegó») cuando el clip volvió a `pendiente` por una edición.
+  - **Frontend:** `misclips.ts` (`editarMiClip` y `cambiarMiPortada` devuelven `{error, enRevision}`; `eliminarMiClip` traduce el rechazo del servidor); `GestionarClip.tsx` muestra dentro del panel «Tu cambio quedó en revisión; el clip vuelve a mostrarse cuando lo aprueben. Quien ya lo compró sigue viéndolo.» en lugar de «Guardado…»; `avisosAdmin.ts`/`AvisosAdmin.tsx` con el tipo `edicion`.
+- **verificación (criterios 1–7, Postgres 17 de prueba con todas las migraciones; no producción):**
+  1. La dueña hace `DELETE` directo de un clip **con compra** → error en español; fila intacta (`borrado_at` nulo, sigue aprobado y publicado); el comprador sigue con `tiene_acceso = true`.
+  2. La dueña borra un clip **sin historial** → se borra (0 filas). Otra cuenta no borra el ajeno (0 filas por RLS).
+  3. **Admin** `DELETE` con historial → `borrado_at` puesto, `published = false`, purga a +30 días, `borrado_por` = la admin; **no** sale en `explorar_ids` (ni para `anon`). Además, con el disparador apagado y `published` forzado a `true`, `explorar_ids` sigue sin devolver el borrado.
+  4. Sin confianza (identidad sin verificar), título de un `aprobado` → `{"en_revision": true}`, `estado = 'pendiente'`, `published = false`, **el comprador conserva `tiene_acceso`**, el clip sale del catálogo y `admin_avisos` lo lista como «Edición por moderar». Lo mismo con la portada. Con el clip ya `pendiente`, otra edición no crea otro aviso. Cuando la admin aprueba, vuelve al catálogo y el aviso desaparece.
+  5. Con confianza (verificada + 5 aprobados): título/descripción y portada **en vivo**, aviso `edicion` para la admin (`nuevo = true`), `admin_log` con antes/después.
+  6. Solo precio/renta/visibilidad → sin cambio de estado, sin aviso.
+  7. No-op → `cambios: 0`, sin log nuevo, sin aviso; portada igual a la actual → `cambios: 0`.
+  - **Regresión del INSERT:** con 5 aprobados + verificada → `aprobado`; sin → `pendiente`; con `moderacion_previa_forzada` → `pendiente`. Una cuenta normal no ve `admin_avisos` ni la tabla; `creadora_autoaprueba` no se ejecuta desde la API.
+  - `tsc -b`, `npm run build` y lint (dinero y plurales) limpios.
+- **NO verificado:** nada contra producción (migración sin aplicar). **El panel en el navegador** con el mensaje de «en revisión» (solo tipos y build; el flujo SQL sí). Cómo se ve el aviso `edicion` en la pantalla de Avisos de administración con datos reales.
+- **Diferencias con el diagnóstico (importantes):**
+  1. **El punto 3 del diagnóstico («el soft-delete no apaga `published`») no se cumplía:** `clips_publicar_alta` (20260916) ya calcula `published = (estado = 'aprobado' and borrado_at is null)` en cada `UPDATE`. Lo que sí faltaba era (a) el rechazo a la dueña, (b) que `explorar_ids`/`clipsPublicados` miraran `borrado_at`, y (c) el `grant` a `anon`. Aun así `published = false` se pone explícito en el borrado lógico.
+  2. **Una admin que borra un clip con compras** deja a quien lo compró **sin acceso** (`tiene_acceso` exige `borrado_at is null`, a propósito desde 20260916: «borrado es borrado»). Es el camino de «contenido ilegal / retirar de la plataforma», no el de la dueña; no lo cambié. Si Sergio quiere que el comprador conserve el acceso incluso entonces, habría que usar el retiro total, no el borrado.
+  3. **Un clip `aprobado` de una creadora SIN identidad verificada** (puede pasar con material subido por administración) que ella edite pasa a `pendiente`, y **`admin_moderar` no deja aprobarlo mientras la identidad no esté verificada** («No se puede aprobar: la creadora todavía no tiene la identidad verificada»). Hoy esa regla no se tocó: el clip se queda en revisión hasta que se verifique. Si hay creadoras así, conviene verificarlas antes o decidir una excepción.
+  4. **Al re-aprobar** el clip recibe un `published_at` nuevo (el disparador lo anula al pasar a `pendiente`), así que sube en los listados por fecha.
+  5. La regla de confianza cuenta el clip que se edita entre los ≥ 5 aprobados (ya es `aprobado` al entrar).
 
 ### [id: 20261109-02] Gestionar mis clips desde el Estudio — hecha y aplicada
 - **fecha:** 2026-11-09 13:45 (America/Mexico_City)
