@@ -27,7 +27,7 @@ import {
 import { fijarCaducidad, type ModoCaducidad } from '../lib/canales'
 import {
   editarMiClip, cambiarMiPortada, dejarDeVenderMiClip, miClipTieneHistorial,
-  eliminarMiClip, yaCaduco, type MiClip,
+  eliminarMiClip, yaCaduco, AVISO_EN_REVISION, type MiClip,
 } from '../lib/misclips'
 import { Pulsable } from './Pulsable'
 
@@ -160,8 +160,10 @@ function Datos({ clip, esAlbum, alCambiar }: {
       },
     })
     enCurso.current = false; setGuardando(false)
-    if (m) { setError(m); return }
-    setBien('Guardado. Ya se ve así en tu perfil.')
+    if (m.error) { setError(m.error); return }
+    // Si el cambio tocaba el contenido y la cuenta aun no es de confianza, el clip
+    // volvio a moderacion: se dice, en lugar de «ya se ve así» (no es cierto).
+    setBien(m.enRevision ? AVISO_EN_REVISION : 'Guardado. Ya se ve así en tu perfil.')
     alCambiar()
   }
 
@@ -374,8 +376,8 @@ function Portada({ clip, uid, alCambiar }: { clip: MiClip; uid: string; alCambia
       const s = await subirPortada(uid, nitida, chica)
       if (s.error || !s.path) { setError(`No se pudo subir la portada: ${s.error ?? 'sin respuesta'}`); return }
       const m = await cambiarMiPortada(clip.id, s.path)
-      if (m) { setError(m); return }
-      setBien('Portada cambiada.')
+      if (m.error) { setError(m.error); return }
+      setBien(m.enRevision ? AVISO_EN_REVISION : 'Portada cambiada.')
       soltarVistas(); setCuadros([]); setElegido(null); setImagen(null); setVistaImagen(null)
       alCambiar()
     } finally {

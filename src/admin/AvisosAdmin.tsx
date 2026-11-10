@@ -20,7 +20,7 @@ import { Boton, Aviso, desde } from './piezas'
 
 const ROTULO: Record<TipoAvisoAdmin, string> = {
   moderacion: 'Moderación', verificacion: 'Identidad', denuncia: 'Denuncia', retiro: 'Retiro',
-  consulta: 'Consulta', ajuste: 'Ajuste', purga: 'Purga',
+  consulta: 'Consulta', ajuste: 'Ajuste', purga: 'Purga', edicion: 'Edición',
 }
 
 export default function AvisosAdmin() {

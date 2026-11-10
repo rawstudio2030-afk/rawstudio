@@ -15,7 +15,7 @@
 import { supabase } from './supabase'
 
 export type TipoAvisoAdmin =
-  'moderacion' | 'verificacion' | 'denuncia' | 'retiro' | 'consulta' | 'ajuste' | 'purga'
+  'moderacion' | 'verificacion' | 'denuncia' | 'retiro' | 'consulta' | 'ajuste' | 'purga' | 'edicion'
 
 export type AvisoAdmin = {
   clave: string

@@ -174,7 +174,7 @@ export async function clipsPublicados(limite = 30): Promise<Lectura<ClipConAutor
   // el clip sigue en el catalogo despues de su fecha.
   const ahora = new Date().toISOString()
   const { data, error } = await supabase.from('clips')
-    .select(CON_AUTORA).eq('published', true)
+    .select(CON_AUTORA).eq('published', true).is('borrado_at', null)
     .or(`caduca_at.is.null,caduca_at.gt.${ahora}`)
     .order('destacado_orden', { ascending: true, nullsFirst: false })
     .order('published_at', { ascending: false }).limit(limite)

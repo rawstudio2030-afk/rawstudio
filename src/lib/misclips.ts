@@ -54,13 +54,30 @@ export async function misClips(
 }
 
 async function llamar(fn: string, args: Record<string, unknown>): Promise<string | null> {
+  const r = await llamarConDatos(fn, args)
+  return r.error
+}
+
+/** Lo que devuelven las funciones de edicion: `enRevision` = el cambio mando el
+ *  clip de vuelta a moderacion (ya no se ve en el catalogo hasta que se apruebe). */
+export type ResultadoEdicion = { error: string | null; enRevision: boolean }
+
+async function llamarConDatos(
+  fn: string, args: Record<string, unknown>,
+): Promise<ResultadoEdicion> {
   try {
-    const { error } = await supabase.rpc(fn, args)
-    return error ? humano(error.message) : null
+    const { data, error } = await supabase.rpc(fn, args)
+    if (error) return { error: humano(error.message), enRevision: false }
+    const enRevision = (data as { en_revision?: unknown } | null)?.en_revision === true
+    return { error: null, enRevision }
   } catch (e) {
-    return humano(e instanceof Error ? e.message : 'No se pudo completar')
+    return { error: humano(e instanceof Error ? e.message : 'No se pudo completar'), enRevision: false }
   }
 }
+
+/** Lo que se le dice a la creadora cuando su cambio quedo en revision. */
+export const AVISO_EN_REVISION =
+  'Tu cambio quedó en revisión; el clip vuelve a mostrarse cuando lo aprueben. Quien ya lo compró sigue viéndolo.'
 
 export type CambiosClip = {
   titulo: string
@@ -74,8 +91,8 @@ export type CambiosClip = {
   }
 }
 
-export function editarMiClip(id: string, c: CambiosClip): Promise<string | null> {
-  return llamar('editar_mi_clip', {
+export function editarMiClip(id: string, c: CambiosClip): Promise<ResultadoEdicion> {
+  return llamarConDatos('editar_mi_clip', {
     p_clip: id,
     p_titulo: c.titulo,
     p_descripcion: c.descripcion,
@@ -87,8 +104,8 @@ export function editarMiClip(id: string, c: CambiosClip): Promise<string | null>
 }
 
 /** La portada (sus dos copias) ya debe estar subida: ver `subirPortada`. */
-export function cambiarMiPortada(id: string, ruta: string): Promise<string | null> {
-  return llamar('cambiar_mi_portada', { p_clip: id, p_cover_path: ruta })
+export function cambiarMiPortada(id: string, ruta: string): Promise<ResultadoEdicion> {
+  return llamarConDatos('cambiar_mi_portada', { p_clip: id, p_cover_path: ruta })
 }
 
 /** Lo saca del catalogo YA. Quien lo compro o lo renta lo conserva. */
@@ -111,17 +128,22 @@ export async function miClipTieneHistorial(
   }
 }
 
+const CON_HISTORIAL =
+  'Este clip tiene compras, rentas o reportes, así que no se puede eliminar. Puedes dejar de venderlo ya o programar su retiro.'
+
 /** Borra un clip SIN historial. Vuelve a comprobarlo justo antes: si entre que
  *  se abrio el panel y este toque alguien lo compro, borrarlo lo convertiria en
  *  un borrado logico y quien pago perderia el acceso. Ante la duda, no se borra. */
 export async function eliminarMiClip(id: string): Promise<string | null> {
   const h = await miClipTieneHistorial(id)
   if ('error' in h) return `No pudimos comprobar que se pueda eliminar. ${h.error}`
-  if (h.tiene) {
-    return 'Este clip acaba de tener una compra, una renta o un reporte, así que ya no se puede eliminar. Puedes dejar de venderlo.'
-  }
+  if (h.tiene) return CON_HISTORIAL
   const m = await borrarClip(id)
-  return m ? humano(m) : null
+  if (!m) return null
+  // El servidor tambien lo rechaza si el clip tiene historial (aunque la pantalla
+  // ya no lo ofrezca): se dice igual que arriba, en lugar de un error de base.
+  if (/ya tiene compras|restrict_violation|23001/i.test(m)) return CON_HISTORIAL
+  return humano(m)
 }
 
 /** ¿Ya paso la fecha de retiro? Con un minuto de margen: la fecha la pone el
