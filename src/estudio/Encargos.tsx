@@ -70,7 +70,7 @@ export default function Encargos() {
       {/* Lo que todavia NO es Mensajes. Este aviso vivia en Chat.tsx, que era
           la pantalla entera; se conserva porque una pestaña llamada «Mensajes»
           sin mas invita a esperar una conversacion libre que aun no existe. */}
-      <div style={{ marginTop: 26, padding: '15px 16px', borderRadius: RADIO.neon,
+      <div style={{ marginTop: 26, padding: '15px 16px', borderRadius: RADIO.filo,
         border: `1.5px dashed ${LINEA.marcada}` }}>
         <div style={{ font: `400 13px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
           Aquí solo van los encargos. Para preguntarle algo a una creadora,
@@ -193,7 +193,7 @@ function Detalle({ e, cierra, recarga }: {
             </>
           ) : (
             <>
-              <div style={{ marginBottom: 14, padding: '14px 16px', borderRadius: RADIO.neon,
+              <div style={{ marginBottom: 14, padding: '14px 16px', borderRadius: RADIO.filo,
                 border: `1px solid ${COLOR.dinero}`, font: `400 14px/1.6 ${FUENTE.ui}`,
                 color: COLOR.textoSuave }}>
                 Ya pagó. Sus <b style={{ color: COLOR.dinero }}>{usdYPesos(e.coins)}</b> están retenidos

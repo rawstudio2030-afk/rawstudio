@@ -47,7 +47,7 @@ export default function MarcaDeAgua({ texto }: Props) {
         // Sin eventos: no debe estorbar los controles del video.
         pointerEvents: 'none',
         zIndex: 3,
-        font: "700 10px/1 'Space Mono', monospace",
+        font: "700 10px/1 'IBM Plex Mono', ui-monospace, monospace",
         letterSpacing: 1.2,
         color: 'rgba(255,255,255,.42)',
         // Sombra en ambos sentidos para que se lea sobre claro y sobre oscuro.

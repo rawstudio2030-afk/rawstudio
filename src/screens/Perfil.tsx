@@ -282,7 +282,7 @@ export default function Perfil() {
           : 'Solo sirve para escribirte con las palabras que prefieres. Nadie más lo ve en tu perfil.'}>
         {trato === null && (
           <div style={{
-            padding: '15px 16px', borderRadius: RADIO.neon, border: `1px solid ${COLOR.admin}`,
+            padding: '15px 16px', borderRadius: RADIO.filo, border: `1px solid ${COLOR.admin}`,
             font: `400 14px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave,
           }}>
             Elige una opción; mientras tanto te hablamos sin asumir nada. No se publica
@@ -311,7 +311,7 @@ export default function Perfil() {
           style={{
             boxSizing: 'border-box', width: '100%', textAlign: 'left',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14,
-            padding: '16px 16px', cursor: 'pointer', borderRadius: RADIO.neon,
+            padding: '16px 16px', cursor: 'pointer', borderRadius: RADIO.filo,
             border: `1px ${creadora ? 'solid' : 'dashed'} rgba(200,255,61,${creadora ? .55 : .35})`,
             background: creadora ? 'rgba(200,255,61,.07)' : 'transparent',
           }}>
@@ -345,7 +345,7 @@ export default function Perfil() {
             persona esperando a que pase algo que no va a pasar sola. */}
         {creadora && !perfil?.identidad_verificada && (
           <div style={{
-            padding: '15px 16px', borderRadius: RADIO.neon, border: `1px solid ${COLOR.admin}`,
+            padding: '15px 16px', borderRadius: RADIO.filo, border: `1px solid ${COLOR.admin}`,
             font: `400 14px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave,
           }}>
             Puedes entrar al estudio, pero <b style={{ color: COLOR.texto }}>
@@ -378,7 +378,7 @@ export default function Perfil() {
             {atajos.map(a => (
               <Enlace key={a.path} a={a.path} style={{
                 display: 'flex', alignItems: 'center', gap: 13, padding: '15px 14px', minHeight: 54,
-                cursor: 'pointer', borderRadius: RADIO.neon, border: '1px solid rgba(255,255,255,.14)',
+                cursor: 'pointer', borderRadius: RADIO.filo, border: '1px solid rgba(255,255,255,.14)',
               }}>
                 <span style={{ width: 26, display: 'grid', placeItems: 'center', color: COLOR.dinero }}>
                   <Icono nombre={a.icono} tam={18} />
@@ -442,7 +442,7 @@ function Seccion({ titulo, nota, primera, children }: {
   return (
     <section style={{
       display: 'flex', flexDirection: 'column', gap: 18, boxSizing: 'border-box',
-      marginTop: primera ? 0 : 14, padding: '20px 18px', borderRadius: RADIO.neon,
+      marginTop: primera ? 0 : 14, padding: '20px 18px', borderRadius: RADIO.filo,
       border: '1px solid rgba(255,255,255,.12)', background: COLOR.superficie,
     }}>
       <div>

@@ -39,7 +39,7 @@ export function MarcoDocumento({ titulo, version, aviso, children }: {
       width: '100%', maxWidth: 720, margin: '0 auto',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-        <Wordmark ancho={110} glow={12} />
+        <Wordmark ancho={110} />
         <Pulsable al={() => nav(-1)} rotulo="Volver" style={{
           width: 44, height: 44, borderRadius: '50%', display: 'grid', placeItems: 'center',
           border: '1px solid rgba(255,255,255,.22)', color: COLOR.texto, cursor: 'pointer',
@@ -58,7 +58,7 @@ export function MarcoDocumento({ titulo, version, aviso, children }: {
 
       {aviso && (
         <div style={{
-          marginTop: 22, padding: '16px 16px', borderRadius: RADIO.neon,
+          marginTop: 22, padding: '16px 16px', borderRadius: RADIO.filo,
           border: '1.5px dashed rgba(255,43,209,.55)', background: 'rgba(255,43,209,.06)',
         }}>
           <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase', color: '#FF5BDC' }}>

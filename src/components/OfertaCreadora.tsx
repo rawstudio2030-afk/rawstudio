@@ -18,7 +18,7 @@ import { Pulsable } from './Pulsable'
 /** Tarjeta de neon, del mismo estilo que las de la portada y el catalogo. */
 function neon(rgb: string, borde: string) {
   return {
-    borderRadius: RADIO.neon, border: `1.5px solid ${borde}`,
+    borderRadius: RADIO.filo, border: `1.5px solid ${borde}`,
     background: `linear-gradient(180deg, rgba(${rgb},.09), rgba(8,8,10,.7))`,
     boxShadow: `0 0 8px rgba(${rgb},.38), 0 0 22px rgba(${rgb},.16)`,
   }
@@ -28,7 +28,7 @@ const C = { rgb: '0,229,255', borde: '#19E6FF' }
 
 const BOTON_MAGENTA = {
   boxSizing: 'border-box', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-  minHeight: 50, cursor: 'pointer', borderRadius: RADIO.neon, color: '#FFF',
+  minHeight: 50, cursor: 'pointer', borderRadius: RADIO.filo, color: '#FFF',
   background: 'linear-gradient(135deg, #FF2BD1, #9B2BE8)', boxShadow: '0 0 16px rgba(255,43,209,.42)',
   font: `700 13px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
 } as const
@@ -67,11 +67,11 @@ export default function OfertaCreadora({ creadora, handle }: {
   return (
     <div style={{ marginTop: 30, display: 'grid', gap: 26 }}>
       {error && (
-        <div style={{ padding: '10px 12px', border: '1px solid #FF4444', color: '#FF4444', borderRadius: RADIO.neon,
+        <div style={{ padding: '10px 12px', border: '1px solid #FF4444', color: '#FF4444', borderRadius: RADIO.filo,
           font: `400 13px/1.45 ${FUENTE.ui}` }}>{error}</div>
       )}
       {aviso && (
-        <div style={{ padding: '10px 12px', border: `1px solid ${COLOR.dinero}`, borderRadius: RADIO.neon,
+        <div style={{ padding: '10px 12px', border: `1px solid ${COLOR.dinero}`, borderRadius: RADIO.filo,
           color: COLOR.dinero, font: `400 13px/1.45 ${FUENTE.ui}` }}>{aviso}</div>
       )}
 
@@ -80,7 +80,7 @@ export default function OfertaCreadora({ creadora, handle }: {
         <div id="suscripcion" style={{ scrollMarginTop: 24 }}>
           <div style={etiqueta}>Suscripción</div>
           {suscrita ? (
-            <div style={{ marginTop: 12, padding: '14px 15px', borderRadius: RADIO.neon,
+            <div style={{ marginTop: 12, padding: '14px 15px', borderRadius: RADIO.filo,
               border: `1.5px solid ${COLOR.dinero}`, background: 'rgba(200,255,61,.05)' }}>
               <div style={{ font: `400 13px/1.45 ${FUENTE.ui}`, color: COLOR.texto }}>
                 Estás suscrita hasta el{' '}
@@ -169,7 +169,7 @@ export default function OfertaCreadora({ creadora, handle }: {
                   nav('/estudio/encargos')
                 }} style={{ ...BOTON_MAGENTA, flex: 1, width: 'auto', fontSize: 12 }}>Enviar propuesta</Pulsable>
                 <Pulsable al={() => setEncargando(false)} style={{ flex: 1, display: 'flex', alignItems: 'center',
-                  justifyContent: 'center', minHeight: 50, cursor: 'pointer', borderRadius: RADIO.neon,
+                  justifyContent: 'center', minHeight: 50, cursor: 'pointer', borderRadius: RADIO.filo,
                   border: `1px solid ${LINEA.fuerte}`, color: COLOR.textoSuave,
                   font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase' }}>Cancelar</Pulsable>
               </div>
@@ -195,7 +195,7 @@ export default function OfertaCreadora({ creadora, handle }: {
           <div style={etiqueta}>Lo que escribe</div>
           <div style={{ marginTop: 12, display: 'grid', gap: 10 }}>
             {posts.map(p => (
-              <div key={p.id} style={{ padding: '14px 15px', borderRadius: RADIO.neon, border: `1px solid ${LINEA.media}`, background: 'rgba(255,255,255,.02)' }}>
+              <div key={p.id} style={{ padding: '14px 15px', borderRadius: RADIO.filo, border: `1px solid ${LINEA.media}`, background: 'rgba(255,255,255,.02)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
                   <span style={{ font: `700 16px/1.3 ${FUENTE.ui}` }}>{p.titulo}</span>
                   {!p.completo && (

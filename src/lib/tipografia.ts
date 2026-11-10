@@ -77,7 +77,7 @@ export const ALTO = {
  * separa lo que deberia leerse junto. Todos los usos del proyecto son de
  * rotulos en mayuscula, y por eso la escala va de 0.5 para arriba. */
 export const LETRA = {
-  /** Titulares grandes en Anton: casi nada, el peso ya los separa. */
+  /** Titulares grandes en Bodoni Moda: casi nada, el peso ya los separa. */
   titular: 0.5,
   /** Rotulos normales. */
   rotulo: 1.2,

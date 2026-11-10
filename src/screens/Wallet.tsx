@@ -22,7 +22,7 @@ import {
 import { usd } from '../lib/dinero'
 import { useMoneda } from '../lib/moneda'
 import Equivalente from '../components/Equivalente'
-import { COLOR, LINEA, FUENTE, RADIO, GLOW } from '../lib/diseño'
+import { COLOR, LINEA, FUENTE, RADIO, LUZ } from '../lib/diseño'
 import Icono from '../components/Iconos'
 import { Pulsable } from '../components/Pulsable'
 import { Enlace } from '../components/Pulsable'
@@ -130,7 +130,7 @@ export function VistaDinero({
           </div>
           <Pulsable al={alReintentar} style={{
             marginTop: 12, minHeight: 44, padding: '0 18px', display: 'inline-flex', alignItems: 'center',
-            cursor: 'pointer', borderRadius: RADIO.neon, border: `1px solid ${LINEA.fuerte}`, color: COLOR.texto,
+            cursor: 'pointer', borderRadius: RADIO.filo, border: `1px solid ${LINEA.fuerte}`, color: COLOR.texto,
             font: `700 12px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
           }}>Reintentar</Pulsable>
         </div>
@@ -144,9 +144,9 @@ export function VistaDinero({
           Retirar SI existe: la pantalla comprueba identidad, cuenta bancaria,
           minimo y disponible, y dice cual falta. */}
       <div style={{
-        display: 'flex', marginTop: 24, borderRadius: RADIO.neon, overflow: 'hidden',
+        display: 'flex', marginTop: 24, borderRadius: RADIO.filo, overflow: 'hidden',
         border: '1.5px solid rgba(200,255,61,.45)', background: 'rgba(200,255,61,.04)',
-        boxShadow: `${GLOW.lima}, inset 0 0 18px rgba(200,255,61,.06)`,
+        boxShadow: `${LUZ.dinero}, inset 0 0 18px rgba(224,177,90,.06)`,
       }}>
         {esCreadora && (
           <Enlace a="/estudio/retirar" style={{
@@ -189,7 +189,7 @@ export function VistaDinero({
           Recargar sigue sin existir —hace falta un procesador de pagos
           compatible con este giro— y decirlo es mas util que un boton que no
           hace nada. */}
-      <div style={{ marginTop: 14, padding: '14px 16px', borderRadius: RADIO.neon, border: `1.5px dashed ${LINEA.marcada}` }}>
+      <div style={{ marginTop: 14, padding: '14px 16px', borderRadius: RADIO.filo, border: `1.5px dashed ${LINEA.marcada}` }}>
         <div style={{ font: `400 13px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
           <b style={{ color: COLOR.texto }}>Recargar</b> todavía no se puede: falta un
           procesador de pagos compatible con este giro. Mientras tanto, la administración
@@ -226,7 +226,7 @@ export function VistaDinero({
         </div>
       ) : (
         <div style={{
-          marginTop: 14, borderRadius: RADIO.neon, border: '1px solid rgba(255,255,255,.12)',
+          marginTop: 14, borderRadius: RADIO.filo, border: '1px solid rgba(255,255,255,.12)',
           background: COLOR.superficie, overflow: 'hidden',
         }}>
           {movimientos.map((m, i) => {
@@ -273,7 +273,7 @@ const iconoCirculo = {
 function Cifra({ rotulo, valor, color }: { rotulo: string; valor: number; color: string }) {
   return (
     <div style={{
-      padding: '14px 14px', borderRadius: RADIO.neon, border: '1px solid rgba(255,255,255,.12)', background: COLOR.superficie,
+      padding: '14px 14px', borderRadius: RADIO.filo, border: '1px solid rgba(255,255,255,.12)', background: COLOR.superficie,
     }}>
       <div style={{ font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase', color: COLOR.textoSuave }}>
         {rotulo}

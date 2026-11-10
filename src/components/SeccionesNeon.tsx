@@ -15,7 +15,7 @@
 import type { ReactNode } from 'react'
 import Icono from './Iconos'
 import { Enlace } from './Pulsable'
-import { COLOR, FUENTE, RADIO, DEGRADADO, GLOW } from '../lib/diseño'
+import { COLOR, FUENTE, RADIO, TRAMA, LUZ } from '../lib/diseño'
 import { COMO_FUNCIONA, VERIFICACION_NOTA, FORMAS_NEON } from '../content/portada'
 
 type Tono = 'm' | 'c'
@@ -33,7 +33,7 @@ function tarjeta(t: Tono) {
   const { borde, rgb } = TONO[t]
   return {
     border: `1.5px solid ${borde}`,
-    borderRadius: RADIO.neon,
+    borderRadius: RADIO.filo,
     background: `linear-gradient(180deg, rgba(${rgb},.1), rgba(8,8,10,.72))`,
     boxShadow: `0 0 8px rgba(${rgb},.5), 0 0 26px rgba(${rgb},.24), inset 0 0 18px rgba(${rgb},.1)`,
   }
@@ -43,7 +43,7 @@ function tarjeta(t: Tono) {
 function Hilo() {
   return <div aria-hidden style={{
     width: 128, height: 2, margin: '14px auto 0',
-    background: DEGRADADO.hilo, boxShadow: GLOW.magenta,
+    background: TRAMA.hilo, boxShadow: LUZ.acento,
   }} />
 }
 
@@ -130,8 +130,7 @@ export function FormasDeGanar() {
       <p style={{
         margin: '14px 0 0', textAlign: 'center', color: COLOR.admin,
         font: `700 14px/1.3 ${FUENTE.ui}`, letterSpacing: 2.4, textTransform: 'uppercase',
-        textShadow: GLOW.textoCian,
-      }}>Tú creas. Tú eliges. Tú ganas.</p>
+              }}>Tú creas. Tú eliges. Tú ganas.</p>
 
       <ul style={{ listStyle: 'none', margin: '28px 0 0', padding: 0, display: 'grid', gap: 12 }}>
         {FORMAS_NEON.map((f, i) => {
@@ -173,7 +172,7 @@ export function FormasDeGanar() {
 
       {/* El panel del 80%: borde de degradado de magenta a cian y las dos luces. */}
       <div className="neon-panel" style={{
-        marginTop: 18, borderRadius: RADIO.neon, border: '2px solid transparent',
+        marginTop: 18, borderRadius: RADIO.filo, border: '2px solid transparent',
         background: `linear-gradient(#0B0912, #0B0912) padding-box, linear-gradient(135deg, ${COLOR.acento}, ${COLOR.admin}) border-box`,
         boxShadow: `0 0 12px rgba(255,43,209,.45), 0 0 34px rgba(0,229,255,.25), inset 0 0 26px rgba(255,43,209,.08)`,
       }}>
@@ -194,8 +193,8 @@ export function FormasDeGanar() {
             <Icono nombre="grafica" tam={34} />
           </span>
           <div style={{ font: `700 clamp(13px, 3.6vw, 19px)/1.15 ${FUENTE.ui}`, letterSpacing: .3, textTransform: 'uppercase' }}>
-            <div style={{ color: COLOR.acento, textShadow: GLOW.textoMagenta }}>Sin cuota mensual.</div>
-            <div style={{ color: COLOR.admin, textShadow: GLOW.textoCian }}>Sin exclusividad.</div>
+            <div style={{ color: COLOR.acento }}>Sin cuota mensual.</div>
+            <div style={{ color: COLOR.admin }}>Sin exclusividad.</div>
           </div>
           <div style={{ font: `400 14px/1.35 ${FUENTE.ui}`, color: '#D9D5DD' }}>Porque tu trabajo tiene valor.</div>
         </div>

@@ -18,7 +18,7 @@ import TarjetaClip from '../components/TarjetaClip'
 import Wordmark from '../components/Wordmark'
 import { Pulsable, Enlace } from '../components/Pulsable'
 import Icono from '../components/Iconos'
-import { COLOR, FUENTE, RADIO, DEGRADADO } from '../lib/diseño'
+import { COLOR, FUENTE, RADIO, TRAMA } from '../lib/diseño'
 
 type Filtro = 'todo' | 'gratis' | 'pago' | 'creadoras'
 
@@ -111,7 +111,7 @@ export default function Explorar() {
       background: `radial-gradient(ellipse 90% 340px at 50% 0, rgba(123,60,255,.2), transparent 75%), ${COLOR.fondo}`,
     }}>
       <div style={{ padding: '46px 18px 0' }}>
-        <div className="sin-riel"><Wordmark ancho={116} glow={14} /></div>
+        <div className="sin-riel"><Wordmark ancho={116} /></div>
 
         <div style={{ marginTop: 22 }}>
           <h1 style={{
@@ -147,7 +147,7 @@ export default function Explorar() {
         <div style={{ padding: '0 18px 14px' }}>
           <label style={{
             display: 'flex', alignItems: 'center', gap: 10, boxSizing: 'border-box',
-            border: '1.5px solid rgba(255,255,255,.28)', borderRadius: RADIO.neon,
+            border: '1.5px solid rgba(255,255,255,.28)', borderRadius: RADIO.filo,
             padding: '0 14px', background: 'rgba(8,8,10,.6)', color: COLOR.textoSuave,
           }}>
             <Icono nombre="lupa" tam={18} />
@@ -170,7 +170,7 @@ export default function Explorar() {
               {gente.map(g => (
                 <Enlace key={g.id} a={`/creator/${g.handle}`} style={{
                   display: 'flex', gap: 12, alignItems: 'center', cursor: 'pointer',
-                  padding: '12px 13px', borderRadius: RADIO.neon,
+                  padding: '12px 13px', borderRadius: RADIO.filo,
                   border: `1.5px solid ${TONO.c.borde}`, background: 'rgba(0,229,255,.04)',
                   boxShadow: `0 0 8px rgba(${TONO.c.rgb},.3), 0 0 20px rgba(${TONO.c.rgb},.12)`,
                 }}>
@@ -231,7 +231,7 @@ export default function Explorar() {
               const dur = duracion(c.duration_s)
               return (
                 <article key={c.id} style={{
-                  padding: 6, borderRadius: RADIO.neon, boxSizing: 'border-box',
+                  padding: 6, borderRadius: RADIO.filo, boxSizing: 'border-box',
                   border: `1.5px solid ${t.borde}`, background: `rgba(${t.rgb},.05)`,
                   boxShadow: `0 0 8px rgba(${t.rgb},.4), 0 0 22px rgba(${t.rgb},.16)`,
                 }}>
@@ -244,7 +244,7 @@ export default function Explorar() {
                       a={`/clip/${c.id}`}>
                       {/* La portada publica es una miniatura de 240 px (la nitida
                           es privada): se le pone encima el duotono de la casa. */}
-                      <div aria-hidden style={{ position: 'absolute', inset: 0, background: DEGRADADO.duotono, mixBlendMode: 'soft-light' }} />
+                      <div aria-hidden style={{ position: 'absolute', inset: 0, background: TRAMA.duotono, mixBlendMode: 'soft-light' }} />
                       <div aria-hidden style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(8,8,10,.1) 45%,rgba(8,8,10,.78) 100%)' }} />
                       <div style={{ position: 'absolute', top: 7, left: 7, right: 7, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                         {marca.map(m => (
@@ -312,7 +312,7 @@ export default function Explorar() {
               cargado se queda tal cual y el aviso es solo de esta pagina. */}
           {falloMas && (
             <div role="alert" style={{
-              marginTop: 18, padding: '14px 16px', borderRadius: RADIO.neon, textAlign: 'center',
+              marginTop: 18, padding: '14px 16px', borderRadius: RADIO.filo, textAlign: 'center',
               border: '1.5px solid rgba(255,90,90,.6)', background: 'rgba(255,90,90,.08)',
               font: `400 14px/1.45 ${FUENTE.ui}`, color: COLOR.texto,
             }}>
@@ -323,7 +323,7 @@ export default function Explorar() {
             <div style={{ marginTop: 18, textAlign: 'center' }}>
               <Pulsable al={verMas} activo={!cargandoMas} style={{
                 display: 'inline-block', padding: '16px 24px', cursor: cargandoMas ? 'default' : 'pointer',
-                borderRadius: RADIO.neon, border: '2px solid #FF4FE0', color: '#FFF',
+                borderRadius: RADIO.filo, border: '2px solid #FF4FE0', color: '#FFF',
                 opacity: cargandoMas ? 0.6 : 1,
                 background: 'linear-gradient(180deg, rgba(255,43,209,.26), rgba(255,43,209,.1))',
                 boxShadow: '0 0 10px rgba(255,43,209,.6), 0 0 28px rgba(255,43,209,.35), inset 0 0 16px rgba(255,43,209,.25)',
@@ -340,14 +340,14 @@ export default function Explorar() {
 function Vacio({ texto, accion }: { texto: string; accion?: { texto: string; al: () => void } }) {
   return (
     <div style={{
-      padding: '60px 20px', textAlign: 'center', borderRadius: RADIO.neon,
+      padding: '60px 20px', textAlign: 'center', borderRadius: RADIO.filo,
       border: '1.5px dashed rgba(255,255,255,.2)',
     }}>
       <div style={{ fontFamily: FUENTE.ui, fontSize: 19, color: COLOR.textoSuave }}>{texto}</div>
       {accion && (
         <Pulsable al={accion.al} style={{
           marginTop: 18, display: 'inline-block', padding: '16px 24px', cursor: 'pointer',
-          borderRadius: RADIO.neon, border: '2px solid #FF4FE0', color: '#FFF',
+          borderRadius: RADIO.filo, border: '2px solid #FF4FE0', color: '#FFF',
           background: 'linear-gradient(180deg, rgba(255,43,209,.26), rgba(255,43,209,.1))',
           boxShadow: '0 0 10px rgba(255,43,209,.6), 0 0 28px rgba(255,43,209,.35), inset 0 0 16px rgba(255,43,209,.25)',
           font: `500 13px/1 ${FUENTE.ui}`, letterSpacing: 2.6, textTransform: 'uppercase',

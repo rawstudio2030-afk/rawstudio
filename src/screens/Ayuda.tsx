@@ -50,7 +50,7 @@ export function Contacto() {
       {/* Lo unico que esta pagina promete con un numero. El resto de los
           plazos de esta plataforma viven en los terminos, y este tambien:
           repetirlo aqui es para que no haga falta abrirlos. */}
-      <div style={{ marginTop: 22, padding: '16px 16px', borderRadius: RADIO.neon, border: `1.5px dashed ${LINEA.marcada}` }}>
+      <div style={{ marginTop: 22, padding: '16px 16px', borderRadius: RADIO.filo, border: `1.5px dashed ${LINEA.marcada}` }}>
         <div style={{ font: `400 14px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
           <b style={{ color: COLOR.texto }}>Un plazo con número:</b> un retiro
           aprobado se paga en un máximo de <b style={{ color: COLOR.dinero }}>48

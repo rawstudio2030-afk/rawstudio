@@ -12,7 +12,7 @@ import {
   BARRA, ESTUDIO, BIBLIOTECA_DE_CREADORA, RUTAS_ENTRADA, RUTAS_PANEL, REDIRIGE_SI_HAY_SESION, EXIGE_SESION,
   papelDe, visiblesPara, type Papel,
 } from '../lib/rutas'
-import { COLOR, LINEA, FUENTE, DEGRADADO } from '../lib/diseño'
+import { COLOR, LINEA, FUENTE, TRAMA } from '../lib/diseño'
 import Icono from './Iconos'
 import Wordmark from './Wordmark'
 import { elegirModo } from '../lib/modo'
@@ -138,7 +138,7 @@ export function VistaBarraInferior({ destinos, aqui }: { destinos: Destino[]; aq
           linea que firma la portada. */}
       <div aria-hidden style={{
         position: 'absolute', left: 0, right: 0, top: 0, height: 1,
-        background: DEGRADADO.hilo, opacity: .55,
+        background: TRAMA.hilo, opacity: .55,
         boxShadow: '0 0 10px rgba(255,43,209,.45)',
       }} />
       {destinos.map(d => {
@@ -266,7 +266,7 @@ export function BarraLateral() {
           escrito: dos marcas para el mismo sitio. Wordmark ya es un boton que
           lleva a casa, asi que no va dentro de un Enlace. */}
       <div style={{ padding: '18px 18px 14px' }}>
-        <Wordmark ancho={118} glow={7} />
+        <Wordmark ancho={118} />
       </div>
 
       <div style={{ padding: '4px 0 10px' }}>

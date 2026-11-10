@@ -62,7 +62,7 @@ export default function Consultas() {
             marginTop: 18,
             minHeight: 44,
             padding: '0 18px',
-            borderRadius: RADIO.neon,
+            borderRadius: RADIO.filo,
             border: `1.5px solid ${LINEA.marcada}`,
             font: `700 15px/1.3 ${FUENTE.ui}`,
             color: COLOR.admin,
@@ -113,7 +113,7 @@ export default function Consultas() {
 
       {/* ---------- pie ---------- */}
       <div style={{
-        marginTop: 34, padding: '16px 16px', borderRadius: RADIO.neon,
+        marginTop: 34, padding: '16px 16px', borderRadius: RADIO.filo,
         border: `1.5px dashed ${LINEA.marcada}`, font: `400 14px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave,
       }}>
         ¿Dudas sobre cómo funciona el sitio? Mira las{' '}

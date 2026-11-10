@@ -301,7 +301,7 @@ export default function Upload() {
       </div>
 
       {!perfil.identidad_verificada && (
-        <div style={{ padding: '15px 16px', borderRadius: RADIO.neon, border: `1px solid ${COLOR.admin}` }}>
+        <div style={{ padding: '15px 16px', borderRadius: RADIO.filo, border: `1px solid ${COLOR.admin}` }}>
           <div style={{ font: `400 14px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
             Para subir y publicar, primero tenemos que{' '}
             <b style={{ color: COLOR.texto }}>verificar tu identidad y tu edad</b>.
@@ -318,7 +318,7 @@ export default function Upload() {
       {/* video */}
       <Pulsable al={() => refVideo.current?.click()} style={{
         boxSizing: 'border-box', width: '100%',
-        padding: '26px 18px', textAlign: 'center', cursor: 'pointer', borderRadius: RADIO.neon,
+        padding: '26px 18px', textAlign: 'center', cursor: 'pointer', borderRadius: RADIO.filo,
         border: `1.5px dashed ${video ? 'rgba(200,255,61,.6)' : LINEA.marcada}`,
         background: video ? 'rgba(200,255,61,.05)' : 'transparent',
       }}>
@@ -534,7 +534,7 @@ export default function Upload() {
       )}
 
       {estado === 'sin-portada' && (
-        <div style={{ borderRadius: RADIO.neon, border: `1px solid ${COLOR.admin}`, padding: '15px 16px' }}>
+        <div style={{ borderRadius: RADIO.filo, border: `1px solid ${COLOR.admin}`, padding: '15px 16px' }}>
           <div style={{ font: `400 14px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
             <b style={{ color: COLOR.texto }}>Tu clip se publicó</b> — el video está
             a salvo. Lo que no se pudo guardar fue la portada: se muestra con el

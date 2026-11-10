@@ -132,7 +132,7 @@ export default function AltaCreadora() {
       display: 'flex', flexDirection: 'column', gap: 20,
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Wordmark ancho={110} glow={12} />
+        <Wordmark ancho={110} />
         <Enlace a="/admin" rotulo="Cerrar" style={{ font: `400 26px/1 ${FUENTE.ui}`, color: COLOR.textoSuave, cursor: 'pointer' }}>×</Enlace>
       </div>
 

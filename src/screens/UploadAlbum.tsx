@@ -138,7 +138,7 @@ export default function UploadAlbum() {
       </div>
 
       {!verificada && (
-        <div style={{ padding: '15px 16px', borderRadius: RADIO.neon, border: `1px solid ${COLOR.admin}` }}>
+        <div style={{ padding: '15px 16px', borderRadius: RADIO.filo, border: `1px solid ${COLOR.admin}` }}>
           <div style={{ font: `400 14px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
             Para subir y publicar, primero tenemos que{' '}
             <b style={{ color: COLOR.texto }}>verificar tu identidad y tu edad</b>.
@@ -161,7 +161,7 @@ export default function UploadAlbum() {
           onChange={e => agregar(e.target.files)} style={{ display: 'none' }} aria-label="Elegir fotos" />
         <Pulsable al={() => refFotos.current?.click()} activo={!ocupado && fotos.length < max} style={{
           boxSizing: 'border-box', width: '100%', padding: '22px 18px', textAlign: 'center',
-          cursor: 'pointer', borderRadius: RADIO.neon,
+          cursor: 'pointer', borderRadius: RADIO.filo,
           border: `1.5px dashed ${enRango ? 'rgba(200,255,61,.6)' : LINEA.marcada}`,
         }}>
           <div style={{ ...etiqueta, color: enRango ? COLOR.dinero : COLOR.textoSuave }}>
@@ -239,7 +239,7 @@ export default function UploadAlbum() {
           style={{ ...campo, resize: 'vertical', fontFamily: FUENTE.ui }} />
       </div>
 
-      <div style={{ padding: '14px 16px', borderRadius: RADIO.neon, border: `1px solid ${LINEA.suave}` }}>
+      <div style={{ padding: '14px 16px', borderRadius: RADIO.filo, border: `1px solid ${LINEA.suave}` }}>
         <div style={etiqueta}>Precio fijo</div>
         <div style={{ font: `700 28px/1 ${FUENTE.mono}`, color: COLOR.dinero, marginTop: 10 }}>{usd(precio)}</div>
         <div style={{ font: `400 12px/1.5 ${FUENTE.ui}`, color: COLOR.textoSuave, marginTop: 8 }}>

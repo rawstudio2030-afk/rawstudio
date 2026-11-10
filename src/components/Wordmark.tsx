@@ -1,57 +1,31 @@
-// El logo, como componente unico: «RAW» en magenta y «studio» en lima, con
-// resplandor de letrero de neon (ver DESIGN-BRIEF.md y design/wordmark-neon.svg).
+// El logo, como componente unico: «RAW» en Italiana y «studio» en Bodoni Moda
+// italica (ver docs/diseno/descenso/README.md y `antes-despues.jpg`).
 //
-// Es TEXTO, no una imagen. El SVG de referencia pide Arial Black, que no
-// existe en Android ni en iOS, asi que alli cada telefono dibujaria otra
-// letra. Aqui se usa Space Grotesk, que ya se carga, y por eso el logo se ve
-// igual en todas partes, escala sin pixelarse y el resplandor sale de los
-// mismos tokens que el resto del sitio.
+// Es TEXTO, no una imagen: escala sin pixelarse, el lector de pantalla lo lee
+// una vez y sale de los mismos tokens que el resto del sitio. Sin tubo de
+// neon, sin contorno hueco, sin resplandor: la marca es sobria.
+//
+// El color de «studio» cambia segun el piso en que se muestre (`piso`): champagne
+// en Collins, que es el de casa; rosa palido en el antro; safelight en el cuarto
+// oscuro; ambar en el calabozo.
 //
 // Ademas lleva a casa al tocarlo, que es lo que todo el mundo espera de un
 // logo en un encabezado.
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
-import { COLOR, FUENTE } from '../lib/diseño'
+import { COLOR, FUENTE, PISO, type NombrePiso } from '../lib/diseño'
 import { Pulsable } from './Pulsable'
 
-// Cuantas veces cabe el ancho del logo en su tamaño de letra: con esta
-// constante `ancho` sigue significando lo mismo que con el PNG, que es lo que
-// el resto de las pantallas ya le pasa. Se mide en el navegador, no se supone.
-const ANCHO_EN_LETRA = 4.87
-
-/** Resplandor de letrero de neon. `glow` es el mismo numero que ya recibia el
- *  logo (el desenfoque en px del halo): se reparte en tres capas, un nucleo
- *  claro, el color y un halo ancho. */
-function neon(color: string, glow: number) {
-  return [
-    `0 0 ${Math.max(1, glow * .22)}px rgba(255,255,255,.4)`,
-    `0 0 ${glow * .55}px ${color}`,
-    `0 0 ${glow * 1.5}px ${color}99`,
-  ].join(', ')
-}
-
-/** Letrero de tubo: la letra es HUECA, solo contorno, y el resplandor sale de
- *  ese contorno (`drop-shadow` sigue los pixeles pintados, no la caja). Es lo
- *  que se ve en los mockups. Solo con tamaño suficiente: a 118 px un contorno
- *  de un pixel se pierde, y ahi se usa la letra rellena. */
-function tuboDe(color: string, nucleo: string, glow: number, letra: number) {
-  return {
-    color: 'transparent',
-    WebkitTextStroke: `${Math.max(1.4, letra * .045)}px ${nucleo}`,
-    filter: [
-      `drop-shadow(0 0 ${Math.max(1, glow * .18)}px ${nucleo})`,
-      `drop-shadow(0 0 ${glow * .6}px ${color})`,
-      `drop-shadow(0 0 ${glow * 1.5}px ${color}AA)`,
-    ].join(' '),
-  }
-}
+// Cuantas veces cabe el ancho del logo en el tamaño de letra de «RAW»: con esta
+// constante `ancho` sigue significando lo mismo que antes, que es lo que el
+// resto de las pantallas ya le pasa. Se mide en el navegador, no se supone.
+const ANCHO_EN_LETRA = 6.02
 
 export default function Wordmark({
   ancho = 150,
-  glow = 16,
   centrado = false,
-  tubo,
-}: { ancho?: number; glow?: number; centrado?: boolean; tubo?: boolean }) {
+  piso = 'collins',
+}: { ancho?: number; centrado?: boolean; piso?: NombrePiso }) {
   const nav = useNavigate()
   const { sesion } = useSesion()
   const aqui = useLocation().pathname
@@ -69,17 +43,12 @@ export default function Wordmark({
     nav(destino)
   }
 
-  const esTubo = tubo ?? ancho >= 130
-  const letra = ancho / ANCHO_EN_LETRA
-
   const pinta = {
     position: 'relative' as const,
     // El ancho es un tamaño de letra y no una caja: el texto manda.
     fontSize: ancho / ANCHO_EN_LETRA,
     lineHeight: 1,
     whiteSpace: 'nowrap' as const,
-    fontFamily: FUENTE.ui, fontWeight: esTubo ? 500 : 700,
-    letterSpacing: esTubo ? '.01em' : '-.02em',
     cursor: inerte ? 'default' : 'pointer',
     margin: centrado ? '0 auto' : undefined,
     flex: '0 0 auto',
@@ -88,18 +57,14 @@ export default function Wordmark({
 
   // El lector de pantalla lee «RAWstudio» una vez, no «R A W s t u d i o».
   const marca = (
-    <span role="img" aria-label="RAWstudio" style={{ display: 'inline-flex', alignItems: 'baseline' }}>
+    <span role="img" aria-label="RAWstudio" style={{ display: 'inline-flex', alignItems: 'baseline', gap: '.08em' }}>
       <span aria-hidden style={{
-        color: COLOR.acento, textTransform: 'uppercase',
-        ...(esTubo
-          ? tuboDe(COLOR.acento, '#FF8BEA', glow * 1.4, letra)
-          : { textShadow: neon(COLOR.acento, glow) }),
+        fontFamily: FUENTE.deco, fontWeight: 400, letterSpacing: '.22em', color: COLOR.texto,
+        fontFeatureSettings: '"kern" 1, "liga" 1',
       }}>RAW</span>
       <span aria-hidden style={{
-        color: COLOR.dinero, fontSize: '.92em', marginLeft: '.04em',
-        ...(esTubo
-          ? tuboDe(COLOR.dinero, '#E6FF8F', glow * 1.4, letra)
-          : { textShadow: neon(COLOR.dinero, glow) }),
+        fontFamily: FUENTE.display, fontStyle: 'italic', fontWeight: 500, fontSize: '1.125em',
+        letterSpacing: '.01em', marginLeft: '-.02em', color: PISO[piso].studio,
       }}>studio</span>
     </span>
   )

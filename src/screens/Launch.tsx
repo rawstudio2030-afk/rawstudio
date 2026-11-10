@@ -61,7 +61,7 @@ export default function Launch() {
 
       <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', padding: '0 22px', marginTop: '-6vh' }}>
         <div className="intro-neon">
-          <Wordmark ancho={Math.min(360, Math.round(window.innerWidth * 0.86))} glow={26} centrado tubo />
+          <Wordmark ancho={Math.min(360, Math.round(window.innerWidth * 0.86))} centrado />
         </div>
         <div className="intro-texto" style={{
           font: `500 16px/1 ${FUENTE.ui}`, letterSpacing: 6, textTransform: 'uppercase',
@@ -77,7 +77,7 @@ export default function Launch() {
       <Pulsable al={() => nav('/age')} style={{
         position: 'absolute', bottom: 'calc(30px + env(safe-area-inset-bottom))', zIndex: 1,
         minHeight: 44, padding: '0 14px', display: 'inline-flex', alignItems: 'center',
-        font: `400 12px/1 'Space Mono',monospace`, letterSpacing: 1.6, textTransform: 'uppercase',
+        font: `400 12px/1 'IBM Plex Mono', ui-monospace, monospace`, letterSpacing: 1.6, textTransform: 'uppercase',
         color: '#B5B0BA', cursor: 'pointer',
       }}>
         Solo mayores de 18 — entrar

@@ -122,7 +122,7 @@ export default function Estudio() {
           rechazo que no explica nada. Mejor decirselo al entrar. */}
       {!perfil.identidad_verificada && (
         <Enlace a="/verificar" style={{
-          display: 'block', boxSizing: 'border-box', width: '100%', borderRadius: RADIO.neon,
+          display: 'block', boxSizing: 'border-box', width: '100%', borderRadius: RADIO.filo,
           border: `1.5px solid ${COLOR.acento}`, background: 'rgba(255,43,209,.08)',
           padding: '18px 16px', marginBottom: 18, cursor: 'pointer',
         }}>

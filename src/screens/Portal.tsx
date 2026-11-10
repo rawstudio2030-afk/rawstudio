@@ -152,7 +152,7 @@ export default function Portal() {
         <div aria-hidden className="miami-velo" />
 
         <div className="miami-cuerpo">
-          <Wordmark ancho={ancha ? 360 : 250} glow={ancha ? 26 : 20} tubo />
+          <Wordmark ancho={ancha ? 360 : 250} />
 
           <h1 className="miami-titular">
             Graba.<br />Ponle precio.<br />Cobra.

@@ -19,7 +19,10 @@
  * Los generadores usan semilla fija: la ciudad es la misma en cada visita.
  */
 import type { ReactNode } from 'react'
-import { COLOR, MIAMI } from '../lib/diseño'
+import { COLOR } from '../lib/diseño'
+
+// Provisional: este fondo se retira en 10-02 (portada en cuatro pisos).
+const PALMERA = '#06050A'
 
 function semilla(n: number) {
   return () => {
@@ -79,7 +82,7 @@ function PalmaSvg({ x, base, h, inclina, k }: Palma) {
   const hoja = `M0 0 C ${L * .3} ${-L * .3}, ${L * .72} ${-L * .22}, ${L} ${L * .2} C ${L * .72} ${-L * .02}, ${L * .3} ${-L * .05}, 0 0Z`
   const angulos = [-70, -42, -14, 14, 40]
   return (
-    <g fill={MIAMI.palmera} stroke={MIAMI.palmera}>
+    <g fill={PALMERA} stroke={PALMERA}>
       <path d={`M${x} ${base} Q${x + inclina * .3} ${base - h * .55} ${cx} ${cy}`}
         fill="none" strokeWidth={7 * k} strokeLinecap="round" />
       {angulos.map(a => (

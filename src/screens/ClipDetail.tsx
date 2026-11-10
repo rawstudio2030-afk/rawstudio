@@ -170,7 +170,7 @@ export default function ClipDetail() {
    * boton de comprar en magenta. */
   const boton = {
     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxSizing: 'border-box',
-    width: '100%', minHeight: 54, padding: '0 18px', borderRadius: RADIO.neon,
+    width: '100%', minHeight: 54, padding: '0 18px', borderRadius: RADIO.filo,
     font: `700 14px/1 ${FUENTE.ui}`, letterSpacing: 1.6, textTransform: 'uppercase',
   } as const
 
@@ -182,14 +182,14 @@ export default function ClipDetail() {
           border: '1px solid rgba(255,255,255,.22)', background: VELO.ligero,
           color: COLOR.texto, cursor: 'pointer',
         }}><span aria-hidden style={{ font: `400 22px/1 ${FUENTE.ui}` }}>&#8249;</span></Pulsable>
-        <span className="sin-riel"><Wordmark ancho={104} glow={5} /></span>
+        <span className="sin-riel"><Wordmark ancho={104} /></span>
         <span aria-hidden style={{ width: 44 }} />
       </div>
 
       {/* El reproductor */}
       <div style={{
         position: 'relative', margin: '14px 14px 0', aspectRatio: '4 / 3', maxHeight: '62vh',
-        borderRadius: RADIO.neon, overflow: 'hidden', background: COLOR.superficie,
+        borderRadius: RADIO.filo, overflow: 'hidden', background: COLOR.superficie,
         border: '1px solid rgba(255,255,255,.12)',
         // Un album desbloqueado NO muestra aqui su portada: la nitida es la primera
         // foto SIN marca, y las fotos solo se ven en el visor, con la marca puesta.
@@ -292,7 +292,7 @@ export default function ClipDetail() {
         )}
 
         {devolucion > 0 && (
-          <div style={{ marginTop: 22, border: `1.5px solid ${COLOR.dinero}`, borderRadius: RADIO.neon, padding: 18 }}>
+          <div style={{ marginTop: 22, border: `1.5px solid ${COLOR.dinero}`, borderRadius: RADIO.filo, padding: 18 }}>
             <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 2,
               textTransform: 'uppercase', color: COLOR.dinero }}>
               La creadora retiró este clip
@@ -316,7 +316,7 @@ export default function ClipDetail() {
 
         {bloqueo?.motivo === 'geobloqueo' ? (
           <div style={{
-            marginTop: 22, padding: '18px 16px', borderRadius: RADIO.neon,
+            marginTop: 22, padding: '18px 16px', borderRadius: RADIO.filo,
             border: '1px solid rgba(0,229,255,.4)', background: 'rgba(0,229,255,.06)',
           }}>
             <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase', color: COLOR.admin }}>
@@ -329,7 +329,7 @@ export default function ClipDetail() {
           </div>
         ) : mio ? (
           <div style={{
-            marginTop: 22, padding: '18px 16px', borderRadius: RADIO.neon,
+            marginTop: 22, padding: '18px 16px', borderRadius: RADIO.filo,
             border: '1px dashed rgba(200,255,61,.4)', background: TINTE.dinero,
           }}>
             <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase', color: COLOR.dinero }}>
@@ -343,7 +343,7 @@ export default function ClipDetail() {
         // no hay un «mejor comprarlo» que ofrecer).
         ) : clip.visibility === 'gratis' || (esAlbum && desbloqueado) ? null : (
           <div style={{
-            marginTop: 22, padding: 18, borderRadius: RADIO.neon,
+            marginTop: 22, padding: 18, borderRadius: RADIO.filo,
             border: '1px solid rgba(255,255,255,.14)', background: COLOR.superficie,
           }}>
             <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase', color: COLOR.textoSuave }}>

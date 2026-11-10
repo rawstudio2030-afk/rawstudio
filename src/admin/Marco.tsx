@@ -128,7 +128,7 @@ export function Marco({ children, titulo, resumen }: {
           boxSizing: 'border-box', width: '100%', padding: '18px 18px 14px',
           borderBottom: `1px solid ${LINEA.tenue}`,
         }}>
-          <Wordmark ancho={118} glow={7} />
+          <Wordmark ancho={118} />
           <div style={{
             marginTop: 9, font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.6,
             textTransform: 'uppercase', color: COLOR.admin,

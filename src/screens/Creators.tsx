@@ -14,7 +14,7 @@ import {
   PINK, LIME, CYAN, PAPER, MUTED, LINE,
 } from '../content/creators'
 import { PRECIO_CONSULTA_TELEGRAM } from '../content/consultas'
-import { FUENTE, RADIO, GLOW } from '../lib/diseño'
+import { FUENTE, RADIO } from '../lib/diseño'
 import { Pulsable, Enlace } from '../components/Pulsable'
 
 
@@ -29,7 +29,7 @@ const etiqueta = (color: string): React.CSSProperties => ({
 /** Una tarjeta translucida: el texto largo no se puede leer directo sobre la
  *  escena, asi que cada bloque lleva su propio fondo. */
 const tarjeta: React.CSSProperties = {
-  boxSizing: 'border-box', borderRadius: RADIO.neon,
+  boxSizing: 'border-box', borderRadius: RADIO.filo,
   border: '1px solid rgba(255,255,255,.14)', background: 'rgba(8,8,10,.78)',
   backdropFilter: 'blur(8px)',
 }
@@ -92,7 +92,7 @@ export default function Creators() {
 
         {/* ---------- encabezado ---------- */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14, marginBottom: 22 }}>
-          <Wordmark ancho={176} glow={16} />
+          <Wordmark ancho={176} />
           <span style={{
             ...etiqueta(LIME), border: `1.5px solid ${LIME}`, borderRadius: 999, padding: '9px 13px', whiteSpace: 'nowrap',
             boxShadow: '0 0 10px rgba(200,255,61,.3)',
@@ -115,7 +115,7 @@ export default function Creators() {
 
         {/* ---------- portada ---------- */}
         <div style={{ paddingBottom: 44 }}>
-          <div style={{ ...etiqueta(CYAN), marginBottom: 16, textShadow: GLOW.textoCian }}>
+          <div style={{ ...etiqueta(CYAN), marginBottom: 16 }}>
             Plataforma para creadoras · México y Estados Unidos
           </div>
           <h1 style={{
@@ -180,7 +180,7 @@ export default function Creators() {
 
           {/* ---------- lo que no prometemos ---------- */}
           <div style={{
-            margin: '28px 0 6px', padding: '22px 18px', borderRadius: RADIO.neon,
+            margin: '28px 0 6px', padding: '22px 18px', borderRadius: RADIO.filo,
             border: `1.5px solid ${LIME}`, background: 'rgba(8,8,10,.78)',
             boxShadow: '0 0 10px rgba(200,255,61,.3), 0 0 28px rgba(200,255,61,.12), inset 0 0 18px rgba(200,255,61,.05)',
           }}>

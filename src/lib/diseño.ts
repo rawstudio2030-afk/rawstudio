@@ -1,151 +1,243 @@
-/* Tokens de diseño.
+/* Tokens de diseño — «El descenso».
  *
- * Antes de este archivo, `MONO` estaba declarado 18 veces —con dos variantes
- * distintas de la misma cadena— y los colores eran literales sueltos: 80
- * apariciones del fondo, 74 del magenta. Cambiar un color significaba
- * buscar y reemplazar por todo el proyecto y confiar en no olvidar ninguna.
+ * La brújula de la dirección visual es `docs/diseno/descenso/README.md`
+ * (maqueta aprobada el 10 nov 2026). Aquí viven los valores; si algo de la
+ * maqueta cambia, se cambia en un solo sitio: este.
  *
- * Los valores de aqui son EXACTAMENTE los que ya estaban en uso. Este archivo
- * no rediseña nada: le pone nombre a lo que existe.
+ * El sitio es un edificio en el que se baja. Cuatro pisos, cada uno con su
+ * paleta (`PISO`): Collins (planta baja, marca de llegada), el antro, el cuarto
+ * oscuro y el calabozo. `COLOR` es la paleta «de casa»: la que usa cualquier
+ * pantalla que no es de un piso concreto (la aplicación, el estudio, el admin).
+ *
+ * Contraste: los pares de texto de abajo se midieron contra WCAG 2.x (AA = 4.5
+ * en texto normal). Lo que cumple, está anotado al lado.
  */
 
-/* ---------- Color ---------- */
+/* ---------- Color (paleta de casa) ---------- */
 
 export const COLOR = {
-  /** Fondo de la aplicacion. Casi negro, con una pizca de azul. */
-  fondo: '#08080A',
+  /** Fondo de la aplicación: el «void» de Collins, un azul noche muy oscuro. */
+  fondo: '#0E1520',
 
-  /** Superficies elevadas sobre el fondo: tarjetas, campos, barras.
-   *  Dos escalones nada mas; la interfaz se apoya en bordes, no en sombras. */
-  superficie: '#111116',
-  superficieAlta: '#191920',
+  /** Superficies elevadas: tarjetas, campos, barras. Dos escalones nada más;
+   *  la interfaz se apoya en bordes, no en sombras. */
+  superficie: '#141C28',
+  superficieAlta: '#1C2636',
 
-  /** Texto principal. Blanco roto: el blanco puro sobre este fondo vibra. */
-  texto: '#F2F0F3',
+  /** Texto principal: marfil. 15.5:1 sobre `fondo`. */
+  texto: '#F3EBE2',
 
-  /** Tres escalones de texto secundario, de mas a menos presente.
-   *  `apagado` es el limite legible; por debajo no bajar. */
-  textoSuave: '#9C979F',
-  textoTenue: '#6E6A72',
-  textoApagado: '#5E5A63',
+  /** Tres escalones de texto secundario, de más a menos presente. Los tres
+   *  pasan AA (≥ 4.5) sobre `fondo`, `superficie` y `superficieAlta`.
+   *  `textoApagado` es el límite legible; por debajo no bajar. */
+  textoSuave: '#C9BDB0',   // 9.9 / 9.3 / 8.3
+  textoTenue: '#A89D92',   // 6.9 / 6.4 / 5.7
+  textoApagado: '#9A8F85', // 5.8 / 5.4 / 4.8
 
-  /** Magenta. El acento de la marca: botones principales y enfasis.
-   *  Se usa igual de fondo (20 veces) que de texto (18). */
-  acento: '#FF2BD1',
+  /** Champagne. El acento «de casa»: botón principal y énfasis fuera de un piso
+   *  concreto. Se usa de fondo y de texto. Cuando es FONDO el texto va oscuro
+   *  (`sobreAcento`): 8.7:1. Marfil sobre champagne no llega a AA. */
+  acento: '#D4B483',
+  sobreAcento: '#141C28',
 
-  /** Verde limon. Dinero, saldos y estados afirmativos. Casi siempre texto. */
-  dinero: '#C8FF3D',
+  /** Ámbar. Dinero, saldos y estados afirmativos. Casi siempre texto
+   *  (9.3:1 sobre `fondo`). */
+  dinero: '#E0B15A',
 
-  /** Cian. Reservado para lo administrativo y para el foco de teclado.
-   *  Es la señal de "esto es privilegiado"; no usarlo decorativamente. */
-  admin: '#00E5FF',
+  /** Agua de mar (seafoam). Reservado para lo administrativo y el foco de
+   *  teclado: es la señal de «esto es privilegiado» y por eso es el único tono
+   *  frío del sitio; no usarlo decorativamente. 8.7:1 sobre `fondo`. */
+  admin: '#7EBFB3',
 } as const
 
-/** Bordes. La interfaz se define por lineas de blanco translucido, no por
- *  sombras. Cuatro pesos, del apenas visible al claramente marcado. */
+/** Bordes. La interfaz se define por líneas de marfil translúcido, no por
+ *  sombras. Cinco pesos, del apenas visible al claramente marcado. */
 export const LINEA = {
-  tenue: 'rgba(255,255,255,.09)',
-  suave: 'rgba(255,255,255,.12)',
-  media: 'rgba(255,255,255,.14)',
-  fuerte: 'rgba(255,255,255,.16)',
-  marcada: 'rgba(255,255,255,.18)',
+  tenue: 'rgba(243,235,226,.09)',
+  suave: 'rgba(243,235,226,.12)',
+  media: 'rgba(243,235,226,.14)',
+  fuerte: 'rgba(243,235,226,.16)',
+  marcada: 'rgba(243,235,226,.18)',
 } as const
 
 /** Velos del color de fondo, para barras fijas y capas sobre contenido. */
 export const VELO = {
-  ligero: 'rgba(8,8,10,.55)',
-  medio: 'rgba(8,8,10,.9)',
-  denso: 'rgba(8,8,10,.94)',
+  ligero: 'rgba(14,21,32,.55)',
+  medio: 'rgba(14,21,32,.9)',
+  denso: 'rgba(14,21,32,.94)',
 } as const
 
 /** Tintes de los acentos, para fondos de realce muy bajos. */
 export const TINTE = {
-  acento: 'rgba(255,43,209,.06)',
-  acentoBorde: 'rgba(255,43,209,.42)',
-  dinero: 'rgba(200,255,61,.05)',
-  dineroBorde: 'rgba(200,255,61,.4)',
+  acento: 'rgba(212,180,131,.07)',
+  acentoBorde: 'rgba(212,180,131,.42)',
+  dinero: 'rgba(224,177,90,.06)',
+  dineroBorde: 'rgba(224,177,90,.4)',
 } as const
 
-/* ---------- Tipografia ---------- */
+/* ---------- Pisos ---------- */
 
+/** Paleta de cada piso (hex de la maqueta). `studio` es el color de «studio» en
+ *  el wordmark cuando la marca está dentro de ese piso. */
+export const PISO = {
+  /** Planta baja · Collins Avenue. Art déco de Miami Beach al atardecer. */
+  collins: {
+    cielo: '#0E1520',
+    navy: '#141C28',
+    champagne: '#D4B483',
+    blush: '#E8B4A8',
+    seafoam: '#7EBFB3',
+    oro: '#C9A86A',
+    coral: '#C47A6A',
+    marfil: '#F3EBE2',
+    /** Botón primario: texto `#141C28` sobre este degradado (7.6–11.6:1). */
+    botonDe: '#E8D2A4',
+    botonA: '#C9A86A',
+    studio: '#D4B483',
+  },
+  /** −1 · El antro. Club subterráneo, haces violeta y ámbar. */
+  antro: {
+    vacio: '#08060E',
+    violeta: '#7A3FA0',
+    violetaClaro: '#9A58C4',
+    rosa: '#C45A8A',
+    ambar: '#D4923A',
+    hielo: '#D8D2E0',
+    /** Botón primario: blanco sobre este degradado. Para texto normal, el
+     *  violeta oscuro (6.9:1); el claro queda en 4.6:1, justo. */
+    botonDe: '#9A58C4',
+    botonA: '#7A3FA0',
+    studio: '#D4A0C8',
+  },
+  /** −2 · Cuarto oscuro. Laboratorio fotográfico, luz de seguridad roja. */
+  oscuro: {
+    vacio: '#080405',
+    safelight: '#B3121B',
+    safelightLit: '#D4212C',
+    papel: '#F4EEE4',
+    ambar: '#C9A04A',
+    plata: '#A39B96',
+    apagado: '#C4B8B0',
+    /** «studio» del wordmark. La maqueta dice `#D4212C` (el safelight lit), pero
+     *  sobre el negro del laboratorio da 3.9:1 y falla AA en el tamaño chico del
+     *  encabezado; este es un punto mas claro (5.1:1 sobre `vacio`). */
+    studio: '#E8404A',
+  },
+  /** −3 · El calabozo. Piedra, velas y hierro. */
+  calabozo: {
+    vacio: '#0B0A09',
+    profundo: '#080605',
+    sangre: '#7A1F24',
+    sangreLit: '#9A2A30',
+    ambar: '#E0B15A',
+    ambarVivo: '#E8C989',
+    hueso: '#F0E6D6',
+    laton: '#C9A25A',
+    apagado: '#B5A898',
+    hierro: '#3D3832',
+    studio: '#E0B15A',
+  },
+} as const
+
+export type NombrePiso = keyof typeof PISO
+
+/** Botones primarios por piso: fondo y texto con contraste AA ya comprobado.
+ *  El cuarto oscuro lleva el safelight APAGADO (`#B3121B`) como fondo sólido:
+ *  papel sobre el «lit» da 4.49 y falla por 0.01. */
+export const BOTON = {
+  collins: { fondo: `linear-gradient(135deg, ${PISO.collins.botonDe}, ${PISO.collins.botonA})`, texto: '#141C28' },
+  antro: { fondo: `linear-gradient(135deg, ${PISO.antro.botonDe}, ${PISO.antro.botonA})`, texto: '#FFFFFF' },
+  oscuro: { fondo: PISO.oscuro.safelight, texto: PISO.oscuro.papel },
+  calabozo: { fondo: `linear-gradient(135deg, ${PISO.calabozo.sangreLit}, ${PISO.calabozo.sangre})`, texto: PISO.calabozo.hueso },
+} as const
+
+/* ---------- Tipografía ---------- */
+
+/** Las familias de Collins y de la aplicación se cargan en el primer paint
+ *  (`index.html`). Las de los demás pisos, en una segunda hoja diferida: no
+ *  deben aparecer en pantallas que no las usan. */
 export const FUENTE = {
-  /** Anton. Titulares grandes en mayusculas.
-   *  Ojo con el interlineado: por debajo de 1 recorta los acentos del
-   *  español (la O de COMO perdia la tilde). En pantallas en español, 1. */
-  display: 'Anton, sans-serif',
+  /** Bodoni Moda. Titulares y énfasis: serif de alto contraste. Sin
+   *  mayúsculas forzadas. Ojo con el interlineado: por debajo de 1 recorta los
+   *  acentos del español. */
+  display: "'Bodoni Moda', 'Didot', Georgia, serif",
 
-  /** Space Grotesk. Texto de interfaz. */
+  /** Italiana. SOLO la «RAW» del wordmark. */
+  deco: "Italiana, 'Bodoni Moda', Georgia, serif",
+
+  /** Space Grotesk. Texto de interfaz de la aplicación y del admin: denso y
+   *  legible a tamaño chico. */
   ui: "'Space Grotesk', system-ui, sans-serif",
 
-  /** Space Mono. Cifras, identificadores, fechas y datos tabulares:
-   *  todo lo que se lee en columna y debe alinearse. */
-  mono: "'Space Mono', monospace",
+  /** Josefin Sans. Interfaz de Collins: navegación, botones y textos de las
+   *  pantallas de llegada. */
+  collins: "'Josefin Sans', 'Space Grotesk', system-ui, sans-serif",
 
+  /** IBM Plex Mono. Cifras, identificadores, fechas y datos tabulares: todo lo
+   *  que se lee en columna y debe alinearse. */
+  mono: "'IBM Plex Mono', ui-monospace, monospace",
+
+  /* --- Familias de pisos (segunda hoja, diferida) --- */
+  /** Letrero «Collins Avenue». Solo esa pieza. */
+  neon: "Monoton, 'Josefin Sans', sans-serif",
+  /** El antro: títulos, cifras y botones. */
+  antro: "Unbounded, 'Space Grotesk', sans-serif",
+  antroNum: "'Bebas Neue', Impact, sans-serif",
+  /** Cuarto oscuro: títulos, etiquetas de laboratorio, lápiz graso, botones. */
+  oscuro: "'DM Serif Display', 'Bodoni Moda', Georgia, serif",
+  etiqueta: "'Courier Prime', 'Courier New', monospace",
+  lapiz: "'Permanent Marker', 'Comic Sans MS', cursive",
+  barlow: "Barlow, 'Space Grotesk', sans-serif",
+  /** Calabozo: placas, titulares y plomo, botones remachados. */
+  placa: "Cinzel, 'Bodoni Moda', Georgia, serif",
+  garamond: "'EB Garamond', Garamond, Georgia, serif",
+  condensada: "'Barlow Condensed', 'Barlow', sans-serif",
+  /** Firma «Descenso» del pie. Opcional: si no carga, serif. */
+  gotica: "'Grenze Gotisch', 'EB Garamond', serif",
 } as const
 
 /* ---------- Forma ---------- */
 
-/** El diseño es de esquina viva. Solo hay dos radios en todo el proyecto:
- *  el circulo de los avatares y un 13 suelto. No se inventa una escala de
- *  radios que nadie usa. */
+/** El sitio no es de esquina redondeada tipo app: Collins y el antro son
+ *  vivos y el calabozo casi (1 px). No se inventa una escala de radios. */
 export const RADIO = {
   circulo: '50%',
-  /** Botones y tarjetas de neon de la portada, como en los mockups. Es el
-   *  unico radio de «esquina suave»: el resto del sitio sigue de esquina viva. */
-  neon: 14,
+  /** Botones, campos y tarjetas: casi vivo. */
+  filo: 1,
 } as const
 
-/* ======================================================================
- * Miami Neon Night — tokens aditivos (ver DESIGN-BRIEF.md)
- *
- * Todo lo de arriba sigue igual. Esto solo AÑADE lo que pide la direccion
- * nueva: resplandor de neon, degradados de noche y la paleta de la escena de
- * la portada. Magenta, cian y lima son los mismos de COLOR; aqui se nombran
- * sus resplandores, que antes estaban escritos a mano en cada pantalla.
- * ====================================================================== */
+/* ---------- Luz ---------- */
 
-/** Resplandor. Para `boxShadow`, salvo `texto*` (`textShadow`) y `imagen`
- *  (`filter`, para PNG/SVG con transparencia).
+/** Resplandor y luz de los pisos. Para `boxShadow`, salvo `letrero`
+ *  (`textShadow`) y `imagen` (`filter`, para PNG/SVG con transparencia).
  *
  *  Un `clip-path` recorta el resplandor del mismo elemento: si la pieza lleva
  *  esquina cortada, el brillo va en su contenedor. */
-export const GLOW = {
-  magenta: '0 0 14px rgba(255,43,209,.55), 0 0 38px rgba(255,43,209,.28)',
-  magentaFuerte: '0 0 18px rgba(255,43,209,.7), 0 0 52px rgba(255,43,209,.38)',
-  cian: '0 0 14px rgba(0,229,255,.5), 0 0 36px rgba(0,229,255,.24)',
-  lima: '0 0 12px rgba(200,255,61,.45), 0 0 30px rgba(200,255,61,.2)',
-  /** Anillo de 1 px: foco y seleccion, tambien en modo sobrio. */
-  hilo: '0 0 0 1px rgba(255,43,209,.5)',
+export const LUZ = {
+  /** Anillo de 1 px: foco y selección, también en modo sobrio. */
+  hilo: '0 0 0 1px rgba(212,180,131,.55)',
+  /** Resplandor suave del acento y del dinero. */
+  acento: '0 0 14px rgba(212,180,131,.28)',
+  dinero: '0 0 14px rgba(224,177,90,.28)',
+  /** Luz de seguridad del cuarto oscuro. */
+  safelight: '0 0 16px rgba(212,33,44,.35)',
 
-  /** `textShadow` de letrero de neon: nucleo claro, luego el color. */
-  textoMagenta: '0 0 4px rgba(255,255,255,.45), 0 0 10px #FF2BD1, 0 0 26px rgba(255,43,209,.65), 0 0 54px rgba(255,43,209,.35)',
-  textoLima: '0 0 4px rgba(255,255,255,.4), 0 0 10px #C8FF3D, 0 0 24px rgba(200,255,61,.55), 0 0 48px rgba(200,255,61,.28)',
-  textoCian: '0 0 4px rgba(255,255,255,.4), 0 0 10px #00E5FF, 0 0 24px rgba(0,229,255,.55)',
+  /** `textShadow` del letrero «Collins Avenue»: neón PASTEL (blush + seafoam),
+   *  no magenta. */
+  letrero: '0 0 6px rgba(232,180,168,.7), 0 0 18px rgba(126,191,179,.5)',
 
   /** `filter` para una imagen con transparencia. */
-  imagen: (px: number, rgba = '255,43,209,.6') => `drop-shadow(0 0 ${px}px rgba(${rgba}))`,
+  imagen: (px: number, rgba = '212,180,131,.5') => `drop-shadow(0 0 ${px}px rgba(${rgba}))`,
 } as const
 
-/** Degradados de la escena nocturna. Son de FONDO: nunca de texto de lectura. */
-export const DEGRADADO = {
-  /** Cielo de la portada: casi negro arriba, violeta y magenta hacia el
-   *  horizonte, como la luz de una ciudad que no se apaga. */
-  cielo: 'linear-gradient(180deg, #08080A 0%, #0C0716 34%, #1A0B2E 62%, #3A0F4A 82%, #6A1458 100%)',
-  /** Piso mojado: el horizonte se apaga hacia abajo. */
-  suelo: 'linear-gradient(180deg, rgba(106,20,88,.55) 0%, rgba(26,11,46,.85) 40%, #08080A 100%)',
-  /** Filete que va de magenta a cian. */
-  hilo: 'linear-gradient(90deg, #FF2BD1, #00E5FF)',
-  /** Capa de color para las portadas del catalogo (van con `mix-blend-mode:
-   *  soft-light`). La portada publica es una miniatura de 240 px: se le da el
-   *  tono de la casa. */
-  duotono: 'linear-gradient(135deg, rgba(255,43,209,.7), rgba(0,229,255,.6))',
-} as const
-
-/** Paleta de la escena (edificios, ventanas, palmeras). Solo para ilustracion:
- *  no se usa en la interfaz. */
-export const MIAMI = {
-  edificio: '#0B0813',
-  edificioClaro: '#140D22',
-  palmera: '#06050A',
-  agua: '#0A0612',
+/** Degradados. Son de FONDO: nunca de texto de lectura. */
+export const TRAMA = {
+  /** Cielo de Collins: del void al navy. */
+  cielo: 'linear-gradient(180deg, #0E1520 0%, #141C28 100%)',
+  /** Filete fino: champagne a seafoam. */
+  hilo: 'linear-gradient(90deg, #D4B483, #7EBFB3)',
+  /** Capa de color para las portadas del catálogo (van con `mix-blend-mode:
+   *  soft-light`). La portada pública es una miniatura de 240 px: se le da el
+   *  tono de la casa, ámbar a sangre. */
+  duotono: 'linear-gradient(135deg, rgba(224,177,90,.55), rgba(122,31,36,.6))',
 } as const

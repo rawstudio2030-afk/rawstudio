@@ -18,7 +18,7 @@ import Avatar from '../components/Avatar'
 import { clipsDe, urlPortada, type Clip } from '../lib/clips'
 import { portadaDe } from '../lib/portadas'
 import type { PerfilPublico } from '../lib/supabase'
-import { COLOR, FUENTE, RADIO, GLOW, DEGRADADO } from '../lib/diseño'
+import { COLOR, FUENTE, RADIO, LUZ, TRAMA } from '../lib/diseño'
 import { nivelesDe } from '../lib/canales'
 import { TONO, insignias, duracion } from '../lib/catalogo'
 import TarjetaClip from '../components/TarjetaClip'
@@ -103,7 +103,7 @@ export default function CreatorProfile() {
 
   const boton = {
     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, boxSizing: 'border-box',
-    flex: 1, minHeight: 54, padding: '0 14px', borderRadius: RADIO.neon, cursor: 'pointer',
+    flex: 1, minHeight: 54, padding: '0 14px', borderRadius: RADIO.filo, cursor: 'pointer',
     font: `500 14px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase', color: '#FFF',
   } as const
 
@@ -135,7 +135,7 @@ export default function CreatorProfile() {
           {/* El anillo de neon: degradado de magenta a cian detras de la foto. */}
           <div style={{
             flex: '0 0 auto', width: 104, height: 104, borderRadius: '50%', padding: 3, boxSizing: 'border-box',
-            background: DEGRADADO.hilo, boxShadow: `${GLOW.magenta}, 0 0 30px rgba(0,229,255,.25)`,
+            background: TRAMA.hilo, boxShadow: `${LUZ.acento}`,
           }}>
             <Avatar ruta={perfil.avatar_path} nombre={perfil.display_name} handle={perfil.handle} tam={98}
               style={{ border: `3px solid ${COLOR.fondo}` }} />
@@ -233,7 +233,7 @@ export default function CreatorProfile() {
         <div style={{ marginTop: 26 }}>
           {clips.length === 0 ? (
             <div style={{
-              padding: '28px 18px', textAlign: 'center', borderRadius: RADIO.neon,
+              padding: '28px 18px', textAlign: 'center', borderRadius: RADIO.filo,
               border: `1.5px ${falloClips ? 'solid' : 'dashed'} ${falloClips ? COLOR.acento : 'rgba(255,255,255,.2)'}`,
             }}>
               <div style={{ font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 2, textTransform: 'uppercase', color: COLOR.textoSuave }}>
@@ -250,7 +250,7 @@ export default function CreatorProfile() {
               {esMio && perfil.is_creator && (
                 <Enlace a="/upload" style={{
                   marginTop: 16, display: 'inline-block', padding: '16px 24px', cursor: 'pointer',
-                  borderRadius: RADIO.neon, border: '2px solid #FF4FE0', color: '#FFF',
+                  borderRadius: RADIO.filo, border: '2px solid #FF4FE0', color: '#FFF',
                   background: 'linear-gradient(180deg, rgba(255,43,209,.26), rgba(255,43,209,.1))',
                   boxShadow: '0 0 10px rgba(255,43,209,.6), 0 0 28px rgba(255,43,209,.35), inset 0 0 16px rgba(255,43,209,.25)',
                   font: `500 13px/1 ${FUENTE.ui}`, letterSpacing: 2.6, textTransform: 'uppercase',
@@ -272,7 +272,7 @@ export default function CreatorProfile() {
                   }}>
                     <div style={{ borderRadius: 8, overflow: 'hidden' }}>
                       <TarjetaClip portada={p} tira={urlPortada(c.preview_path ?? null)} a={`/clip/${c.id}`}>
-                        <div aria-hidden style={{ position: 'absolute', inset: 0, background: DEGRADADO.duotono, mixBlendMode: 'soft-light' }} />
+                        <div aria-hidden style={{ position: 'absolute', inset: 0, background: TRAMA.duotono, mixBlendMode: 'soft-light' }} />
                         <div aria-hidden style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(8,8,10,.1) 50%,rgba(8,8,10,.8) 100%)' }} />
                         {dur && (
                           <span style={{

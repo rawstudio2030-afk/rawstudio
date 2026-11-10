@@ -198,7 +198,7 @@ export default function Verificar() {
 
       {/* Lo que se promete en la pagina de creadoras, dicho aqui donde importa. */}
       <div style={{
-        borderRadius: RADIO.neon, border: '1.5px dashed rgba(200,255,61,.5)', background: 'rgba(200,255,61,.05)',
+        borderRadius: RADIO.filo, border: '1.5px dashed rgba(200,255,61,.5)', background: 'rgba(200,255,61,.05)',
         padding: '16px 16px',
       }}>
         <div style={{ ...etiqueta, color: COLOR.dinero }}>Qué hacemos con esto</div>
@@ -310,7 +310,7 @@ function Foto({ etiqueta: et, nota, archivo, refInput, camara, onElegir }: {
     <>
       <Pulsable al={() => refInput.current?.click()} style={{
         boxSizing: 'border-box', width: '100%', textAlign: 'left', minHeight: 80,
-        display: 'flex', alignItems: 'center', gap: 14, cursor: 'pointer', borderRadius: RADIO.neon,
+        display: 'flex', alignItems: 'center', gap: 14, cursor: 'pointer', borderRadius: RADIO.filo,
         border: `1.5px ${archivo ? 'solid' : 'dashed'} ${archivo ? 'rgba(200,255,61,.6)' : 'rgba(255,255,255,.28)'}`,
         background: archivo ? 'rgba(200,255,61,.05)' : 'transparent', padding: 14,
       }}>

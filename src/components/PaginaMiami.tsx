@@ -26,7 +26,7 @@ export default function PaginaMiami({ children, logo = true }: {
       <div className="pagina-miami-cuerpo">
         {logo && (
           <div style={{ display: 'flex', justifyContent: 'center', padding: '6px 0 4px' }}>
-            <Wordmark ancho={230} glow={20} tubo />
+            <Wordmark ancho={230} />
           </div>
         )}
         {children}

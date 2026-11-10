@@ -142,7 +142,7 @@ function IndiceDesarrollo() {
                     borderLeft: `2px solid ${act ? COLOR.acento : 'transparent'}`,
                   }}>
                   <span style={{
-                    font: "700 10px/1 'Space Mono', monospace",
+                    font: "700 10px/1 'IBM Plex Mono', ui-monospace, monospace",
                     color: COLOR.fondo, background: act ? COLOR.acento : COLOR.dinero,
                     padding: '5px 6px',
                   }}>{s.n}</span>

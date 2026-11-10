@@ -61,7 +61,7 @@ export function VistaBiblioteca({ compras, fallo, alReintentar }: {
       </div>
 
       {fallo ? (
-        <div style={{ padding: '50px 20px', textAlign: 'center', borderRadius: RADIO.neon, border: `1px solid ${COLOR.acento}` }}>
+        <div style={{ padding: '50px 20px', textAlign: 'center', borderRadius: RADIO.filo, border: `1px solid ${COLOR.acento}` }}>
           <div style={{ font: `400 19px/1.35 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
             No pudimos leer lo que compraste.
           </div>
@@ -72,7 +72,7 @@ export function VistaBiblioteca({ compras, fallo, alReintentar }: {
             style={{ display: 'inline-flex', marginTop: 18, padding: '0 28px' }}>Reintentar</Pulsable>
         </div>
       ) : compras.length === 0 ? (
-        <div style={{ padding: '50px 20px', textAlign: 'center', borderRadius: RADIO.neon, border: '1.5px dashed rgba(255,255,255,.2)' }}>
+        <div style={{ padding: '50px 20px', textAlign: 'center', borderRadius: RADIO.filo, border: '1.5px dashed rgba(255,255,255,.2)' }}>
           <div style={{ font: `400 19px/1.35 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
             Todavía no has desbloqueado nada.
           </div>

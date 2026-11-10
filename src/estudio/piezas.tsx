@@ -101,7 +101,7 @@ export function Vacio({ texto }: { texto: string }) {
   return (
     <div style={{
       padding: '48px 20px', textAlign: 'center', border: `1.5px dashed ${LINEA.marcada}`,
-      borderRadius: RADIO.neon, font: `400 14px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave,
+      borderRadius: RADIO.filo, font: `400 14px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave,
     }}>{texto}</div>
   )
 }
