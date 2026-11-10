@@ -38,7 +38,7 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 
 ## Consultas activas
 
-### [id: 20261109-05] Videos de hasta 2 GB — hecha (migración sin aplicar)
+### [id: 20261109-05] Videos de hasta 2 GB — hecha y aplicada
 - **fecha:** 2026-11-09 17:30 (America/Mexico_City)
 - **estado:** respondida
 - **tarea:** Subir el tope de video a 2 GB (2048 MiB): bucket `clips`, validación en cliente y copy unificada. Omar debe alinear el global de Storage en el dashboard.
@@ -46,18 +46,18 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 - **contexto:** HEAD al asignar: `d2e7af2`. Bucket hoy 2000 MiB; UI ya dice «2 GB» sin validar. Sergio pidió 1 GB y luego 2 GB (9 nov 2026, ~17:24–17:30 hora de México).
 - **urgencia:** alta
 - **ya se intentó:** nada de código; diagnóstico del coordinador (2000 vs 2048, global del dashboard, TUS en 09-04).
-- **resultado:** HECHA en un commit propio (`feat: videos de hasta 2 gb`, solo local; el SHA vigente se anota al publicar), después de 09-04. **NO aplicada ni publicada:** Omar confirmó que el plan es Pro, pero falta que suba el límite global de Storage a ≥ 2 GB y apruebe el `db push` de `20261222000000_clips_2gb.sql`. Se apartó a propósito de la aplicación de 09-03 para que `db push` no la arrastrara.
+- **resultado:** HECHA en un commit propio (`feat: videos de hasta 2 gb`, después de 09-04). **APLICADA y PUBLICADA el 2026-11-09 con la aprobación de Omar, tras confirmar que el límite global de Storage ya estaba en 2 GB:** `supabase db push` (el dry run confirmó que `20261222000000_clips_2gb.sql` era la única pendiente) y después el frontend con `git push`. **Comprobado en producción** (`supabase db query --linked`): `clips` = 2048 MiB; los demás buckets sin cambio (albumes 10, avatars 2, clip-covers 5, clip-covers-full 5, expedientes 12, verificacion 8 MiB).
 - **diff resumido:**
   - **`supabase/migrations/20261222000000_clips_2gb.sql`:** `update storage.buckets set file_size_limit = 2048::bigint * 1024 * 1024 where id = 'clips'`. **Ojo, corrección a la receta de la ronda:** `2048 * 1024 * 1024` en SQL se evalúa como `int4` y **desborda** (2³¹ no cabe; probado: «entero fuera de rango»), por eso el `::bigint`. Idempotente; los otros seis buckets no se tocan (comprobado en el Postgres de prueba: albumes 10, avatars 2, clip-covers 5, clip-covers-full 5, expedientes 12, verificacion 8 MiB).
   - **Una sola constante** `MAX_VIDEO_BYTES = 2048 * 1024 * 1024` y `errorTamanoVideo(bytes)` en `src/lib/clips.ts`: «Este video pesa 2.1 GB; el máximo es 2 GB.» (si pasa por muy poco: «un poco más de 2 GB», para que no diga «pesa 2.0 GB; el máximo es 2 GB»). Se rechaza **al elegir el archivo, antes de transferir**, en `Upload.tsx`, `AltaCreadora.tsx`, `PublicarPor.tsx` y `SubidaMasiva.tsx` (los que pasan se dejan fuera y se listan), y **además dentro de `publicarPara`** (`admin.ts`) para que ningún camino se lo salte. `Upload.tsx` lo vuelve a comprobar al publicar.
   - **Copy:** «MP4, MOV o WebM · hasta 2 GB» ya estaba en creadora y `PublicarPor`; se añadió «hasta 2 GB» en `AltaCreadora`.
 - **verificación:** Postgres 17 de prueba con todas las migraciones: `clips` = 2147483648 bytes = 2048 MiB, el resto igual. Mensaje probado con Deno: 1.9 GB y exactamente 2 GiB pasan; 2 GiB + 1 byte y 2.1 GB se rechazan con el texto correcto. `tsc -b`, `npm run build` y lint (dinero y plurales) limpios.
-- **NO verificado:** nada contra producción. **Criterio 2 de aceptación (subir de verdad ~1,9 GB y reanudar)** no se probó con un archivo de ese tamaño: la reanudación se probó con 40 MB contra un servidor TUS local (ver 09-04). Que el global de Storage esté en ≥ 2 GB no se puede ver desde el repo.
+- **NO verificado:** **subir de verdad un video grande a producción** (el bucket ya acepta 2048 MiB, pero no se subió ninguno; que el límite global esté en 2 GB lo confirmó Omar, no se puede ver desde el repo). **Criterio 2 de aceptación (subir de verdad ~1,9 GB y reanudar)** no se probó con un archivo de ese tamaño: la reanudación se probó con 40 MB contra un servidor TUS local (ver 09-04). Que el global de Storage esté en ≥ 2 GB no se puede ver desde el repo.
 - **Checklist de Omar (dashboard de Supabase, yo no lo hago):**
   - [x] Confirmar plan **Pro** (Omar lo confirmó el 2026-11-09).
-  - [ ] Storage → Settings: **Global file size limit ≥ 2 GB** (2048 MiB o más), **antes** del `db push`.
+  - [x] Storage → Settings: límite global ≥ 2 GB (hecho por Omar el 2026-11-09, antes del `db push`).
   - [ ] Revisar el cupo total vs uso; si el aviso del panel usa `limite_almacenamiento_mb = 1024`, subirlo al cupo real (p. ej. 102400 en Pro de 100 GB).
-  - [ ] Aprobar `supabase db push` (esta migración va junto con `20261221000000` de 09-03).
+  - [x] Aprobar `supabase db push` (hecho).
 - **Diferencias:** ninguna con el diagnóstico, salvo el `::bigint` de arriba.
 
 ### [id: 20261109-04] Barra de progreso al subir videos — hecha y publicada
