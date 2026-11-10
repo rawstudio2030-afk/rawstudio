@@ -164,30 +164,12 @@ details[open] > summary > .faq-signo {
   [class*="opart"], .cintillo > * { animation: none !important }
 }
 
-/* La portada ocupa la pantalla completa. Va en CSS y no en estilo inline
-   porque necesita dos declaraciones: svh es la altura real del navegador de
-   celular —descontando la barra de direcciones— y vh queda de respaldo para
-   quien no la entienda. Inline no se pueden dar dos valores a la misma
-   propiedad. */
-.portal-alto {
-  min-height: 100vh;
-  min-height: 100svh;
-}
-
-/* ---------- Portada: Miami Neon Night ----------
+/* ---------- Pantallas de entrada (restos de la direccion anterior) ----------
  *
- * Mobile-first y centrada, como los mockups: wordmark, titular, subtitulo,
- * dos botones, las opciones en una fila y el 18+ abajo. Detras, la escena
- * (`.miami-escena`) ocupa TODA la portada; el texto va por encima.
- *
- * Va en CSS y no en estilo inline porque necesita consultas de medios. */
-.portal-miami {
-  position: relative; overflow: hidden; box-sizing: border-box;
-  display: flex; flex-direction: column; align-items: center;
-  padding: calc(34px + env(safe-area-inset-top)) 22px 22px;
-  background: #06050B;
-}
-.miami-escena { position: absolute; inset: 0; pointer-events: none }
+ * La portada («El descenso») tiene sus propias hojas en `src/descenso/`. Lo que
+ * queda aqui son las piezas que todavia usan las pantallas de entrada
+ * (`PaginaMiami`, `FondoMiami`) hasta que la ronda 20261110-03 las pase a su
+ * piso. */
 /* Dos composiciones de la escena: vertical para celular, horizontal para
    pantalla ancha. Se muestra una. */
 .miami-fondo-ancho { display: none }
@@ -195,9 +177,6 @@ details[open] > summary > .faq-signo {
   .miami-fondo-movil { display: none }
   .miami-fondo-ancho { display: block }
 }
-/* El ojo, sutil y por detras de las palmeras (la escena se pinta encima). */
-.miami-luna { position: absolute; top: 7%; right: 6%; width: 118px; opacity: .3 }
-.miami-luna .portal-ojo-caja { width: 100% }
 .miami-velo {
   position: absolute; inset: 0; pointer-events: none;
   background:
@@ -208,28 +187,6 @@ details[open] > summary > .faq-signo {
   position: relative; z-index: 2; width: 100%; max-width: 480px;
   display: flex; flex-direction: column; align-items: center; text-align: center;
 }
-.miami-titular {
-  margin: 30px 0 0; font-family: 'Bodoni Moda', Georgia, serif; font-weight: 400;
-  /* Interlineado 1: en español las mayusculas llevan acento y con menos de 1
-     la linea de arriba se los come. */
-  font-size: clamp(46px, min(15vw, 8.4vh), 96px); line-height: 1;
-  text-transform: uppercase; letter-spacing: 0; color: #F4F2F5;
-  text-shadow: 0 2px 26px rgba(6,5,11,.9);
-}
-.miami-sub {
-  margin: 16px 0 0;
-  font: 400 clamp(17px, 4.7vw, 21px)/1.3 'Space Grotesk', system-ui, sans-serif;
-  color: #E9E5EC; text-shadow: 0 1px 16px rgba(6,5,11,.95);
-}
-.miami-botones { width: 100%; display: grid; gap: 14px; margin-top: 26px }
-/* «Ya tengo cuenta»: del mismo alto que «Crear mi cuenta» y con el rotulo legible,
-   no el gris apagado del boton suave de las pantallas de acceso. */
-.miami-botones .miami-boton-entrar {
-  font-size: 15px; letter-spacing: 3px; color: #F2F0F3; border-color: rgba(255,255,255,.55);
-  background: rgba(8,8,10,.6);
-}
-/* En pantalla ancha los botones van de dos en dos; este ocupa la fila entera. */
-.miami-botones .miami-boton-ancho { grid-column: 1 / -1 }
 .miami-boton {
   box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 12px;
   min-height: 58px; padding: 0 18px; cursor: pointer;
@@ -252,45 +209,9 @@ details[open] > summary > .faq-signo {
   text-shadow: 0 0 10px rgba(180,250,255,.6);
 }
 .miami-boton svg { flex: 0 0 auto }
-/* Las opciones: una fila, colores alternados y un punto entre cada una. El
-   area tactil sale del relleno vertical, no del texto. */
-.miami-opciones {
-  margin: 14px -14px 0; width: calc(100% + 28px);
-  display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
-}
-.miami-opcion {
-  display: inline-flex; align-items: center; cursor: pointer;
-  padding: 17px 0; font: 500 10px/1 'Space Grotesk', system-ui, sans-serif;
-  letter-spacing: .4px; text-transform: uppercase; color: #FF5BDC;
-  text-shadow: 0 0 10px rgba(255,43,209,.55);
-}
-.miami-opcion:nth-child(even) { color: #3EE9FF; text-shadow: 0 0 10px rgba(0,229,255,.5) }
-.miami-opcion:not(:last-child)::after {
-  content: '\2022'; margin: 0 7px; color: #8F8A94; text-shadow: none; font-size: 9px;
-}
-.miami-enlaces {
-  display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 24px;
-  font: 400 12px/1 'IBM Plex Mono', ui-monospace, monospace; color: #B5B0BA;
-}
-.miami-enlaces > * { padding: 16px 4px; text-decoration: underline; text-underline-offset: 5px; cursor: pointer }
-.miami-18 { position: relative; z-index: 2; margin-top: auto; padding-top: 18px }
-
-@media (min-width: 600px) {
-  .miami-botones { grid-template-columns: 1fr 1fr }
-  .miami-opcion { font-size: 11px; letter-spacing: 1px }
-}
 @media (min-width: 720px) {
-  .portal-miami { padding-top: 4.5vh }
-  .miami-luna { top: 8%; right: 16%; width: min(280px, 26vw) }
   .miami-cuerpo { max-width: 720px }
-  /* En pantalla ancha el titular tiene que mandar: el mockup lo hace casi
-     tan grande como el wordmark. Se mide en vh para que en una portatil de
-     720 de alto los botones sigan a la vista. */
-  .miami-titular { margin-top: 3.5vh; font-size: clamp(60px, min(8vw, 11.5vh), 118px) }
-  .miami-sub { margin-top: 2vh; font-size: clamp(19px, 2.6vh, 26px) }
-  .miami-botones { margin-top: 3vh; max-width: 600px }
   .miami-boton { min-height: 62px }
-  .miami-opcion { font-size: 12px }
 }
 
 /* ---------- Pantallas de entrada: puerta, acceso, registro ----------
@@ -424,40 +345,6 @@ details[open] > summary > .faq-signo {
 
 /* La tarjeta del modo sobrio: contorno tenue, esquina suave, sin luz. */
 .tarjeta-sobria { border: 1px solid rgba(255,255,255,.12); border-radius: 14px; background: #111116; box-sizing: border-box }
-
-/* ---------- «Como funciona» y «Formas de ganar» ----------
- *
- * Las tarjetas de neon van en estilo en linea (SeccionesNeon.tsx); aqui solo
- * lo que cambia con el ancho. */
-.neon-pasos { list-style: none; margin: 30px 0 0; padding: 0; display: grid; gap: 14px }
-.neon-paso { display: flex; align-items: center; gap: 18px; padding: 20px 18px }
-.neon-icono {
-  flex: 0 0 auto; width: 70px; height: 70px; border-radius: 50%;
-  display: grid; place-items: center; box-sizing: border-box;
-}
-/* Tres tarjetas en fila: el icono pasa arriba y el texto debajo. */
-@media (min-width: 900px) {
-  .neon-pasos { grid-template-columns: repeat(3, 1fr); gap: 18px }
-  .neon-paso { flex-direction: column; align-items: flex-start; gap: 18px; padding: 26px 24px 28px }
-}
-
-/* El panel del 80%: la cifra a la izquierda y lo que significa a la derecha,
-   tambien en celular, como en el mockup. Solo en un telefono muy angosto se
-   apilan, porque ahi el texto ya no cabe en una columna legible. */
-.neon-panel { display: flex; align-items: stretch }
-.neon-panel-cifra { flex: 0 0 auto; padding: 22px 16px 22px 20px; text-align: center; display: grid; align-content: center; justify-items: center }
-.neon-panel-texto {
-  flex: 1 1 0; min-width: 0; padding: 20px 18px 20px 18px; display: grid; gap: 9px; align-content: center;
-  border-left: 1px solid rgba(255,255,255,.14);
-}
-@media (min-width: 560px) {
-  .neon-panel-cifra { padding: 28px 28px 28px 34px }
-  .neon-panel-texto { padding: 26px 28px; gap: 12px }
-}
-@media (max-width: 339px) {
-  .neon-panel { flex-wrap: wrap }
-  .neon-panel-texto { flex-basis: 100%; border-left: 0; border-top: 1px solid rgba(255,255,255,.14) }
-}
 
 /* ---------- Riel de la izquierda en pantalla ancha ----------
  *

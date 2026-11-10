@@ -1,100 +1,64 @@
-/* Pantalla 00 — Portada.
+/* Pantalla 00 — Portada: «El descenso».
  *
- * Antes aqui vivia la intro: cuatro segundos de video y un pase automatico al
- * age gate. Servia para presentarse, no para explicar nada, y quien llegaba de
- * fuera se topaba con una puerta antes de saber a que puerta estaba tocando.
+ * La portada es un edificio en el que se baja (docs/diseno/descenso/): planta
+ * baja en Collins Avenue y, debajo, el antro, el cuarto oscuro y el calabozo,
+ * con umbrales entre piso y piso y un ascensor que dice en cual vas.
  *
- * Ahora es una portada de verdad —lo que hace el sitio, cuanto se queda una,
- * como se empieza— y la intro no se pierde: el ojo sigue ahi, con la espiral
- * magenta de siempre como pupila.
+ * PRIMER PAINT = SOLO EL HERO DE COLLINS (CHECKLIST §2.1): la barra, el
+ * ascensor, la foto de fondo (el LCP), el wordmark, el titular, el subtitulo y
+ * los botones. Los pisos de abajo —sus fotos, sus fuentes, sus textos— son un
+ * chunk perezoso (`descenso/Pisos`) que se pide en el primer gesto de bajar
+ * (scroll, rueda, toque, tecla) o al pulsar «Ver cómo funciona» o un piso del
+ * ascensor. «Sobre nosotros» (contacto, preguntas, privacidad) sigue siendo un
+ * bloque que solo se abre con un clic (§2.2).
  *
- * PRIMER PAINT = SOLO EL HERO: wordmark, titular, subtitulo, «Crear mi cuenta»
- * y los enlaces. «Como funciona», «Precios» y «Sobre nosotros» (un bloque corto
- * con los enlaces de ayuda) son modulos que se piden con React.lazy cuando quien
- * visita pulsa la opcion; hasta entonces no estan en el DOM ni se descargan. El
- * cintillo magenta ya no sale aqui: el hero dice el 80% y la exclusividad. El video
- * de la intro ya no se carga aqui. Las preguntas frecuentes y los textos
- * legales viven en sus rutas (/preguntas, /contacto, /privacidad, /terminos).
+ * El copy del hero es canonico y no se toca: «Graba. / Ponle precio. / Cobra.» y
+ * «El 80% de cada dólar es tuyo. / Sin exclusividad.».
  *
- * El aire es el mismo del video: blanco y negro de alto contraste, un solo
- * color acido, trazo de linoleo y fondo de op art que se retuerce. Nada de
- * esto es imagen: son curvas que se redibujan once veces por segundo.
+ * Los botones llevan a las rutas de siempre: «Crear mi cuenta» a /registro,
+ * «Ya tengo cuenta» a /acceso (el formulario de entrar NO se mueve), «Solo
+ * vengo a ver» a /age (la puerta de edad, como antes).
  */
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import { preload } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
-import { Enlace } from '../components/Pulsable'
-import { useSesion } from '../lib/sesion'
+import { Enlace, Pulsable } from '../components/Pulsable'
 import Wordmark from '../components/Wordmark'
-import { FiltrosHervor } from '../components/Hervor'
-import { Ojo, RecorteIris, OJO } from '../components/OpArt'
-import FondoMiami from '../components/FondoMiami'
-import Insignia18 from '../components/Insignia18'
-import { Pulsable } from '../components/Pulsable'
-import { COLOR, FUENTE } from '../lib/diseño'
+import { useSesion } from '../lib/sesion'
+import { PISO } from '../lib/diseño'
+import { SPRITE_HERO } from '../descenso/spriteHero'
+import { PISOS_INFO, irA, useDescenso } from '../descenso/useDescenso'
+import '../descenso/descenso.css'
 
-/* Lo que NO es el hero. Cada import() es un chunk aparte que el navegador pide
- * cuando React intenta pintar el componente, o sea al primer click. */
-const ComoFunciona = lazy(() =>
-  import('../components/SeccionesNeon').then(m => ({ default: m.ComoFunciona })))
-const FormasDeGanar = lazy(() =>
-  import('../components/SeccionesNeon').then(m => ({ default: m.FormasDeGanar })))
+/* Lo que NO es el hero: cada import() es un chunk aparte que el navegador pide
+ * cuando React intenta pintar el componente. */
+const Pisos = lazy(() => import('../descenso/Pisos'))
 const SobreNosotros = lazy(() => import('../components/SobreNosotros'))
 
-type Seccion = 'como' | 'precios' | 'sobre'
+const I = ({ n }: { n: string }) => (
+  <svg className="ico" aria-hidden="true"><use href={`#i-${n}`} /></svg>
+)
 
-/** Las opciones de debajo de los botones. «Creadores» ya tiene su pagina; las
- *  demas abren, bajo el hero, la seccion que nombran. No son enlaces `#...`
- *  porque el sitio usa HashRouter: un enlace asi cambia la ruta en vez de
- *  bajar a la seccion. */
-const OPCIONES: { t: string; s?: Seccion; id?: string; a?: string }[] = [
-  { t: 'Cómo funciona', s: 'como', id: 'como-funciona' },
-  { t: 'Precios', s: 'precios', id: 'precios' },
-  { t: 'Creadores', a: '/creadoras' },
-  { t: 'Sobre nosotros', s: 'sobre', id: 'sobre-nosotros' },
-]
-
-function irA(id: string) {
-  const quieto = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  document.getElementById(id)?.scrollIntoView({ behavior: quieto ? 'auto' : 'smooth', block: 'start' })
+/** Hueco que mantiene la pagina «larga» mientras los pisos llegan: asi hay
+ *  scroll desde el primer momento y el gesto que los pide puede ocurrir. */
+function Hueco() {
+  return <div aria-hidden style={{ minHeight: '100vh', background: PISO.antro.vacio }} />
 }
 
-/** ¿Pantalla ancha? Solo para el tamaño del wordmark: el resto del cambio
- *  entre celular y escritorio lo hace el CSS. */
-function useAncha() {
-  const q = '(min-width: 720px)'
-  const [ancha, setAncha] = useState(() => window.matchMedia(q).matches)
-  useEffect(() => {
-    const m = window.matchMedia(q)
-    const al = () => setAncha(m.matches)
-    m.addEventListener('change', al)
-    return () => m.removeEventListener('change', al)
-  }, [])
-  return ancha
-}
-
-/** Avisa cuando lo que lo rodea ya se pinto. Va dentro del mismo Suspense que
- *  la seccion perezosa: solo se monta cuando el chunk llego, que es cuando el
- *  ancla existe y se puede bajar a ella. */
+/** Avisa cuando lo que lo rodea ya se pinto (para bajar a «Sobre nosotros»). */
 function AlMontar({ listo }: { listo: () => void }) {
-  // Una sola vez, al montarse: si dependiera de `listo` (una funcion nueva en
-  // cada render de Portal) volveria a bajar cada vez que se abre otra seccion.
   const ref = useRef(listo)
   useEffect(() => { ref.current() }, [])
   return null
 }
 
 export default function Portal() {
-  const ancha = useAncha()
-  const [abiertas, setAbiertas] = useState<Record<Seccion, boolean>>({
-    como: false, precios: false, sobre: false,
-  })
+  // El fondo de Collins es el LCP: se pide antes de que React pinte el <img>.
+  preload('/descenso/bar-hero.webp', { as: 'image', fetchPriority: 'high', type: 'image/webp' })
 
-  /** Pide una seccion. Si ya esta montada, solo baja; si no, la monta y baja
-   *  cuando llega su chunk (`AlMontar`). */
-  const pedir = (s: Seccion, id: string) => {
-    if (abiertas[s]) irA(id)
-    else setAbiertas(a => ({ ...a, [s]: true }))
-  }
+  const raiz = useRef<HTMLDivElement>(null)
+  const { piso, solida, pisosPedidos, bajar, pisosListos } = useDescenso(raiz)
+  const [sobre, setSobre] = useState(false)
   const nav = useNavigate()
   const { sesion, perfil, cargando } = useSesion()
 
@@ -104,125 +68,109 @@ export default function Portal() {
     if (sesion && perfil?.adult_confirmed_at) nav('/clip', { replace: true })
   }, [cargando, sesion, perfil, nav])
 
+  const info = PISOS_INFO.find(p => p.piso === piso) ?? PISOS_INFO[0]
+
   return (
-    <div style={{
-      minHeight: '100%', boxSizing: 'border-box',
-      background: COLOR.fondo, color: COLOR.texto, fontFamily: FUENTE.ui,
-      overflowX: 'hidden',
-    }}>
-      <FiltrosHervor />
-      <RecorteIris />
+    <div ref={raiz} className={`descenso piso-${piso}`}>
+      <svg xmlns="http://www.w3.org/2000/svg" style={{ display: 'none' }} aria-hidden="true"
+        dangerouslySetInnerHTML={{ __html: SPRITE_HERO }} />
 
-      {/* ---------- portada ----------
-          Direccion «Miami Neon Night» (DESIGN-BRIEF.md y mockups aprobados):
-          una calle de Miami de noche detras de un letrero de neon. El ojo de
-          siempre se queda, pero sutil y por detras de las palmeras: ya no es
-          el protagonista. */}
-      <section className="portal-alto portal-miami">
-        <div className="miami-escena" aria-hidden>
-          <div className="miami-luna">
-            <div className="portal-ojo-caja">
-              {/* La pupila va dentro del iris y el dibujo encima: comparten
-                  centro por construccion, asi que nunca se descuadran. */}
-              <div style={{
-                position: 'relative', width: '100%',
-                aspectRatio: `${OJO.ancho} / ${OJO.alto}`,
-              }}>
-                <div className="ojo-recorte" style={{
-                  position: 'absolute', left: '50%', top: '50%',
-                  transform: 'translate(-50%,-50%)',
-                  width: `${OJO.iris * 2 / OJO.ancho * 100}%`, aspectRatio: '1',
-                  overflow: 'hidden',
-                }}>
-                  {/* La espiral magenta de la intro, sin video: un gradiente
-                      no pesa nada y el iris no se queda hueco. */}
-                  <div style={{
-                    width: '100%', height: '100%', display: 'block',
-                    background: 'radial-gradient(circle at 50% 50%, #FF4FE0 0 13%, #B3189A 14% 30%, #1A0314 31% 62%, #FF2BD1 63% 68%, #0B0008 69%)',
-                  }} />
-                </div>
-                <Ojo />
-              </div>
+      <Pulsable className="skip" al={() => document.getElementById('nivel-1')?.focus()}>
+        Saltar al contenido
+      </Pulsable>
+
+      {/* ambiente: tinte del piso, vineta y grano (fijos, sin eventos) */}
+      <div id="tinte" aria-hidden="true" />
+      <div id="vineta" aria-hidden="true" />
+      <div id="grano" aria-hidden="true" />
+
+      {/* ---------- barra ---------- */}
+      <header className={`nav${solida ? ' solida' : ''}`} id="nav">
+        <Wordmark ancho={138} piso={piso} />
+        <nav className="nav-links" aria-label="Secciones">
+          <Pulsable al={() => bajar('nivel-2')}>Cómo funciona</Pulsable>
+          <Pulsable al={() => bajar('nivel-3')}>Piezas</Pulsable>
+          <Pulsable al={() => bajar('nivel-4')}>Precios</Pulsable>
+          <Enlace a="/acceso">Entrar</Enlace>
+        </nav>
+        <span className="sello-18" title="Solo para mayores de 18 años" role="img" aria-label="Solo para mayores de 18 años">
+          <span className="rs-mini" aria-hidden="true">RS</span>
+          <span className="edad" aria-hidden="true">18+</span>
+        </span>
+      </header>
+
+      {/* ---------- ascensor (se oculta bajo 900 px) ---------- */}
+      <aside className="ascensor" aria-label="Pisos del edificio">
+        <div className="asc-cap" aria-hidden="true">Ascensor</div>
+        <div className="asc-display" aria-hidden="true">{info.codigo}</div>
+        <div className="asc-name" aria-hidden="true">{info.nombre}</div>
+        <nav className="asc-track" aria-label="Ir a un piso">
+          {PISOS_INFO.map(p => (
+            <button key={p.id} type="button" className={`asc-floor${p.piso === piso ? ' activa' : ''}`}
+              data-piso={p.piso} aria-current={p.piso === piso ? 'location' : undefined}
+              aria-label={`Piso ${p.codigo}, ${p.nombre}${p.piso === piso ? ' (estás aquí)' : ''}`}
+              onClick={() => bajar(p.id)}>
+              <span className="dot" aria-hidden="true" />
+              <span className="lab" aria-hidden="true"><b>{p.codigo}</b>{p.corto}</span>
+            </button>
+          ))}
+        </nav>
+        <div className="asc-hint" aria-hidden="true">Baja <i /></div>
+      </aside>
+
+      <main>
+        {/* ---------- PB · Collins ---------- */}
+        <section className="hero nivel piso-c" id="nivel-1" tabIndex={-1}
+          data-piso="collins" data-code="PB" data-nombre="Calle Collins">
+          <div className="hero-scene" aria-hidden="true">
+            <picture>
+              <source srcSet="/descenso/bar-hero.webp" type="image/webp" />
+              <img className="hero-bg" id="hero-bg" src="/descenso/bar-hero.jpg" alt=""
+                width={1280} height={720} fetchPriority="high" decoding="async" />
+            </picture>
+            <div className="hero-velo" />
+          </div>
+          <div className="hero-copy">
+            <p className="piso-mark">
+              <I n="coupe" />
+              Planta baja · <span className="script">Collins Avenue</span>
+            </p>
+            <h1>Graba.<br />Ponle precio.<br />Cobra.</h1>
+            <p className="hero-sub">El 80% de cada dólar es tuyo.<br />Sin exclusividad.</p>
+            <div className="acciones">
+              <Enlace a="/registro" className="btn btn-p">Crear mi cuenta</Enlace>
+              <Enlace a="/acceso" className="btn btn-g">Ya tengo cuenta</Enlace>
+              <Pulsable className="btn btn-a" al={() => bajar('nivel-2')}>
+                <I n="fan" />Ver cómo funciona
+              </Pulsable>
             </div>
+            {/* Quien solo viene a mirar: el camino que no es «crear cuenta» ni
+                «entrar» y no puede desaparecer. Va a la puerta de edad, como antes. */}
+            <Enlace a="/age" className="solo-ver">Solo vengo a ver →</Enlace>
           </div>
-          <FondoMiami />
-        </div>
+          <Pulsable className="desciende" al={() => bajar('umbral-antro')}>
+            Baja al antro <i />
+          </Pulsable>
+        </section>
 
-        {/* Sin este velo el titular pelea con las luces de la ciudad. */}
-        <div aria-hidden className="miami-velo" />
-
-        <div className="miami-cuerpo">
-          <Wordmark ancho={ancha ? 360 : 250} />
-
-          <h1 className="miami-titular">
-            Graba.<br />Ponle precio.<br />Cobra.
-          </h1>
-
-          <p className="miami-sub">
-            El 80% de cada dólar es tuyo.<br />Sin exclusividad.
-          </p>
-
-          <div className="miami-botones">
-            <Enlace a="/registro" className="miami-boton miami-boton-magenta">Crear mi cuenta</Enlace>
-            {/* Quien regresa viene a entrar, no a leer: era un enlace chico
-                subrayado al final de la pantalla y no se veia. Ahora es un boton
-                del mismo tamaño que el de crear cuenta, justo debajo. */}
-            <Enlace a="/acceso" className="miami-boton miami-boton-suave miami-boton-entrar">Ya tengo cuenta</Enlace>
-            <Pulsable al={() => pedir('como', 'como-funciona')} className="miami-boton miami-boton-cian miami-boton-ancho">
-              <svg aria-hidden width="18" height="18" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round">
-                <path d="M7 5v14l11.5-7Z" />
-              </svg>
-              Ver cómo funciona
-            </Pulsable>
-          </div>
-
-          {/* Las opciones, a la vista y en una sola fila, con los dos colores
-              del neon alternados. En celular no hay barra con enlaces, y lo
-              que no se ve en la primera pantalla no se encuentra. */}
-          <nav className="miami-opciones" aria-label="Secciones">
-            {OPCIONES.map(o => o.a
-              ? <Enlace key={o.t} a={o.a} className="miami-opcion">{o.t}</Enlace>
-              : <Pulsable key={o.t} al={() => pedir(o.s!, o.id!)} className="miami-opcion">{o.t}</Pulsable>)}
-          </nav>
-
-          {/* Quien solo viene a mirar: el camino que no es «crear cuenta» ni
-              «entrar» y no puede desaparecer. */}
-          <div className="miami-enlaces">
-            <Enlace a="/age">Solo vengo a ver &#8594;</Enlace>
-          </div>
-        </div>
-
-        <div className="miami-18"><Insignia18 /></div>
-      </section>
-
-      {/* ---------- bajo el hero: solo si se pide ----------
-          Nada de esto existe en el DOM hasta el primer click, y cada bloque es
-          su propio chunk. `AlMontar` baja a la seccion cuando por fin esta. */}
-      {abiertas.como && (
-        <Suspense fallback={null}>
-          <ComoFunciona />
-          <AlMontar listo={() => irA('como-funciona')} />
-        </Suspense>
-      )}
-
-      {abiertas.precios && (
-        <Suspense fallback={null}>
-          <FormasDeGanar />
-          <AlMontar listo={() => irA('precios')} />
-        </Suspense>
-      )}
-
-      {/* «Sobre nosotros»: un bloque corto (que es, de donde sale y los enlaces
-          de ayuda), no la portada entera. En pantalla ancha el texto se iba a
-          mas de mil pixeles de linea y no se podia leer: el ojo pierde el
-          renglon al regresar. */}
-      {abiertas.sobre && (
-        <div style={{ padding: '0 26px 44px', maxWidth: 620, margin: '0 auto' }}>
-          <Suspense fallback={null}>
-            <SobreNosotros />
-            <AlMontar listo={() => irA('sobre-nosotros')} />
+        {/* ---------- los pisos de abajo: solo cuando se piden ---------- */}
+        {pisosPedidos ? (
+          <Suspense fallback={<Hueco />}>
+            <Pisos alMontar={pisosListos} alAbrirSobre={() => setSobre(s => !s)} sobreAbierto={sobre} />
           </Suspense>
+        ) : <Hueco />}
+      </main>
+
+      {/* «Sobre nosotros»: el bloque corto de antes (que es, de donde sale y los
+          enlaces de ayuda). Solo con clic: no esta en el DOM hasta entonces. */}
+      {sobre && (
+        <div style={{ background: PISO.calabozo.vacio, padding: '0 26px 44px' }}>
+          <div style={{ maxWidth: 620, margin: '0 auto' }}>
+            <Suspense fallback={null}>
+              <SobreNosotros />
+              <AlMontar listo={() => irA('sobre-nosotros')} />
+            </Suspense>
+          </div>
         </div>
       )}
     </div>
