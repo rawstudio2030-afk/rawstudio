@@ -180,6 +180,13 @@ export default function UploadAlbum() {
       {avance && (
         <div role="status" style={{ font: `400 13px/1.5 ${FUENTE.mono}`, color: COLOR.dinero }}>
           {avance.paso} {avance.hechas > 0 || estado === 'procesando' ? `${avance.hechas} de ${avance.total}` : ''}
+          {/* Barra global: las fotos son chicas (≤10 MB) y no usan TUS; avanza por foto. */}
+          <div role="progressbar" aria-label={avance.paso} aria-valuemin={0} aria-valuemax={Math.max(1, avance.total)}
+            aria-valuenow={Math.min(avance.hechas, Math.max(1, avance.total))}
+            style={{ marginTop: 8, height: 8, borderRadius: 999, overflow: 'hidden', background: 'rgba(255,255,255,.1)' }}>
+            <div style={{ height: '100%', background: COLOR.dinero, transition: 'width .25s linear',
+              width: `${Math.round((Math.min(avance.hechas, avance.total) / Math.max(1, avance.total)) * 100)}%` }} />
+          </div>
         </div>
       )}
 

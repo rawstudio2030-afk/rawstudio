@@ -18,6 +18,8 @@ import { aCentavos, usd } from '../lib/dinero'
 import { COLOR, TINTE, FUENTE } from '../lib/diseño'
 import { Pulsable, Enlace } from '../components/Pulsable'
 import Centro from '../components/Centro'
+import BarraSubida from '../components/BarraSubida'
+import { useSubida } from '../lib/useSubida'
 
 
 const etiqueta: React.CSSProperties = {
@@ -63,7 +65,7 @@ export default function AltaCreadora() {
   const [precio, setPrecio] = useState('2.40')
   const centavos = aCentavos(precio)   // null si el texto no se entiende
   const [publicados, setPublicados] = useState(0)
-  const [subiendo, setSubiendo] = useState('')
+  const sub = useSubida()
 
   if (cargando) return <Centro texto="Cargando…" />
   if (!esAdmin) return (
@@ -107,19 +109,17 @@ export default function AltaCreadora() {
   const publicar = async () => {
     if (!creadora || !video || !titulo.trim() || ocupado) return
     if (centavos === null) return   // texto invalido: no publicar a $0 por un dedazo
-    setOcupado(true); setError(''); setSubiendo('Preparando…')
+    setOcupado(true); setError('')
+    const senal = sub.empezar()
+    sub.etapa('preparando')
+    // El video va por TUS (resumible): si se corta la red, volver a pulsar
+    // «Publicar clip» continua donde se quedo.
     const r = await publicarPara(
       { creadora: creadora.id, titulo, video, portada, precio: centavos, visibilidad: 'pago' },
-      // Un video de 17 MB puede tardar varios minutos. Sin porcentaje no hay
-      // forma de distinguir una subida lenta de una atorada.
-      (etapa, fraccion) => setSubiendo(
-        etapa === 'portada' && fraccion === 0 ? 'Sacando la portada del video…'
-          : etapa === 'guardando' ? 'Guardando…'
-          : `Subiendo ${etapa === 'video' ? 'el video' : 'la portada'} · ${Math.round(fraccion * 100)}%`,
-      ),
+      sub.desdePublicar, { signal: senal },
     )
-    setOcupado(false); setSubiendo('')
-    if ('error' in r) { setError(r.error); return }
+    setOcupado(false); sub.terminar()
+    if ('error' in r) { setError(r.cancelada ? 'Subida cancelada. Puedes volver a publicar cuando quieras.' : r.error); return }
     setPublicados(n => n + 1)
     setTitulo(''); setVideo(null); setPortada(null)
   }
@@ -260,7 +260,10 @@ export default function AltaCreadora() {
             </div>
           </Etiquetado>
 
-          <Boton texto={subiendo || (ocupado ? 'Publicando…' : 'Publicar clip')}
+          <BarraSubida estado={sub.estado}
+            alCancelar={sub.estado.etapa === 'video' ? sub.cancelar : undefined} />
+
+          <Boton texto={ocupado ? 'Publicando…' : error ? 'Reintentar' : 'Publicar clip'}
             activo={!!video && !!titulo.trim() && centavos !== null && !ocupado} al={publicar} />
 
           <Enlace a={`/creator/${creadora.handle}`} style={{

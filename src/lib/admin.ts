@@ -17,6 +17,7 @@ import type { MotivoReporte } from './reportes'
 import { portadaAutomaticaDeVideo, tiraDeVideo } from './miniatura'
 import { precioDeVideoAlAzar } from './precios'
 import { descripcionGenerica } from './descripcion'
+import { subirVideoResumible } from './subidaVideo'
 
 
 export type PerfilAdmin = {
@@ -193,6 +194,9 @@ export async function subirExpediente(
   }
 }
 
+/** Las etapas de `publicarPara`, en el orden en que ocurren. */
+export type EtapaAvance = 'preparando' | 'video' | 'portada' | 'guardando'
+
 /** Publica un clip a nombre de una creadora dada de alta. Rechaza si el
  *  expediente está incompleto: esa regla vive en la base. */
 export async function publicarPara(
@@ -204,23 +208,25 @@ export async function publicarPara(
      *  defecto cuando no viene una: «Video de {nombre}». */
     nombreCreadora?: string | null
   },
-  alAvanzar?: (etapa: string, fraccion: number) => void,
+  alAvanzar?: (etapa: EtapaAvance, fraccion: number, bytes?: { loaded: number; total: number }) => void,
+  opciones?: { signal?: AbortSignal },
 ) {
-  // Se pide primero una URL firmada y despues se sube por XHR.
-  //
-  // Dos razones, ambas por lo que se vio en el alta de la primera creadora:
+  // El VIDEO sube por TUS (resumible, `subirVideoResumible`): a 2 GB una sola
+  // peticion es demasiado fragil. Lo demas —portadas y la tira, archivos de unos
+  // KB o pocos MB— sigue con URL firmada y XHR, por dos razones que se vieron en el
+  // alta de la primera creadora:
   //
   // 1. El permiso se revisa AL PEDIR la URL, no al terminar de transferir. Si
   //    falta el expediente o no hay privilegios, el error llega en un segundo
   //    y no despues de mandar 17 MB en balde.
-  // 2. XHR si emite progreso; el cliente de Supabase no. Sin eso una subida
-  //    normal de varios minutos era indistinguible de una atorada.
+  // 2. XHR si emite progreso; el cliente de Supabase no.
   const subidos: { bucket: string; ruta: string }[] = []
+  let cancelada = false
 
   // `rutaFija` existe para la portada: sus dos copias tienen que ir a la MISMA
   // ruta en los dos buckets, porque la base guarda una sola y lo que decide
   // cuanto se ve es de cual bucket se lee.
-  const subir = async (bucket: string, f: File, etapa: string, rutaFija?: string) => {
+  const subir = async (bucket: string, f: File, etapa: EtapaAvance, rutaFija?: string) => {
     const ext = (f.name.split('.').pop() || 'bin').toLowerCase()
     const ruta = rutaFija ?? `${datos.creadora}/${crypto.randomUUID()}.${ext}`
     const { data, error } = await supabase.storage.from(bucket).createSignedUploadUrl(ruta)
@@ -246,6 +252,21 @@ export async function publicarPara(
     return ruta
   }
 
+  // El video: TUS. Si se cancela se borra lo parcial (lo hace el helper) y se corta
+  // todo el flujo; lo ya subido en este intento se limpia en el `catch` de abajo.
+  const subirVideo = async (f: File) => {
+    const ext = (f.name.split('.').pop() || 'bin').toLowerCase()
+    const r = await subirVideoResumible({
+      bucket: 'clips', ruta: `${datos.creadora}/${crypto.randomUUID()}.${ext}`,
+      archivo: f, signal: opciones?.signal,
+      alProgreso: p => alAvanzar?.('video', p.fraction, { loaded: p.loaded, total: p.total }),
+    })
+    if ('error' in r) { cancelada = r.cancelada === true; throw new Error(r.error) }
+    subidos.push({ bucket: 'clips', ruta: r.ruta })
+    alAvanzar?.('video', 1, { loaded: f.size, total: f.size })
+    return r.ruta
+  }
+
   // Si el guardado falla, los archivos ya transferidos quedarian ocupando
   // espacio sin ningun clip que los use. Se borran para que un reintento
   // arranque limpio.
@@ -262,7 +283,7 @@ export async function publicarPara(
     // que SI viene (elegida o subida) no se toca.
     let portada = datos.portada ?? null
     if (!portada) {
-      alAvanzar?.('portada', 0)
+      alAvanzar?.('preparando', 0)
       portada = await portadaAutomaticaDeVideo(datos.video)
     }
 
@@ -271,7 +292,7 @@ export async function publicarPara(
     // contenido a cualquiera que pasara el mouse. Sale del mismo archivo y
     // antes de subir nada: si el formato no se puede decodificar, se sabe ya
     // y no despues de mandar 200 MB.
-    alAvanzar?.('portada', 0)
+    alAvanzar?.('preparando', 0)
     const tira = datos.visibilidad === 'gratis' ? await tiraDeVideo(datos.video) : null
 
     // La portada publica se ENCOGE aqui, antes de salir de esta maquina, y la
@@ -282,7 +303,7 @@ export async function publicarPara(
     const { achicar } = await import('./miniatura')
     const chica = portada ? await achicar(portada) : null
 
-    const rutaVideo = await subir('clips', datos.video, 'video')
+    const rutaVideo = await subirVideo(datos.video)
     let rutaPortada: string | null = null
     if (portada && chica) {
       rutaPortada = `${datos.creadora}/${crypto.randomUUID()}.jpg`
@@ -313,7 +334,7 @@ export async function publicarPara(
     return data as { ok: boolean; clip: string }
   } catch (e) {
     await limpiar()
-    return { error: (e as Error).message }
+    return { error: (e as Error).message, cancelada }
   }
 }
 

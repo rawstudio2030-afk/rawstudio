@@ -19,6 +19,8 @@ import Avatar from '../components/Avatar'
 import { aCentavos } from '../lib/dinero'
 import { Boton, Campo, Etiquetado, Insignia, Selector, desde } from './piezas'
 import { Pulsable } from '../components/Pulsable'
+import BarraSubida from '../components/BarraSubida'
+import { useSubida } from '../lib/useSubida'
 
 export default function PublicarPor() {
   const [texto, setTexto] = useState('')
@@ -132,9 +134,10 @@ function Formulario({ c, vuelve }: { c: CreadoraGestionable; vuelve: () => void 
   const [visibilidad, setVisibilidad] = useState<'pago' | 'suscriptores' | 'gratis'>('pago')
   const [avatar, setAvatar] = useState<File | null>(null)
   const [ocupado, setOcupado] = useState(false)
-  const [avance, setAvance] = useState('')
   const [error, setError] = useState('')
   const [hechos, setHechos] = useState(0)
+  const sub = useSubida()
+  const [nota, setNota] = useState('')
 
   const cambiar = (i: number, cambio: Partial<EnFila>) =>
     setFila(f => f.map((x, j) => j === i ? { ...x, ...cambio } : x))
@@ -150,17 +153,23 @@ function Formulario({ c, vuelve }: { c: CreadoraGestionable; vuelve: () => void 
     // De uno en uno y no en paralelo: son archivos grandes, y varias subidas
     // simultaneas se roban el ancho de banda entre ellas y acaban tardando
     // mas que en fila.
+    let n = 0
     for (const { f, i } of pendientes) {
+      n++
+      setNota(`${f.titulo} · archivo ${n} de ${pendientes.length}`)
       cambiar(i, { estado: 'subiendo', detalle: '' })
+      const senal = sub.empezar()
       const r = await publicarPara(
         { creadora: c.id, titulo: f.titulo, video: f.archivo, portada: null,
           descripcion: desc, precio: aCentavos(precio) ?? 0, visibilidad },
-        (etapa, frac) => setAvance(
-          `${f.titulo} · ` + (etapa === 'guardando' ? 'guardando'
-            : etapa === 'portada' && frac === 0 ? 'sacando la portada'
-            : `${etapa === 'video' ? 'video' : 'portada'} ${Math.round(frac * 100)}%`)),
+        sub.desdePublicar, { signal: senal },
       )
       if ('error' in r) {
+        if (r.cancelada) {
+          // Cancelar detiene TODA la fila: lo que ya se publico se queda.
+          cambiar(i, { estado: 'espera', detalle: 'Cancelado. Vuelve a publicar cuando quieras.' })
+          break
+        }
         // Un fallo no detiene la fila: los demas videos no tienen la culpa.
         cambiar(i, { estado: 'error', detalle: r.error! })
       } else {
@@ -168,7 +177,8 @@ function Formulario({ c, vuelve }: { c: CreadoraGestionable; vuelve: () => void 
         ok++
       }
     }
-    setOcupado(false); setAvance('')
+    sub.terminar(); setNota('')
+    setOcupado(false)
     setHechos(n => n + ok)
     const fallaron = fila.filter(f => f.estado === 'error').length
     if (fallaron) setError(`${fallaron} no se pudieron subir. Están marcados abajo.`)
@@ -308,6 +318,11 @@ function Formulario({ c, vuelve }: { c: CreadoraGestionable; vuelve: () => void 
             después uno por uno si hace falta.
           </div>
 
+          <div style={{ marginTop: 14 }}>
+            <BarraSubida estado={sub.estado} nota={nota}
+              alCancelar={sub.estado.etapa === 'video' ? sub.cancelar : undefined} />
+          </div>
+
           {error && (
             <div style={{ marginTop: 14, padding: '10px 13px', border: '1px solid #FF4444',
               color: '#FF4444', font: `400 12px/1.45 ${FUENTE.ui}` }}>{error}</div>
@@ -317,7 +332,7 @@ function Formulario({ c, vuelve }: { c: CreadoraGestionable; vuelve: () => void 
             <Boton tono="primario"
               activo={fila.some(f => f.estado !== 'listo' && f.titulo.trim()) && !ocupado}
               al={publicar}>
-              {avance || (() => {
+              {ocupado ? 'Subiendo…' : (() => {
                 const n = fila.filter(f => f.estado !== 'listo' && f.titulo.trim()).length
                 return n > 1 ? `Publicar los ${n}` : 'Publicar por ella'
               })()}

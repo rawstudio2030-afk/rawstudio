@@ -17,6 +17,8 @@ import {
 } from '../lib/admin'
 import { usd } from '../lib/dinero'
 import { Boton } from './piezas'
+import BarraSubida from '../components/BarraSubida'
+import { useSubida } from '../lib/useSubida'
 
 export default function SubidaMasiva() {
   const [lote, setLote] = useState<VideoEnLote[]>([])
@@ -25,7 +27,9 @@ export default function SubidaMasiva() {
   const [aviso, setAviso] = useState('')
   const [error, setError] = useState('')
   const [ocupado, setOcupado] = useState(false)
-  const [avance, setAvance] = useState('')
+  const sub = useSubida()
+  const [nota, setNota] = useState('')
+  const [globalLote, setGlobalLote] = useState<{ hechos: number; total: number } | null>(null)
 
   const cargarCreadoras = useCallback(async () => {
     const r = await creadorasGestionables('')
@@ -69,24 +73,31 @@ export default function SubidaMasiva() {
     // En fila y no en paralelo: son archivos grandes, y varias subidas a la
     // vez se roban el ancho de banda entre ellas.
     for (const { v, i } of listos) {
-      setLote(x => x.map((y, j) => j === i ? { ...y, estado: 'subiendo' } : y))
+      n++
+      setGlobalLote({ hechos: n - 1, total: listos.length })
+      // Barra por archivo (bytes del video) + la linea del lote («archivo 3 de 12»).
+      setNota(`${v.carpeta}/${v.titulo} · archivo ${n} de ${listos.length}`)
+      setLote(x => x.map((y, j) => j === i ? { ...y, estado: 'subiendo', detalle: '' } : y))
+      const senal = sub.empezar()
       const r = await publicarPara(
         { creadora: v.creadora!, titulo: v.titulo, video: v.archivo, portada: null,
           descripcion: v.descripcion, precio: v.precio, visibilidad: v.visibilidad,
           nombreCreadora: v.nombreCreadora },
-        (etapa, f) => setAvance(
-          `${++n === 1 ? '' : ''}${v.carpeta}/${v.titulo} · ` +
-          (etapa === 'guardando' ? 'guardando'
-           : etapa === 'portada' && f === 0 ? 'sacando la portada'
-           : `${Math.round(f * 100)}%`)),
+        sub.desdePublicar, { signal: senal },
       )
+      if ('error' in r && r.cancelada) {
+        // Cancelar detiene TODO el lote: lo ya subido se queda, el resto sigue por subir.
+        setLote(x => x.map((y, j) => j === i
+          ? { ...y, estado: 'espera', detalle: 'Cancelado. Vuelve a subir el lote para continuar.' } : y))
+        break
+      }
       setLote(x => x.map((y, j) => j === i ? {
         ...y,
         estado: 'error' in r ? 'fallo' : 'listo',
         detalle: 'error' in r ? r.error! : '',
       } : y))
     }
-    setOcupado(false); setAvance('')
+    sub.terminar(); setNota(''); setGlobalLote(null); setOcupado(false)
   }
 
   const cuenta = (e: VideoEnLote['estado']) => lote.filter(v => v.estado === e).length
@@ -184,8 +195,27 @@ export default function SubidaMasiva() {
             )}
             <div style={{ flex: 1 }} />
             <Boton tono="primario" activo={porSubir > 0 && !ocupado} al={subir}>
-              {avance || (porSubir ? `Subir los ${porSubir}` : 'Nada que subir')}
+              {ocupado ? 'Subiendo…' : (porSubir ? `Subir los ${porSubir}` : 'Nada que subir')}
             </Boton>
+          </div>
+
+          {globalLote && (
+            <div style={{ marginBottom: 8 }}>
+              <div role="progressbar" aria-label="Avance del lote" aria-valuemin={0}
+                aria-valuemax={globalLote.total} aria-valuenow={globalLote.hechos}
+                aria-valuetext={`${globalLote.hechos} de ${cuantos(globalLote.total, 'archivo')} terminados`}
+                style={{ height: 6, borderRadius: 999, overflow: 'hidden', background: 'rgba(255,255,255,.1)' }}>
+                <div style={{ height: '100%', background: COLOR.admin, transition: 'width .25s linear',
+                  width: `${Math.round((globalLote.hechos / Math.max(1, globalLote.total)) * 100)}%` }} />
+              </div>
+              <div style={{ marginTop: 5, font: `400 11px/1.4 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
+                Lote: {globalLote.hechos} de {cuantos(globalLote.total, 'archivo')} terminados
+              </div>
+            </div>
+          )}
+          <div style={{ marginBottom: 12 }}>
+            <BarraSubida estado={sub.estado} nota={nota}
+              alCancelar={sub.estado.etapa === 'video' ? sub.cancelar : undefined} />
           </div>
 
           <div style={{ border: `1px solid ${LINEA.tenue}`, maxHeight: 420, overflowY: 'auto' }}>

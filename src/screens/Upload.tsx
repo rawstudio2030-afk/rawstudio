@@ -22,6 +22,10 @@ import Centro from '../components/Centro'
 import { perfilParaPublicar } from '../lib/trato'
 import { configAlbumes } from '../lib/albumes'
 import SelectorSubida from '../components/SelectorSubida'
+import BarraSubida from '../components/BarraSubida'
+import { useSubida } from '../lib/useSubida'
+import { subirVideoResumible } from '../lib/subidaVideo'
+import { supabase } from '../lib/supabase'
 
 
 /* Modo consumo: rotulos en `textoSuave` (eran textoTenue, 3.78:1, bajo AA) y
@@ -83,6 +87,7 @@ export default function Upload() {
   const [detalle, setDetalle] = useState('')
   const [clipNuevo, setClipNuevo] = useState<string | null>(null)
   const [paso, setPaso] = useState('')
+  const sub = useSubida()
 
   // Los cuadros candidatos se sacan en cuanto hay video, no al publicar: asi
   // la creadora elige mientras escribe el titulo, y si el navegador no puede
@@ -157,6 +162,8 @@ export default function Upload() {
   const publicar = async () => {
     if (!listo || !video || !sesion) return
     setEstado('subiendo'); setDetalle('')
+    const senal = sub.empezar()
+    sub.etapa('preparando')
 
     // La portada: la que subio ella, el cuadro que eligio, o —si el navegador
     // no pudo decodificar el video— el automatico de siempre. Todo esto pasa
@@ -182,14 +189,37 @@ export default function Upload() {
     // a cualquiera que pasara el mouse — por 183 clips, unos 1.098 cuadros.
     const tira = modo === 'gratis' ? await tiraDeVideo(video) : null
 
+    // El video va por TUS (resumible): si se corta la red, Reintentar sigue donde
+    // se quedo. La barra muestra bytes reales.
     setPaso('Subiendo el video…')
-    const v = await subirArchivo('clips', sesion.user.id, video)
-    if (v.error) { setEstado('error'); setDetalle(v.error); return }
+    sub.etapa('video')
+    const extVideo = (video.name.split('.').pop() || 'mp4').toLowerCase()
+    const v = await subirVideoResumible({
+      bucket: 'clips', ruta: `${sesion.user.id}/${crypto.randomUUID()}.${extVideo}`,
+      archivo: video, signal: senal,
+      alProgreso: p => sub.bytes(p.loaded, p.total),
+    })
+    if ('error' in v) {
+      sub.terminar()
+      if (v.cancelada) {
+        // Cancelar no es un error: el formulario queda tal cual, listo para publicar.
+        setEstado('listo'); setDetalle('')
+      } else {
+        setEstado('error'); setDetalle(v.error)
+      }
+      return
+    }
+    const rutaVideo = v.ruta
+
+    // Si algo falla DESPUES de subir el video, no se deja huerfano ocupando espacio
+    // (la subida de administracion ya lo hacia; esta no).
+    const quitarVideo = () => { supabase.storage.from('clips').remove([rutaVideo]).catch(() => {}) }
 
     let coverPath: string | null = null
     let falloPortada: string | null = null
     if (nitida && chica) {
       setPaso('Subiendo la portada…')
+      sub.etapa('portada')
       // Las dos copias, misma ruta: la chica al bucket publico y la nitida al
       // privado. Que falle NO tumba la publicacion —perder el video ya subido
       // por una imagen seria mucho peor— pero SI se dice. Antes se ponia
@@ -209,13 +239,14 @@ export default function Upload() {
     }
 
     setPaso('Publicando…')
+    sub.etapa('guardando')
     const r = await crearClip({
       creator_id: sesion.user.id,
       title: titulo.trim(),
       // Si se deja vacia: «Video de {nombre}», neutra y sin decir de que va. Lo que ella
       // escribio no se toca.
       description: desc.trim() || descripcionGenerica(perfil?.display_name, perfil?.handle),
-      storage_path: v.path ?? null,
+      storage_path: rutaVideo,
       cover_path: coverPath,
       visibility: modo,
       price_coins: modo === 'pago' ? precio : 0,
@@ -225,6 +256,8 @@ export default function Upload() {
       published: true,
     })
     if (r.error) {
+      sub.terminar()
+      quitarVideo()
       setEstado('error')
       // El servidor responde con un texto de permisos que no explica nada.
       setDetalle(/row-level security|pol[ií]tica de seguridad/i.test(r.error)
@@ -242,6 +275,7 @@ export default function Upload() {
     // El clip SI se publico. Si la portada se quedo fuera no se navega: se
     // dice, con el clip ya a salvo y una liga para ir a verlo. Irse en
     // silencio dejaria a la creadora descubriendolo sola en el catalogo.
+    sub.terminar()
     if (falloPortada) { setEstado('sin-portada'); setDetalle(falloPortada); setClipNuevo(r.id ?? null); return }
 
     nav(`/clip/${r.id}`)
@@ -471,8 +505,18 @@ export default function Upload() {
         </div>
       )}
 
+      {/* Cancelar solo en la etapa del video: es la unica que se puede detener
+          (y borra lo parcial). Las otras duran segundos. */}
+      <BarraSubida estado={sub.estado}
+        alCancelar={sub.estado.etapa === 'video' ? sub.cancelar : undefined} />
+
       {estado === 'error' && (
-        <div role="alert" style={{ font: `400 14px/1.45 ${FUENTE.ui}`, color: '#FF7BE6' }}>{detalle}</div>
+        <div role="alert" style={{ font: `400 14px/1.45 ${FUENTE.ui}`, color: '#FF7BE6' }}>
+          {detalle}
+          {/conexi[oó]n|Reintenta/.test(detalle) && (
+            <> «Reintentar» continúa donde se quedó mientras la subida siga vigente; si ya no, empieza de nuevo.</>
+          )}
+        </div>
       )}
 
       {estado === 'sin-portada' && (
@@ -493,7 +537,7 @@ export default function Upload() {
 
       <Pulsable al={publicar} activo={listo} className="boton-principal"
         style={{ width: '100%', marginTop: 'auto' }}>
-        {estado === 'subiendo' ? paso : 'Publicar'}
+        {estado === 'subiendo' ? paso : estado === 'error' ? 'Reintentar' : 'Publicar'}
       </Pulsable>
     </div>
   )
