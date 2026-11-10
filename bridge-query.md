@@ -38,7 +38,7 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 
 ## Consultas activas
 
-### [id: 20261110-04] Correos y brief El descenso — hecha (sin publicar)
+### [id: 20261110-04] Correos y brief El descenso — hecha y publicada
 - **fecha:** 2026-11-10 12:20 (America/Mexico_City)
 - **estado:** respondida
 - **tarea:** Actualizar las plantillas de correo (170 hex) a la paleta del descenso y reescribir `DESIGN-BRIEF.md`. Favicon/sello RS si no se hizo en 10-01.
@@ -46,7 +46,7 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 - **contexto:** HEAD al asignar (maqueta ya en el árbol): `13be7e6`. Depende de los tokens de [id: 20261110-01]. Sergio aprobó la maqueta el 10 nov 2026 y pidió pasar indicaciones e imágenes al repo.
 - **urgencia:** media
 - **ya se intentó:** nada de código de esta ronda; el coordinador contó 170 hex en `supabase/functions/avisar-*`, `enviar-campana` y `supabase/templates/recuperar.html`.
-- **resultado:** HECHA en un commit propio, **`05f4f1b`** (`feat: correos y brief al descenso`), el último de la serie 10-01…10-04. **NO publicada, NO desplegada:** las funciones de borde y la plantilla de Auth solo cambian en producción cuando se redesplieguen / se pegue la plantilla (ver «Para Omar»).
+- **resultado:** HECHA en un commit propio, **`4876730`** (`feat: correos y brief al descenso`), el último de la serie 10-01…10-04. **PUBLICADA el 2026-11-10 con la aprobación de Omar (`git push`, sin CNAME ni correo .mx); las funciones de borde NO están desplegadas ni la plantilla de Auth repegada:** eso se hace después, junto con el corte de dominio (ver «Para Omar»).
 - **diff resumido (18 archivos, +406 −367):**
   - **Correos (8 funciones):** `avisar-bienvenida`, `-compra`, `-creadora`, `-purga`, `-retiro`, `-verificacion`, `-verificada` y `enviar-campana`. Solo cambian valores de color dentro del HTML en línea: fondo de página `#0E1520` (void), tarjeta `#141C28` (navy), texto `#F3EBE2` (marfil), apagados `#C9BDB0` / `#A89D92`, acento magenta → **champagne `#D4B483`**, lima → **ámbar `#E0B15A`** (dinero y afirmativos), cian → **seafoam `#7EBFB3`**; el texto de un botón sobre champagne/ámbar es navy `#141C28` (antes `#08080A`). **Copy, asuntos, remitentes, buzones y lógica sin tocar.**
   - **`supabase/templates/recuperar.html`:** misma paleta; el logo `<img>` se sustituye por el **wordmark en texto** («RAW» espaciado en marfil + «studio» cursiva champagne, Didot / Bodoni MT / Georgia): no depende de que el cliente cargue imágenes. Titular en la serif de la marca (antes Arial Black en mayúsculas). **La tarjeta pasa de `width:600px` a `width:100%; max-width:600px`**: a 360 px el correo desbordaba a 624 px (ya era así antes; medido), ahora cabe (360 = 360).
@@ -63,7 +63,7 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
   2. **Plantilla de recuperar contraseña:** si en Supabase → Authentication → Email Templates se pegó a mano, **volver a pegar `supabase/templates/recuperar.html`** (la que se pegó antes sigue llamando a `correo/logo.png`: ese archivo ahora es la marca nueva, así que tampoco sale el neón, pero el texto y los colores no cambian hasta repegarla).
 - **Diferencias:** (1) el **wordmark de recuperar va en texto**, no con la imagen: el brief lo permitía y es más robusto (Gmail bloquea imágenes). (2) **`og.png`/iconos se dibujan con Didot y Bodoni 72 del sistema**, no con Italiana/Bodoni Moda (no están instaladas y Pillow solo lee archivos locales): misma familia de didonas; el script lo explica y cambia con apuntar a las .ttf. (3) `scripts/portadas-elegir.mjs` (herramienta local de curaduría) y `public/deck/index.html` (el deck viejo) **siguen con los colores neón**: no son correo ni son el sitio; no se tocaron.
 
-### [id: 20261110-03] Páginas públicas al descenso y barrido de colores — hecha (sin publicar)
+### [id: 20261110-03] Páginas públicas al descenso y barrido de colores — hecha y publicada
 - **fecha:** 2026-11-10 12:20 (America/Mexico_City)
 - **estado:** respondida
 - **tarea:** Llevar Explorar, fichas, perfiles, `/creadoras`, puertas de entrada, wallet, etc. al piso que les toca, y barrer hex / clases `.miami-*` sueltos.
@@ -71,7 +71,7 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 - **contexto:** HEAD al asignar: `13be7e6`. En `src` hay ~395 literales hex (52 en `src/index.css`); el admin solo cambia de tokens y sigue en escritorio (`ANCHO_MINIMO` 1280).
 - **urgencia:** media
 - **ya se intentó:** nada de código de esta ronda.
-- **resultado:** HECHA en un commit propio, **`d80cbda`** (`feat: paginas publicas al descenso`), después de 10-02. **NO publicada.**
+- **resultado:** HECHA en un commit propio, **`c6ae7ad`** (`feat: paginas publicas al descenso`), después de 10-02. **PUBLICADA el 2026-11-10 con la aprobación de Omar.**
 - **diff resumido (80 archivos, +791 −1061):**
   - **Mapa de pisos final** (el del coordinador, con estos matices): **Collins** → `/age`, `/intro`, `/entrar`, `/acceso`, `/registro`, `/nueva-clave`, `/modo`, `/privacidad`, `/terminos`, `/contacto`, `/preguntas`, `/ayuda`. Nuevo marco `PaginaCollins` / `FondoCollins` (la foto `bar-hero` fija y velada en navy; sustituye a `PaginaMiami` / `FondoFijo`); las páginas de texto (`MarcoDocumento`) llevan el void navy con tinte seafoam **sin foto** (se leen mejor). **Antro** → `/creadoras` (con `FondoAntro`: la foto `club` muy velada, titulares en Unbounded) y `/consultas` (`MarcoDocumento piso="antro"`). **Cuarto oscuro** → Explorar, `TarjetaClip`, ficha del clip (**sobria**: el reproductor no se redecora), perfil de creadora (cabecera Collins para leer el nombre, hoja de contactos debajo), Biblioteca. Estilos en `src/lib/oscuro.ts`. **Calabozo** → billetera, ganancias, retirar, estudio y cobro, y las herramientas de quien publica (subir, álbum, verificar, perfil, alta): solo fondo y acento (`src/lib/calabozo.ts`); la UI sigue clara y densa. **Admin**: solo tokens. **Ajustes que justifico:** `/consultas` en antro (la maqueta lo pide «la conversación / el club»); perfil de cuenta, subir y verificar en calabozo (son «cuenta y herramientas», no «ver y elegir»).
   - **Cuarto oscuro:** fondo con luz de seguridad roja arriba; marco de fotograma casi negro con filete de papel; **insignias** pago = papel sobre safelight `#B3121B` (6.0:1), suscriptoras = plata, gratis = ámbar; **precio a lápiz graso** (Permanent Marker) en ámbar `#C9A04A` (8.4:1; el rojo sobre negro daba 3.9:1); **botón principal** = papel sobre safelight apagado (la maqueta advierte que el «lit» da 4.49 y falla por 0.01).
@@ -84,7 +84,7 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 - **NO verificado:** **Lighthouse** (no hay aquí; sustituido por axe). axe deja «incompleto» el contraste de texto sobre foto/degradado (decenas de nodos por página): lo que sí está medido son los pares de los tokens. **Pantallas que exigen sesión** (billetera, ganancias, retirar, estudio, subir, verificar, perfil de cuenta, biblioteca, alta, admin): **no se abrieron** (no hay sesión de prueba); cambian solo de fondo/tokens y compilan, pero **no se vieron**. **Admin a ≥1280 px:** no se abrió. **Flujos con cuenta** (registrarse, entrar, recuperar clave) **no se ejecutaron**: solo se vieron las pantallas. Una pasada visual lado a lado con `nivel*.jpg` en las pantallas internas, **hecha por mí a ojo**, no por quien diseñó.
 - **Diferencias / pendientes de decisión:** (1) **`/creadoras` y `/consultas` quedan en antro** pero `Wallet`/`Earnings` etc. en calabozo solo con fondo: si quieres «dos o tres cosas más» del calabozo (placas Cinzel, botones remachados) en billetera, es otra ronda. (2) Tarjetas y superficies **dentro** de las pantallas de calabozo siguen en navy (`COLOR.superficie`) sobre fondo de piedra cálida: se ve coherente pero no es un mapa uno a uno de la maqueta. (3) `src/assets/wordmark.png`, `launch.mp4` y `cortina.jpg` **ya no los usa nadie** (los dos últimos ya no los usaban antes): no los borré. (4) `src/content/portada.ts` conserva `COMO_FUNCIONA`, `FORMAS_NEON` y `VERIFICACION_NOTA`, sin uso desde 10-02.
 
-### [id: 20261110-02] Portada: el descenso en cuatro pisos — hecha (sin publicar)
+### [id: 20261110-02] Portada: el descenso en cuatro pisos — hecha y publicada
 - **fecha:** 2026-11-10 12:20 (America/Mexico_City)
 - **estado:** respondida
 - **tarea:** Sustituir `FondoMiami` / `SeccionesNeon` por la landing en cuatro pisos (Collins → antro → cuarto oscuro → calabozo) con ascensor, respetando §2.1/§2.2 y el copy verbatim del hero.
@@ -92,7 +92,7 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 - **contexto:** HEAD al asignar: `13be7e6`. Maqueta en `docs/diseno/descenso/`. El hero actual (`Portal.tsx`) dice «Graba. / Ponle precio. / Cobra.» y «El 80% de cada dólar es tuyo. / Sin exclusividad.» — no se toca.
 - **urgencia:** alta
 - **ya se intentó:** nada de código de producto; la maqueta ya está en el repo.
-- **resultado:** HECHA en un commit propio, **`b6c0063`** (`feat: portada en cuatro pisos (el descenso)`), después de 10-01. **NO publicada.** Corrí `python3 extraer.py` (23 imágenes); los JPG extraídos quedan **sin versionar** en `docs/diseno/descenso/` (la carpeta ya los generaba el script).
+- **resultado:** HECHA en un commit propio, **`9544c00`** (`feat: portada en cuatro pisos (el descenso)`), después de 10-01. **PUBLICADA el 2026-11-10 con la aprobación de Omar.** Corrí `python3 extraer.py` (23 imágenes); los JPG extraídos quedan **sin versionar** en `docs/diseno/descenso/` (la carpeta ya los generaba el script).
 - **diff resumido (22 archivos, +1419 −521):**
   - **`src/screens/Portal.tsx` reescrito**: barra fija (wordmark que cambia de color de «studio» por piso, enlaces, sello 18+), **ascensor** (PB / −1 / −2 / −3, botones, `aria-current`, oculto <900 px) y el piso PB con el copy **verbatim**. CTAs: «Crear mi cuenta» → `/registro`, «Ya tengo cuenta» → `/acceso`, «Ver cómo funciona» → baja al antro, «Solo vengo a ver» → `/age` (como hoy). `src/descenso/`: `descenso.css` (primer paint: variables, barra, ascensor, hero, tinte/viñeta/grano), `pisos.css` + `Pisos.tsx` (chunk perezoso: escalera, antro con los tres pasos 10/20/40, tendedero y hoja de contactos, puerta, calabozo con 80 % + tablillas + CTA + pie), `useDescenso.ts` (scroll rAF, piso activo, parallax suave solo sin `prefers-reduced-motion`, petición de los pisos), `spriteHero.ts` / `spritePisos.ts` (iconos SVG de la maqueta).
   - **Es la maqueta pasada a CSS del producto bajo `.descenso`** (mismos valores, no copiada a `public/`); los textos de la maqueta salen tal cual, sin las notas de «maqueta».
@@ -111,7 +111,7 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
   3. **El wordmark de la barra es inerte en `/`** (comportamiento heredado del age gate), a diferencia de la maqueta donde sube al hero.
   4. La barra de la maqueta dice «Entrar» → `/acceso`.
 
-### [id: 20261110-01] Tokens, tipografías y wordmark del descenso — hecha (sin publicar)
+### [id: 20261110-01] Tokens, tipografías y wordmark del descenso — hecha y publicada
 - **fecha:** 2026-11-10 12:20 (America/Mexico_City)
 - **estado:** respondida
 - **tarea:** Reescribir `src/lib/diseño.ts` y las fuentes de `index.html`, redibujar el Wordmark (Italiana + Bodoni italic, «studio» por piso) y retirar `GLOW` / `DEGRADADO` / `MIAMI` neon. Corregir el contraste AA (el blanco sobre magenta actual es 2.84).
@@ -119,7 +119,7 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 - **contexto:** HEAD al asignar: `13be7e6` (maqueta en `docs/diseno/descenso/`, commits `45c6018` y `13be7e6`). Referencia: README de esa carpeta. Sergio aprobó la maqueta (tipografías actuales, no `v1`) el 10 nov 2026 y pidió indicaciones en el puente más las imágenes en el repo.
 - **urgencia:** alta
 - **ya se intentó:** nada de código de producto de esta ronda.
-- **resultado:** HECHA en un commit propio, **`0deeb55`** (`feat: tokens y tipografias del descenso`). **NO publicada.**
+- **resultado:** HECHA en un commit propio, **`1802f79`** (`feat: tokens y tipografias del descenso`). **PUBLICADA el 2026-11-10 con la aprobación de Omar.**
 - **diff resumido (34 archivos, +346 −269):**
   - **`src/lib/diseño.ts` reescrito**: `COLOR` (fondo `#0E1520`, superficies `#141C28` / `#1C2636`, texto marfil `#F3EBE2`, tres grises de texto que pasan AA sobre las tres superficies — medido —, **acento champagne `#D4B483`** con `sobreAcento` navy, **dinero ámbar `#E0B15A`**, **admin seafoam `#7EBFB3`**), `LINEA`, `VELO`, `TINTE`, **`PISO`** (los hex del README por piso, con el color de «studio»), **`BOTON`** (el botón primario de cada piso con su texto AA), `FUENTE` (display Bodoni Moda, `deco` Italiana, `ui` Space Grotesk, `collins` Josefin, `mono` IBM Plex Mono, y las familias de los otros pisos), `RADIO` (`circulo` y `filo` = 1 px: sin la escala de 14 px), `LUZ` y `TRAMA` en lugar de `GLOW` / `DEGRADADO` / `MIAMI`. **No queda Anton ni Space Mono referenciados.** El comentario de cabecera apunta al README de la maqueta.
   - **`index.html`**: fuentes **críticas** en el primer stylesheet (Italiana, Bodoni Moda con itálica, Josefin Sans, Space Grotesk, IBM Plex Mono; `display=swap`) y **segunda hoja diferida** (`media="print"` + `onload`) con Unbounded, Bebas Neue, DM Serif Display, Courier Prime, Permanent Marker, Barlow / Condensed, Cinzel, EB Garamond, Monoton y Grenze Gotisch (esta última incluida, solo para la firma del pie). `theme-color` y `site.webmanifest` → `#0E1520`. **`public/favicon.svg` = el de la maqueta** (RS champagne sobre navy).
