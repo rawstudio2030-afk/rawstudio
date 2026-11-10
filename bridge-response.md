@@ -21,7 +21,7 @@
 ## Reglas permanentes (Claude Code)
 1. **No preguntar a Sergio** por decisiones técnicas o de UI estándar. El coordinador decide; Sergio solo en negocio/contenido/legal.
 2. **Negocio fijo:** comisión **20%** (creadora 80%), pagos **SPEI**, audiencia **18+**. No cambiar ese copy.
-3. **Stack:** TypeScript strict, React 19 + `HashRouter`, Vite 8, tokens en `src/lib/diseño.ts`, **Miami Neon Night** (`DESIGN-BRIEF.md`).
+3. **Stack:** TypeScript strict, React 19 + `HashRouter`, Vite 8, tokens en `src/lib/diseño.ts`. Dirección visual vigente: **El descenso** (`docs/diseno/descenso/`, rondas `[id: 20261110-01]` a `[id: 20261110-04]`). `DESIGN-BRIEF.md` se reescribe en la 10-04; hasta entonces manda la maqueta, no *Miami Neon Night*.
 4. **Prioridad:** seguridad y textos legales **antes** de abrir al público.
 5. **Anti-bucle por tarea:** máx **10** rondas; solo iterar si mejora checklist; parar si **2** rondas seguidas no mejoran; tope **1 hora** por tarea; ítems `pass` **inmutables** salvo regresión.
 6. **Diario:** cruzar diff + commit + ítem de checklist.
@@ -29,6 +29,268 @@
 ---
 
 ## Respuestas activas
+
+### Respuesta a [id: 20261110-04] — Correos y brief El descenso
+- **fecha:** 2026-11-10 12:20 (America/Mexico_City)
+- **decisión de Sergio:** el rediseño incluye la papelería que sale de la casa (correos) y el documento que Claude (y el coordinador) van a seguir después.
+- **estado:** lista-para-claude
+- **depende de:** [id: 20261110-01] (tokens). Puede hacerse en paralelo conceptual a 10-03, pero **el commit va después** de 10-03 para no mezclar.
+
+#### Diagnóstico (no lo reescribas: úsalo)
+1. Hay **170** literales hex en correos:
+   - `supabase/functions/avisar-retiro/index.ts` (45)
+   - `supabase/templates/recuperar.html` (30)
+   - `avisar-creadora` (18), `avisar-verificacion` (15), `avisar-compra` (15), `avisar-verificada` (13), `avisar-bienvenida` (11), `avisar-purga` (7), `enviar-campana` (6)
+2. Esos HTML se ven en Gmail/Outlook: nada de flex moderno, fondos fotográficos pesados ni tipografías custom que Outlook vaya a ignorar. Se puede cambiar paleta (fondos oscuros navy/void, acentos champagne/oxblood, texto ivory/bone) y el wordmark a texto «RAW» + «studio» sin tubo neon.
+3. `DESIGN-BRIEF.md` describe todavía *Miami Neon Night* (magenta, cian, lima, skyline, «GRABA. PONLE PRECIO. COBRA.» en Anton). Hay que reescribirlo para que nadie vuelva a implementar neon.
+4. `public/favicon.svg` sigue siendo el círculo magenta con play lima, si 10-01 no lo cambió. Esta ronda es buen sitio para adoptar `docs/diseno/descenso/sello-rs.svg` / `favicon.svg` y, si tocas `og.png` / apple-touch, que sean marca discreta (sin contenido adulto, sin skyline magenta).
+
+#### Qué hacer
+
+**1. Plantillas de correo**
+- Sustituye magenta/lima/cian por tokens del descenso (void `#0E1520` / navy `#141C28`, ivory `#F3EBE2`, champagne `#D4B483`, oxblood `#7A1F24` para énfasis, ámbar `#E0B15A` para dinero). Contraste AA en texto sobre el fondo del correo.
+- Wordmark en texto o un PNG/SVG chico ya existente (`public/correo/logo.png` — si lo regeneras, que sea el wordmark nueva, no el neon). No incrustes los JPG de 300+ KB de la maqueta en cada mail.
+- No cambies copy, asuntos, remitentes ni buzones: siguen `@rawstudio.biz`. No inventes textos legales ni de Telegram. No muevas el FROM a `.mx`. El commit local de correo .mx **sigue sin publicarse**.
+- `enviar-campana` y recuperar contraseña entran en el mismo barrido.
+
+**2. Reescribir `DESIGN-BRIEF.md`**
+- Título: RAWstudio — Brief de diseño visual (**El descenso**).
+- Apunta a `docs/diseno/descenso/README.md` como fuente de paletas, tipografías y efectos.
+- Resume los cuatro pisos, el wordmark (Italiana + Bodoni italic, «studio» por piso), el mapa de pantallas de 10-03, el ascensor (oculto <900 px, `prefers-reduced-motion`), modo consumo (reproductor sobrio) vs modo marca (landing y puertas).
+- Copy canónico del hero (verbatim).
+- Reglas: mobile-first, no inventar features, tokens en `diseño.ts`, admin solo tokens / desktop 1280, no renombrar `/creadoras`, no mover el login a `/entrar`, no tracking, no legales inventados.
+- Quita la paleta magenta/cian/lima y el orden de implementación viejo (o márcalo como histórico, una línea).
+
+**3. Favicon / og (si no se hizo en 10-01)**
+- Actualiza `public/favicon.svg` al sello RS o al monograma de la maqueta. Regenera apple-touch / icon-192 / icon-512 / `og.png` solo si puedes hacerlo en esta ronda sin meter fotos de ambiente pesadas en `og.png` (la preview de WhatsApp debe seguir siendo marca discreta, como ya documenta `index.html`).
+
+**4. Regla permanente del puente**
+- En este mismo commit, si el coordinador no lo dejó ya: la regla 3 de `bridge-response.md` debe decir **El descenso**, no *Miami Neon Night*. Si ya está actualizada, no la reescribas.
+
+#### No tocar
+- Cuerpos legales, textos de Telegram, procesador de recargas, secretos, `TELEGRAM_BOT_TOKEN`.
+- Dominio canónico / CNAME / FROM (08-05 y el commit local de correo .mx).
+- Lógica de las edge functions (cuándo se manda un correo, a quién, qué datos); solo presentación HTML/CSS inline.
+- Landing y páginas (10-02/10-03). Migraciones.
+
+#### Criterios de aceptación
+1. `rg '#FF2BD1|#C8FF3D|#00E5FF' supabase/functions supabase/templates` no devuelve esos acentos.
+2. Un HTML de bienvenida y el de recuperar se ven legibles en una vista estrecha (360 px) y en una ancha: texto contraste AA, marca nueva, sin recortes salvajes.
+3. `DESIGN-BRIEF.md` describe El descenso y apunta a la maqueta; ya no prescribe magenta/cian/lima como dirección vigente.
+4. Favicon nuevo o nota explícita de por qué se dejó el viejo.
+5. `tsc -b` / `npm run build` si tocaste frontend; las functions siguen tipadas como el repo las comprueba hoy.
+
+#### Entrega
+- Commit sugerido: `feat: correos y brief al descenso`.
+- Commit propio, el último de la serie.
+- Marca [id: 20261110-04] `respondida` con SHA y diff.
+
+#### Siguiente paso para Claude Code
+Implementa, deja el resultado en `bridge-query.md`. No abras una quinta ronda de diseño salvo que algo de estas cuatro no compile o rompa un flujo.
+
+### Respuesta a [id: 20261110-03] — Páginas públicas al descenso y barrido de colores
+- **fecha:** 2026-11-10 12:20 (America/Mexico_City)
+- **decisión de Sergio:** el rediseño no se queda en la portada; el resto del sitio público tiene que pertenecer al mismo edificio.
+- **estado:** lista-para-claude
+- **depende de:** [id: 20261110-01] y [id: 20261110-02].
+
+#### Diagnóstico (no lo reescribas: úsalo)
+1. Tras 10-01/10-02, la portada ya habla el descenso, pero Explorar, fichas, perfiles, `/creadoras`, `/entrar`, age gate, etc. siguen con restos neon (clases `.miami-*`, `PaginaMiami`, `FondoFijo`, hex sueltos).
+2. En `src` hay ~395 literales hex (52 en `src/index.css`) más rgba. Magenta `#FF2BD1`, lima `#C8FF3D` y cian `#00E5FF` aparecen fuera de `diseño.ts`. El barrido tiene que pasar esas pantallas a tokens.
+3. `PaginaMiami` envuelve puerta / acceso / registro / nueva-clave con el skyline fijo y el wordmark neon.
+
+#### Mapa de pisos (propuesta del coordinador: síguela; si una pantalla encaja mejor en otro piso, dilo en el resultado y justifica)
+
+| Piso | Pantallas |
+|------|-----------|
+| **Collins (marca de llegada, elegante)** | `/` ya hecho en 10-02; AgeGate (`/age`, `/intro`); `/entrar` (puerta, **sin** mover el formulario de login aquí); `/acceso`, `/registro`, `/nueva-clave`, `/modo`; legales `/privacidad` `/terminos` `/contacto` `/preguntas` `/ayuda`. `PaginaMiami` → marco Collins (fondo `bar-hero` velado o void navy + tinte champagne/seafoam, wordmark con «studio» champagne). |
+| **Antro (movimiento, cómo se entra a la casa)** | `/creadoras` (**no** renombrar la ruta); partes públicas de invitación a publicar; `/consultas` (la conversación / el club). Energía violeta-ámbar, Unbounded/Space Grotesk, sin convertirlo en un flyer de antro que grite. |
+| **Cuarto oscuro (ver y elegir)** | Explorar (`/clip` y la grilla); `TarjetaClip`; `ClipDetail` (el reproductor sigue **sobrio**: el cromo de la ronda 2 no se re-decora; safelight solo en marcos, precios, candados, 18+); `CreatorProfile` (su «hoja de contactos» + cabecera más Collins si ayuda a leer el nombre); Biblioteca. La grilla se inspira en la hoja de contactos de la maqueta (sprockets/marco no son obligatorios en cada thumbnail si dañan densidad o rendimiento; al menos paleta, tipografía de precio y 18+). |
+| **Calabozo (tributo y cuenta)** | Wallet, earnings, retirar, estudio/cobro, CTAs de «el 80 % es tuyo» fuera de la landing. Oxblood + ámbar + bone. No conviertas el Estudio entero en una mazmorra: las herramientas de la creadora (`/upload`, `/estudio/clips`, Gestión) usan tokens del calabozo (acento, fondos) con UI clara y densa. |
+| **Admin (sin piso)** | Solo tokens nuevos (ya en 10-01). Desktop-only, `ANCHO_MINIMO` 1280. Cero fondos fotográficos, cero tipografías de cartelería (sin Monoton, sin Permanent Marker, sin Grenze Gotisch). |
+
+#### Qué hacer
+1. Aplica el mapa. Sustituye `PaginaMiami` / `FondoFijo` / restos de `FondoMiami` por equivalentes del piso Collins (o el que toque). Renombrar componentes (`PaginaCollins`, etc.) está bien si actualizas todos los imports.
+2. Barrido de hex y de `.miami-*` en `src` (incluido `src/index.css`). Lo que quede hardcodeado debe ser excepción justificada (p. ej. un canvas) o token. El magenta/lima/cian de marca no deben sobrevivir en el sitio público.
+3. Wordmark en cada pantalla: pasa el `piso` correcto.
+4. Contraste AA en textos y botones nuevos. Revisa sobre todo precios, badges RENTA/18+ y estados de error.
+5. Móvil 390 px en Explorar, ficha, perfil, `/creadoras`, `/acceso`. Tocables ≥ 44 px.
+6. Sin regresiones de flujo: entrar, registrarse, explorar, abrir un clip, ver un perfil, ir a `/creadoras`, recuperar clave, age gate.
+
+#### No tocar
+- Ruta `/creadoras` (el path se queda). Formulario de login (se queda en `/acceso`, no en `/entrar`).
+- Copy 80 % / dólar. Reproductor: controles y marca de agua de las rondas 2–3.
+- Admin: layout, módulos, `ANCHO_MINIMO`. Correos (10-04). Migraciones, Telegram, DeepSeek, secretos, analítica, legales inventados.
+- 08-05, 09-03, 09-04, 09-05. El commit local de correo .mx no se publica.
+
+#### Criterios de aceptación
+1. Una pasada visual (desktop + 390 px) de Explorar, ficha, perfil, `/creadoras`, `/acceso`, age gate, wallet: se reconocen como el mismo edificio, no como neon + parches.
+2. `rg '#FF2BD1|#C8FF3D|#00E5FF' src` (y equivalentes en minúscula) no devuelve acentos de marca; lo que quede, listado y justificado en el resultado.
+3. Clases `.miami-*` eliminadas o reducidas a cero usos. `PaginaMiami` / `FondoMiami` sin imports vivos.
+4. Lighthouse a11y de Explorar y de una ficha ≥ el actual. Contraste AA.
+5. Flujos de arriba sin regresión. `tsc -b` / `npm run build` / lint OK.
+
+#### Entrega
+- Commit sugerido: `feat: paginas publicas al descenso`.
+- Commit propio, después de 10-02.
+- Marca [id: 20261110-03] `respondida` con SHA, lista de pantallas tocadas y el mapa final si lo ajustaste.
+
+#### Siguiente paso para Claude Code
+Implementa, luego [id: 20261110-04]. Resultado en `bridge-query.md`.
+
+### Respuesta a [id: 20261110-02] — Portada: el descenso en cuatro pisos
+- **fecha:** 2026-11-10 12:20 (America/Mexico_City)
+- **decisión de Sergio:** la landing es un descenso: planta baja Collins Avenue → el antro → el cuarto oscuro → el calabozo. Aprobó la maqueta con las tipografías actuales.
+- **estado:** lista-para-claude
+- **depende de:** [id: 20261110-01] (tokens, fuentes, wordmark). Impleméntala antes.
+- **referencia visual:** `docs/diseno/descenso/index.html` (maqueta, fotos embebidas) y `docs/diseno/descenso/capturas.html`. Desde esa carpeta corre `python3 extraer.py` para materializar `img/bar-hero.jpg`, `stairs.jpg`, `club.jpg`, `camara.jpg`, `puerta.jpg`, `grain.png` y las capturas `nivel1.jpg`–`nivel4.jpg`, `desktop-full.jpg`, `movil.jpg`, `antes-despues.jpg`. Copia los fondos a `public/descenso/` como webp (jpg de reserva).
+
+#### Diagnóstico (no lo reescribas: úsalo)
+1. `src/screens/Portal.tsx` es el primer paint: wordmark, titular, subtítulo, «Crear mi cuenta» / «Ya tengo cuenta» / «Ver cómo funciona». Monta `FondoMiami` y clases `.miami-*`. `ComoFunciona`, `FormasDeGanar` y `SobreNosotros`/`Portada` van con `React.lazy` y se montan al clic (rondas 1 y 4, §2.1 y §2.2 **pass inmutables**).
+2. `src/components/SeccionesNeon.tsx` es «Cómo funciona» + panel del 80 % al estilo neon. `FondoMiami.tsx` / `FondoFijo.tsx` pintan el skyline magenta.
+3. El copy del hero en `Portal.tsx` (líneas del titular y «El 80% de cada dólar es tuyo. / Sin exclusividad.») es **canónico**. La maqueta ya lo trae igual.
+4. §2.1 (primer paint = solo hero) y §2.2 (contacto/privacidad/FAQ solo con clic) son `pass` inmutables: el descenso no puede montar los cuatro fondos ni las tres secciones inferiores en el bundle inicial.
+
+#### Qué hacer
+
+**1. La landing es el edificio**
+Reproduce la maqueta en React, no copies el HTML a `public/`. Cuatro pisos más umbrales entre ellos:
+
+- **PB Collins (`#nivel-1`)** — hero a pantalla completa con `img/bar-hero.jpg` (cópiala a `public/descenso/` como webp + jpg de reserva, lado largo ≤ ~1600 px). Velo como en la maqueta. Wordmark + titular + subtítulo **verbatim** + los tres botones y «Solo vengo a ver». Badge/sello 18+. Marca de piso: «Planta baja · Collins Avenue» (letrero Monoton pastel, no magenta). Indicación «Baja al antro».
+- **Umbral escalera** — `img/stairs.jpg`. Texto de maqueta («La noche empieza debajo.» / «El antro.»).
+- **−1 El antro (`#nivel-2`)** — sustituye el «Cómo funciona» neon. Tres pasos (Graba tu pieza / Ponle precio y cuélgala / Cobra. El 80% queda tuyo.) con tipografía Unbounded + Bebas Neue, fondo `img/club.jpg`, haces violeta y ámbar. Precios de ejemplo 10 / 20 / 40 USD como en el producto; no inventes otros.
+- **Umbral revelado** — paso al cuarto oscuro, luz roja, sin foto propia o con un velo.
+- **−2 Cuarto oscuro (`#nivel-3`)** — catálogo de la portada como **hoja de contactos** (sprockets, frame, candado, 18+, lápiz graso, precio a Permanent Marker). Usa clips **reales** publicados (el mismo origen que hoy use la portada/ explora de muestra), no las miniaturas `thumb-*.jpg` (esas son dummy de la maqueta). Si hoy la portada no lista clips y manda a Explorar, mantén ese criterio: la hoja puede ser una muestra o un enlace visual a `/clip`; no inventes un ranking nuevo ni tracking.
+- **Umbral puerta** — `img/puerta.jpg`. «El calabozo.»
+- **−3 El calabozo (`#nivel-4`)** — `img/camara.jpg`, cifra 80 % TUYO, texto de tributo (puedes usar el de la maqueta siempre que no contradiga «el 80% de cada dólar» / SPEI / sin exclusividad / 18+), tablillas «Para quien crea» / «Para quien visita», CTA final «Crear mi cuenta» / «Ya tengo cuenta» a `/registro` y `/acceso`. Pie con enlaces existentes (cómo funciona, piezas/explorar, preguntas, legales). No inventes textos legales.
+
+**2. Ascensor**
+- Replicate `.ascensor`: fijo a la derecha, bronce, display PB/−1/−2/−3 y nombre del piso, botones para saltar.
+- `aria-label` claro; el piso activo se anuncia (no solo color).
+- **Oculto bajo 900 px** (no debe tapar el hero en móvil). En 390 px la página se recorre solo con scroll, como `movil.jpg`.
+- Respeta `prefers-reduced-motion`: sin parallax, sin grano animado, `scroll-behavior: auto`.
+
+**3. Sustituir, no acumular**
+- `FondoMiami` y `SeccionesNeon` dejan de usarse en la portada. Si nadie más los importa, bórralos o déjalos sin uso y dilo; no mantengas dos landings.
+- Las clases `.miami-*` que solo servían al hero se reemplazan por las del descenso (o se reescriben). No dejes botones magenta/cian.
+
+**4. Rendimiento (obligatorio, por §2.1)**
+- Primer paint = hero Collins: wordmark, titular, subtítulo, CTA principal. El fondo Collins puede ser el LCP (webp, `fetchpriority="high"`, tamaño contenido).
+- Pisos −1…−3, umbrales, hoja de contactos y fuentes no críticas: `React.lazy` y/o carga al acercarse (IntersectionObserver) o al primer scroll. No metas `camara.jpg` ni Unbounded en el bundle inicial.
+- `font-display: swap` (ya pedido en 10-01). Grano en CSS overlay, no un canvas pesado.
+- Presupuesta LCP: no empeorar de forma notable el peso del primer paint respecto al hero actual (que ya no trae `launch.mp4`).
+
+**5. Rutas de los CTAs (no inventes pantallas)**
+- «Crear mi cuenta» → `/registro`
+- «Ya tengo cuenta» → `/acceso` (el formulario de login **no** se mueve a `/entrar`)
+- «Ver cómo funciona» → baja al antro (`#nivel-2`) o el equivalente interno
+- «Solo vengo a ver» → `/clip` (Explorar) o el cuarto oscuro si montas muestra; coherente con lo que hace hoy
+
+#### No tocar
+- El copy verbatim del hero (80 % / dólar / sin exclusividad).
+- Age gate, `/creadoras` (nombre), login en `/acceso`, analítica.
+- Panel admin (salvo que un token lo rompa: eso es 10-01).
+- Migraciones, Telegram, DeepSeek, secretos, legales, recargas.
+- [id: 20261108-05], 09-03, 09-04, 09-05. El commit local de correo .mx no se publica.
+- No reabrir el recorte de «Sobre nosotros» (ronda 4): no vuelvas a montar la `Portada` larga bajo el hero.
+
+#### Criterios de aceptación
+1. A 1440 px la landing se reconoce al lado de `nivel1.jpg`–`nivel4.jpg` y `desktop-full.jpg`: mismos pisos, wordmark, paletas y ascensor.
+2. A 390 px se reconoce al lado de `movil.jpg`: sin ascensor, tipografías y CTAs usables (≥44 px), sin desbordes horizontales.
+3. Hero: las cinco líneas del titular/sub **idénticas** a las de producción hoy.
+4. Lighthouse accessibility ≥ el de la portada actual (mismo perfil de medición). Contraste AA; `prefers-reduced-motion` apaga parallax/grano/scroll suave.
+5. Primer paint sin los fondos del antro/calabozo ni las fuentes de esos pisos. Medir y dejar el peso en el resultado.
+6. Flujos: crear cuenta, ya tengo cuenta, ver cómo funciona, solo vengo a ver, 18+, enlaces del pie. Sin regresiones.
+7. `tsc -b` / `npm run build` / lint (dinero, plurales) pasan.
+
+#### Entrega
+- Commit sugerido: `feat: portada en cuatro pisos (el descenso)`.
+- Commit propio, después de 10-01. No mezcles con 10-03 ni 08-05.
+- Marca [id: 20261110-02] `respondida` con SHA, capturas (desktop 4 pisos + móvil) y nota de peso/LCP.
+
+#### Siguiente paso para Claude Code
+1. Confirma que 10-01 está en el árbol.
+2. Implementa esta ronda.
+3. Sigue con [id: 20261110-03].
+4. Deja el resultado en `bridge-query.md`.
+
+### Respuesta a [id: 20261110-01] — Tokens, tipografías y wordmark del descenso
+- **fecha:** 2026-11-10 12:20 (America/Mexico_City)
+- **decisión de Sergio:** aprobó la maqueta «El descenso» (tipografías actuales, no las de `v1`) y pidió pasar indicaciones e imágenes al repo para que Claude implemente el rediseño.
+- **estado:** lista-para-claude
+- **referencia visual:** [`docs/diseno/descenso/`](./docs/diseno/descenso/README.md) — abre `index.html` y `capturas.html`. `python3 extraer.py` escribe las capturas y los fondos como archivos. Tokens, tipografías, hex y efectos están en el README.
+
+#### Diagnóstico (no lo reescribas: úsalo)
+1. Tokens actuales en `src/lib/diseño.ts`: `COLOR` (fondo `#08080A`, acento magenta `#FF2BD1`, dinero lima `#C8FF3D`, admin cian `#00E5FF`), `LINEA`, `VELO`, `TINTE`, `FUENTE` (Anton / Space Grotesk / Space Mono), `RADIO`, y los aditivos de *Miami Neon Night*: `GLOW`, `DEGRADADO`, `MIAMI`.
+2. `index.html` carga Anton + Space Grotesk + Space Mono. `theme-color` es `#08080A`.
+3. `Wordmark.tsx` pinta «RAW» en magenta y «studio» en lima, con tubo de neón (`WebkitTextStroke` + `drop-shadow`). Comportamiento de navegación (inerte en `/`, `/age`, `/intro`; si no, casa) **se conserva**.
+4. Clases `.miami-*` en `src/index.css` (`.miami-titular`, `.miami-boton-magenta`, `.miami-velo`, etc.) y componentes `FondoMiami.tsx`, `PaginaMiami.tsx`, `FondoFijo.tsx`, `SeccionesNeon.tsx`. Esta ronda **no** rediseña la landing: solo deja los tokens y el wordmark listos para que 10-02 y 10-03 los usen.
+5. Contraste actual: texto claro sobre magenta `#FF2BD1` ≈ **2.84** (falla WCAG AA). La nueva paleta sí pasa AA en los pares documentados en el README; el único justo es papel `#F4EEE4` sobre safelight lit `#D4212C` (4.49): usa `#B3121B` como fondo sólido de ese botón.
+6. En `src` hay ~395 literales hex (52 en `src/index.css`) más rgba sueltos. Esta ronda no hace el barrido completo (eso es 10-03): aquí se rediseña la fuente de verdad (`diseño.ts` + fuentes + wordmark) y se evitan nuevas introducciones de magenta/lima/cian de marca.
+
+#### Qué hacer
+
+**1. Reescribir `src/lib/diseño.ts`**
+- Conserva la forma del archivo (un solo sitio para tokens) pero **sustituye** la dirección Miami Neon:
+  - `COLOR.fondo` → `#0E1520` (void Collins; el calabozo y el antro pueden exponerse como `COLOR.fondoAntro` / `COLOR.fondoOscuro` / `COLOR.fondoCalabozo` o un mapa `PISO`).
+  - `COLOR.superficie` / `superficieAlta` → navy `#141C28` y un escalón por encima (no inventes una escala de 8 grises).
+  - `COLOR.texto` → `#F3EBE2` (ivory). `textoSuave` / `textoTenue` / `textoApagado` a partir de `#C9BDB0` bajando luminosidad, siempre ≥ 4.5:1 sobre el fondo que usen.
+  - `COLOR.acento` ya no es magenta. El acento «de casa» (botón primario por defecto, fuera de un piso concreto) es champagne `#C9A86A` / `#D4B483`, con texto oscuro `#141C28` cuando el acento es fondo.
+  - `COLOR.dinero` deja de ser lima `#C8FF3D`. Usa ámbar `#E0B15A` (9.99:1 sobre `#0B0A09`) o el champagne; no reutilices el lima.
+  - `COLOR.admin` deja el cian de neón `#00E5FF`. Usa brass `#C9A25A` o un hielo discreto que cumpla AA; no lo uses de adorno en el sitio público.
+- Añade tokens de piso (`PISO.collins | antro | oscuro | calabozo`) con los hex del README. Incluye color de «studio» por piso (`#D4B483`, `#D4A0C8`, `#D4212C`, `#E0B15A`).
+- `FUENTE`: mapea display/ui/mono **y** las familias por piso según el README (`display` ya no es Anton). No dejes Anton referenciado.
+- `GLOW`, `DEGRADADO` y `MIAMI`: **elimínalos o sustitúyelos** por equivalentes del descenso (tintes de piso, letrero Collins pastel blush+seafoam, remaches, safelight). No dejes `GLOW.magenta` / `textoMagenta` / cielo violeta-magenta. Actualiza todos los importadores de esta ronda para que `tsc` pase; lo que pertenezca a la landing se toca lo mínimo (aliases temporales solo si 10-02 va justo después en el mismo día — preferible actualizar usos rotos a tokens nuevos).
+- `LINEA`, `VELO`, `TINTE`, `RADIO`: reescribe sobre la paleta nueva. El sitio no es de esquina redondeada tipo app: Collins y el antro son vivos; el calabozo es casi vivo (`1px`). No inventes una escala de radios.
+- Documenta en comentarios que la brújula es `docs/diseno/descenso/README.md`.
+
+**2. Fuentes en `index.html`**
+- Sustituye el `<link>` de Anton / Space Grotesk / Space Mono.
+- Carga con `display=swap`, `preconnect` a Google Fonts (ya está) y subset `latin,latin-ext` (español: tildes, ñ).
+- **No cargues las 16 familias en el primer paint.** Críticas para LCP del hero (Collins): Italiana, Bodoni Moda (incluye itálica), Josefin Sans. Space Grotesk puede quedarse si la usas de UI general.
+- El resto (Unbounded, Bebas Neue, DM Serif Display, Courier Prime, Permanent Marker, Barlow / Barlow Condensed, Cinzel, EB Garamond, IBM Plex Mono, Monoton, Grenze Gotisch) se carga al entrar o al acercarse al piso que las usa, o con un segundo stylesheet diferido. Grenze Gotisch es opcional (solo la firma «Descenso» del pie).
+- `theme-color` → `#0E1520`.
+
+**3. Wordmark (`src/components/Wordmark.tsx`)**
+- «RAW» en Italiana, letter-spacing ~0.22em, color ivory `#F3EBE2`.
+- «studio» en Bodoni Moda italic. Color según piso (prop `piso?: 'collins' | 'antro' | 'oscuro' | 'calabozo'`, default `'collins'`).
+- Sin tubo de neón, sin `WebkitTextStroke`, sin glow magenta/lima.
+- Conserva: `inerte` en `/`, `/age`, `/intro`; destino `/clip` o `/entrar` según sesión; scroll-to-top si ya estás en casa; `ancho` como API pública (reescala la letra).
+- Mira `docs/diseno/descenso/index.html` (`.marca .raw` / `.marca .studio`) y `antes-despues.jpg`.
+
+**4. Favicon / sello (opcional en esta ronda, deseable)**
+- Referencia: `docs/diseno/descenso/sello-rs.svg` (monograma RS de bronce) y `favicon.svg` de la maqueta. Si actualizas `public/favicon.svg` / apple-touch / `og.png`, que no meta contenido adulto ni el skyline magenta. Si lo dejas para 10-04, dilo en el resultado.
+
+**5. Panel de administración**
+- Solo debe **compilar y leerse** con los tokens nuevos (contraste AA). No rediseñes layout, no bajes de `ANCHO_MINIMO` 1280 (`src/admin/piezas.tsx`). Sin pisos ni fondos fotográficos en el panel.
+
+#### No tocar
+- Landing (`Portal.tsx`, `SeccionesNeon.tsx`, `FondoMiami.tsx`) más allá de lo imprescindible para que compile tras cambiar tokens/wordmark. El descenso de 4 pisos es [id: 20261110-02].
+- Barrido de hex sueltos en pantallas internas: [id: 20261110-03]. Correos y `DESIGN-BRIEF.md`: [id: 20261110-04].
+- Copy del hero («El 80% de cada dólar es tuyo.»), `/creadoras` (no renombrar), formulario de login (no moverlo a `/entrar`), analítica/visitas/heatmaps.
+- Migraciones, RLS, precios, Telegram, DeepSeek, secretos, buzones `@rawstudio.biz`, marcador `@alta.rawstudio.biz`.
+- No reabras [id: 20261109-03], [id: 20261109-04], [id: 20261109-05] (ya aplicadas). No mezcles con [id: 20261108-05] (CNAME / correo .mx). **El commit local que mueve el correo a .mx no se publica.**
+- No inventes textos legales.
+
+#### Criterios de aceptación
+1. `diseño.ts` ya no exporta magenta `#FF2BD1`, lima `#C8FF3D`, cian `#00E5FF` como acentos de marca, ni `GLOW`/`DEGRADADO`/`MIAMI` al estilo neon. Los hex del README están nombrados.
+2. Wordmark = Italiana + Bodoni italic; «studio» admite color por piso; se ve como en la maqueta (no como tubo neon). Captura del header en desktop y a 390 px.
+3. `index.html` carga las fuentes críticas con `display=swap`; LCP no descarga Unbounded/Cinzel/etc. en el primer stylesheet.
+4. Contraste AA en texto de tokens por defecto (incluido el acento usado como fondo: texto oscuro sobre champagne, no ivory sobre champagne si no llega a 4.5). Ningún texto normal sobre magenta.
+5. El panel admin abre a ≥1280 px, compila y no perdió módulos.
+6. `tsc -b`, `npm run build` y lint (dinero/plurales) pasan.
+7. Navegación del wordmark y age gate intactos.
+
+#### Entrega
+- Commit sugerido: `feat: tokens y tipografias del descenso`.
+- Un commit propio. No mezcles con 10-02 ni con 08-05.
+- Marca [id: 20261110-01] `respondida` con SHA, diff y capturas del wordmark.
+
+#### Siguiente paso para Claude Code
+1. `git pull` (HEAD al asignar estas rondas: se anuncia en `bridge-query.md`).
+2. Implementa **esta** ronda primero.
+3. Luego [id: 20261110-02], [id: 20261110-03] y [id: 20261110-04], cada una en su commit, en ese orden.
+4. Deja el resultado en `bridge-query.md`.
 
 ### Respuesta a [id: 20261109-05] — Videos de hasta 2 GB
 - **fecha:** 2026-11-09 17:30 (America/Mexico_City)

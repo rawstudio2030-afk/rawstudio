@@ -148,6 +148,12 @@ React 19 · Vite 8 · HashRouter · Supabase · GitHub Pages · comisión 20% / 
 
 ## Decisiones
 
+### El descenso (2026-11-10) — dirección aprobada, pendiente de implementar
+1. Sergio eligió la landing como un edificio de cuatro pisos: planta baja Collins Avenue → el antro → el cuarto oscuro → el calabozo (tipografías de la maqueta actual, no `v1`).
+2. Maqueta y capturas: `docs/diseno/descenso/` (`45c6018`, `13be7e6`). Rondas `[id: 20261110-01]` a `[id: 20261110-04]` en el puente.
+3. El ítem §1.6 (Miami Neon, `pass`) no se marca como regresión hasta que estas rondas aterrizen; entonces se reescribe como El descenso (marca vs consumo). No se toca ningún otro `pass` inmutable (§2.1 y §2.2 incluidos: el descenso lazy-carga los pisos de abajo).
+4. Admin: solo tokens nuevos, desktop-only (`ANCHO_MINIMO` 1280). Sin migraciones, sin renombrar `/creadoras`, sin mover el login a `/entrar`, sin analítica.
+
 ### Arranque
 1. Docs puente + checklist creados sin cambio de producto.
 

@@ -38,6 +38,42 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 
 ## Consultas activas
 
+### [id: 20261110-04] Correos y brief El descenso
+- **fecha:** 2026-11-10 12:20 (America/Mexico_City)
+- **estado:** asignada
+- **tarea:** Actualizar las plantillas de correo (170 hex) a la paleta del descenso y reescribir `DESIGN-BRIEF.md`. Favicon/sello RS si no se hizo en 10-01.
+- **pregunta:** Implementa la ronda descrita en `bridge-response.md`, entrada [id: 20261110-04]. Commit propio, **después** de [id: 20261110-03]. No mezcles con [id: 20261108-05] ni reabras 09-03, 09-04 o 09-05. El commit local que mueve el correo a .mx **no se publica**.
+- **contexto:** HEAD al asignar (maqueta ya en el árbol): `13be7e6`. Depende de los tokens de [id: 20261110-01]. Sergio aprobó la maqueta el 10 nov 2026 y pidió pasar indicaciones e imágenes al repo.
+- **urgencia:** media
+- **ya se intentó:** nada de código de esta ronda; el coordinador contó 170 hex en `supabase/functions/avisar-*`, `enviar-campana` y `supabase/templates/recuperar.html`.
+
+### [id: 20261110-03] Páginas públicas al descenso y barrido de colores
+- **fecha:** 2026-11-10 12:20 (America/Mexico_City)
+- **estado:** asignada
+- **tarea:** Llevar Explorar, fichas, perfiles, `/creadoras`, puertas de entrada, wallet, etc. al piso que les toca, y barrer hex / clases `.miami-*` sueltos.
+- **pregunta:** Implementa la ronda descrita en `bridge-response.md`, entrada [id: 20261110-03] (sigue el mapa de pisos; si ajustas uno, justifícalo). Commit propio, después de [id: 20261110-02]. No renombres `/creadoras`. No muevas el formulario de login a `/entrar`. No mezcles con [id: 20261108-05]. El commit local de correo .mx no se publica.
+- **contexto:** HEAD al asignar: `13be7e6`. En `src` hay ~395 literales hex (52 en `src/index.css`); el admin solo cambia de tokens y sigue en escritorio (`ANCHO_MINIMO` 1280).
+- **urgencia:** media
+- **ya se intentó:** nada de código de esta ronda.
+
+### [id: 20261110-02] Portada: el descenso en cuatro pisos
+- **fecha:** 2026-11-10 12:20 (America/Mexico_City)
+- **estado:** asignada
+- **tarea:** Sustituir `FondoMiami` / `SeccionesNeon` por la landing en cuatro pisos (Collins → antro → cuarto oscuro → calabozo) con ascensor, respetando §2.1/§2.2 y el copy verbatim del hero.
+- **pregunta:** Implementa la ronda descrita en `bridge-response.md`, entrada [id: 20261110-02]. Commit propio, **después** de [id: 20261110-01]. Corre `python3 extraer.py` en `docs/diseno/descenso/` para tener los fondos y las capturas. No mezcles con [id: 20261108-05]. El commit local de correo .mx no se publica.
+- **contexto:** HEAD al asignar: `13be7e6`. Maqueta en `docs/diseno/descenso/`. El hero actual (`Portal.tsx`) dice «Graba. / Ponle precio. / Cobra.» y «El 80% de cada dólar es tuyo. / Sin exclusividad.» — no se toca.
+- **urgencia:** alta
+- **ya se intentó:** nada de código de producto; la maqueta ya está en el repo.
+
+### [id: 20261110-01] Tokens, tipografías y wordmark del descenso
+- **fecha:** 2026-11-10 12:20 (America/Mexico_City)
+- **estado:** asignada
+- **tarea:** Reescribir `src/lib/diseño.ts` y las fuentes de `index.html`, redibujar el Wordmark (Italiana + Bodoni italic, «studio» por piso) y retirar `GLOW` / `DEGRADADO` / `MIAMI` neon. Corregir el contraste AA (el blanco sobre magenta actual es 2.84).
+- **pregunta:** Implementa la ronda descrita en `bridge-response.md`, entrada [id: 20261110-01]. Es la **primera** de la serie: commit propio antes de 10-02. No rediseñes la landing aquí (eso es 10-02). No mezcles con [id: 20261108-05] ni reabras [id: 20261109-03], [id: 20261109-04] o [id: 20261109-05] (ya aplicadas). El commit local que mueve el correo a .mx **no se publica**.
+- **contexto:** HEAD al asignar: `13be7e6` (maqueta en `docs/diseno/descenso/`, commits `45c6018` y `13be7e6`). Referencia: README de esa carpeta. Sergio aprobó la maqueta (tipografías actuales, no `v1`) el 10 nov 2026 y pidió indicaciones en el puente más las imágenes en el repo.
+- **urgencia:** alta
+- **ya se intentó:** nada de código de producto de esta ronda.
+
 ### [id: 20261109-05] Videos de hasta 2 GB — hecha y aplicada
 - **fecha:** 2026-11-09 17:30 (America/Mexico_City)
 - **estado:** respondida
