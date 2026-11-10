@@ -46,7 +46,7 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 - **contexto:** HEAD al asignar: `d2e7af2`. Bucket hoy 2000 MiB; UI ya dice «2 GB» sin validar. Sergio pidió 1 GB y luego 2 GB (9 nov 2026, ~17:24–17:30 hora de México).
 - **urgencia:** alta
 - **ya se intentó:** nada de código; diagnóstico del coordinador (2000 vs 2048, global del dashboard, TUS en 09-04).
-- **resultado:** HECHA en un commit propio, `07cc01a` (`feat: videos de hasta 2 gb`), después de 09-04. **NO aplicada ni publicada:** la migración `20261222000000_clips_2gb.sql` espera a que Omar suba el global de Storage (ver su checklist) y apruebe el `db push`.
+- **resultado:** HECHA en un commit propio (`feat: videos de hasta 2 gb`, solo local; el SHA vigente se anota al publicar), después de 09-04. **NO aplicada ni publicada:** Omar confirmó que el plan es Pro, pero falta que suba el límite global de Storage a ≥ 2 GB y apruebe el `db push` de `20261222000000_clips_2gb.sql`. Se apartó a propósito de la aplicación de 09-03 para que `db push` no la arrastrara.
 - **diff resumido:**
   - **`supabase/migrations/20261222000000_clips_2gb.sql`:** `update storage.buckets set file_size_limit = 2048::bigint * 1024 * 1024 where id = 'clips'`. **Ojo, corrección a la receta de la ronda:** `2048 * 1024 * 1024` en SQL se evalúa como `int4` y **desborda** (2³¹ no cabe; probado: «entero fuera de rango»), por eso el `::bigint`. Idempotente; los otros seis buckets no se tocan (comprobado en el Postgres de prueba: albumes 10, avatars 2, clip-covers 5, clip-covers-full 5, expedientes 12, verificacion 8 MiB).
   - **Una sola constante** `MAX_VIDEO_BYTES = 2048 * 1024 * 1024` y `errorTamanoVideo(bytes)` en `src/lib/clips.ts`: «Este video pesa 2.1 GB; el máximo es 2 GB.» (si pasa por muy poco: «un poco más de 2 GB», para que no diga «pesa 2.0 GB; el máximo es 2 GB»). Se rechaza **al elegir el archivo, antes de transferir**, en `Upload.tsx`, `AltaCreadora.tsx`, `PublicarPor.tsx` y `SubidaMasiva.tsx` (los que pasan se dejan fuera y se listan), y **además dentro de `publicarPara`** (`admin.ts`) para que ningún camino se lo salte. `Upload.tsx` lo vuelve a comprobar al publicar.
@@ -54,13 +54,13 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 - **verificación:** Postgres 17 de prueba con todas las migraciones: `clips` = 2147483648 bytes = 2048 MiB, el resto igual. Mensaje probado con Deno: 1.9 GB y exactamente 2 GiB pasan; 2 GiB + 1 byte y 2.1 GB se rechazan con el texto correcto. `tsc -b`, `npm run build` y lint (dinero y plurales) limpios.
 - **NO verificado:** nada contra producción. **Criterio 2 de aceptación (subir de verdad ~1,9 GB y reanudar)** no se probó con un archivo de ese tamaño: la reanudación se probó con 40 MB contra un servidor TUS local (ver 09-04). Que el global de Storage esté en ≥ 2 GB no se puede ver desde el repo.
 - **Checklist de Omar (dashboard de Supabase, yo no lo hago):**
-  - [ ] Confirmar plan **Pro** (en Free el global no pasa de 50 MB).
+  - [x] Confirmar plan **Pro** (Omar lo confirmó el 2026-11-09).
   - [ ] Storage → Settings: **Global file size limit ≥ 2 GB** (2048 MiB o más), **antes** del `db push`.
   - [ ] Revisar el cupo total vs uso; si el aviso del panel usa `limite_almacenamiento_mb = 1024`, subirlo al cupo real (p. ej. 102400 en Pro de 100 GB).
   - [ ] Aprobar `supabase db push` (esta migración va junto con `20261221000000` de 09-03).
 - **Diferencias:** ninguna con el diagnóstico, salvo el `::bigint` de arriba.
 
-### [id: 20261109-04] Barra de progreso al subir videos — hecha (solo frontend)
+### [id: 20261109-04] Barra de progreso al subir videos — hecha y publicada
 - **fecha:** 2026-11-09 17:20 (America/Mexico_City)
 - **estado:** respondida
 - **tarea:** Barra de progreso real al subir videos; **enmienda 17:30:** la transferencia de video va por **TUS resumible** (`tus-js-client`), no por XHR. Archivos chicos pueden seguir en XHR/`.upload()`.
@@ -68,7 +68,7 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 - **contexto:** HEAD al asignar: `c5b1156`. Creadora sin progreso de bytes; admin con XHR+%. Enmienda: con tope a 2 GB (09-05), una sola petición a ese tamaño es frágil → TUS con reanudación. Lo pidió Sergio el 9 nov 2026 (~17:16; enmienda ~17:30 hora de México).
 - **urgencia:** alta
 - **ya se intentó:** nada de esta ronda; el % del admin queda como precedente de UX, no del protocolo.
-- **resultado:** HECHA en un commit propio, `c1b7f18` (`feat: barra de progreso al subir videos (subida reanudable TUS)`), después de 09-03. **Solo frontend, sin migración:** se publica con `git push` cuando Omar lo apruebe.
+- **resultado:** HECHA en un commit propio, `47da27e` (`feat: barra de progreso al subir videos (subida reanudable TUS)`), después de 09-03. **PUBLICADA el 2026-11-09 con la aprobación de Omar** (`git push`, junto con 09-03). Solo frontend, sin migración.
 - **diff resumido:**
   - **Dependencia:** `tus-js-client@4.3.1`.
   - **`src/lib/subidaVideo.ts` (nuevo):** `subirVideoResumible({ bucket, ruta, archivo, contentType?, signal?, alProgreso })`. TUS contra `https://<ref>.storage.supabase.co/storage/v1/upload/resumable` (si la URL del proyecto no es la de `.supabase.co`, la propia URL); `chunkSize` exactamente 6 MiB; `Authorization: Bearer` con el token de la sesión **pedido en cada petición** (una subida de 2 GB puede durar más que el token); `uploadDataDuringCreation`, `removeFingerprintOnSuccess`, `retryDelays [0,3,5,10,20] s`. **Reanudar:** busca una subida anterior del mismo archivo y bucket (huella de `tus-js-client` en localStorage) y la sigue **con la misma ruta de destino**; si no hay (o caducó) empieza de nuevo. **Cancelar:** `abort(true)` (DELETE al servidor) + `remove` de la ruta. Nunca lanza: devuelve `{ruta, reanudada}` o `{error, cancelada?}` con texto en español (red, 401/403, 413, 415, 5xx).
@@ -85,7 +85,7 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
   2. **Cancelar solo aparece en la etapa del video**; las demás duran segundos y no hay nada que abortar de forma limpia.
   3. **Reanudar tras expirar (~24 h)** no avisa con un texto aparte: si la URL caducó, `tus-js-client` empieza una subida nueva y la barra arranca en 0 %.
 
-### [id: 20261109-03] Blindar borrado y moderar ediciones de clips — hecha (migración sin aplicar)
+### [id: 20261109-03] Blindar borrado y moderar ediciones de clips — hecha y aplicada
 - **fecha:** 2026-11-09 17:15 (America/Mexico_City)
 - **estado:** respondida
 - **tarea:** Blindar el borrado con historial (rechazar DELETE de la dueña; soft-delete admin + fuera del catálogo) y moderar ediciones de título/descripción/portada con la misma regla de confianza del alta, avisando a administración.
@@ -93,7 +93,7 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 - **contexto:** HEAD al asignar: `c960dc4`. Diagnóstico del coordinador (revisión post-09-02): soft-delete de dueña quita `tiene_acceso` al comprador; `clips_delete_propio` permite el bypass; soft-delete no apaga `published` y el catálogo no filtra `borrado_at`; editar contenido de un `aprobado` no pasa por moderación. Sergio aprobó la ronda el 9 nov 2026 (~17:15 hora de México).
 - **urgencia:** alta
 - **ya se intentó:** nada de código de esta ronda; 09-02 dejó las dos decisiones abiertas a propósito.
-- **resultado:** HECHA en un commit propio, `916297f` (`feat: blindar borrado y moderar ediciones de clips`). **NO aplicada ni publicada:** la migración `20261221000000_blindar_borrado_y_moderar_ediciones.sql` espera la aprobación de Omar (`supabase db push`); el frontend, después.
+- **resultado:** HECHA en un commit propio, `7f8662b` (`feat: blindar borrado y moderar ediciones de clips`). **APLICADA y PUBLICADA el 2026-11-09 con la aprobación de Omar:** `supabase db push` (solo `20261221000000_blindar_borrado_y_moderar_ediciones.sql`; el dry run confirmó que era la única pendiente, con la de 09-05 apartada) y después el frontend con `git push`. **Comprobado en producción, solo lectura y con la llave pública:** `explorar_ids` sigue sirviendo el catálogo a visitantes (186 clips en 4 páginas de 60; sin esto el `grant` a `anon` de `borrado_at` habría roto el catálogo), la consulta de `clipsPublicados` con `borrado_at is null` devuelve los 186, y sin sesión `editar_mi_clip` y `admin_avisos` dan permiso denegado (42501) y `avisos_edicion_clip` no se puede leer.
 - **diff resumido:**
   - **`supabase/migrations/20261221000000_blindar_borrado_y_moderar_ediciones.sql`:**
     - **A) Borrado.** `clips_no_borrar_con_historial`: con historial y quien borra **no es admin** → `raise exception` en español (`restrict_violation`: «Este clip ya tiene compras, rentas o reportes y no se puede eliminar. Usa «Dejar de venderlo ya» o el retiro total.»), la fila no cambia; **admin** → borrado lógico (`borrado_at`, purga a 30 días, motivo «Borrado por administración», `published = false`, quita destacado); sin historial → `DELETE` duro. **Sin sesión de usuario** (`auth.uid()` nulo: funciones internas/`service_role`) se mantiene el borrado lógico de antes, para no romper nada interno; nadie con sesión llega por esa rama.
@@ -111,7 +111,7 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
   7. No-op → `cambios: 0`, sin log nuevo, sin aviso; portada igual a la actual → `cambios: 0`.
   - **Regresión del INSERT:** con 5 aprobados + verificada → `aprobado`; sin → `pendiente`; con `moderacion_previa_forzada` → `pendiente`. Una cuenta normal no ve `admin_avisos` ni la tabla; `creadora_autoaprueba` no se ejecuta desde la API.
   - `tsc -b`, `npm run build` y lint (dinero y plurales) limpios.
-- **NO verificado:** nada contra producción (migración sin aplicar). **El panel en el navegador** con el mensaje de «en revisión» (solo tipos y build; el flujo SQL sí). Cómo se ve el aviso `edicion` en la pantalla de Avisos de administración con datos reales.
+- **NO verificado:** con una sesión real en producción: editar un clip aprobado (a `pendiente` y en vivo), el borrado de la dueña con historial y el borrado de una admin (solo se probó en el Postgres de prueba). **El panel en el navegador** con el mensaje de «en revisión» (solo tipos y build; el flujo SQL sí). Cómo se ve el aviso `edicion` en la pantalla de Avisos de administración con datos reales.
 - **Diferencias con el diagnóstico (importantes):**
   1. **El punto 3 del diagnóstico («el soft-delete no apaga `published`») no se cumplía:** `clips_publicar_alta` (20260916) ya calcula `published = (estado = 'aprobado' and borrado_at is null)` en cada `UPDATE`. Lo que sí faltaba era (a) el rechazo a la dueña, (b) que `explorar_ids`/`clipsPublicados` miraran `borrado_at`, y (c) el `grant` a `anon`. Aun así `published = false` se pone explícito en el borrado lógico.
   2. **Una admin que borra un clip con compras** deja a quien lo compró **sin acceso** (`tiene_acceso` exige `borrado_at is null`, a propósito desde 20260916: «borrado es borrado»). Es el camino de «contenido ilegal / retirar de la plataforma», no el de la dueña; no lo cambié. Si Sergio quiere que el comprador conserve el acceso incluso entonces, habría que usar el retiro total, no el borrado.
