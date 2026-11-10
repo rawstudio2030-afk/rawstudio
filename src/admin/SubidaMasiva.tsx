@@ -16,8 +16,10 @@ import {
   type VideoEnLote,
 } from '../lib/admin'
 import { usd } from '../lib/dinero'
+import { errorTamanoVideo } from '../lib/clips'
 import { Boton } from './piezas'
 import BarraSubida from '../components/BarraSubida'
+import { tamanoLegible } from '../lib/tamanos'
 import { useSubida } from '../lib/useSubida'
 
 export default function SubidaMasiva() {
@@ -41,9 +43,18 @@ export default function SubidaMasiva() {
 
   const elegirCarpeta = (fs: FileList | null) => {
     if (!fs) return
-    const l = agruparVideos([...fs], creadoras)
-    setLote(l); setError(''); setAviso('')
+    const todos = [...fs]
+    // Los que pasan de 2 GB se dejan fuera al elegir, antes de transferir nada.
+    const grandes = todos.filter(a => errorTamanoVideo(a.size) && /\.(mp4|mov|webm|m4v)$/i.test(a.name))
+    const l = agruparVideos(todos.filter(a => !errorTamanoVideo(a.size)), creadoras)
+    setLote(l); setAviso('')
     if (!l.length) setError('No encontré videos en esa carpeta (busco .mp4, .mov, .webm y .m4v).')
+    else setError('')
+    if (grandes.length) {
+      setError(e => (e ? e + ' ' : '') + `${cuantos(grandes.length, 'video')} se ${palabra(grandes.length, 'omitió', 'omitieron')} por pasar de 2 GB: ` +
+        grandes.slice(0, 4).map(a => `${a.name} (${tamanoLegible(a.size)})`).join(', ') +
+        (grandes.length > 4 ? ` y ${grandes.length - 4} más.` : '.'))
+    }
   }
 
   const cargarCatalogo = async (f: File) => {

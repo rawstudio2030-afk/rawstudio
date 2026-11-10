@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
 import { usePapel } from '../components/Navegacion'
 import { altaCreadora, subirExpediente, publicarPara, fijarAvatar } from '../lib/admin'
+import { errorTamanoVideo } from '../lib/clips'
 import Wordmark from '../components/Wordmark'
 import Telefono, { valorValido, pistaDe } from '../components/Telefono'
 import { aCentavos, usd } from '../lib/dinero'
@@ -235,8 +236,13 @@ export default function AltaCreadora() {
           <Etiquetado t="Título del clip">
             <input value={titulo} onChange={e => setTitulo(e.target.value)} maxLength={90} className="campo-admin" style={campo} />
           </Etiquetado>
-          <Archivo t="Video" f={video} onElegir={setVideo}
-            acepta="video/mp4,video/quicktime,video/webm" nota="MP4, MOV o WebM" />
+          <Archivo t="Video" f={video}
+            onElegir={v => {
+              const m = errorTamanoVideo(v.size)
+              if (m) { setError(m); return }   // antes de transferir nada
+              setError(''); setVideo(v)
+            }}
+            acepta="video/mp4,video/quicktime,video/webm" nota="MP4, MOV o WebM · hasta 2 GB" />
           <Archivo t="Portada" f={portada} onElegir={setPortada}
             acepta="image/*" nota="Lo único que se ve sin pagar. Si no pones, se genera una." />
 

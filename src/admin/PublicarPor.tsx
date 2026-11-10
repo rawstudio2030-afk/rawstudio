@@ -17,6 +17,7 @@ import {
 } from '../lib/admin'
 import Avatar from '../components/Avatar'
 import { aCentavos } from '../lib/dinero'
+import { errorTamanoVideo } from '../lib/clips'
 import { Boton, Campo, Etiquetado, Insignia, Selector, desde } from './piezas'
 import { Pulsable } from '../components/Pulsable'
 import BarraSubida from '../components/BarraSubida'
@@ -236,11 +237,16 @@ function Formulario({ c, vuelve }: { c: CreadoraGestionable; vuelve: () => void 
             <input type="file" multiple
               accept="video/mp4,video/quicktime,video/webm"
               onChange={e => {
-                const nuevos = [...(e.target.files ?? [])].map(a => ({
+                const todos = [...(e.target.files ?? [])]
+                // Los que pasan de 2 GB se rechazan al elegir, antes de transferir nada.
+                const grandes = todos.filter(a => errorTamanoVideo(a.size))
+                const nuevos = todos.filter(a => !errorTamanoVideo(a.size)).map(a => ({
                   archivo: a, titulo: tituloDesde(a.name),
                   estado: 'espera' as const, detalle: '',
                 }))
                 e.target.value = ''
+                setError(grandes.length
+                  ? grandes.map(a => `«${a.name}»: ${errorTamanoVideo(a.size)}`).join(' ') : '')
                 setFila(f => [...f, ...nuevos])
               }}
               style={{ font: `400 12px/1 ${FUENTE.ui}`, color: COLOR.textoSuave }} />

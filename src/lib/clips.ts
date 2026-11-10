@@ -1,5 +1,20 @@
 import { supabase } from './supabase'
 import { leido, noSePudo, type Lectura } from './lectura'
+import { tamanoLegible } from './tamanos'
+
+/** El tope de un video: 2 GiB (2048 MiB). UNA sola constante: la validan todas las
+ *  pantallas que suben video y `publicarPara`, y la migracion 20261222000000 pone
+ *  el mismo numero en el bucket `clips`. No inventes un tope distinto por pantalla. */
+export const MAX_VIDEO_BYTES = 2048 * 1024 * 1024
+
+/** El mensaje si el video pasa del tope, o null si cabe. Se usa ANTES de transferir
+ *  nada: descubrirlo a los 1.9 GB de subida seria cruel. */
+export function errorTamanoVideo(bytes: number): string | null {
+  if (bytes <= MAX_VIDEO_BYTES) return null
+  // Apenas pasado del tope, «pesa 2.0 GB; el maximo es 2 GB» no se entiende.
+  if (bytes < MAX_VIDEO_BYTES * 1.05) return 'Este video pesa un poco más de 2 GB; el máximo es 2 GB.'
+  return `Este video pesa ${tamanoLegible(bytes)}; el máximo es 2 GB.`
+}
 
 export type Visibilidad = 'pago' | 'suscriptores' | 'gratis'
 

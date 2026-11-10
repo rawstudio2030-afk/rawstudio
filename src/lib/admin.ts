@@ -18,6 +18,7 @@ import { portadaAutomaticaDeVideo, tiraDeVideo } from './miniatura'
 import { precioDeVideoAlAzar } from './precios'
 import { descripcionGenerica } from './descripcion'
 import { subirVideoResumible } from './subidaVideo'
+import { errorTamanoVideo } from './clips'
 
 
 export type PerfilAdmin = {
@@ -220,6 +221,11 @@ export async function publicarPara(
   //    falta el expediente o no hay privilegios, el error llega en un segundo
   //    y no despues de mandar 17 MB en balde.
   // 2. XHR si emite progreso; el cliente de Supabase no.
+  // El tope de 2 GB se vigila aqui, ANTES de transferir nada, para que ningun camino
+  // (alta, Publicar por, subida masiva) se lo salte aunque su pantalla lo olvide.
+  const muyGrande = errorTamanoVideo(datos.video.size)
+  if (muyGrande) return { error: muyGrande, cancelada: false }
+
   const subidos: { bucket: string; ruta: string }[] = []
   let cancelada = false
 

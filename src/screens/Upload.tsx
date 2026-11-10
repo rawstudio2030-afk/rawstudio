@@ -4,7 +4,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSesion } from '../lib/sesion'
-import { subirArchivo, subirPortada, crearClip, type Visibilidad } from '../lib/clips'
+import { subirArchivo, subirPortada, crearClip, errorTamanoVideo, type Visibilidad } from '../lib/clips'
 import {
   portadaAutomaticaDeVideo, tiraDeVideo, cuadrosDeVideo, achicar,
   ANCHO_PUBLICO, type Cuadro,
@@ -88,6 +88,7 @@ export default function Upload() {
   const [clipNuevo, setClipNuevo] = useState<string | null>(null)
   const [paso, setPaso] = useState('')
   const sub = useSubida()
+  const [avisoVideo, setAvisoVideo] = useState('')
 
   // Los cuadros candidatos se sacan en cuanto hay video, no al publicar: asi
   // la creadora elige mientras escribe el titulo, y si el navegador no puede
@@ -161,6 +162,8 @@ export default function Upload() {
 
   const publicar = async () => {
     if (!listo || !video || !sesion) return
+    const grande = errorTamanoVideo(video.size)
+    if (grande) { setEstado('error'); setDetalle(grande); return }
     setEstado('subiendo'); setDetalle('')
     const senal = sub.empezar()
     sub.etapa('preparando')
@@ -330,7 +333,18 @@ export default function Upload() {
         </div>
       </Pulsable>
       <input ref={refVideo} type="file" accept="video/mp4,video/quicktime,video/webm" style={{ display: 'none' }}
-        onChange={e => { const f = e.target.files?.[0]; if (f) setVideo(f) }} />
+        onChange={e => {
+          const f = e.target.files?.[0]
+          // Para poder volver a elegir el mismo archivo despues de un rechazo.
+          e.target.value = ''
+          if (!f) return
+          const m = errorTamanoVideo(f.size)
+          if (m) { setAvisoVideo(m); return }   // se rechaza al elegir, antes de transferir nada
+          setAvisoVideo(''); setVideo(f)
+        }} />
+      {avisoVideo && (
+        <div role="alert" style={{ font: `400 14px/1.45 ${FUENTE.ui}`, color: '#FF7BE6' }}>{avisoVideo}</div>
+      )}
 
       {/* portada */}
       <div className="tarjeta-sobria" style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
