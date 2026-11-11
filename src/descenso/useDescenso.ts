@@ -24,6 +24,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { NombrePiso } from '../lib/diseño'
+import { motor } from './sonidoTipos'
 
 export const PISOS_INFO: { piso: NombrePiso; id: string; codigo: string; nombre: string; corto: string; etiqueta: string }[] = [
   { piso: 'collins', id: 'nivel-1', codigo: 'PB', nombre: 'Calle Collins', corto: 'Collins', etiqueta: 'Planta baja, Calle Collins' },
@@ -73,6 +74,12 @@ function aplicaLlegada(el: HTMLElement, p: number, reduce: boolean) {
   const card = el.querySelector<HTMLElement>('.llegada')
   if (!card) return
   const vis = reduce ? (p >= 0.78 ? 1 : 0) : smoothstep(0.78, 0.88, p)
+  // La campanilla suena UNA vez cada vez que el titulo cruza la mitad al aparecer.
+  const llega = vis >= 0.5
+  if (llega !== (card.dataset.llego === '1')) {
+    card.dataset.llego = llega ? '1' : '0'
+    if (llega) motor.actual?.ding()
+  }
   card.style.opacity = vis.toFixed(3)
   card.style.transform = reduce ? 'none' : `translate3d(0,${((1 - vis) * 40).toFixed(2)}px,0)`
 }
@@ -186,6 +193,14 @@ export function useDescenso(raiz: React.RefObject<HTMLElement | null>) {
 
     function ponPuertas(i: number, o: number, v: number) {
       if (!reja) return
+      // El sonido sigue al MOVIMIENTO de la reja (cuanto cambio este cuadro) y marca
+      // el golpe del seguro al terminar de cerrar o de abrir.
+      const m = motor.actual
+      if (m) {
+        m.reja(Math.abs(i - cIn) + Math.abs(o - cOut))
+        if (cIn < 0.97 && i >= 0.97) m.choque('cierra')
+        else if (cIn > 0.05 && i <= 0.05 && tIn < 0.05) m.choque('abre')
+      }
       cIn = i; cOut = o; velo = v
       reja.style.setProperty('--cierre-in', i.toFixed(4))
       reja.style.setProperty('--cierre-out', o.toFixed(4))
@@ -194,16 +209,19 @@ export function useDescenso(raiz: React.RefObject<HTMLElement | null>) {
     }
 
     function muestraScroll() {
-      let mejorIn = 0, mejorOut = 0, mejorVis = 0
+      let mejorIn = 0, mejorOut = 0, mejorVis = 0, retumbo = 0
       for (const u of umbrales) {
         const r = u.getBoundingClientRect()
         const vis = Math.min(r.bottom, window.innerHeight) - Math.max(r.top, 0)
         if (vis <= 0) continue
         const p = progreso(u)
         aplicaHueco(u, p, reduce)
+        // El retumbo de la cabina: crece al empezar a bajar y se va al llegar.
+        retumbo = Math.max(retumbo, smoothstep(0.12, 0.3, p) * (1 - smoothstep(0.66, 0.86, p)))
         if (vis > mejorVis) { mejorVis = vis; mejorIn = gateInner(p); mejorOut = gateOuter(p) }
       }
       tIn = mejorIn; tOut = mejorOut
+      motor.actual?.cabina(reduce ? 0 : retumbo)
       tVelo = reduce ? Math.max(mejorIn, mejorOut) * 0.45 : 0
     }
 
@@ -267,6 +285,7 @@ export function useDescenso(raiz: React.RefObject<HTMLElement | null>) {
       io = new IntersectionObserver(([e]) => {
         const on = e.isIntersecting
         cala.classList.toggle('en-escena', on)
+        motor.actual?.chisporroteo(on)
         if (reduce) return
         for (const v of videos) {
           if (on) { if (v.preload !== 'auto') v.preload = 'auto'; v.play()?.catch(() => {}) } else v.pause()

@@ -28,6 +28,7 @@ import { useSesion } from '../lib/sesion'
 import { PISO } from '../lib/diseño'
 import { SPRITE_HERO } from '../descenso/spriteHero'
 import { ANGULOS, PISOS_INFO, irA, useDescenso } from '../descenso/useDescenso'
+import { useSonido } from '../descenso/useSonido'
 import '../descenso/descenso.css'
 
 /* Lo que NO es el hero: cada import() es un chunk aparte que el navegador pide
@@ -59,6 +60,7 @@ export default function Portal() {
   const raiz = useRef<HTMLDivElement>(null)
   const { piso, solida, pisosPedidos, bajar, pisosListos } = useDescenso(raiz)
   const [sobre, setSobre] = useState(false)
+  const sonido = useSonido()
   const nav = useNavigate()
   const { sesion, perfil, cargando } = useSesion()
 
@@ -136,9 +138,22 @@ export default function Portal() {
           {PISOS_INFO.map(p => (
             <button key={p.id} type="button" className={`asc-btn${p.piso === piso ? ' activa' : ''}`}
               data-piso={p.piso} aria-current={p.piso === piso ? 'true' : undefined}
-              aria-label={p.etiqueta} onClick={() => bajar(p.id)}>{p.codigo}</button>
+              aria-label={p.etiqueta} onClick={() => { sonido.tecla(); bajar(p.id) }}>{p.codigo}</button>
           ))}
         </div>
+        {/* El sonido del ascensor: APAGADO por defecto, solo con un clic. */}
+        <button type="button" className="asc-sonido" aria-pressed={sonido.activo}
+          aria-label={sonido.activo ? 'Silenciar el sonido del ascensor' : 'Activar el sonido del ascensor'}
+          onClick={sonido.alternar}>
+          <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+            strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 9.5h3.2L12 5.5v13l-4.8-4H4z" />
+            {sonido.activo
+              ? <><path d="M15.2 9.2a4 4 0 0 1 0 5.6" /><path d="M17.8 6.8a7.4 7.4 0 0 1 0 10.4" /></>
+              : <path d="m16 9.5 5 5m0-5-5 5" />}
+          </svg>
+          <span className="asc-sonido-t">{sonido.activo ? 'Sonido' : 'Silencio'}</span>
+        </button>
         <div className="asc-hint" aria-hidden="true">Baja <i /></div>
       </aside>
 

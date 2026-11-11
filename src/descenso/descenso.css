@@ -385,3 +385,26 @@
 }
 .descenso .piso-mark .script { animation:letrero-vacila 9s linear infinite }
 @media (prefers-reduced-motion:reduce) { .descenso .piso-mark .script { animation:none } }
+
+/* El interruptor de sonido del dial: un boton de laton, de al menos 44 px. */
+.descenso .asc-sonido {
+  pointer-events:auto; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; gap:7px;
+  width:100%; min-height:44px; margin-top:10px; padding:0 8px;
+  border:1px solid #8a6a32; border-radius:6px;
+  background:linear-gradient(180deg, rgba(232,201,137,.14), rgba(0,0,0,.25));
+  color:#E8C989; font-family:var(--font-ui); font-size:10px; font-weight:600;
+  letter-spacing:.14em; text-transform:uppercase;
+}
+.descenso .asc-sonido:hover { filter:brightness(1.12) }
+.descenso .asc-sonido:focus-visible { outline:2px solid #E8C989; outline-offset:3px }
+.descenso .asc-sonido[aria-pressed="true"] {
+  color:#1a1008; border-color:#6a4a16;
+  background:radial-gradient(circle at 35% 28%, #fff4d0, #E8C989 38%, #C9A25A 65%, #8a5a18);
+  box-shadow:0 0 12px rgba(232,201,137,.55);
+}
+@media (max-width:900px) {
+  /* En el dial compacto queda solo el icono (el texto es lo primero que sobra). */
+  .descenso .ascensor .asc-sonido { margin-top:4px; min-height:44px; padding:0 }
+  .descenso .ascensor .asc-sonido-t { display:none }
+}

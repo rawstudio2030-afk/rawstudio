@@ -80,6 +80,14 @@ esconde**: queda un dial compacto (sin botonera ni nombre) que no tapa el titula
 los botones. Con `prefers-reduced-motion`: sin scrubbing ni recede, fotogramas
 estáticos, la reja solo vela la pantalla; el viaje dura ~0.8 s.
 
+**Sonido del ascensor** (opcional, sintetizado con Web Audio: no hay archivos de audio).
+Un botón «Sonido» en el dial, **apagado por defecto** y solo con un clic (el contexto de
+audio nace dentro de ese gesto); no se recuerda entre visitas. Suena lo que se ve: la
+reja mientras se mueve y el golpe del seguro al cerrar y abrir, el retumbo de la cabina,
+la campanilla al abrirse las puertas, el clic de los botones del dial y el crepitar de
+las antorchas del calabozo. Volumen bajo, con compresor, y se calla con la pestaña
+oculta. El motor (`sonido.ts`) se descarga solo al activarlo.
+
 El calabozo lleva **antorchas** (cuerpo `antorcha.webp` + bucle de fuego en video, que
 solo se pide y reproduce cuando el piso está a la vista; cuatro en escritorio, dos en
 móvil) y siluetas negras de decoración. Crédito del fuego: *Burning Torch at the Dark*,
