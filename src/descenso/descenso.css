@@ -376,3 +376,12 @@
 .descenso .acciones .btn, .descenso .solo-ver, .descenso .desciende {font-family:var(--font-ui)}
 .descenso .desciende {background:none;border:0;text-align:left;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
 .descenso .asc-btn {cursor:pointer;padding:0}
+
+/* El letrero «Collins Avenue»: un neon que a veces vacila, apenas. Una sola
+   propiedad (opacity) en un elemento chico; se apaga con reduced-motion. */
+@keyframes letrero-vacila {
+  0%, 90%, 94%, 100% { opacity:1 }
+  92% { opacity:.78 } 93% { opacity:1 } 95% { opacity:.62 } 96% { opacity:.95 }
+}
+.descenso .piso-mark .script { animation:letrero-vacila 9s linear infinite }
+@media (prefers-reduced-motion:reduce) { .descenso .piso-mark .script { animation:none } }

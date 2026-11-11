@@ -185,6 +185,8 @@ export default function Pisos({
               <Foto id="club-bg" src="club"
                 alt="Salón subterráneo vacío, con haces de luz violeta y ámbar entre humo. Sin personas." />
               <div className="club-velo" />
+              <span className="niebla n1" aria-hidden="true" />
+              <span className="niebla n2" aria-hidden="true" />
               <span className="beam b1" />
               <span className="beam b2" />
               <div className="club-cartela">
