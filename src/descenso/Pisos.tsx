@@ -1,5 +1,5 @@
-/* Los pisos de ABAJO del descenso: la escalera, el antro (−1), el cuarto oscuro
- * (−2) y el calabozo (−3) con el pie.
+/* Los pisos de ABAJO del descenso: los huecos de ascensor, el antro (−1), el cuarto
+ * oscuro (−2) y el calabozo (−3) con el pie.
  *
  * Es un chunk perezoso (React.lazy en `Portal.tsx`): el primer paint es solo el
  * hero de Collins (CHECKLIST §2.1). Lo que trae este modulo —sus textos, su CSS,
@@ -15,7 +15,7 @@
  * las miniaturas son fotos de ambiente (generadas, sin personas) que la propia
  * hoja declara «de ejemplo». Todo lo que lleva a ver de verdad pasa por `/age`.
  */
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Enlace, Pulsable } from '../components/Pulsable'
 import Wordmark from '../components/Wordmark'
 import { SPRITE_PISOS } from './spritePisos'
@@ -59,6 +59,81 @@ const COLGANTES: { foto: number; no: string; giro: string }[] = [
   { foto: 5, no: '27A', giro: '3deg' },
 ]
 
+/** El plano de la reja de latón: fijo al viewport, por encima del contenido y sin
+ *  eventos. Lo mueve `useDescenso` por variables CSS (`--cierre-in`, `--cierre-out`,
+ *  `--velo`), no React: son decenas de actualizaciones por segundo.
+ *
+ *  Dos planos: la tijera interior (`reja-bay.webp`, un tile repetible que se
+ *  comprime al abrir, la hoja derecha en espejo) y la puerta exterior de rellano
+ *  (`reja-ext.webp`, una hoja a cada lado). Sin Three.js ni WebGL. */
+function Reja() {
+  return (
+    <div id="reja" className="reja abierta" aria-hidden="true">
+      <div className="reja-velo" />
+      <div className="reja-cabin">
+        <div className="reja-plano outer">
+          <div className="puerta-ext izq"><div className="puerta-ext-face" /></div>
+          <div className="puerta-ext der"><div className="puerta-ext-face" /></div>
+        </div>
+        <div className="reja-plano inner">
+          <div className="reja-marco top" />
+          <div className="reja-marco bot" />
+          <div className="reja-tijera izq"><div className="reja-tile" /></div>
+          <div className="reja-tijera der"><div className="reja-tile" /></div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/** Un hueco de ascensor entre dos pisos (280 vh, 190 vh en móvil). La cabina
+ *  (`.shaft`) queda fija mientras dura: foto de salida, losa de concreto con el
+ *  número del piso, foto de llegada y —DENTRO del hueco, no después— la placa con
+ *  el titular del piso, que aparece al partirse las puertas: ningún fotograma
+ *  muestra solo la foto de fondo. Es transición, no una pantalla del producto
+ *  (decorativo: `aria-hidden`; el titular real está en el piso que sigue). */
+function Hueco({ id, etiqueta, de, a, salida, llegada, piso, numero, nombre, titular }: {
+  id: string; etiqueta: string; de: string; a: string
+  salida: string; llegada: string; piso: 'a' | 'o' | 'k'
+  numero: string; nombre: string; titular: string
+}) {
+  return (
+    <section className="umbral" id={id} aria-label={etiqueta} data-from={de} data-to={a}>
+      <div className="shaft" aria-hidden="true">
+        <img className="shaft-out" src={`/descenso/${salida}.webp`} alt="" loading="lazy" decoding="async" />
+        <div className="losa">
+          <div className="losa-cara" />
+          <div className="losa-canto">
+            <span className="losa-stencil">{numero}</span>
+            <span className="losa-sub">{nombre}</span>
+          </div>
+        </div>
+        <img className="shaft-in" src={`/descenso/${llegada}.webp`} alt="" loading="lazy" decoding="async" />
+        <div className="umbral-velo" />
+        <div className={`llegada piso-${piso}`}>
+          <p className="placa">Piso {numero} · {nombre}</p>
+          <p className="titular">{titular}</p>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/** Una antorcha del calabozo: el cuerpo (`antorcha.webp`, hierro y trapo, con alpha),
+ *  la luz de la llama (radial en `screen`) y el bucle de fuego en video (200×296,
+ *  `mix-blend-mode: screen` con máscara radial) anclado al trapo. `preload="none"`:
+ *  `useDescenso` lo pide y lo reproduce solo cuando el calabozo entra en vista, y
+ *  lo pausa al salir. Con `prefers-reduced-motion` queda el póster estático. */
+const Antorcha = ({ clase }: { clase: string }) => (
+  <div className={`antorcha ${clase}`}>
+    <span className="antorcha-luz" />
+    <video className="fuego-loop" muted loop playsInline preload="none" poster="/descenso/fuego-poster.webp">
+      <source src="/descenso/fuego-loop.mp4" type="video/mp4" />
+    </video>
+    <img className="antorcha-img" src="/descenso/antorcha.webp" alt="" width={244} height={920} decoding="async" loading="lazy" />
+  </div>
+)
+
 const Pinza = () => (
   <svg className="pinza" viewBox="0 0 30 46" aria-hidden="true">
     <path d="M11 2.5h8l-1.1 16.2h-5.8z" fill="#c4a57a" stroke="#6b5340" strokeWidth="1.2" strokeLinejoin="round" />
@@ -82,6 +157,9 @@ export default function Pisos({
   alAbrirSobre: () => void
   sobreAbierto: boolean
 }) {
+  // En móvil no se insertan las antorchas 3 y 4 (cada una baja su propio video).
+  const [movil] = useState(() => window.matchMedia('(max-width: 900px)').matches)
+
   // Avisa UNA vez que ya esta en el DOM (si algo pidio bajar, ahora ya hay a donde).
   const montar = useRef(alMontar)
   useEffect(() => { montar.current() }, [])
@@ -91,20 +169,12 @@ export default function Pisos({
       <svg xmlns="http://www.w3.org/2000/svg" style={{ display: 'none' }} aria-hidden="true"
         dangerouslySetInnerHTML={{ __html: SPRITE_PISOS }} />
 
-      {/* ---------- umbral: la escalera ---------- */}
-      <section className="umbral" id="umbral-antro" aria-label="Escalera hacia el antro">
-        <Foto id="stairs-bg" src="stairs"
-          alt="Escalera art déco de terrazo y bronce que desciende hacia una luz violeta. Sin personas." />
-        <div className="umbral-velo" />
-        <div className="umbral-copy">
-          <p className="piso-mark piso-c" style={{ display: 'inline-flex' }}>
-            <I n="stairs" />Un piso más abajo
-          </p>
-          <p className="dir">La noche empieza debajo.</p>
-          <h2>El antro.</h2>
-          <p>La escalera de sol naciente baja desde el salón de Collins Avenue. Abajo esperan el bajo, el humo y la primera pista.</p>
-        </div>
-      </section>
+      {/* La reja del ascensor: una sola, fija, compartida por los tres huecos. */}
+      <Reja />
+
+      {/* ---------- hueco: Collins → el antro ---------- */}
+      <Hueco id="umbral-antro" etiqueta="Ascensor hacia el antro" de="collins" a="antro"
+        salida="bar-hero" llegada="club" piso="a" numero="−1" nombre="El antro" titular="Graba tu pieza." />
 
       {/* ---------- −1 · el antro ---------- */}
       <section className="nivel piso-a" id="nivel-2" data-piso="antro" data-code="−1" data-nombre="El antro"
@@ -138,38 +208,28 @@ export default function Pisos({
         </div>
       </section>
 
-      {/* ---------- umbral: el revelado ---------- */}
-      <section className="umbral" id="umbral-oscuro" aria-label="Paso al cuarto de revelado">
-        <div className="umbral-velo" />
-        <div className="umbral-copy">
-          <p className="piso-mark piso-o" style={{ display: 'inline-flex' }}>
-            <I n="enlarger" />Servicio · solo personal
-          </p>
-          <h2>Cuarto de revelado.</h2>
-          <p style={{ fontFamily: 'var(--font-playfair)', fontStyle: 'italic', color: 'var(--o-muted)' }}>
-            Detrás del antro se apaga el color. Queda la luz roja y la hoja de contactos.
-          </p>
-        </div>
-      </section>
-
-      <div className="tendedero" aria-hidden="true">
-        <div className="cuerda" />
-        <div className="colgantes">
-          {COLGANTES.map(c => (
-            <figure className="colgante" key={c.no}>
-              <Pinza />
-              <div className="print-paper" style={{ ['--r' as string]: c.giro }}>
-                <div className="ventana"><Foto src={`thumb-${c.foto}`} /></div>
-                <figcaption>RAW 400 · {c.no}</figcaption>
-              </div>
-            </figure>
-          ))}
-        </div>
-      </div>
+      {/* ---------- hueco: el antro → el cuarto oscuro ---------- */}
+      <Hueco id="umbral-oscuro" etiqueta="Ascensor al cuarto de revelado" de="antro" a="oscuro"
+        salida="club" llegada="darkroom" piso="o" numero="−2" nombre="Cuarto oscuro" titular="Marca lo que quieres ver." />
 
       {/* ---------- −2 · cuarto oscuro ---------- */}
       <section className="nivel piso-o" id="nivel-3" data-piso="oscuro" data-code="−2" data-nombre="Cuarto oscuro"
         aria-label="Piezas">
+        <div className="tendedero" aria-hidden="true">
+          <div className="cuerda" />
+          <div className="colgantes">
+            {COLGANTES.map(c => (
+              <figure className="colgante" key={c.no}>
+                <Pinza />
+                <div className="print-paper" style={{ ['--r' as string]: c.giro }}>
+                  <div className="ventana"><Foto src={`thumb-${c.foto}`} /></div>
+                  <figcaption>RAW 400 · {c.no}</figcaption>
+                </div>
+              </figure>
+            ))}
+          </div>
+        </div>
+
         <div className="wrap">
           <div className="cab-ext">
             <div>
@@ -221,28 +281,44 @@ export default function Pisos({
         </div>
       </section>
 
-      {/* ---------- umbral: la puerta ---------- */}
-      <section className="umbral" id="umbral-calabozo" aria-label="Puerta al calabozo">
-        <Foto id="door-bg" src="puerta"
-          alt="Puerta de hierro remachado entre piedra tallada, iluminada por antorchas. Sin personas." />
-        <div className="umbral-velo" />
-        <div className="umbral-copy">
-          <p className="piso-mark piso-k" style={{ display: 'inline-flex' }}>
-            <I n="door" />Lo más hondo
-          </p>
-          <h2>El calabozo.</h2>
-          <p style={{ fontFamily: 'var(--font-fell)', fontStyle: 'italic', color: 'var(--k-muted)' }}>
-            Más abajo que el revelado, la piedra y el sello. Aquí se parte el tributo.
-          </p>
-        </div>
-      </section>
+      {/* ---------- hueco: el cuarto oscuro → el calabozo ---------- */}
+      <Hueco id="umbral-calabozo" etiqueta="Ascensor al calabozo" de="oscuro" a="calabozo"
+        salida="darkroom" llegada="camara" piso="k" numero="−3" nombre="El calabozo" titular="El tributo se parte en la piedra." />
 
       {/* ---------- −3 · el calabozo ---------- */}
       <section className="nivel piso-k" id="nivel-4" data-piso="calabozo" data-code="−3" data-nombre="El calabozo"
         aria-label="Precios">
         <div className="camara-bg" aria-hidden="true">
-          <Foto id="cam-bg" src="camara" />
+          <img id="cam-bg" src="/descenso/camara.webp" alt="" loading="lazy" decoding="async" />
           <div className="camara-velo" />
+        </div>
+        {/* Siluetas negras de decoración (cadenas, grilletes, aspa de San Andrés,
+            cuerdas): SVG de la maqueta, `multiply`, sin personas. Tres capas con
+            parallax distinto. */}
+        <div className="cala-siluetas" aria-hidden="true">
+          <div className="cala-capa c1">
+            <svg className="sil sil-aspa-lg" viewBox="0 0 140 180"><use href="#sil-aspa" /></svg>
+            <svg className="sil sil-cage" viewBox="0 0 80 150"><use href="#sil-cage" /></svg>
+          </div>
+          <div className="cala-capa c2">
+            <svg className="sil sil-chain-a" viewBox="0 0 24 220"><use href="#sil-chain" /></svg>
+            <svg className="sil sil-chain-b" viewBox="0 0 24 220"><use href="#sil-chain" /></svg>
+            <svg className="sil sil-rope" viewBox="0 0 80 80"><use href="#sil-rope" /></svg>
+            <svg className="sil sil-hook-a" viewBox="0 0 36 90"><use href="#sil-hook" /></svg>
+            <svg className="sil sil-hook-b" viewBox="0 0 36 90"><use href="#sil-hook" /></svg>
+          </div>
+          <div className="cala-capa c3">
+            <svg className="sil sil-manacles-a" viewBox="0 0 180 50"><use href="#sil-manacles" /></svg>
+            <svg className="sil sil-manacles-b" viewBox="0 0 180 50"><use href="#sil-manacles" /></svg>
+            <svg className="sil sil-hook-c" viewBox="0 0 36 90"><use href="#sil-hook" /></svg>
+          </div>
+        </div>
+        <div className="cala-luz" aria-hidden="true" />
+        {/* Las antorchas: cuatro en escritorio; en móvil NO se montan la 3 ni la 4
+            (cuatro videos serían demasiado). */}
+        <div className="cala-antorchas" aria-hidden="true">
+          <Antorcha clase="a1" /><Antorcha clase="a2" />
+          {!movil && <><Antorcha clase="a3" /><Antorcha clase="a4" /></>}
         </div>
         <div className="wrap">
           <p className="piso-mark"><I n="candle" />Piso −3 · El calabozo</p>

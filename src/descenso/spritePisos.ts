@@ -89,4 +89,69 @@ export const SPRITE_PISOS = `<symbol id="i-candle" viewBox="0 0 24 24" fill="non
 <filter id="wobble">
     <feTurbulence type="turbulence" baseFrequency="0.05" numOctaves="2" seed="4" result="t"/>
     <feDisplacementMap in="SourceGraphic" in2="t" scale="1.6"/>
-  </filter>`
+  </filter>
+<symbol id="sil-aspa" viewBox="0 0 140 180">
+    <g fill="currentColor">
+      <rect x="62" y="6" width="16" height="168" rx="3" transform="rotate(32 70 90)"/>
+      <rect x="62" y="6" width="16" height="168" rx="3" transform="rotate(-32 70 90)"/>
+    </g>
+    <g fill="none" stroke="currentColor" stroke-width="5">
+      <circle cx="28" cy="24" r="9"/>
+      <circle cx="112" cy="24" r="9"/>
+      <circle cx="28" cy="156" r="9"/>
+      <circle cx="112" cy="156" r="9"/>
+    </g>
+  </symbol>
+<symbol id="sil-cage" viewBox="0 0 80 150">
+    <g fill="none" stroke="currentColor" stroke-width="3.2" stroke-linejoin="round">
+      <ellipse cx="40" cy="10" rx="5" ry="7"/>
+      <ellipse cx="40" cy="22" rx="5" ry="7"/>
+      <ellipse cx="40" cy="34" rx="5" ry="7"/>
+      <path d="M10 62 Q10 48 40 48 Q70 48 70 62"/>
+      <rect x="10" y="62" width="60" height="78"/>
+      <line x1="22" y1="62" x2="22" y2="140"/>
+      <line x1="34" y1="62" x2="34" y2="140"/>
+      <line x1="46" y1="62" x2="46" y2="140"/>
+      <line x1="58" y1="62" x2="58" y2="140"/>
+      <line x1="10" y1="140" x2="70" y2="140"/>
+    </g>
+    <rect x="36" y="40" width="8" height="10" fill="currentColor"/>
+  </symbol>
+<symbol id="sil-chain" viewBox="0 0 24 220">
+    <g fill="none" stroke="currentColor" stroke-width="3">
+      <ellipse cx="12" cy="12" rx="6" ry="9"/>
+      <ellipse cx="12" cy="28" rx="6" ry="9"/>
+      <ellipse cx="12" cy="44" rx="6" ry="9"/>
+      <ellipse cx="12" cy="60" rx="6" ry="9"/>
+      <ellipse cx="12" cy="76" rx="6" ry="9"/>
+      <ellipse cx="12" cy="92" rx="6" ry="9"/>
+      <ellipse cx="12" cy="108" rx="6" ry="9"/>
+      <ellipse cx="12" cy="124" rx="6" ry="9"/>
+      <ellipse cx="12" cy="140" rx="6" ry="9"/>
+      <ellipse cx="12" cy="156" rx="6" ry="9"/>
+      <ellipse cx="12" cy="172" rx="6" ry="9"/>
+      <ellipse cx="12" cy="188" rx="6" ry="9"/>
+      <ellipse cx="12" cy="204" rx="6" ry="9"/>
+    </g>
+  </symbol>
+<symbol id="sil-manacles" viewBox="0 0 180 50">
+    <g fill="none" stroke="currentColor" stroke-linecap="round">
+      <circle cx="26" cy="25" r="18" stroke-width="7"/>
+      <circle cx="154" cy="25" r="18" stroke-width="7"/>
+      <ellipse cx="56" cy="25" rx="10" ry="7" stroke-width="4"/>
+      <ellipse cx="76" cy="25" rx="10" ry="7" stroke-width="4"/>
+      <ellipse cx="96" cy="25" rx="10" ry="7" stroke-width="4"/>
+      <ellipse cx="116" cy="25" rx="10" ry="7" stroke-width="4"/>
+    </g>
+  </symbol>
+<symbol id="sil-rope" viewBox="0 0 80 80">
+    <path d="M40 40 m 0 -28 a 28 28 0 1 1 0 56 a 21 21 0 1 1 0 -42 a 14 14 0 1 1 0 28 a 7 7 0 1 1 0 -14" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+  </symbol>
+<symbol id="sil-hook" viewBox="0 0 36 90">
+    <rect x="6" y="2" width="24" height="5" rx="1" fill="currentColor"/>
+    <g fill="none" stroke="currentColor" stroke-linecap="round">
+      <circle cx="18" cy="16" r="7" stroke-width="4"/>
+      <path d="M18 23 C18 40 31 43 31 56 C31 72 10 76 10 58" stroke-width="5"/>
+    </g>
+  </symbol>
+`

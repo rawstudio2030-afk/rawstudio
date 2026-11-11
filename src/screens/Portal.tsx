@@ -27,7 +27,7 @@ import Wordmark from '../components/Wordmark'
 import { useSesion } from '../lib/sesion'
 import { PISO } from '../lib/diseño'
 import { SPRITE_HERO } from '../descenso/spriteHero'
-import { PISOS_INFO, irA, useDescenso } from '../descenso/useDescenso'
+import { ANGULOS, PISOS_INFO, irA, useDescenso } from '../descenso/useDescenso'
 import '../descenso/descenso.css'
 
 /* Lo que NO es el hero: cada import() es un chunk aparte que el navegador pide
@@ -99,22 +99,46 @@ export default function Portal() {
         </span>
       </header>
 
-      {/* ---------- ascensor (se oculta bajo 900 px) ---------- */}
-      <aside className="ascensor" aria-label="Pisos del edificio">
-        <div className="asc-cap" aria-hidden="true">Ascensor</div>
-        <div className="asc-display" aria-hidden="true">{info.codigo}</div>
-        <div className="asc-name" aria-hidden="true">{info.nombre}</div>
-        <nav className="asc-track" aria-label="Ir a un piso">
+      {/* ---------- selector de pisos: el dial del ascensor ----------
+          Aguja, display PB / −1 / −2 / −3, nombre del piso y botonera. Un clic hace
+          el viaje (scroll de ~2.5 s). Bajo 900 px queda compacto (solo dial y
+          display): ya no se esconde, pero tampoco tapa el titular ni los botones. */}
+      <aside className="ascensor" aria-label="Selector de pisos del ascensor">
+        <p className="asc-cap" id="asc-label">Pisos</p>
+        <div className="dial" aria-hidden="true">
+          <svg className="dial-svg" viewBox="0 0 200 124">
+            <defs>
+              <linearGradient id="rimBrass" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stopColor="#E8C989" /><stop offset=".45" stopColor="#C9A25A" /><stop offset="1" stopColor="#6a4a16" />
+              </linearGradient>
+              <radialGradient id="hubBrass" cx="38%" cy="32%" r="70%">
+                <stop offset="0" stopColor="#F4E4B8" /><stop offset=".55" stopColor="#C9A25A" /><stop offset="1" stopColor="#5a4214" />
+              </radialGradient>
+            </defs>
+            <path d="M 18 110 A 82 82 0 0 1 182 110" fill="none" stroke="url(#rimBrass)" strokeWidth="10" />
+            <path d="M 30 110 A 70 70 0 0 1 170 110" fill="none" stroke="#14110c" strokeWidth="12" />
+            <path d="M 30 110 A 70 70 0 0 1 170 110" fill="none" stroke="#C9A25A" strokeWidth=".85" opacity=".65" />
+            <g stroke="#E8C989" strokeWidth="2" strokeLinecap="round">
+              <line x1="33.4" y1="91.7" x2="26.6" y2="89.8" /><line x1="72.8" y1="45.4" x2="68.4" y2="37.6" />
+              <line x1="127.2" y1="45.4" x2="131.6" y2="37.6" /><line x1="166.6" y1="91.7" x2="173.4" y2="89.8" />
+            </g>
+            <g fill="#E8C989" fontFamily="Cinzel,serif" fontSize="11" fontWeight="600" textAnchor="middle">
+              <text x="16" y="88">PB</text><text x="62" y="28">−1</text><text x="138" y="28">−2</text><text x="184" y="88">−3</text>
+            </g>
+            <circle cx="100" cy="110" r="9" fill="url(#hubBrass)" stroke="#6a4a16" strokeWidth="1" />
+            <circle cx="100" cy="110" r="3.2" fill="#2a1c0c" />
+          </svg>
+          <div className="aguja" style={{ ['--aguja' as string]: `${ANGULOS[piso]}deg` }}><i /></div>
+        </div>
+        <div className="asc-display" aria-live="polite">{info.codigo}</div>
+        <div className="asc-name">{info.nombre}</div>
+        <div className="botonera" role="group" aria-labelledby="asc-label">
           {PISOS_INFO.map(p => (
-            <button key={p.id} type="button" className={`asc-floor${p.piso === piso ? ' activa' : ''}`}
-              data-piso={p.piso} aria-current={p.piso === piso ? 'location' : undefined}
-              aria-label={`Piso ${p.codigo}, ${p.nombre}${p.piso === piso ? ' (estás aquí)' : ''}`}
-              onClick={() => bajar(p.id)}>
-              <span className="dot" aria-hidden="true" />
-              <span className="lab" aria-hidden="true"><b>{p.codigo}</b>{p.corto}</span>
-            </button>
+            <button key={p.id} type="button" className={`asc-btn${p.piso === piso ? ' activa' : ''}`}
+              data-piso={p.piso} aria-current={p.piso === piso ? 'true' : undefined}
+              aria-label={p.etiqueta} onClick={() => bajar(p.id)}>{p.codigo}</button>
           ))}
-        </nav>
+        </div>
         <div className="asc-hint" aria-hidden="true">Baja <i /></div>
       </aside>
 
@@ -153,7 +177,7 @@ export default function Portal() {
           </Pulsable>
         </section>
 
-        {/* ---------- los pisos de abajo: solo cuando se piden ---------- */}
+        {/* ---------- los pisos de abajo y sus huecos de ascensor: solo cuando se piden ---------- */}
         {pisosPedidos ? (
           <Suspense fallback={<Hueco />}>
             <Pisos alMontar={pisosListos} alAbrirSobre={() => setSobre(s => !s)} sobreAbierto={sobre} />

@@ -67,10 +67,23 @@ pida).
 
 ## Portada (landing)
 
-Cuatro pisos más umbrales, con un **ascensor** fijo a la derecha: bronce, display
-PB / −1 / −2 / −3, botones para saltar de piso; **oculto bajo 900 px**; accesible
-(`aria-label="Pisos del edificio"`, el piso activo se anuncia con `aria-current`,
-no solo con color); sin parallax ni grano animado con `prefers-reduced-motion`.
+Cuatro pisos y, entre ellos, **huecos de ascensor** (280 vh; 190 vh bajo 900 px) con
+scroll acoplado: el progreso del hueco manda una **reja de latón** (la tijera interior
+cierra primero y la puerta exterior de rellano la sigue con desfase), una **losa de
+concreto** con el número del piso que cruza el encuadre, y, al partirse las puertas,
+la **placa y el titular del piso** (dentro del hueco: ningún fotograma queda con solo
+la foto de fondo). Fuente de los números: `docs/diseno/descenso/elevador/`.
+
+A la derecha, el **dial** de latón (aguja, display PB / −1 / −2 / −3, nombre y botonera;
+`aria-current` en el piso activo). Un clic hace un viaje de ~2.5 s. **Bajo 900 px no se
+esconde**: queda un dial compacto (sin botonera ni nombre) que no tapa el titular ni
+los botones. Con `prefers-reduced-motion`: sin scrubbing ni recede, fotogramas
+estáticos, la reja solo vela la pantalla; el viaje dura ~0.8 s.
+
+El calabozo lleva **antorchas** (cuerpo `antorcha.webp` + bucle de fuego en video, que
+solo se pide y reproduce cuando el piso está a la vista; cuatro en escritorio, dos en
+móvil) y siluetas negras de decoración. Crédito del fuego: *Burning Torch at the Dark*,
+Pexels 4765799, autor «K», licencia Pexels.
 
 **Carga (CHECKLIST §2.1 y §2.2, `pass` inmutables):** el primer paint es **solo el
 hero de Collins**. Los pisos de abajo son un chunk perezoso (`descenso/Pisos`) que se
