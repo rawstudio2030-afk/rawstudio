@@ -60,9 +60,9 @@ _(Ronda 1 y 2 verificadas. Ronda 3: §4 `not_started`→`partial`. Fails que que
 - **Estado:** `partial`
 - **Evidencia:** DESIGN-BRIEF + viewport; el peso inicial de la portada bajó en ronda 1 (paquete principal 705.67 → 640.20 kB; sin `launch.mp4` en el bundle). Sigue partial por el resto del recorrido móvil.
 
-### 1.6 Miami Neon en modo marca vs sobrio en consumo
-- **Estado:** `pass` ✅ **inmutable**
-- **Evidencia:** tokens en `diseño.ts`; portada marca / clip consumo.
+### 1.6 El descenso en modo marca vs sobrio en consumo
+- **Estado:** `pass` ✅ **inmutable** — reescrito el 2026-11-10 al aterrizar 10-01…10-04 (cambio acordado; no es una regresión).
+- **Evidencia:** tokens y `PISO` / `BOTON` en `diseño.ts` (`1802f79`); portada en cuatro pisos (`9544c00`); páginas públicas al piso que les toca (`c6ae7ad`). El modo consumo (reproductor) sigue sobrio.
 
 ---
 
@@ -148,11 +148,18 @@ React 19 · Vite 8 · HashRouter · Supabase · GitHub Pages · comisión 20% / 
 
 ## Decisiones
 
-### El descenso (2026-11-10) — dirección aprobada, pendiente de implementar
+### El descenso (2026-11-10) — dirección aprobada, 10-01…10-04 en main
 1. Sergio eligió la landing como un edificio de cuatro pisos: planta baja Collins Avenue → el antro → el cuarto oscuro → el calabozo (tipografías de la maqueta actual, no `v1`).
-2. Maqueta y capturas: `docs/diseno/descenso/` (`45c6018`, `13be7e6`). Rondas `[id: 20261110-01]` a `[id: 20261110-04]` en el puente.
-3. El ítem §1.6 (Miami Neon, `pass`) no se marca como regresión hasta que estas rondas aterrizen; entonces se reescribe como El descenso (marca vs consumo). No se toca ningún otro `pass` inmutable (§2.1 y §2.2 incluidos: el descenso lazy-carga los pisos de abajo).
+2. Maqueta original y capturas: `docs/diseno/descenso/` (`45c6018`, `13be7e6`). Rondas `[id: 20261110-01]` a `[id: 20261110-04]` **implementadas y publicadas** en `origin/main`: tokens `1802f79`, portada `9544c00`, páginas públicas `c6ae7ad`, correos y brief `4876730`. Docs del puente: `71bde6c` (asignación) y `47e4629` (publicadas).
+3. §1.6 se reescribió como El descenso (marca vs consumo) al aterrizar esas rondas. No se tocó ningún otro `pass` inmutable (§2.1 y §2.2 incluidos: el descenso lazy-carga los pisos de abajo).
 4. Admin: solo tokens nuevos, desktop-only (`ANCHO_MINIMO` 1280). Sin migraciones, sin renombrar `/creadoras`, sin mover el login a `/entrar`, sin analítica.
+
+### Ronda 10-05 (2026-11-10 21:15) — elevador entre pisos
+1. **Por qué:** Sergio aprobó la maqueta viva del elevador («Me gusta, mándaselo a Claude Code») a las 21:15 America/Chicago.
+2. **Qué:** sustituir los umbrales cortos y el ascensor simple de 10-02 por huecos de 280 vh (190 vh en móvil) con scroll acoplado, reja de latón de dos puertas, losa de concreto, dial a la derecha (compacto en móvil, ya no se esconde), título de llegada al abrir (sin fotograma de fondo vacío) y, en el calabozo, antorchas reales y siluetas negras de decoración.
+3. **Qué no:** copy del hero, Three.js/Spline/Tailwind, wordmark, paletas de 10-01/10-02, clips reales antes de la puerta de edad, admin, migraciones, 08-05, correo .mx. No reabrir 10-01…10-04.
+4. Maqueta y capturas: `docs/diseno/descenso/elevador/`. Este commit de docs no implementa el elevador; Claude Code debe seguir `bridge-response.md` `[id: 20261110-05]`.
+5. Ítems ya `pass` permanecen inmutables (§2.1 y §2.2 incluidos).
 
 ### Arranque
 1. Docs puente + checklist creados sin cambio de producto.

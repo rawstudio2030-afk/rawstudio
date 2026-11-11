@@ -30,6 +30,98 @@
 
 ## Respuestas activas
 
+### Respuesta a [id: 20261110-05] — Elevador entre pisos del descenso
+- **fecha:** 2026-11-10 21:15 (America/Mexico_City)
+- **decisión de Sergio:** «Me gusta, mándaselo a Claude Code» (21:15 America/Chicago del 10 nov 2026; ese día coincide con America/Mexico_City). Aprobó la maqueta viva del elevador: reja de latón de dos puertas, losa de concreto, selector de dial, título de llegada al abrir y antorchas del calabozo.
+- **estado:** lista-para-claude
+- **depende de:** [id: 20261110-02] (portada en cuatro pisos). **10-01…10-04 ya están en `origin/main`** (`1802f79`, `9544c00`, `c6ae7ad`, `4876730`; docs del puente `47e4629`). No las reimplementes ni las reabras. Esta ronda se construye **encima** de 10-02: sustituye los umbrales cortos y el ascensor simple por el hueco con scroll acoplado.
+- **referencia visual:** `docs/diseno/descenso/elevador/index.html` (maqueta, assets embebidos) y `docs/diseno/descenso/elevador/capturas.html`. Desde esa carpeta corre `python3 extraer.py` para materializar `img/reja-bay.webp`, `reja-ext.webp`, `reja-marco.webp`, `antorcha.webp`, `fuego-loop.mp4`, `fuego-poster.webp`, `losa.webp`, `darkroom.webp` y las capturas. Licencias en `docs/diseno/descenso/elevador/README.md`. Copia los assets **nuevos** a `public/descenso/` (webp; el mp4 se queda mp4). Reutiliza `bar-hero`, `club`, `camara` y `grain` que ya están ahí desde 10-02.
+
+#### Diagnóstico (no lo reescribas: úsalo)
+1. La portada de 10-02 (`src/screens/Portal.tsx`, `src/descenso/Pisos.tsx`, `useDescenso.ts`) ya es el edificio de cuatro pisos, con §2.1/§2.2 en pie: el hero de Collins es el primer paint; los pisos de abajo van en un chunk perezoso. El copy del hero es canónico y no se toca.
+2. Los umbrales actuales son tramos cortos con foto (`stairs` al antro, un velo al revelado, `puerta` al calabozo) y un texto. El «ascensor» de 10-02 es un indicador fijo a la derecha que hace `scrollIntoView({ behavior: 'smooth' })`, **oculto bajo 900 px**. No hay reja, no hay losa, no hay scroll acoplado.
+3. Sergio vio un hueco al abrir la reja: un rato de foto de fondo sola, porque el título del piso entraba después. En la maqueta aprobada el letrero de llegada (placa de latón + titular del piso) vive **dentro del hueco** y aparece al abrirse las puertas; el contenido del piso entra justo detrás. No debe quedar ningún fotograma de fondo vacío.
+4. El calabozo de 10-02 ya tiene el 80 % y las tablillas sobre `camara.webp`. Le faltan las antorchas reales y las siluetas negras de decoración.
+
+#### Qué hacer
+
+Reproduce la maqueta en React, no copies el HTML a `public/`. Toma los números de `docs/diseno/descenso/elevador/index.html`.
+
+**1. Huecos de ascensor entre pisos**
+
+Sustituye los tres umbrales cortos (`#umbral-antro`, `#umbral-oscuro`, `#umbral-calabozo`) por huecos de **280 vh** (190 vh bajo 900 px). Cada uno es un `position: relative` con un `.shaft` `position: sticky; top: 0; height: 100dvh`:
+
+- Foto de salida (`.shaft-out`) y foto de llegada (`.shaft-in`): Collins `bar-hero` → antro `club`; antro `club` → cuarto oscuro `darkroom` (archivo nuevo; el piso −2 **sigue** sin foto de fondo propia, solo el velo safelight); cuarto oscuro `darkroom` → calabozo `camara`.
+- Progreso: `p = clamp(0, 1, -rect.top / (alturaDelHueco - viewport))`.
+- La reja interior de tijera cierra primero (`gateInner`: 0→1 en `p = 0…0.20`, abierta de nuevo en `0.74…0.92`). La puerta exterior de rellano la sigue con desfase (`gateOuter`: empieza en `p = 0.08`, cierra en `0.26`, abre en `0.66…0.84`).
+- La escena de salida recede (`translateY` negativo + `scale(1 - recede * 0.18)` + un poco de blur/brillo) como si bajara la cabina; la de llegada aparece al revés. Lerp de las puertas: `k = 0.18` (sigue corriendo en `requestAnimationFrame` aunque no haya evento de scroll).
+- `prefers-reduced-motion`: sin scrubbing ni recede; fotogramas estáticos, puertas abiertas (o un cruce fundido mínimo, sin animar la reja).
+
+**2. Losa de concreto**
+
+En cada hueco, una losa (`.losa`, textura `losa.webp`) cruza el encuadre a mitad de viaje, con el número plantillado y el nombre del piso de llegada (`−1` / El antro, `−2` / Cuarto oscuro, `−3` / El calabozo). Sigue el movimiento de la maqueta (`top` en vh entre `p ≈ 0.30` y `0.70`). No es una pantalla del producto: es parte de la transición.
+
+**3. Reja de latón**
+
+Dos planos, fijos al viewport mientras dura el hueco (`z-index` por encima del contenido, `pointer-events: none`):
+
+- Interior: `reja-bay.webp` es un **tile repetible**. `background-size: calc(100% / 9)` del ancho de la hoja (`--bays: 9`) para que los vanos se compriman al abrir. Dos hojas (izq/der); la derecha va en espejo (`scaleX(-1)`).
+- Exterior: `reja-ext.webp` es la puerta de rellano (panel calado), una hoja a cada lado que se traslada. Marco con `reja-marco.webp`.
+- Tinte por piso: overlay (`mix-blend-mode: overlay`) enmascarado con el alpha del metal (no un filtro que pinte el hueco). Collins `#efd4a8`, antro `#cbb0d4`, oscuro `#e8a090`, calabozo `#f0b060`.
+- Perspectiva suave como en la maqueta (`perspective` + un `translateZ` en la puerta exterior); sin Three.js, sin Spline, sin WebGL.
+
+**4. Selector / dial a la derecha**
+
+Sustituye el ascensor de 10-02 por el dial de la maqueta (aguja, display PB/−1/−2/−3, nombre del piso, botones). `aria-label` claro; el piso activo se anuncia (`aria-current`), no solo con color. Un clic hace un scroll suave de **~2.5 s** (easing in-out, como `rideTo` de la maqueta); con `prefers-reduced-motion`, ~0.8 s o `auto`.
+
+**Cambio respecto a 10-02:** en móvil (<900 px) el dial **no se esconde**. Queda un dial compacto (sin botonera ni nombre), como `movil.jpg`. No debe tapar el titular del hero ni robar los CTAs (tocables ≥ 44 px, sin desborde).
+
+**5. Título de llegada (el hueco del «segundo 5»)**
+
+Dentro de cada hueco, no después: una placa de latón (`Piso −1 · El antro`, etc.) más el titular que el piso ya usa («Graba tu pieza.», «Marca lo que quieres ver.», «El tributo se parte en la piedra.»). Se funde y sube al partirse las puertas (`smoothstep` de `p ≈ 0.78` a `0.88` en la maqueta). El contenido del piso de llegada empieza arriba, de modo que **ningún fotograma** muestre solo la foto de fondo. Verifica cuadro a cuadro (o con los `?shot=` de la maqueta: `trans-1`…`trans-3`, `llegada-1`…`llegada-3`) en los tres huecos, escritorio y 390 px.
+
+**6. Calabozo: antorchas y siluetas**
+
+- Cuerpo `antorcha.webp` + `<video class="fuego-loop" muted loop playsinline preload="none" poster="…/fuego-poster.webp">` con `mix-blend-mode: screen` y máscara radial, anclado al trapo (no un rectángulo flotando encima). `preload="none"` hasta que `#nivel-4` entra en vista (`IntersectionObserver`); entonces `preload="auto"` y `play()`. Pausar al salir.
+- Cuatro antorchas en escritorio; en móvil **no montes** `a3` ni `a4` (como la maqueta: `display: none` o, mejor, ni las insertes, para no bajar cuatro vídeos).
+- Luz de la llama con un radial `screen`. La animación de parpadeo de la maqueta basta; no hace falta desfasarlas en esta ronda.
+- Siluetas negras de bondage (cadenas, grilletes, aspa de San Andrés, cuerdas) como decoración: copia los SVG de la maqueta (`.sil`, `mix-blend-mode: multiply`), `aria-hidden`, sin personas, sin foto explícita.
+- El humo en canvas de la maqueta es opcional y barato; si lo traes, apágalo con `prefers-reduced-motion` y no lo metas en el primer paint. Si duda, déjalo fuera y dilo.
+
+**7. Rendimiento y motion (obligatorio, por §2.1)**
+
+- Reja, losa, `darkroom`, antorchas y `fuego-loop.mp4` **no** viajan en el bundle inicial: van con el chunk perezoso de `Pisos.tsx` (se piden al primer gesto de bajar, como ahora). El dial sí puede seguir en el primer paint, que ya trae el ascensor.
+- Presupuesto: reja + antorcha + marco + poster + bucle de fuego ≈ **380 KB**. `losa.webp` sale ~257 KB de la maqueta (el jpg de trabajo era 589 KB): si Lighthouse se resiente, bájala a ~120 KB. `darkroom.webp` ≈ 56 KB.
+- `loading="lazy"` / `decoding="async"` en las fotos del hueco. El bucle de fuego no se precarga fuera de vista.
+- `prefers-reduced-motion`: sin scrubbing, sin recede, sin fuego en vídeo (poster estático o apagado), sin humo, puertas abiertas. El salto entre pisos sigue siendo usable.
+
+#### No tocar
+- El copy verbatim del hero («Graba. Ponle precio. Cobra.» / «El 80% de cada dólar es tuyo. Sin exclusividad.»).
+- Age gate, ruta `/creadoras`, login en `/acceso`, analítica, tracking. En la portada, antes de `/age`, solo aplica la regla de la puerta de edad: la hoja de contactos sigue siendo **muestra** (decisión de 10-02), sin clips reales.
+- Wordmark Italiana + Bodoni. Paletas y tipografías por piso de 10-01/10-02. Sin lima, cian ni magenta.
+- Three.js, Spline, React Three Fiber, Tailwind u otra dependencia nueva.
+- Panel admin (layout, `ANCHO_MINIMO` 1280, sin tipografías de cartelería).
+- Migraciones, Telegram, DeepSeek, secretos, textos legales nuevos, procesador de recargas.
+- [id: 20261108-05], 09-03, 09-04, 09-05. El commit local de correo .mx no se publica.
+- Rondas 10-01…10-04: no las reabras ni mezcles su diff en este commit. No reescribas `DESIGN-BRIEF.md` entero; si tocas el párrafo del ascensor, actualízalo (dial compacto en móvil, huecos con scroll acoplado).
+
+#### Criterios de aceptación
+1. `tsc -b` / `npm run build` / lint (dinero, plurales) pasan.
+2. En escritorio y en 390 px el scroll entre pisos va acoplado a la reja y a la losa (o el fallback estático si hay `prefers-reduced-motion`).
+3. Al abrirse una reja **no hay un fotograma de fondo vacío**: se ven la placa y el título, y el contenido entra justo detrás. Los tres huecos, escritorio y móvil.
+4. `prefers-reduced-motion` funciona (sin scrubbing ni fuego animado; se puede bajar de piso).
+5. Lighthouse Performance de la portada no empeora de forma grave respecto al de 10-02; **deja los números** (Performance, LCP, peso del primer paint vs. el chunk de los pisos) en el resultado. El primer paint sigue siendo solo el hero de Collins (§2.1 inmutable).
+6. A 390 px: dial compacto visible, sin desborde, CTAs del hero ≥ 44 px. Contraste AA en placa, dial y titulares de llegada.
+7. La hoja de contactos de la portada no muestra clips reales antes de la puerta de edad.
+
+#### Entrega
+- Commit sugerido: `feat: elevador entre pisos del descenso`.
+- Commit propio, encima de 10-02 (HEAD de producto ya incluye 10-01…10-04). No mezcles con 08-05 ni con el correo .mx.
+- Marca [id: 20261110-05] `respondida` con SHA, nota de peso/Lighthouse y confirmación de que no quedó un fotograma vacío al abrir.
+
+#### Siguiente paso para Claude Code
+Implementa, deja el resultado en `bridge-query.md`. No abras otra ronda de diseño encima.
+
 ### Respuesta a [id: 20261110-04] — Correos y brief El descenso
 - **fecha:** 2026-11-10 12:20 (America/Mexico_City)
 - **decisión de Sergio:** el rediseño incluye la papelería que sale de la casa (correos) y el documento que Claude (y el coordinador) van a seguir después.

@@ -38,6 +38,15 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 
 ## Consultas activas
 
+### [id: 20261110-05] Elevador entre pisos del descenso
+- **fecha:** 2026-11-10 21:15 (America/Mexico_City)
+- **estado:** asignada
+- **tarea:** Sustituir los umbrales cortos y el ascensor simple de 10-02 por el hueco de ascensor con scroll acoplado (reja de latón, losa, dial, título de llegada, antorchas del calabozo), respetando §2.1/§2.2 y el copy verbatim del hero.
+- **pregunta:** Implementa la ronda descrita en `bridge-response.md`, entrada [id: 20261110-05]. Commit propio, **encima** de [id: 20261110-02]. 10-01…10-04 **ya están** en `origin/main`: no las reimplementes ni las reabras. No mezcles con [id: 20261108-05]. El commit local de correo .mx no se publica.
+- **contexto:** HEAD de producto al asignar: `47e4629`. 10-01 `1802f79`, 10-02 `9544c00`, 10-03 `c6ae7ad`, 10-04 `4876730`. Maqueta: `606da44`, capturas: `bd0faab` (`docs/diseno/descenso/elevador/`). Sergio aprobó la maqueta el 10 nov 2026 a las 21:15 (America/Chicago) y pidió pasarla a Claude Code.
+- **urgencia:** alta
+- **ya se intentó:** nada de código de esta ronda; la maqueta y las capturas ya están en el repo.
+
 ### [id: 20261110-04] Correos y brief El descenso — hecha y publicada
 - **fecha:** 2026-11-10 12:20 (America/Mexico_City)
 - **estado:** respondida
