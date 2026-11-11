@@ -177,3 +177,7 @@ Los iconos son SVG originales de la maqueta (copa, ventilador, escalera, vinilo,
 - Panel de administración (se queda desktop-only, `ANCHO_MINIMO` 1280; solo cambia de tokens).
 - Analítica, heatmaps ni recuento de visitas.
 - Textos legales nuevos, copy de Telegram ni pasarela de recargas.
+
+## Elevador entre pisos (ronda 20261110-05)
+
+La maqueta del hueco de ascensor, la reja de latón, la losa, el selector, las antorchas y las capturas de la transición está en [`elevador/`](./elevador/). Ábrela por su cuenta (`elevador/index.html`); no sustituye a este `index.html` (referencia de los cuatro pisos y las paletas). La implementación en el producto la hace la ronda `[id: 20261110-05]`, encima de 10-02.
