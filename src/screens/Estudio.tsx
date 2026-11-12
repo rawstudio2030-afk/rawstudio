@@ -25,6 +25,7 @@ import { usd } from '../lib/dinero'
 import { COLOR, FUENTE, RADIO } from '../lib/diseño'
 import Icono from '../components/Iconos'
 import { Pulsable, Enlace } from '../components/Pulsable'
+import EnlaceGuias from '../components/EnlaceGuias'
 import Centro from '../components/Centro'
 import { perfilParaPublicar } from '../lib/trato'
 import VincularTelegram from '../components/VincularTelegram'
@@ -172,6 +173,8 @@ export default function Estudio() {
       <BandejaConsultas />
 
       <Lista canales={hacer} nav={nav} />
+
+      <div style={{ marginTop: 8 }}><EnlaceGuias /></div>
 
       {ajustar.length > 0 && (
         <>

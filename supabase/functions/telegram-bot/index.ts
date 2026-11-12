@@ -13,9 +13,16 @@
 //                     con DeepSeek -> se le pasa a la creadora.
 // - respuesta de la creadora (con «Responder») -> DeepSeek solo AVISA si no
 //                     avanza nada; no la reescribe -> se le pasa al cliente.
+// - /guias o el boton «Guias de grabacion»   manda el PDF de la guia elegida
+//                     (iPhone 12, 13, 14, 15·16·17, y «sin regarla» sola o en
+//                     pareja). Es para cualquiera que escriba al bot: un toque de
+//                     boton NO pasa por `bot_enrutar`, no cobra, no crea ni toca
+//                     consultas y no llama a DeepSeek.
 //
 // ---------- Secretos (Supabase > Edge Functions > Secrets) ----------
 //   TELEGRAM_BOT_TOKEN        el de @BotFather. NUNCA en el repo ni en el front.
+//   (El webhook debe recibir `callback_query`: si `setWebhook` se hizo con
+//   `allowed_updates`, tiene que incluirlo. Ver la nota de despliegue en el puente.)
 //   TELEGRAM_WEBHOOK_SECRET   cadena larga al azar; la misma que se pasa a setWebhook.
 //   DEEPSEEK_API_KEY          la clave de la API de DeepSeek.
 //   (SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY ya los pone Supabase.)
@@ -43,6 +50,11 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.47.10'
 import { avisosDeVencido, sinToken, type Vencido } from '../_shared/consultas.ts'
 
+// Direccion publica para las URLs absolutas que necesita Telegram (los PDF y el
+// enlace a /creadoras). Una sola constante. La ronda 20261108-05 (rawstudio.mx,
+// aun sin publicar) la sustituye por `ORIGEN_CANONICO` de `_shared/sitio.ts`.
+const SITIO = 'https://rawstudio.biz'
+
 const TOKEN = Deno.env.get('TELEGRAM_BOT_TOKEN') ?? ''
 const SECRETO = Deno.env.get('TELEGRAM_WEBHOOK_SECRET') ?? ''
 const DEEPSEEK = Deno.env.get('DEEPSEEK_API_KEY') ?? ''
@@ -62,14 +74,34 @@ function igual(a: string, b: string): boolean {
   return d === 0
 }
 
-/** Manda un texto plano. Devuelve el id del mensaje en ese chat, o null. */
-async function decir(chat: number, texto: string): Promise<number | null> {
+type Teclado = { inline_keyboard: { text: string; callback_data: string }[][] }
+
+/** Llama a un metodo de la API de Telegram. Devuelve la respuesta o null si la
+ *  llamada fallo; el token no se imprime nunca (ver `sinToken`). */
+async function api(metodo: string, cuerpo: Record<string, unknown>): Promise<{ ok?: boolean } | null> {
+  try {
+    const r = await fetch(`https://api.telegram.org/bot${TOKEN}/${metodo}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(cuerpo),
+    })
+    return await r.json()
+  } catch (e) {
+    console.error(metodo, sinToken(e, TOKEN))
+    return null
+  }
+}
+
+/** Manda un texto plano (con teclado en linea si se da). Devuelve el id del
+ *  mensaje en ese chat, o null. */
+async function decir(chat: number, texto: string, teclado?: Teclado): Promise<number | null> {
   try {
     const r = await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         chat_id: chat, text: texto.slice(0, 4000), disable_web_page_preview: true,
+        ...(teclado ? { reply_markup: teclado } : {}),
       }),
     })
     const j = await r.json()
@@ -151,7 +183,74 @@ const AYUDA =
   'Para empezar, entra a la ficha de un clip en rawstudio.biz y toca «Consultar por Telegram»: ' +
   'ahi te damos un enlace que te trae aqui ya vinculado.\n\n' +
   'Si eres creadora, vincula tu Telegram desde tu perfil en rawstudio.biz.\n\n' +
+  '¿Vas a grabar? Escribe /guias o toca el botón para recibir la guía de tu iPhone.\n\n' +
   'Las reglas del servicio: https://rawstudio.biz/#/consultas'
+
+// ---------- Guias de grabacion ----------
+//
+// Lista BLANCA: lo que llega en `callback_data` solo elige una clave de aqui; nada
+// que venga de la persona arma la URL. Los archivos viven en `public/guias/` del
+// sitio (mismos nombres que `src/content/guias.ts`; son dos runtimes y la lista
+// se repite a proposito). Sin `parse_mode`, como el resto del bot.
+
+type Guia = { archivo: string; caption: string }
+
+const VER_EN_EL_SITIO = `También está en ${SITIO}/#/creadoras.`
+const iphone = (modelos: string): string =>
+  `Guía para grabar con tu ${modelos}: ajustes, encuadre, luz y sonido. ${VER_EN_EL_SITIO}`
+const sinRegarla = (version: string, detalle: string): string =>
+  `Cómo grabar tu contenido sin regarla, versión «${version}»: ${detalle}. ` +
+  `Solo para mayores de 18 años. ${VER_EN_EL_SITIO}`
+
+const GUIAS = new Map<string, Guia>([
+  ['12', { archivo: 'guia-iphone12.pdf', caption: iphone('iPhone 12') }],
+  ['13', { archivo: 'guia-iphone13.pdf', caption: iphone('iPhone 13') }],
+  ['14', { archivo: 'guia-iphone14.pdf', caption: iphone('iPhone 14') }],
+  ['15-17', { archivo: 'guia-iphone15-16-17.pdf', caption: iphone('iPhone 15, 16 o 17') }],
+  ['sola', { archivo: 'guia-sin-regarla-sola.pdf',
+    caption: sinRegarla('Grabando sola', 'tus límites, el set, la luz, el sonido y los ángulos') }],
+  ['pareja', { archivo: 'guia-sin-regarla-pareja.pdf',
+    caption: sinRegarla('En pareja', 'el acuerdo, el set, la luz, el sonido y los ángulos') }],
+])
+
+/** El boton que acompana a la ayuda: abre el selector. */
+const BOTON_GUIAS: Teclado = { inline_keyboard: [[{ text: 'Guías de grabación', callback_data: 'guias' }]] }
+
+/** El selector: primero los ajustes del iPhone y luego «sin regarla» (sola primero). */
+const SELECTOR_GUIAS: Teclado = { inline_keyboard: [
+  [{ text: 'iPhone 12', callback_data: 'guia:12' }, { text: 'iPhone 13', callback_data: 'guia:13' }],
+  [{ text: 'iPhone 14', callback_data: 'guia:14' }, { text: 'iPhone 15 · 16 · 17', callback_data: 'guia:15-17' }],
+  [{ text: 'Sin regarla · Grabando sola', callback_data: 'guia:sola' }],
+  [{ text: 'Sin regarla · En pareja', callback_data: 'guia:pareja' }],
+] }
+
+const TEXTO_SELECTOR =
+  'Guías de grabación (PDF).\n\n' +
+  '¿Qué iPhone tienes? Elige el tuyo para recibir los ajustes de la cámara.\n\n' +
+  'O la guía «Cómo grabar tu contenido sin regarla»: Grabando sola o En pareja.'
+
+/** Un toque de boton. SOLO manda el selector o un PDF: nunca pasa por
+ *  `bot_enrutar`, no cobra, no toca consultas y no llama a DeepSeek. Siempre
+ *  contesta el `callback_query` (si no, el boton se queda girando). */
+async function alTocarBoton(cb: { id: string; data?: unknown; message?: { chat?: { id?: number; type?: string } } }) {
+  const chat = cb.message?.chat
+  let aviso: string | undefined
+  try {
+    if (chat?.type !== 'private' || typeof chat.id !== 'number') return
+    if (cb.data === 'guias') { await decir(chat.id, TEXTO_SELECTOR, SELECTOR_GUIAS); return }
+
+    const clave = typeof cb.data === 'string' && cb.data.startsWith('guia:') ? cb.data.slice(5) : ''
+    const guia = GUIAS.get(clave)
+    if (!guia) { aviso = 'Esa opción ya no está disponible. Escribe /guias.'; return }
+    const url = `${SITIO}/guias/${guia.archivo}`
+    const r = await api('sendDocument', { chat_id: chat.id, document: url, caption: guia.caption })
+    if (!r?.ok) await decir(chat.id, `No pude mandarte el archivo. Descárgalo aquí: ${url}`)
+  } catch (e) {
+    console.error('guias', sinToken(e, TOKEN))
+  } finally {
+    await api('answerCallbackQuery', { callback_query_id: cb.id, ...(aviso ? { text: aviso } : {}) })
+  }
+}
 
 /** Avisos de los mensajes que vencieron sin respuesta. Es la red de seguridad:
  *  el camino principal es la funcion `vencer-consultas`, que corre por reloj. */
@@ -169,7 +268,7 @@ async function alRecibirTexto(chat: number, texto: string, respondeA: number | n
   // /start [codigo]
   const m = texto.match(/^\/start(?:@\w+)?(?:\s+(\S+))?\s*$/)
   if (m) {
-    if (!m[1]) { await decir(chat, AYUDA); return }
+    if (!m[1]) { await decir(chat, AYUDA, BOTON_GUIAS); return }
     const { data, error } = await db.rpc('bot_canjear_codigo', { p_codigo: m[1], p_chat: chat })
     if (error) { console.error('canjear', error.message); await decir(chat, 'Algo salio mal. Intenta de nuevo en un momento.'); return }
     if (!data?.ok) {
@@ -194,7 +293,11 @@ async function alRecibirTexto(chat: number, texto: string, respondeA: number | n
     }
     return
   }
-  if (texto.startsWith('/')) { await decir(chat, AYUDA); return }
+  // /guias va directo al selector. Antes del filtro de comandos: de lo contrario
+  // contestaria la ayuda. No toca la consulta abierta de nadie: el siguiente texto
+  // de quien tenga una se enruta como siempre.
+  if (/^\/guias(?:@\w+)?\s*$/.test(texto)) { await decir(chat, TEXTO_SELECTOR, SELECTOR_GUIAS); return }
+  if (texto.startsWith('/')) { await decir(chat, AYUDA, BOTON_GUIAS); return }
 
   const { data: r, error } = await db.rpc('bot_enrutar', { p_chat: chat, p_responde_a: respondeA })
   if (error) { console.error('enrutar', error.message); await decir(chat, 'Algo salio mal. Intenta de nuevo en un momento.'); return }
@@ -270,7 +373,7 @@ async function alRecibirTexto(chat: number, texto: string, respondeA: number | n
     return
   }
 
-  await decir(chat, AYUDA)
+  await decir(chat, AYUDA, BOTON_GUIAS)
 }
 
 Deno.serve(async (req) => {
@@ -280,6 +383,8 @@ Deno.serve(async (req) => {
 
   try {
     const u = await req.json()
+    // Toque de un boton en linea (las guias). No es un mensaje: va aparte.
+    if (u?.callback_query) { await alTocarBoton(u.callback_query); return ok() }
     const msg = u?.message
     // Solo chats privados con texto. Un grupo o un canal no entra al puente.
     if (!msg || msg.chat?.type !== 'private' || typeof msg.text !== 'string') return ok()

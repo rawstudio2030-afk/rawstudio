@@ -18,6 +18,7 @@ import Equivalente from '../components/Equivalente'
 import { PRECIOS_VIDEO, PRECIO_INICIAL } from '../lib/precios'
 import { descripcionGenerica } from '../lib/descripcion'
 import { Pulsable, Enlace } from '../components/Pulsable'
+import EnlaceGuias from '../components/EnlaceGuias'
 import Centro from '../components/Centro'
 import { perfilParaPublicar } from '../lib/trato'
 import { configAlbumes } from '../lib/albumes'
@@ -346,6 +347,8 @@ export default function Upload() {
       {avisoVideo && (
         <div role="alert" style={{ font: `400 14px/1.45 ${FUENTE.ui}`, color: COLOR.acento }}>{avisoVideo}</div>
       )}
+
+      <EnlaceGuias style={{ marginTop: -8 }} />
 
       {/* portada */}
       <div className="tarjeta-sobria" style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>

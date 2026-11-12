@@ -7,7 +7,10 @@
 // desplazaban un contenedor interno (`overflowY: auto; height: 100%`) que en
 // este layout se estira al alto de su contenido y por tanto nunca desplaza:
 // los botones de seccion eran un no-op, en silencio.
+import { useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 import Wordmark from '../components/Wordmark'
+import GuiasGrabacion from '../components/GuiasGrabacion'
 import FondoAntro from '../components/FondoAntro'
 import {
   SECCIONES, FAQ, NO_PROMETEMOS, ICONS,
@@ -39,6 +42,14 @@ const titular: React.CSSProperties = {
 }
 
 export default function Creators() {
+  // `#/creadoras#guias`: con HashRouter el segundo `#` llega como `location.hash`,
+  // pero el navegador no baja solo (el primer `#` ya es la ruta). Se baja a mano.
+  const { hash } = useLocation()
+  useEffect(() => {
+    if (hash !== '#guias') return
+    document.getElementById('guias')?.scrollIntoView()
+  }, [hash])
+
   // Las anclas nativas (#seccion) chocarian con HashRouter, que ya usa el hash
   // para las rutas, asi que el salto se hace por scroll programatico.
   // La animacion va a mano y no con scrollTo({behavior:'smooth'}): ese modo es
@@ -96,7 +107,7 @@ export default function Creators() {
 
         {/* ---------- saltos de seccion ---------- */}
         <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 24, scrollbarWidth: 'none' }}>
-          {[{ id: 'proteccion', nav: 'Protección' }, ...SECCIONES].map((s, i) => (
+          {[{ id: 'proteccion', nav: 'Protección' }, ...SECCIONES, { id: 'guias', nav: 'Guías' }].map((s, i) => (
             <button key={s.id} onClick={() => saltar(s.id)} style={{
               flex: '0 0 auto', minHeight: 44, font: `700 11px/1 ${FUENTE.ui}`, letterSpacing: 1.4,
               textTransform: 'uppercase', background: 'rgba(8,6,14,.6)', cursor: 'pointer', borderRadius: 999,
@@ -233,6 +244,9 @@ export default function Creators() {
             }}>Leer las reglas completas &#8594;</Enlace>
           </div>
         </div>
+
+        {/* ---------- guias de grabacion (PDF) ---------- */}
+        <GuiasGrabacion titular={titular} />
 
         {/* ---------- cierre ---------- */}
         <div style={{ marginTop: 50, paddingTop: 40, borderTop: `1px solid ${LINE}`, textAlign: 'center' }}>
