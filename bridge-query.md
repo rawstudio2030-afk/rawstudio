@@ -39,13 +39,33 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 ## Consultas activas
 
 ### [id: 20261111-01] Guías de grabación por modelo de iPhone (bot y sitio)
-- **fecha:** 2026-11-11 19:10 (America/Mexico_City)
-- **estado:** asignada
-- **tarea:** Botón y comando `/guias` en el bot de Telegram que mandan el PDF del modelo elegido (iPhone 12, 13, 14, 15·16·17), y la sección `#guias` en `/creadoras` con enlaces desde `/upload` y el Estudio. §11 de `CHECKLIST.md`, ítem 1.
-- **pregunta:** Implementa la ronda de `bridge-response.md`, entrada [id: 20261111-01]. Commit propio, encima del commit de assets `public/guias/`. No reabras 10-01…10-05 y no mezcles con [id: 20261108-05]: el CNAME y el correo .mx siguen sin publicarse.
-- **contexto:** HEAD al asignar: `75b3f0b`. Los PDF los hizo el coordinador con el mismo diseño de la guía del iPhone 12; no los regeneres. Sergio lo pidió por voz el 11 nov 2026.
+- **fecha:** 2026-11-11 (America/Mexico_City)
+- **estado:** respondida
+- **tarea:** Botón y comando `/guias` en el bot de Telegram que mandan el PDF elegido, y la sección `#guias` en `/creadoras` con enlaces desde `/upload` y el Estudio. §11 de `CHECKLIST.md`, ítems 1 y 2. **Extensión pedida por Sergio:** bloque «Cómo grabar tu contenido sin regarla» con «Grabando sola» primero y «En pareja» después, en `/creadoras#guias` y en el botón del bot.
+- **resultado:** HECHA y verificada en local. **Sin `push`** (espera la aprobación de Omar). No se marcó ningún ítem `pass`.
+- **commits (SHA completos), sobre `origin/main` `cf71473`:**
+  1. `8d62738` — `assets: guías de grabación por modelo de iPhone (PDF y portadas)`. Solo `public/guias/`: los 12 archivos del coordinador (4 guías de iPhone, 2 «sin regarla» y sus 6 portadas), sin tocarlos.
+  2. `60c3dd519738464641ce34ff38671805b77e4bb4` — `feat: guías de grabación por modelo de iPhone (bot y /creadoras)`.
+  Los commits retenidos de 08-05 (CNAME, correo `.mx`) se volvieron a montar encima de estos dos y siguen sin push.
+- **diff resumido:**
+  - `supabase/functions/telegram-bot/index.ts`: `SITIO = 'https://rawstudio.biz'` (una sola constante, con comentario de que 08-05 la sustituye por `ORIGEN_CANONICO`); tabla blanca `GUIAS` (`12`, `13`, `14`, `15-17`, `sola`, `pareja`); `alTocarBoton` atiende `u.callback_query` solo en chat privado, antes de `u.message`; `/guias` va antes del filtro de comandos; `/start` sin código, comando desconocido y la ayuda de respaldo llevan el botón «Guías de grabación»; `AYUDA` con la línea «¿Vas a grabar?…». `answerCallbackQuery` se contesta siempre (en `finally`); si `sendDocument` falla, se manda el enlace por `sendMessage`. Sin `parse_mode`. Los demás textos `.biz` del bot no se tocaron.
+  2. `src/content/guias.ts` (lista de guías y `rutaGuia` con `import.meta.env.BASE_URL`), `src/components/GuiasGrabacion.tsx` (sección `#guias`), `src/components/EnlaceGuias.tsx` (enlace discreto), `src/screens/Creators.tsx` (monta la sección, chip «Guías» y `scrollIntoView` cuando `location.hash === '#guias'`), `src/screens/Upload.tsx` y `src/screens/Estudio.tsx` («¿Cómo grabar? Guías por modelo de iPhone →» a `/creadoras#guias`). Sin dependencias nuevas, sin literales `rawstudio.biz` ni `rawstudio.mx` en el front.
+  3. `CHECKLIST.md`: §11 ítems 1 y 2, fila de estado y nota 5 de la ronda. Sin `pass`.
+- **Selector del bot** (texto «Guías de grabación (PDF). ¿Qué iPhone tienes?… O la guía «Cómo grabar tu contenido sin regarla»: Grabando sola o En pareja.»). Botones: `iPhone 12` · `iPhone 13` / `iPhone 14` · `iPhone 15 · 16 · 17` / `Sin regarla · Grabando sola` / `Sin regarla · En pareja`. Caption de los «sin regarla» incluye «Solo para mayores de 18 años».
+- **Sección `#guias`** (390 px, comprobada con captura): título «Que tu video salga bien»; bloque «Ajustes de tu iPhone» (4 tarjetas: 2 columnas a 390 px, 4 en fila desde ~480 px) y bloque «Cómo grabar tu contenido sin regarla» (2 tarjetas: «Grabando sola», 15 páginas, y «En pareja», 14). Cada tarjeta: portada (`loading="lazy"`, `decoding="async"`, ancho y alto escritos, `alt` con el modelo), a qué aplica, «N páginas · PDF» y «Descargar PDF» (`download`, 44 px). El bloque de iPhone va primero (es el de la ronda) y el de «sin regarla» después; si Sergio lo quiere al revés es mover un bloque.
+- **Verificación:**
+  - `tsc -b --force`, `npm run build`, `npm run lint` (`dinero` y `plural` limpios; los avisos de oxlint son los de antes) y `deno check supabase/functions/telegram-bot/index.ts` pasan.
+  - Bot, con un arnés en Deno que sustituye `fetch` y `Deno.serve` (no es Telegram real): `/start`, `/guias`, `/guias@bot` y `/otro` contestan lo esperado; el botón abre el selector; cada una de las seis claves manda **su** PDF con caption y sin `parse_mode`, y contesta el `callback_query`; `guia:../../etc` y `guia:constructor` se ignoran con el aviso corto; un toque en grupo no hace nada; si `sendDocument` falla llega el enlace; secreto malo da 401. Un toque de botón no llama a `bot_enrutar` ni a DeepSeek (cero RPC); un texto suelto sigue enrutándose como antes.
+  - Sitio, en el navegador: `/creadoras#guias` baja a la sección (en carga fría y con el chip «Guías»); a 390 px sin desborde horizontal; los seis enlaces responden 200 `application/pdf` y cada uno baja **su** archivo (tamaños coinciden con `public/guias/`); sin errores de consola.
+- **NO verificado:** Telegram real (envío del PDF por URL, que Telegram siga la redirección de `rawstudio.biz` cuando exista el 301 a `.mx`); `/upload` y el Estudio con sesión de creadora (solo compilación y revisión del código; el enlace usa el mismo `Link` del router que lo probado en `/creadoras`); iOS/Android reales; Lighthouse; el peso de la portada (§2.1) no cambia porque nada de esto entra en `/`, pero no lo medí.
+- **Para Omar, al desplegar** (solo después de publicar el sitio: Telegram descarga el PDF desde `SITIO/guias/…`, así que debe existir en producción):
+  1. `supabase functions deploy telegram-bot` (con `verify_jwt = false`, como ya está en `config.toml`).
+  2. Mirar si el webhook filtra tipos: `curl -s "https://api.telegram.org/bot<TOKEN>/getWebhookInfo"`. Si en `allowed_updates` no aparece `callback_query` (o la lista no está vacía y no lo incluye), volver a registrarlo con el mismo secreto: `curl -sS "https://api.telegram.org/bot<TOKEN>/setWebhook" -d "url=https://ggyubhyobobizugeknen.supabase.co/functions/v1/telegram-bot" -d "secret_token=<TELEGRAM_WEBHOOK_SECRET>" -d 'allowed_updates=["message","callback_query"]'`. (`<TOKEN>` y `<TELEGRAM_WEBHOOK_SECRET>` son los secretos de Supabase; no van en el repo ni en el chat.) Si `getWebhookInfo` no muestra `allowed_updates`, Telegram manda todo y no hay nada que cambiar.
+- **Para el coordinador / Sergio:**
+  - El bot manda las guías a **cualquiera que le escriba**, sin cuenta ni verificación de edad (así lo pide la ronda). Las dos «sin regarla» son para mayores de 18: el caption lo dice, pero el bot no lo comprueba. Si Sergio quiere restringirlas a cuentas vinculadas y verificadas, es una ronda aparte (toca la base).
+  - Detecté una discrepancia en `/creadoras` (FAQ «¿Van a saber mi nombre real?»): dice que se limpian los metadatos de **cada foto y video**, pero el código solo limpia los de las fotos; los videos se suben tal cual (TUS). Las guías piden poner la ubicación de la cámara en «Nunca» por eso. No lo toqué (copy y no está en esta ronda); queda para decidir si se corrige el texto o se limpia el video.
+  - Los PDF «sin regarla» no los revisé de contenido: solo portada y página 2, y que abren. Las páginas de cada uno las tomé del propio PDF (15 y 14).
 - **urgencia:** media
-- **ya se intentó:** nada de código. Los PDF y las miniaturas están listos.
 
 ### [id: 20261110-05] Elevador entre pisos del descenso — hecha y publicada
 - **fecha:** 2026-11-10 21:15 (America/Mexico_City)
