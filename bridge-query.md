@@ -38,6 +38,15 @@ Claude Code escribe aquí bloqueos, dudas y decisiones que necesita del **coordi
 
 ## Consultas activas
 
+### [id: 20261111-01] Guías de grabación por modelo de iPhone (bot y sitio)
+- **fecha:** 2026-11-11 19:10 (America/Mexico_City)
+- **estado:** asignada
+- **tarea:** Botón y comando `/guias` en el bot de Telegram que mandan el PDF del modelo elegido (iPhone 12, 13, 14, 15·16·17), y la sección `#guias` en `/creadoras` con enlaces desde `/upload` y el Estudio. §11 de `CHECKLIST.md`, ítem 1.
+- **pregunta:** Implementa la ronda de `bridge-response.md`, entrada [id: 20261111-01]. Commit propio, encima del commit de assets `public/guias/`. No reabras 10-01…10-05 y no mezcles con [id: 20261108-05]: el CNAME y el correo .mx siguen sin publicarse.
+- **contexto:** HEAD al asignar: `75b3f0b`. Los PDF los hizo el coordinador con el mismo diseño de la guía del iPhone 12; no los regeneres. Sergio lo pidió por voz el 11 nov 2026.
+- **urgencia:** media
+- **ya se intentó:** nada de código. Los PDF y las miniaturas están listos.
+
 ### [id: 20261110-05] Elevador entre pisos del descenso — hecha y publicada
 - **fecha:** 2026-11-10 21:15 (America/Mexico_City)
 - **estado:** respondida

@@ -30,6 +30,79 @@
 
 ## Respuestas activas
 
+### Respuesta a [id: 20261111-01] — Guías de grabación por modelo de iPhone (bot y sitio)
+- **fecha:** 2026-11-11 19:10 (America/Mexico_City)
+- **estado:** lista-para-claude
+- **responde a:** Sergio pidió por voz (11 nov 2026) guías de grabación para iPhone 13, iPhone 14 y una agrupada para iPhone 15, 16 y 17, con el mismo diseño que la del iPhone 12. Quiere que el bot de Telegram las mande desde un botón «Guías de grabación» y que también estén en el sitio.
+- **ronda:** 1 de 10 de esta tarea · **tope:** 1 hora
+- **checklist afectados (NO marques pass tú):** §11 «Materiales para creadoras», ítem 1. No rompas ítems `pass` (§2.1, §2.2, §6.3 incluidos).
+
+#### Orden respecto a rondas anteriores
+`[id: 20261110-05]` ya está `respondida` y publicada (`f8dd71e`, más `f281777` y `75b3f0b` encima). **No la reabras**, ni 10-01…10-04. No mezcles esta ronda con `[id: 20261108-05]` (rawstudio.mx): el commit local del CNAME y del correo .mx sigue sin publicarse hasta el corte de DNS. Commit propio.
+
+#### Material (ya hecho por el coordinador; no lo regeneres)
+En `public/guias/` (commit de assets del coordinador, aparte de este):
+
+| Archivo | Modelo | Páginas |
+|---|---|---|
+| `guia-iphone12.pdf` | iPhone 12 | 10 |
+| `guia-iphone13.pdf` | iPhone 13 y 13 mini | 10 |
+| `guia-iphone14.pdf` | iPhone 14 y 14 Plus | 10 |
+| `guia-iphone15-16-17.pdf` | iPhone 15, 15 Plus, 16, 16 Plus y 17 | 10 |
+| `portada-iphone12.webp` … `portada-iphone15-16-17.webp` | miniatura de la portada, 480 px de ancho | — |
+
+Si al empezar `public/guias/` no existe en tu rama, **detente** y anótalo en `bridge-query.md`. No generes ni edites los PDF: los mantiene el coordinador. Son estáticos: GitHub Pages los sirve tal cual en `/guias/…`, fuera del `HashRouter`.
+
+#### Diagnóstico (no lo reescribas: úsalo)
+1. `supabase/functions/telegram-bot/index.ts` solo atiende `u.message` con texto en chat privado. No hay teclado ni `callback_query`. `/start` sin código y cualquier otro comando contestan `AYUDA`. **Cualquier texto que no sea comando va a `bot_enrutar`**, y el mensaje de un cliente a una consulta cuesta 20 pesos.
+2. `AYUDA` y los demás textos del bot todavía dicen `rawstudio.biz` en `origin/main`. La constante canónica (`ORIGEN_CANONICO` en `supabase/functions/_shared/sitio.ts` y `src/lib/sitio.ts`) es de 08-05, que **no** está publicada.
+3. `/creadoras` (`src/screens/Creators.tsx`) ya tiene secciones con ancla (p. ej. `#consultas`). La subida está en `/upload` (`src/screens/Upload.tsx`) y en el Estudio (`/estudio…`).
+
+#### Qué hacer
+
+**1. Bot: «Guías de grabación»**
+- Un teclado en línea (`reply_markup.inline_keyboard`) con un botón **«Guías de grabación»** (`callback_data: 'guias'`). Va en la respuesta de `/start` sin código (junto a `AYUDA`) y en la de cualquier comando desconocido. Añade también el comando **`/guias`**, que va directo al selector. Atiéndelo **antes** del `if (texto.startsWith('/'))` que hoy devuelve `AYUDA`.
+- Al tocar «Guías de grabación» (o con `/guias`), el bot manda «¿Qué iPhone tienes?» con cuatro botones: `iPhone 12`, `iPhone 13`, `iPhone 14`, `iPhone 15 · 16 · 17` (`callback_data` p. ej. `guia:12`, `guia:13`, `guia:14`, `guia:15-17`; lista blanca, nada que venga del usuario arma la URL).
+- Al elegir uno: `sendDocument` con `document` = URL pública del PDF y un `caption` corto, sin `parse_mode`, como el resto del bot. Por ejemplo: «Guía para grabar con tu iPhone 13: ajustes, encuadre, luz y sonido. También está en <sitio>/#/creadoras.» Para la agrupada: «… con tu iPhone 15, 16 o 17 …». Luego `answerCallbackQuery` (siempre, aunque falle el envío, para que el botón no se quede girando). Si `sendDocument` falla, manda el enlace del PDF por `sendMessage`.
+- Atiende `u.callback_query` en `Deno.serve`, **solo en chat privado**. Un toque de botón **nunca** pasa por `bot_enrutar`, no cobra, no crea ni toca consultas, y no llama a DeepSeek. Las guías son para cualquiera que escriba al bot, aunque no tenga cuenta vinculada.
+- En `AYUDA`, añade una línea: «¿Vas a grabar? Escribe /guias o toca el botón para recibir la guía de tu iPhone.»
+- DeepSeek sigue **solo para validar** consultas. Nada de respuestas generadas por IA. `TELEGRAM_BOT_TOKEN` se queda como secreto de Supabase: nunca en el repo ni en el front, y no lo imprimas en logs (ya existe `sinToken`).
+- Webhook: si el `setWebhook` de producción se hizo con `allowed_updates`, debe incluir `callback_query`. **No lo cambies tú.** Escribe en el resultado el comando exacto (sin el token) para que Omar lo corra al desplegar la función.
+
+**2. Sitio: dónde se descargan**
+- En `/creadoras` (no la renombres), una sección **«Guías de grabación»** con ancla `#guias`: una tarjeta por modelo con la miniatura `portada-*.webp` (`loading="lazy"`, `decoding="async"`, `alt` con el modelo), el nombre del modelo, a qué modelos aplica (tabla de arriba), «10 páginas · PDF» y un enlace **«Descargar PDF»** (`href` al PDF y atributo `download`, o `target="_blank" rel="noopener"`). Cuatro tarjetas en fila en escritorio y una o dos columnas a 390 px.
+- En la pantalla de subida (`/upload`) y en el Estudio, un enlace discreto: «¿Cómo grabar? Guías por modelo de iPhone →» hacia `/creadoras#guias`. Con `HashRouter`, haz que el ancla funcione: si `#/creadoras#guias` no baja solo, hazlo con `scrollIntoView` al montar.
+- Estilo con los tokens de `src/lib/diseño.ts` (piso que ya usa `/creadoras`). Sin Tailwind, sin dependencias nuevas. Tocables ≥ 44 px, contraste AA.
+- Las rutas de los PDF y miniaturas se arman con `import.meta.env.BASE_URL` + `guias/…`, nunca con un dominio escrito a mano.
+
+**3. Dominio: va a cambiar a rawstudio.mx**
+La dirección pública pasa a **https://rawstudio.mx** con 08-05, que aún no se publica. No escribas `rawstudio.biz` ni `rawstudio.mx` en código nuevo:
+- **Front:** rutas relativas con `BASE_URL` (punto 2).
+- **Bot:** las URLs absolutas que necesita Telegram salen de **una sola** constante. Si `supabase/functions/_shared/sitio.ts` (`ORIGEN_CANONICO`) existe en tu rama, impórtala. Si no existe (en `origin/main` no existe), define arriba de `telegram-bot/index.ts` `const SITIO = 'https://rawstudio.biz'` con un comentario que diga que 08-05 la sustituye por `ORIGEN_CANONICO`. Arma con ella las URLs de los PDF (`${SITIO}/guias/guia-iphone13.pdf`) y el enlace a `/#/creadoras`. No adelantes 08-05: los demás textos `.biz` del bot se quedan como están.
+
+#### No tocar
+- Los PDF y las miniaturas de `public/guias/`. Si ves un error de contenido, anótalo en `bridge-query.md`.
+- El copy del hero («Graba. Ponle precio. Cobra.» / «El 80% de cada dólar es tuyo. Sin exclusividad.»), la puerta de edad, la ruta `/creadoras`, y el login (no lo muevas a `/entrar`).
+- El cobro de consultas, los 20 pesos, los 2 días, `COBRO_CONSULTAS_ACTIVO`, los prompts de DeepSeek, `bot_enrutar` y `bot_canjear_codigo`, las migraciones (no hace falta ninguna) y los secretos.
+- 08-05 (CNAME, correo .mx), 10-01…10-05, panel admin (`ANCHO_MINIMO` 1280), analítica o conteo de descargas (no se registra quién descarga), textos legales, procesador de recargas.
+- Three.js, Spline, Tailwind u otra dependencia nueva.
+
+#### Criterios de aceptación
+1. `tsc -b` / `npm run build` / lint pasan. `deno check supabase/functions/telegram-bot/index.ts` pasa, si lo tienes.
+2. Bot: `/start` sin código y `/guias` muestran el botón o el selector. Tocar cada modelo manda **ese** PDF (los cuatro), con caption y sin `parse_mode`, y responde el `callback_query`. Un toque de botón no genera cargo, no crea consulta y no llama a DeepSeek. Un `callback_data` que no está en la lista blanca se ignora con un aviso corto.
+3. Un cliente con consulta abierta que usa `/guias` no pierde el hilo: su siguiente mensaje de texto se enruta como antes.
+4. Sitio: `/creadoras#guias` muestra las cuatro tarjetas con miniatura y descarga, y cada enlace baja el PDF correcto. Desde `/upload` y el Estudio se llega a la sección. Sin desborde a 390 px, tocables ≥ 44 px.
+5. Ningún literal nuevo `rawstudio.biz` / `rawstudio.mx` en el front. En el bot, una sola constante (o `ORIGEN_CANONICO`).
+6. Los PDF no entran al bundle de JS: se sirven desde `public/`. El peso del primer paint de la portada no cambia (§2.1 inmutable).
+
+#### Entrega
+- Commit sugerido: `feat: guías de grabación por modelo de iPhone (bot y /creadoras)`.
+- Commit propio, encima del commit de assets `public/guias/`. No mezcles con 08-05 ni con el correo .mx.
+- En `bridge-query.md`, marca [id: 20261111-01] como `respondida` con el SHA. Incluye una captura o la descripción del selector del bot y de la sección `#guias`, y el comando de `setWebhook` para Omar si hace falta.
+
+#### Siguiente paso para Claude Code
+Implementa y deja el resultado en `bridge-query.md`. No abras otra ronda de diseño encima. Los demás materiales para creadoras (§11 del checklist) **no** son de esta ronda: los prepara el coordinador.
+
 ### Respuesta a [id: 20261110-05] — Elevador entre pisos del descenso
 - **fecha:** 2026-11-10 21:15 (America/Mexico_City)
 - **decisión de Sergio:** «Me gusta, mándaselo a Claude Code» (21:15 America/Chicago del 10 nov 2026; ese día coincide con America/Mexico_City). Aprobó la maqueta viva del elevador: reja de latón de dos puertas, losa de concreto, selector de dial, título de llegada al abrir y antorchas del calabozo.

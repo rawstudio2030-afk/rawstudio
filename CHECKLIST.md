@@ -20,6 +20,7 @@ Fuente de verdad para el coordinador y Claude Code.
 | Consultas pagadas por Telegram (página pública) | **5 / 10** | **Hecha** (`3b88b30`, reporte en `653c989`) — pendiente de verificación del coordinador | 2026-11-06 ~15:00 | Ver `bridge-response.md` id `20261106-05`. Después de la 4 si esta sigue pendiente. Tope 1 h. |
 | Avatares automáticos (frame o inicial/silueta) | **6 / 10** | **Hecha** (`bc5edf6`, reporte en `653c989`) — pendiente de verificación del coordinador | 2026-11-06 ~15:15 | Ver `bridge-response.md` id `20261106-06`. Después de la 4 y la 5. Tope 1 h. |
 | Trato de género desde el alta | **7 / 10** | **Asignada** — esperando código | 2026-11-06 ~17:56 | Ver `bridge-response.md` id `20261106-07`. Tope 1 h. |
+| Guías de grabación por modelo de iPhone (bot `/guias` + `/creadoras#guias`) | **1 / 10** | **Asignada**: esperando código y el commit de assets `public/guias/` | 2026-11-11 ~19:10 | Ver `bridge-response.md` id `20261111-01` y §11. Tope 1 h. |
 
 ---
 
@@ -146,6 +147,16 @@ React 19 · Vite 8 · HashRouter · Supabase · GitHub Pages · comisión 20% / 
 ## 10. Trato de género
 - **Estado:** `not_started` — **en ronda 7** (`20261106-07`). Registrar mujer / hombre / neutro / no_decir desde el alta (obligatorio, sin preselección); helper único de trato (`src/lib/trato.ts`); cuentas existentes en neutro hasta que elijan (aviso en Perfil, sin bloquear); no publicar el valor en la ficha pública; no renombrar `/creadoras`.
 
+## 11. Materiales para creadoras
+- **Estado:** `not_started`. Todo es **pendiente**. Los materiales los prepara el **coordinador**, no Claude Code. Claude solo integra lo que se le pida en una ronda.
+1. **Guías de grabación iPhone 13, 14 y 15·16·17.** PDF listos (10 páginas cada uno, mismo diseño que la del iPhone 12) para `public/guias/`, con la del iPhone 12 como `guia-iphone12.pdf`. Ronda `[id: 20261111-01]` **asignada**: botón y `/guias` en el bot, sección `#guias` en `/creadoras`. Falta implementar y verificar.
+2. **Artículo «Cómo grabar tu contenido sin regarla».** Hay un borrador del coordinador, fuera del repo y sin publicar. **Pendiente de revisión** de Sergio antes de decidir dónde va.
+3. **PDF nuevo: catálogo neutral de categorías de contenido.** Erótico, pornográfico, bondage, fetiche, amateur y las demás que apliquen. Explica qué es cada una, con ejemplos visuales suaves y sin empujar ninguna. Estilo idéntico al de las guías de iPhone: fondo crema, acentos dorados, portada azul marino, títulos serif (parte normal + parte en cursiva), etiquetas en versalitas espaciadas, recuadros redondeados e ilustraciones vectoriales hechas en código, sin IA. **No generado todavía.** Lo hace el coordinador más adelante.
+4. **Artículo nuevo: «Spas nudistas mixtos en Europa».** Dónde están (con mapas pequeños dibujados a mano), por qué existen, quién va (familias, amistades, parejas), rangos de edad, y el contexto cultural de Alemania (FKK) y de otros países. Mismo estilo visual que las guías de iPhone (crema, dorado, portada azul marino, serif, recuadros redondeados, ilustraciones vectoriales en código, sin IA). **No generado todavía.** Lo hace el coordinador más adelante.
+5. **PDF nuevo: «Prevención de infecciones de transmisión sexual (ITS)»**, para creadoras de contenido adulto. Educativo y de salud: riesgos reales sin moralizar, incluido no excederse persiguiendo contenido de formas que pongan en riesgo su salud. Datos de salud solo de fuentes oficiales (OMS, CDC, Secretaría de Salud de México). Mismo estilo visual que las guías de iPhone. **No generado todavía.** Lo hace el coordinador más adelante.
+
+---
+
 ## Decisiones
 
 ### El descenso (2026-11-10) — dirección aprobada, 10-01…10-04 en main
@@ -153,6 +164,12 @@ React 19 · Vite 8 · HashRouter · Supabase · GitHub Pages · comisión 20% / 
 2. Maqueta original y capturas: `docs/diseno/descenso/` (`45c6018`, `13be7e6`). Rondas `[id: 20261110-01]` a `[id: 20261110-04]` **implementadas y publicadas** en `origin/main`: tokens `1802f79`, portada `9544c00`, páginas públicas `c6ae7ad`, correos y brief `4876730`. Docs del puente: `71bde6c` (asignación) y `47e4629` (publicadas).
 3. §1.6 se reescribió como El descenso (marca vs consumo) al aterrizar esas rondas. No se tocó ningún otro `pass` inmutable (§2.1 y §2.2 incluidos: el descenso lazy-carga los pisos de abajo).
 4. Admin: solo tokens nuevos, desktop-only (`ANCHO_MINIMO` 1280). Sin migraciones, sin renombrar `/creadoras`, sin mover el login a `/entrar`, sin analítica.
+
+### Ronda 11-01 (2026-11-11 19:10) — guías de grabación por modelo de iPhone
+1. **Por qué:** Sergio pidió por voz guías para iPhone 13, iPhone 14 y una agrupada para 15, 16 y 17, con el diseño de la del iPhone 12, y que el bot y el sitio las den.
+2. **Qué:** botón «Guías de grabación» y `/guias` en el bot (manda el PDF del modelo elegido con `sendDocument`, sin cobro, sin consulta y sin DeepSeek); sección `#guias` en `/creadoras` con miniatura y descarga; enlaces desde `/upload` y el Estudio. URLs desde una sola constante (`ORIGEN_CANONICO` cuando aterrice 08-05).
+3. **Qué no:** regenerar los PDF, 08-05 (CNAME, correo .mx), cobro o prompts de DeepSeek, migraciones, secretos, copy del hero, renombrar `/creadoras`, analítica de descargas. No reabrir 10-01…10-05.
+4. Los PDF van en un commit de assets aparte (`public/guias/`). Ver `bridge-response.md` `[id: 20261111-01]`.
 
 ### Ronda 10-05 (2026-11-10 21:15) — elevador entre pisos
 1. **Por qué:** Sergio aprobó la maqueta viva del elevador («Me gusta, mándaselo a Claude Code») a las 21:15 America/Chicago.
