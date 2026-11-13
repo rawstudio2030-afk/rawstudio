@@ -52,7 +52,7 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.47.10'
 import { avisosDeVencido, sinToken, type Vencido } from '../_shared/consultas.ts'
-import { guiaPorClave, pantalla, pantallaDeBoton, pantallaDeComando, type IdPantalla, type Teclado } from '../_shared/menuBot.ts'
+import { articulosDeBase, guiaPorClave, pantalla, pantallaDeBoton, pantallaDeComando, type ArticuloBot, type IdPantalla, type Teclado } from '../_shared/menuBot.ts'
 
 // Direccion publica para las URLs absolutas que necesita Telegram (los PDF y el
 // enlace a /creadoras). Una sola constante. La ronda 20261108-05 (rawstudio.mx,
@@ -180,9 +180,21 @@ function avanza(pregunta: string, respuesta: string) {
   )
 }
 
+/** Los articulos que el panel marco «en el bot». Lectura de una lista publica: no
+ *  cobra, no toca consultas ni a nadie. Si la base falla, el menu sale sin la
+ *  seccion en vez de romperse. */
+async function articulosDelBot(): Promise<ArticuloBot[]> {
+  const { data, error } = await db.rpc('bot_articulos_lista')
+  if (error) { console.error('bot_articulos_lista', error.message); return [] }
+  return articulosDeBase(data)
+}
+
+/** Solo el inicio y la pantalla de articulos dependen de esa lista. */
+const necesitaArticulos = (id: IdPantalla): boolean => id === 'inicio' || id === 'articulos'
+
 /** Manda una pantalla del menu como mensaje NUEVO (comandos y respaldo). */
 async function mostrarPantalla(chat: number, id: IdPantalla) {
-  const p = pantalla(id, SITIO)
+  const p = pantalla(id, SITIO, necesitaArticulos(id) ? await articulosDelBot() : [])
   await decir(chat, p.texto, p.teclado)
 }
 
@@ -201,7 +213,7 @@ async function alTocarBoton(
     // (muy viejo, borrado), se manda uno nuevo. «No modificado» = ya estaba ahi.
     const id = pantallaDeBoton(cb.data)
     if (id) {
-      const p = pantalla(id, SITIO)
+      const p = pantalla(id, SITIO, necesitaArticulos(id) ? await articulosDelBot() : [])
       const mensaje = cb.message?.message_id
       const r = typeof mensaje === 'number'
         ? await api('editMessageText', {

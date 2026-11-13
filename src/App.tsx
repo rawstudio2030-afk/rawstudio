@@ -28,6 +28,7 @@ const Admin = lazy(() => import('./screens/Admin'))
 import Niveles from './estudio/Niveles'
 import EncargosRedirige from './estudio/EncargosRedirige'
 import Blog from './estudio/Blog'
+import Articulos, { ArticuloDetalle } from './screens/Articulos'
 import ClipsEstudio from './estudio/Clips'
 import Cobro from './estudio/Cobro'
 import Retirar from './estudio/Retirar'
@@ -76,6 +77,7 @@ export const SCREENS = [
   { path: '/upload/album', n: '30', title: 'Nuevo álbum',    el: <UploadAlbum /> },
   { path: '/avisos',    n: '29', title: 'Avisos',         el: <Avisos /> },
   { path: '/consultas', n: '28', title: 'Consultas por Telegram', el: <Consultas /> },
+  { path: '/articulos', n: '32', title: 'Artículos', el: <Articulos /> },
   { path: '/alta-creadora', n: '20', title: 'Alta de creadora', el: <AltaCreadora /> },
   { path: '/estudio/niveles',  n: '21', title: 'Suscripción mensual', el: <Niveles /> },
   { path: '/estudio/encargos', n: '22', title: 'Contenido a la medida', el: <EncargosRedirige /> },
@@ -267,6 +269,7 @@ export default function App() {
             necesita un parametro y ahi no habria cual usar. */}
         <Route path="/creator/:handle" element={<CreatorProfile />} />
         <Route path="/clip/:id" element={<ClipDetail />} />
+        <Route path="/articulos/:id" element={<ArticuloDetalle />} />
         {/* El panel enruta sus modulos por parametro; /admin a secas cae en el Resumen. */}
         <Route path="/admin/:modulo" element={<Admin />} />
         <Route path="*" element={<Portal />} />

@@ -34,7 +34,7 @@ export const RUTAS_PANEL = ['/admin', '/alta-creadora']
 export const EXIGE_SESION = [
   '/library', '/chat', '/avisos', '/perfil', '/yo', '/upload', '/upload/album', '/earnings', '/admin', '/wallet',
   '/estudio', '/estudio/niveles', '/estudio/encargos', '/estudio/blog', '/estudio/clips',
-  '/estudio/cobro', '/estudio/retirar',
+  '/estudio/cobro', '/estudio/retirar', '/articulos',
 ]
 
 /** Rutas que NO exigen haber cruzado la puerta de edad: la portada, la propia

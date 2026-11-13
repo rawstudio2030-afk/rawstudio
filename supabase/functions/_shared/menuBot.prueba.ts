@@ -1,8 +1,8 @@
 // Pruebas del menu del bot. Sin red y sin permisos:
 //   deno test supabase/functions/_shared/menuBot.prueba.ts
 import {
-  COMANDOS, PANTALLAS, guiaPorClave, pantalla, pantallaDeBoton, pantallaDeComando,
-  type Boton,
+  COMANDOS, PANTALLAS, articulosDeBase, guiaPorClave, pantalla, pantallaDeBoton, pantallaDeComando,
+  type ArticuloBot, type Boton,
 } from './menuBot.ts'
 
 const SITIOS = ['https://rawstudio.biz', 'https://rawstudio.mx']
@@ -11,8 +11,15 @@ function afirmar(cond: unknown, msg: string): asserts cond {
   if (!cond) throw new Error(msg)
 }
 
-const botones = (sitio: string): { id: string; b: Boton }[] =>
-  PANTALLAS.flatMap((id) => pantalla(id, sitio).teclado.inline_keyboard.flat().map((b) => ({ id, b })))
+const ID1 = '3f1c2b4a-5d6e-4f70-8a9b-0c1d2e3f4a5b'
+const ID2 = '9a8b7c6d-5e4f-4a3b-9c2d-1e0f9a8b7c6d'
+const EJEMPLO: ArticuloBot[] = [
+  { id: ID1, titulo: 'Salud: prevención' },
+  { id: ID2, titulo: 'Cómo preparar tu set' },
+]
+
+const botones = (sitio: string, arts: ArticuloBot[] = EJEMPLO): { id: string; b: Boton }[] =>
+  PANTALLAS.flatMap((id) => pantalla(id, sitio, arts).teclado.inline_keyboard.flat().map((b) => ({ id, b })))
 
 Deno.test('ningun boton lleva a una pantalla o guia que no existe', () => {
   for (const sitio of SITIOS) {
@@ -43,7 +50,7 @@ Deno.test('callback_data cabe en los 64 bytes de Telegram y los enlaces son http
 Deno.test('toda pantalla que no es el inicio tiene camino de vuelta', () => {
   for (const id of PANTALLAS) {
     if (id === 'inicio') continue
-    const vuelve = pantalla(id, SITIOS[0]).teclado.inline_keyboard.flat()
+    const vuelve = pantalla(id, SITIOS[0], EJEMPLO).teclado.inline_keyboard.flat()
       .some((b) => 'callback_data' in b && b.callback_data === 'm:inicio')
     afirmar(vuelve, `${id} no tiene boton para volver al inicio`)
   }
@@ -51,7 +58,7 @@ Deno.test('toda pantalla que no es el inicio tiene camino de vuelta', () => {
 
 Deno.test('el inicio llega a todas las demas pantallas', () => {
   const destinos = new Set(
-    pantalla('inicio', SITIOS[0]).teclado.inline_keyboard.flat()
+    pantalla('inicio', SITIOS[0], EJEMPLO).teclado.inline_keyboard.flat()
       .flatMap((b) => ('callback_data' in b ? [pantallaDeBoton(b.callback_data)] : [])),
   )
   for (const id of PANTALLAS) if (id !== 'inicio') afirmar(destinos.has(id), `el inicio no llega a ${id}`)
@@ -102,4 +109,42 @@ Deno.test('COMANDOS: validos para setMyCommands y todos atendidos', () => {
     vistos.add(c.command)
     afirmar(c.command === 'start' || pantallaDeComando(`/${c.command}`) !== null, `/${c.command} no tiene pantalla`)
   }
+})
+
+Deno.test('articulos: el boton del inicio aparece SOLO si hay al menos uno valido', () => {
+  const planos = (arts: ArticuloBot[]) =>
+    pantalla('inicio', SITIOS[0], arts).teclado.inline_keyboard.flat().map((b) => b.text)
+  afirmar(!planos([]).some((t) => /Artículos/.test(t)), 'sin articulos no debe haber boton')
+  afirmar(!planos([{ id: 'no-es-uuid', titulo: 'x' }]).some((t) => /Artículos/.test(t)), 'un id invalido no cuenta')
+  afirmar(planos(EJEMPLO).some((t) => /Artículos/.test(t)), 'con articulos debe haber boton')
+})
+
+Deno.test('articulos: cada boton es un ENLACE al sitio, no un callback ni el contenido', () => {
+  for (const sitio of SITIOS) {
+    const b = pantalla('articulos', sitio, EJEMPLO).teclado.inline_keyboard.flat()
+    for (const a of EJEMPLO) {
+      const boton = b.find((x) => 'url' in x && x.url === `${sitio}/#/articulos/${a.id}`)
+      afirmar(boton && boton.text === a.titulo, `falta el enlace de ${a.titulo} en ${sitio}`)
+    }
+    afirmar(b.filter((x) => 'url' in x).length === EJEMPLO.length, 'solo debe haber un enlace por articulo')
+    afirmar(b.some((x) => 'callback_data' in x && x.callback_data === 'm:inicio'), 'falta volver')
+  }
+})
+
+Deno.test('articulos: pantalla vacia no rompe, y el titulo del boton se recorta a 60', () => {
+  const vacia = pantalla('articulos', SITIOS[0], [])
+  afirmar(/Todavía no hay/.test(vacia.texto) && vacia.teclado.inline_keyboard.flat().length === 1, 'estado vacio')
+  const largo = pantalla('articulos', SITIOS[0], [{ id: ID1, titulo: 'T'.repeat(200) }]).teclado.inline_keyboard.flat()
+  afirmar(largo.some((b) => 'url' in b && b.text.length === 60), 'el titulo debe recortarse a 60')
+})
+
+Deno.test('articulosDeBase: filtra lo invalido, recorta a 12 y tolera cualquier cosa', () => {
+  afirmar(articulosDeBase(null).length === 0 && articulosDeBase({}).length === 0 && articulosDeBase('x').length === 0, 'no-arreglos')
+  const mezcla = articulosDeBase([
+    { id: ID1, titulo: 'Bueno' }, { id: '../../x', titulo: 'malo' }, { id: ID2, titulo: '   ' },
+    { id: ID2 }, null, 7, { id: ID2, titulo: 'Otro' },
+  ])
+  afirmar(mezcla.length === 2 && mezcla[0].titulo === 'Bueno' && mezcla[1].titulo === 'Otro', 'solo los validos')
+  const muchos = Array.from({ length: 30 }, (_, i) => ({ id: ID1.replace(/.$/, String(i % 10)), titulo: `T${i}` }))
+  afirmar(articulosDeBase(muchos).length === 12, 'tope de 12')
 })

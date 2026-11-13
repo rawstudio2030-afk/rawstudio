@@ -33,7 +33,7 @@ export type Teclado = { inline_keyboard: Boton[][] }
 export type Pantalla = { texto: string; teclado: Teclado }
 
 /** Las pantallas que existen. `m:<id>` solo acepta una de estas. */
-export const PANTALLAS = ['inicio', 'consultas', 'guias'] as const
+export const PANTALLAS = ['inicio', 'consultas', 'guias', 'articulos'] as const
 export type IdPantalla = (typeof PANTALLAS)[number]
 
 const esPantalla = (id: string): id is IdPantalla => (PANTALLAS as readonly string[]).includes(id)
@@ -56,13 +56,16 @@ const VOLVER: Boton = { text: '← Inicio', callback_data: IR('inicio') }
  *  del corte): sale de la misma direccion que los enlaces, no se escribe aparte. */
 const host = (sitio: string): string => new URL(sitio).host
 
-export function pantalla(id: IdPantalla, sitio: string): Pantalla {
+export function pantalla(id: IdPantalla, sitio: string, articulos: ArticuloBot[] = []): Pantalla {
   switch (id) {
     case 'inicio':
       return {
         texto: 'Hola, soy el bot de RAWstudio. ¿Qué necesitas?',
         teclado: { inline_keyboard: [
           [{ text: 'Guías de grabación', callback_data: IR('guias') }],
+          // El boton de articulos aparece SOLO cuando hay al menos uno publicado y
+          // marcado para el bot: una seccion vacia en el inicio es peor que no tenerla.
+          ...(articulos.some(esValido) ? [[{ text: 'Artículos de salud y educación', callback_data: IR('articulos') }]] : []),
           [{ text: 'Cómo funcionan las consultas', callback_data: IR('consultas') }],
           [{ text: 'Abrir RAWstudio', url: `${sitio}/` }, { text: 'Soporte', url: `${sitio}/#/contacto` }],
         ] },
@@ -92,6 +95,18 @@ export function pantalla(id: IdPantalla, sitio: string): Pantalla {
           [{ text: 'iPhone 14', callback_data: 'guia:14' }, { text: 'iPhone 15 · 16 · 17', callback_data: 'guia:15-17' }],
           [{ text: 'Sin regarla · Grabando sola', callback_data: 'guia:sola' }],
           [{ text: 'Sin regarla · En pareja', callback_data: 'guia:pareja' }],
+          [VOLVER],
+        ] },
+      }
+
+    case 'articulos':
+      return {
+        texto: articulos.some(esValido)
+          ? 'Artículos de salud y ayuda\n\nElige el que quieras leer. Se abre en el sitio, con tu sesión.'
+          : 'Todavía no hay artículos publicados. Vuelve pronto.',
+        // Botones de ENLACE: abren el articulo en el sitio. El texto no pasa por Telegram.
+        teclado: { inline_keyboard: [
+          ...articulos.filter(esValido).map((a) => [{ text: a.titulo.slice(0, 60), url: `${sitio}/#/articulos/${a.id}` }]),
           [VOLVER],
         ] },
       }
@@ -128,6 +143,33 @@ export function guiaPorClave(data: unknown, sitio: string): Guia | null {
   return guias.get(clave) ?? null
 }
 
+// ---------- Articulos (los publica el panel) ----------
+//
+// Los articulos, instrucciones y preguntas se escriben en el panel de
+// administracion (modulo «Articulos») y viven en la base. El bot solo LISTA los
+// que estan publicados y marcados «en el bot» (`bot_articulos_lista`) y da un
+// ENLACE al sitio: el contenido nunca viaja por Telegram.
+//
+// Por eso cada articulo tiene un «titulo para el bot» corto y neutro: es lo unico
+// que Telegram ve. El bot no puede garantizar que Telegram no objete un titulo,
+// pero un titulo neutro y un enlace a tu propio dominio reducen ese riesgo.
+
+/** Lo que el bot sabe de un articulo: su id y el titulo para Telegram. */
+export type ArticuloBot = { id: string; titulo: string }
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+/** Un id que no sea un UUID nunca arma un enlace: la lista viene de la base,
+ *  pero el bot no confia en lo que arma una URL. */
+const esValido = (a: ArticuloBot): boolean =>
+  typeof a?.id === 'string' && UUID.test(a.id) && typeof a.titulo === 'string' && a.titulo.trim().length > 0
+
+/** Convierte lo que devuelve la base en una lista segura (o vacia). */
+export function articulosDeBase(data: unknown): ArticuloBot[] {
+  if (!Array.isArray(data)) return []
+  return (data as ArticuloBot[]).filter(esValido).slice(0, 12)
+}
+
 // ---------- El menu de comandos de Telegram ----------
 //
 // Es la lista que aparece al tocar «Menu» junto a la caja de texto o al escribir
@@ -137,6 +179,7 @@ export const COMANDOS: { command: string; description: string }[] = [
   { command: 'start', description: 'Inicio' },
   { command: 'guias', description: 'Guías de grabación para tu iPhone' },
   { command: 'consultas', description: 'Cómo funcionan las consultas' },
+  { command: 'articulos', description: 'Artículos de salud y ayuda' },
   { command: 'ayuda', description: 'Ayuda' },
 ]
 
@@ -148,6 +191,7 @@ export function pantallaDeComando(texto: string): IdPantalla | null {
     case 'ayuda': return 'inicio'
     case 'guias': return 'guias'
     case 'consultas': return 'consultas'
+    case 'articulos': return 'articulos'
     default: return null
   }
 }

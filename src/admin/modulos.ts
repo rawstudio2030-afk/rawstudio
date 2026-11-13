@@ -28,6 +28,7 @@ export const GRUPOS: { titulo: string; modulos: Modulo[] }[] = [
   ] },
   { titulo: 'Contenido', modulos: [
     { clave: 'contenido',    titulo: 'Contenido',    listo: true },
+    { clave: 'articulos',    titulo: 'Artículos',    listo: true },
   ] },
   { titulo: 'Dinero', modulos: [
     { clave: 'finanzas',     titulo: 'Finanzas',     listo: true },

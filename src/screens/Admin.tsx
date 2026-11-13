@@ -22,6 +22,7 @@ import Bitacora from '../admin/Bitacora'
 import Herramientas from '../admin/Herramientas'
 import Resumen from '../admin/Resumen'
 import Consultas from '../admin/Consultas'
+import ArticulosAdmin from '../admin/ArticulosAdmin'
 import AvisosAdmin from '../admin/AvisosAdmin'
 
 export default function Admin() {
@@ -52,6 +53,7 @@ export default function Admin() {
       {modulo.clave === 'usuarios'     && <Usuarios key={search} />}
       {modulo.clave === 'moderacion'   && <Moderacion />}
       {modulo.clave === 'contenido'    && <Contenido key={search} />}
+      {modulo.clave === 'articulos'    && <ArticulosAdmin />}
       {modulo.clave === 'comunicacion' && <Comunicacion />}
       {modulo.clave === 'retiros'      && <Retiros />}
       {modulo.clave === 'reportes'     && <Reportes />}
