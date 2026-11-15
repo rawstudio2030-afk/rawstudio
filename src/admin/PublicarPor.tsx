@@ -12,7 +12,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { COLOR, LINEA, FUENTE } from '../lib/diseño'
 import {
-  creadorasGestionables, publicarPara, fijarAvatar,
+  creadorasGestionables, publicarPara, fijarAvatar, subirExpediente,
   type CreadoraGestionable,
 } from '../lib/admin'
 import Avatar from '../components/Avatar'
@@ -28,6 +28,7 @@ export default function PublicarPor() {
   const [busqueda, setBusqueda] = useState('')
   const [lista, setLista] = useState<CreadoraGestionable[]>([])
   const [elegida, setElegida] = useState<CreadoraGestionable | null>(null)
+  const [conDocs, setConDocs] = useState<CreadoraGestionable | null>(null)
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -44,6 +45,9 @@ export default function PublicarPor() {
 
   if (elegida) {
     return <Formulario c={elegida} vuelve={() => { setElegida(null); cargar() }} />
+  }
+  if (conDocs) {
+    return <Documentos c={conDocs} vuelve={() => { setConDocs(null); cargar() }} />
   }
 
   return (
@@ -74,39 +78,115 @@ export default function PublicarPor() {
         </div>
       ) : (
         <div style={{ display: 'grid', gap: 9 }}>
-          {lista.map(c => (
-            <Pulsable key={c.id} al={() => setElegida(c)} activo={c.verificada} style={{
+          {lista.map(c => {
+            const fila = (
+              <>
+                <Avatar ruta={c.avatar_path} nombre={c.nombre} handle={c.handle} tam={38}
+                  style={{ border: `1px solid ${LINEA.suave}` }} />
+                <div style={{ flex: 1 }}>
+                  <div style={{ font: `400 13px/1.3 ${FUENTE.ui}` }}>{c.nombre}</div>
+                  <div style={{ font: `400 11px/1.45 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
+                    @{c.handle} · alta {desde(c.alta_at)} · {c.clips_publicados}/{c.clips_total} publicados
+                  </div>
+                </div>
+                {c.verificada
+                  ? <Insignia texto="Puede publicar" color={COLOR.dinero} />
+                  : <Insignia texto={c.tiene_documentos ? 'Sin verificar' : 'Faltan documentos'}
+                      color={COLOR.aviso} />}
+              </>
+            )
+            const caja: React.CSSProperties = {
               boxSizing: 'border-box', width: '100%', textAlign: 'left',
               display: 'flex', alignItems: 'center', gap: 13, padding: '13px 15px',
               border: `1px solid ${LINEA.tenue}`, background: COLOR.superficie,
-              cursor: c.verificada ? 'pointer' : 'not-allowed',
-              opacity: c.verificada ? 1 : .55,
-            }}>
-              <Avatar ruta={c.avatar_path} nombre={c.nombre} handle={c.handle} tam={38}
-                style={{ border: `1px solid ${LINEA.suave}` }} />
-              <div style={{ flex: 1 }}>
-                <div style={{ font: `400 13px/1.3 ${FUENTE.ui}` }}>{c.nombre}</div>
-                <div style={{ font: `400 11px/1.45 ${FUENTE.mono}`, color: COLOR.textoSuave }}>
-                  @{c.handle} · alta {desde(c.alta_at)} · {c.clips_publicados}/{c.clips_total} publicados
+            }
+            // Verificada: la fila entera elige. Sin verificar: no se puede publicar,
+            // pero SI cargar sus documentos desde aqui (un boton dentro de otro
+            // boton no es HTML valido, por eso son dos filas distintas).
+            return c.verificada
+              ? <Pulsable key={c.id} al={() => setElegida(c)} style={{ ...caja, cursor: 'pointer' }}>{fila}</Pulsable>
+              : (
+                <div key={c.id} style={caja}>
+                  {fila}
+                  <Boton chico al={() => setConDocs(c)}>Cargar documentos</Boton>
                 </div>
-              </div>
-              {c.verificada
-                ? <Insignia texto="Puede publicar" color={COLOR.dinero} />
-                : <Insignia texto={c.tiene_documentos ? 'Sin verificar' : 'Faltan documentos'}
-                    color={COLOR.aviso} />}
-            </Pulsable>
-          ))}
+              )
+          })}
         </div>
       )}
 
       {lista.some(c => !c.verificada) && (
         <div style={{ marginTop: 14, font: `400 11px/1.45 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
-          Las apagadas no se pueden elegir: sin identidad verificada, la base rechaza
-          cualquier publicación. Sube sus documentos desde el alta o resuelve su
-          verificación en el módulo 09.
+          Las que no están verificadas no pueden publicar: la base rechaza cualquier
+          publicación. Con «Cargar documentos» subes su identificación y su
+          consentimiento firmado; al quedar completos se verifica sola. También
+          puedes resolver su verificación en el módulo 09.
         </div>
       )}
     </>
+  )
+}
+
+/** Carga la identificacion y el consentimiento de una creadora que ya existe.
+ *  Es el mismo camino que el alta (`subirExpediente`): la verificacion NO se
+ *  decide aqui, la enciende un disparador en la base cuando ambos documentos
+ *  estan cargados. */
+function Documentos({ c, vuelve }: { c: CreadoraGestionable; vuelve: () => void }) {
+  const [ident, setIdent] = useState<File | null>(null)
+  const [consent, setConsent] = useState<File | null>(null)
+  const [fechaConsent, setFechaConsent] = useState('')
+  const [ocupado, setOcupado] = useState(false)
+  const [error, setError] = useState('')
+  const [listo, setListo] = useState<null | boolean>(null)
+
+  const subir = async () => {
+    if (!ident || !consent || ocupado) return
+    setOcupado(true); setError('')
+    const r = await subirExpediente(c.id, ident, consent, fechaConsent || undefined)
+    setOcupado(false)
+    if ('error' in r) { setError(r.error); return }
+    setListo(r.verificada)
+  }
+
+  const archivo = (pon: (f: File | null) => void) => (
+    <input type="file" accept="image/*,application/pdf"
+      onChange={e => pon(e.target.files?.[0] ?? null)}
+      style={{ font: `400 13px/1.3 ${FUENTE.ui}`, color: COLOR.texto }} />
+  )
+
+  return (
+    <div style={{ maxWidth: 520, display: 'grid', gap: 16 }}>
+      <div><Boton chico al={vuelve}>‹ Volver</Boton></div>
+      <div style={{ font: `700 18px/1.2 ${FUENTE.ui}` }}>
+        Documentos de {c.nombre} <span style={{ color: COLOR.textoSuave, font: `400 13px/1 ${FUENTE.mono}` }}>@{c.handle}</span>
+      </div>
+      <div style={{ font: `400 12px/1.6 ${FUENTE.ui}`, color: COLOR.textoSuave }}>
+        Sube la identificación y el consentimiento firmado que recibiste fuera de la
+        plataforma. Se guardan en un almacén privado que solo lee la administración.
+        Cuando los dos estén cargados, el perfil se verifica solo.
+      </div>
+      {error && <div style={{ color: COLOR.error, font: `400 12px/1.45 ${FUENTE.ui}` }}>{error}</div>}
+      {listo === null ? (
+        <>
+          <Etiquetado texto="Identificación (foto o PDF)" hijo={archivo(setIdent)} />
+          <Etiquetado texto="Consentimiento firmado (foto o PDF)" hijo={archivo(setConsent)} />
+          <Etiquetado texto="Fecha en que lo firmó (opcional)" hijo={
+            <input type="date" value={fechaConsent} onChange={e => setFechaConsent(e.target.value)}
+              className="campo-admin" style={{ font: `400 14px/1.3 ${FUENTE.ui}`, padding: '10px' }} />
+          } />
+          <div><Boton activo={!!ident && !!consent && !ocupado} al={subir}>
+            {ocupado ? 'Subiendo…' : 'Subir documentos'}
+          </Boton></div>
+        </>
+      ) : (
+        <div style={{ font: `400 13px/1.6 ${FUENTE.ui}`, color: listo ? COLOR.dinero : COLOR.aviso }}>
+          {listo
+            ? 'Documentos cargados. El perfil quedó verificado: ya puede publicar.'
+            : 'Documentos cargados, pero el perfil no quedó verificado. Revisa su ficha en el módulo 09.'}
+          <div style={{ marginTop: 12 }}><Boton chico al={vuelve}>Volver a la lista</Boton></div>
+        </div>
+      )}
+    </div>
   )
 }
 
