@@ -416,6 +416,99 @@ export async function fichaUsuario(id: string) {
   return { ficha: data as FichaUsuario }
 }
 
+/* ---------- Ficha completa: una pestana por seccion ----------
+ *
+ * Cada seccion se pide cuando se abre la pestana (admin_usuario_seccion). La
+ * CLABE llega ENMASCARADA; la completa solo sale por verClabe(), que exige un
+ * motivo y lo deja en la bitacora. */
+
+export type SeccionFicha =
+  'resumen' | 'contenido' | 'comentarios' | 'compras' | 'cobros' | 'consultas' | 'bitacora'
+
+export type ResumenCuenta = {
+  correo: string | null; telefono: string | null; nombre_google: string | null
+  proveedores: string[]; creada: string; ultimo_acceso: string | null
+  correo_confirmado: boolean; es_creadora: boolean
+  edad_confirmada: string | null
+  identidad_verificada: boolean; identidad_verificada_at: string | null
+  suspendida_at: string | null; baneada_at: string | null
+  expediente: null | {
+    identificacion: boolean; consentimiento: boolean
+    consentimiento_fecha: string | null; alta_at: string; nota: string | null
+  }
+  telegram_vinculada_at: string | null; tiene_cuenta_cobro: boolean
+  consentimientos: { tipo: string; version: string; otorgado: boolean; created_at: string }[]
+  verificaciones: { estado: string; motivo: string | null; created_at: string }[]
+}
+export type ContenidoDeUsuario = { clips: {
+  id: string; titulo: string; tipo: string; estado: string; publicado: boolean
+  visibilidad: string; precio: number; fotos: number | null
+  motivo_rechazo: string | null; revisado_at: string | null; revisado_por: string | null
+  borrado_at: string | null; borrado_motivo: string | null; created_at: string
+}[] }
+export type ComentariosDeUsuario = {
+  recibidos: { id: string; texto: string; autora: string | null; clip: string | null
+    created_at: string; borrado_at: string | null }[]
+  hechos: { id: string; texto: string; clip: string | null
+    created_at: string; borrado_at: string | null }[]
+}
+export type ComprasDeUsuario = {
+  compras: { id: string; precio: number; clip: string | null; created_at: string }[]
+  rentas: { id: string; precio: number; clip: string | null; inicio: string; vence: string }[]
+  suscripciones: { id: string; estado: string; inicio: string; periodo_fin: string | null
+    cancela_al_fin: boolean; como: string; otra: string | null }[]
+  propinas: { id: string; coins: number; mensaje: string | null; created_at: string
+    como: string; otra: string | null }[]
+  recargas: { id: string; concepto: string; coins: number; monto_mxn: number; estado: string
+    proveedor: string; created_at: string; pagado_at: string | null }[]
+  pedidos: { id: string; estado: string; descripcion: string; oferta: number | null
+    acordado: number | null; entrega_max: string | null; created_at: string
+    como: string; otra: string | null }[]
+}
+export type CobrosDeUsuario = {
+  cuenta: null | { titular: string; banco: string | null; clabe: string
+    verificado: boolean; regimen: string; tiene_rfc: boolean; actualizada: string }
+  retiros: { id: string; coins: number; estado: string; banco: string | null
+    titular: string | null; clabe: string; motivo_rechazo: string | null
+    created_at: string; resuelta_at: string | null }[]
+}
+export type ConsultasDeUsuario = {
+  consultas: { id: string; created_at: string; ultimo_at: string | null
+    como: string; otra: string | null; clip: string | null }[]
+  reportes_hechos: { id: string; motivo: string; comentario: string | null; estado: string
+    created_at: string; nota_resolucion: string | null }[]
+  reportes_recibidos: { id: string; motivo: string; comentario: string | null; estado: string
+    created_at: string; nota_resolucion: string | null; clip: string | null }[]
+}
+export type BitacoraDeUsuario = { registros: {
+  id: number; accion: string; detalle: Record<string, unknown>; ip: string | null
+  created_at: string; admin: string | null; sobre_ella: boolean; hecho_por_ella: boolean
+}[] }
+
+export type TiposSeccion = {
+  resumen: ResumenCuenta; contenido: ContenidoDeUsuario; comentarios: ComentariosDeUsuario
+  compras: ComprasDeUsuario; cobros: CobrosDeUsuario; consultas: ConsultasDeUsuario
+  bitacora: BitacoraDeUsuario
+}
+
+export async function seccionUsuario<S extends SeccionFicha>(id: string, seccion: S) {
+  const { data, error } = await supabase.rpc('admin_usuario_seccion', {
+    p_usuario: id, p_seccion: seccion,
+  })
+  if (error) return { error: error.message }
+  return { datos: data as TiposSeccion[S] }
+}
+
+/** La CLABE COMPLETA de una cuenta. Exige un motivo (min. 10 caracteres) y
+ *  queda en la bitacora con quien la pidio; la CLABE no se guarda ahi. */
+export async function verClabe(id: string, motivo: string) {
+  const { data, error } = await supabase.rpc('admin_ver_clabe', {
+    p_usuario: id, p_motivo: motivo,
+  })
+  if (error) return { error: error.message }
+  return { datos: data as { titular: string; banco: string | null; clabe: string } }
+}
+
 /* Las tres acciones de estado pasan por funciones del servidor y no por un
  * update directo. La version anterior escribia en profiles desde el cliente y
  * anotaba la bitacora en una segunda llamada: si la primera pasaba y la

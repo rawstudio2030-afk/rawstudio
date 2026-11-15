@@ -17,7 +17,7 @@ import {
 } from './piezas'
 import { bloqueosDe, type Salida } from '../lib/cierreCuenta'
 import { humano } from '../lib/humano'
-import { Pulsable } from '../components/Pulsable'
+import Actividad from './FichaActividad'
 import { Link, useSearchParams } from 'react-router-dom'
 import { tratoDe } from '../lib/admin'
 import { OPCIONES_TRATO, type Trato } from '../lib/trato'
@@ -289,7 +289,6 @@ function Ficha({ fila, ficha, errorFicha, aviso, cierraAviso, cierra, pide }: {
   aviso: { tipo: TipoAviso; texto: ReactNode } | null; cierraAviso: () => void
   cierra: () => void; pide: (d: Dialogo) => void
 }) {
-  const [pestana, setPestana] = useState<'clips' | 'movimientos' | 'acciones'>('clips')
   const [trato, setTrato] = useState<Trato | null>(null)
   useEscape(true, cierra)
   useEffect(() => {
@@ -405,77 +404,9 @@ function Ficha({ fila, ficha, errorFicha, aviso, cierraAviso, cierra, pide }: {
           Alta {fecha(fila.created_at)} · último acceso {desde(fila.ultimo_acceso)}
         </div>
 
-        {/* ---- Pestañas ---- */}
-        <div style={{ display: 'flex', gap: 0, marginTop: 22,
-          borderBottom: `1px solid ${LINEA.tenue}` }}>
-          {([['clips', `Clips (${ficha?.clips.length ?? 0})`],
-             ['movimientos', `Movimientos (${ficha?.movimientos.length ?? 0})`],
-             ['acciones', `Historial (${ficha?.acciones.length ?? 0})`]] as const).map(([k, t]) => (
-            <Pulsable key={k} al={() => setPestana(k)} activado={pestana === k} style={{
-              padding: '8px 13px', cursor: 'pointer',
-              font: `700 10px/1 ${FUENTE.ui}`, letterSpacing: 1.2, textTransform: 'uppercase',
-              color: pestana === k ? COLOR.admin : COLOR.textoSuave,
-              borderBottom: `2px solid ${pestana === k ? COLOR.admin : 'transparent'}`,
-            }}>{t}</Pulsable>
-          ))}
-        </div>
-
-        <div style={{ marginTop: 12 }}>
-          {!ficha && errorFicha && (
-            <Aviso tipo="error">No se pudo cargar el detalle de la cuenta: {errorFicha}</Aviso>
-          )}
-          {!ficha && !errorFicha && <Vacio texto="Cargando…" />}
-          {ficha && pestana === 'clips' && (
-            ficha.clips.length === 0 ? <Vacio texto="No ha publicado nada" /> :
-            ficha.clips.map(c => (
-              <Renglon key={c.id} izq={c.titulo}
-                der={`${usd(c.precio)}`} pie={`${fecha(c.created_at)} · ${c.visibilidad}`}
-                marca={c.publicado ? undefined : 'sin publicar'} />
-            ))
-          )}
-          {ficha && pestana === 'movimientos' && (
-            ficha.movimientos.length === 0 ? <Vacio texto="Sin movimientos" /> :
-            ficha.movimientos.map(m => (
-              <Renglon key={m.id} izq={m.motivo.replace(/_/g, ' ')}
-                der={`${m.delta > 0 ? '+' : ''}${usd(m.delta)}`}
-                colorDer={m.delta > 0 ? COLOR.dinero : COLOR.error}
-                pie={`${fechaHora(m.created_at)}${m.nota ? ` · ${m.nota}` : ''}`} />
-            ))
-          )}
-          {ficha && pestana === 'acciones' && (
-            ficha.acciones.length === 0 ? <Vacio texto="Sin acciones registradas" /> :
-            ficha.acciones.map(a => (
-              <Renglon key={a.id} izq={a.accion.replace(/_/g, ' ')}
-                pie={`${fechaHora(a.created_at)} · ${JSON.stringify(a.detalle)}`} />
-            ))
-          )}
-        </div>
+        {/* ---- Pestañas: cada una pide su sección al abrirse ---- */}
+        <Actividad key={fila.id} id={fila.id} ficha={ficha} errorFicha={errorFicha} />
       </aside>
-    </div>
-  )
-}
-
-function Vacio({ texto }: { texto: string }) {
-  return <div style={{ padding: '26px 0', textAlign: 'center',
-    font: `400 12px/1 ${FUENTE.ui}`, color: COLOR.textoSuave }}>{texto}</div>
-}
-
-function Renglon({ izq, der, pie, colorDer, marca }: {
-  izq: string; der?: string; pie?: string; colorDer?: string; marca?: string
-}) {
-  return (
-    <div style={{ padding: '9px 0', borderBottom: `1px solid ${LINEA.tenue}` }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
-        <span style={{ font: `400 12px/1.3 ${FUENTE.ui}`, color: COLOR.texto }}>
-          {izq}
-          {marca && <span style={{ marginLeft: 7, font: `700 10px/1 ${FUENTE.ui}`,
-            letterSpacing: 1.2, textTransform: 'uppercase', color: COLOR.aviso }}>{marca}</span>}
-        </span>
-        {der && <span style={{ font: `400 12px/1.3 ${FUENTE.mono}`,
-          color: colorDer ?? COLOR.textoSuave, whiteSpace: 'nowrap' }}>{der}</span>}
-      </div>
-      {pie && <div style={{ marginTop: 3, font: `400 11px/1.45 ${FUENTE.mono}`,
-        color: COLOR.textoSuave, wordBreak: 'break-word' }}>{pie}</div>}
     </div>
   )
 }
